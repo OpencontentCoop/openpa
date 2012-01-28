@@ -1,0 +1,1 @@
+<abbr lang="{$lingua}" xml:lang="{$lingua}" title="{$content}">{$sigla}</abbr>

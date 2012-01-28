@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<software>
+    <metadata>
+        <name>OpenContent OpenPA Extension</name>
+        <version>1.0</version>
+        <copyright>Copyright © 2010 OpenContent</copyright>
+        <license>GNU General Public License v2.0</license>
+    </metadata>
+
+    <dependencies>
+        <requires>
+            <extension name="ezmultiupload" />
+            <extension name="ezjscore" />
+        </requires>
+        <extends>
+            <extension name="ezwebin" />
+        </extends>
+    </dependencies>
+
+</software>

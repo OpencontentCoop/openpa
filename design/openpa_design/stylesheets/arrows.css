@@ -1,0 +1,29 @@
+div.block-search-advanced-link p,
+div.block-lista_accordion  .ui-icon 
+{
+	background-image: url(../images/arrows/arrow-accordion.gif);
+}
+
+div.content-navigator div.content-navigator-previous div.content-navigator-arrow,
+div.content-navigator div.content-navigator-previous-disabled div.content-navigator-arrow,
+div.content-navigator div.content-navigator-next div.content-navigator-arrow,
+div.content-navigator div.content-navigator-next-disabled div.content-navigator-arrow,
+span.arrow-blue-t,
+span.arrow-blue-r,
+span.arrow-blue-b,
+span.arrow-blue-l,
+h2.block-title a,
+.block-eventi .jcarousel-prev-vertical,
+.block-eventi .jcarousel-next-vertical,
+div.banner-carousel div.jcarousel-next-horizontal,
+div.banner-carousel div.jcarousel-prev-horizontal,
+div.banner-carousel div.jcarousel-prev-horizontal,
+div.banner-carousel div.jcarousel-prev-horizontal
+{
+	background-image: url(../images/arrows/arrow.gif);
+}
+
+a span.arrows-blue-r
+{
+	background: url(../images/default/arrows-2.gif) no-repeat right -1px;
+}

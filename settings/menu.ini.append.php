@@ -1,0 +1,12 @@
+<?php /* #?ini charset="utf-8"?
+
+[MenuSettings]
+AvailableMenuArray[]=LeftTopDropDown
+
+[LeftTopDropDown]
+TitleText=Left and dropdown top
+MenuThumbnail=menu/left_top.jpg
+TopMenu=dropdown_top
+LeftMenu=flat_left
+
+*/ ?>
