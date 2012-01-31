@@ -29,7 +29,6 @@
 
 </head>
 <body class="no-js">
-
 <script type="text/javascript">{literal}
 //<![CDATA[
 (function(){var c = document.body.className;

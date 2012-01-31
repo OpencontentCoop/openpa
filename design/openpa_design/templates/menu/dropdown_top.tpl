@@ -6,7 +6,7 @@
 {ezscript_require( array( 'menu.js' ) )}
 <script type="text/javascript">{literal}
 $(document).ready(function(){{/literal}
-$.preLoadImages("{'openpa/topmenu-secondlevel.png'|ezimage(no)}","{'openpa/bullet_secondlevel.gif'|ezimage(no)}");
+$.preLoadImages("{'topmenu/topmenu-secondlevel.png'|ezimage(no)}","{'bullet/bullet_secondlevel.gif'|ezimage(no)}");
 {literal}});
 {/literal}</script>
 
@@ -17,9 +17,9 @@ $.preLoadImages("{'openpa/topmenu-secondlevel.png'|ezimage(no)}","{'openpa/bulle
 	
     <ul id="topmenu-firstlevel">
 	
-	{if $custom_keys.is_area_tematica}
+	{if is_area_tematica()}
 		
-        {def $aree_tematiche = $custom_keys.is_area_tematica.parent}			
+        {def $aree_tematiche = is_area_tematica().parent}			
 		
         <li class="menu-area-tematica">
 			<div><a href={$custom_keys.is_area_tematica.url_alias|ezurl()}><span>{$custom_keys.is_area_tematica.name|wash()}</span></a></div>
@@ -150,7 +150,7 @@ $.preLoadImages("{'openpa/topmenu-secondlevel.png'|ezimage(no)}","{'openpa/bulle
 								{set $item_class_2 = $item_class_2|append($item2.name|slugize())}
 								<li id="node_id_{$item2.node_id}" class="count-{$level_2_items|count()}{if $item_class_2} {$item_class_2|implode(" ")}{/if}">
                                     <div>
-                                        <a title="{if is_set($item2.data_map.abstract)}{if $item2.data_map.abstract.has_content}{$item2.data_map.abstract.content.output.output_text|explode("<br />")|implode(" ")|strip_tags()|trim()}{/if}{else}link a {$item2.name|wash()}{/if}" class="{$item2.name|slugize()}" href={if eq( $ui_context, 'browse' )}{concat("content/browse/", $item2.node_id)|ezurl}{else}{if $item2.node_id|eq($item2.main_node_id)}{$item2.url_alias|ezurl}{else}{if $item2.class_identifier|eq('area_tematica')}{$item2.object.main_node.url_alias|ezurl}{else}{$item2.url_alias|ezurl}{/if}{/if}{/if}{if $pagedata.is_edit} onclick="return false;"{/if}>
+                                        <a title="{if is_set($item2.data_map.abstract)}{if $item2|has_abstract()}{$item2|abstract()|openpa_shorten()}{/if}{else}link a {$item2.name|wash()}{/if}" class="{$item2.name|slugize()}" href={if eq( $ui_context, 'browse' )}{concat("content/browse/", $item2.node_id)|ezurl}{else}{if $item2.node_id|eq($item2.main_node_id)}{$item2.url_alias|ezurl}{else}{if $item2.class_identifier|eq('area_tematica')}{$item2.object.main_node.url_alias|ezurl}{else}{$item2.url_alias|ezurl}{/if}{/if}{/if}{if $pagedata.is_edit} onclick="return false;"{/if}>
                                             {$item2.name|wash()}
                                         </a>
                                     </div>

@@ -1,6 +1,6 @@
 <?php
 
-include_once( "extension/openpa_base/lib/browser_detection.php" );
+include_once( "extension/openpa/lib/browser_detection.php" );
 class CheckbrowserOperator
 {
 

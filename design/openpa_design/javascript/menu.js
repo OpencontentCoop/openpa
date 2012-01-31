@@ -5,11 +5,11 @@ $(document).ready(function(){
 			return true;
 		e.preventDefault();
 	});
-	$('#topmenu-firstlevel > li').bind('click', function(e){       
-		$('ul', '#topmenu-firstlevel').not($('ul', this)).removeClass('hover');
-		$('li', '#topmenu-firstlevel').not($(this)).removeClass('hover');
-		$('ul', this).toggleClass('hover');
-		$(this).toggleClass('hover');
+	$('#topmenu-firstlevel > li').bind('click', function(e){
+        $('ul', '#topmenu-firstlevel').not($('ul', this)).removeClass('hover');
+        $('li', '#topmenu-firstlevel').not($(this)).removeClass('hover');
+        $('ul', this).toggleClass('hover');
+        $(this).toggleClass('hover');
     });
 
 	$('#topmenu-firstlevel > li').not('.menu-area-tematica').attr('title', 'Click per aprire/chiudere il menu esteso');	

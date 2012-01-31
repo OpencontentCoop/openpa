@@ -1,0 +1,69 @@
+"Menu per bambini";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Servizio offerto che garantisce la possibilità di scelta tra menu pensati specificatamente peri bambini o con porzioni ridotte</paragraph></section>
+";|
+"Menu per vegetariani";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Possibilità di scelta di un menu specifico per vegetariani</paragraph></section>
+";|
+"Menu per celiaci";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Possibilità per i celiaci di scegliere delle opzioni di menu specifiche</paragraph></section>
+";|
+"Accessi consentito agli animali";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale che fornisce la possibilità di accesso al locale anche ad animali</paragraph></section>
+";|
+"Adesione alla Trento card";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Servizi previsti dal circuito della Trento card</paragraph></section>
+";|
+Climatizzatore;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale previsto di climatizzazione</paragraph></section>
+";|
+"Ospitalità per gruppi numerosi";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale che garantisce la possibilità di accesso e/o prenotazione per gruppi di almeno 15/20 persone</paragraph></section>
+";|
+Parcheggio;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale con possibilità di parcheggio</paragraph></section>
+";|
+Prenotazione;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Possibilità di prenotazione</paragraph></section>
+";|
+"Prenotazione per feste ed eventi";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Possibilità di prenotazione per feste ed eventi come compleanni, lauree, ecc.</paragraph></section>
+";|
+"Interessato alla Trento card";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Interesse manifestato per la sottoscrizione dei servizi previsti dal circuito della Trento card</paragraph></section>
+";|
+"Rampa di accesso";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale fornito di rampa di accesso</paragraph></section>
+";|
+"Piattaforma elevatrice";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale fornito di piattaforma elevatrice</paragraph></section>
+";|
+Ascensore;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale fornito di ascensore</paragraph></section>
+";|
+"Ingresso con gradini";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale fornito di ingresso con gradini</paragraph></section>
+";|
+"Servizi igienici dedicati";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale fornito di servizi igienici dedicati per soggetti diversamente abili</paragraph></section>
+";|
+"Menu per bambini";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Servizio offerto che garantisce la possibilità di scelta tra menu pensati specificatamente peri bambini o con porzioni ridotte</paragraph></section>
+";|
+Fasciatoio;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Servizio di fasciatoio ad uso delle famiglie</paragraph></section>
+";|
+"Scalda biberon";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Servizio di scalda biberon ad uso delle famiglie</paragraph></section>
+";|
+Seggiolini;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Servizio di seggiolini o seggioloni per bambini piccoli ad uso delle famiglie</paragraph></section>
+";|
+"Parco giochi";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale dotato di parco giochi ad uso degli ospiti e delle famiglie</paragraph></section>
+";|
+"Giochi di intrattenimento";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale dotato di giochi di intrattenimento ad uso delle famiglie</paragraph></section>
+";|
+"Riduzioni e offerte per la famiglia";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Locale che fornisce riduzioni ed offerte speciali per famiglie</paragraph></section>
+";|

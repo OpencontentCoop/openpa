@@ -121,17 +121,38 @@ class OpenPAOperator
                         {
                             $style = $mainStyles[ $item['node_id'] ];
                         }
+                        
+                    }
+                }
+
+                $areaStyle = array();
+
+                foreach( $path as $p )
+                {
+                    if ( isset( $p['node_id'] ) )
+                    {
+                        $isAreaTematica = $this->get_area_tematica_node( $p['node_id'] );
+                        if ( $isAreaTematica !== false )
+                        {                        
+                            if ( empty( $areaStyle ) )
+                            {
+                                $areaStyle[] = 'aree-tematiche';
+                                $areaStyle[] = 'area_tematica';
+                            }
+                            
+                            $areaCustomStyle =  $this->get_area_tematica_style( $p['node_id'] );
+                            if ( !empty( $areaCustomStyle ) )
+                            {
+                                $areaStyle[] = $areaCustomStyle;
+                            }
+                        }
                     }
                 }
                 
-                if ( isset( $path[2] ) )
+                if ( !empty( $areaStyle ) )
                 {
-                    $isAreaTematica = $this->get_area_tematica_style( $path[2]['node_id'] );
-                    if ( $isAreaTematica )
-                    {
-                        $style = $isAreaTematica;
-                    }
-                }
+                    $style = implode( ' ', $areaStyle );
+                }                
                 
                 $operatorValue = $style;
             } break;
@@ -196,8 +217,12 @@ class OpenPAOperator
                     {
                         if ( $this->get_area_tematica_node( $item['node_id'] ) )
                         {                            
-                            $result = 'aree/' . $this->get_area_tematica_style( $item['node_id'] ) . '.css';
-                            break;
+                            $customStyle = $this->get_area_tematica_style( $item['node_id'] );
+                            if ( !empty( $customStyle ) )
+                            {
+                                $result = 'aree/' . $customStyle . '.css';
+                                break;
+                            }
                         }
                     }
                 }

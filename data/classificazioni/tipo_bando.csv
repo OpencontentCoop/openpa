@@ -1,0 +1,12 @@
+Lavori;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Bandi inerenti ai lavori</paragraph></section>
+";|
+Forniture;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Bandi inerenti alle forniture</paragraph></section>
+";|
+Servizi;"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Bandi per servizi</paragraph></section>
+";|
+"Ulteriori bandi di gara";"<?xml version=""1.0"" encoding=""utf-8""?>
+<section xmlns:image=""http://ez.no/namespaces/ezpublish3/image/"" xmlns:xhtml=""http://ez.no/namespaces/ezpublish3/xhtml/"" xmlns:custom=""http://ez.no/namespaces/ezpublish3/custom/""><paragraph>Bandi che non rientrano nella tipologia dei lavori, delle forniture e dei servizi</paragraph></section>
+";|

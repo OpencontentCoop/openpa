@@ -81,7 +81,7 @@ $(function() {
    {/if}
 {/if}
 
-{if $related_content['SearchCount']|gt(0)}
+{if and( is_set( $related_content['SearchCount'] ), $related_content['SearchCount']|gt(0) )}
 
 {set $related_content=$related_content['SearchResult']}
 

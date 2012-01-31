@@ -374,7 +374,7 @@ div#topmenu ul#topmenu-firstlevel li a span
 
 div#topmenu ul#topmenu-firstlevel li.lastli a span
 {
-	background:transparent url("../images/topmenu/topmenu-lastli-bg.jpg") no-repeat top right;
+	/*background:transparent url("../images/topmenu/topmenu-lastli-bg.jpg") no-repeat top right;*/
 	display:block;
 }
 div#topmenu ul#topmenu-firstlevel li.hover a span,
@@ -1159,4 +1159,148 @@ ul.w3c-conformance li a
 #page div#topmenu ul#topmenu-firstlevel li a
 {    
 	font-size:15px;
+}
+
+
+
+/* ovverride per le sezioni */
+div#topmenu ul#topmenu-firstlevel li.default-1 a,
+div#topmenu ul#topmenu-firstlevel li.default-1 ul  li a:hover,
+div#page.default-1 div#sidemenu ul li div span.handler,
+div#page.default-1 div#sidemenu  a.current
+{
+  background-color:#f60;
+}
+div#topmenu ul#topmenu-firstlevel  li.default-1 ul,
+div#page.default-1 div#path
+{
+	border-color:#f60;
+}
+
+div#topmenu ul#topmenu-firstlevel li.default-2 a,
+div#topmenu ul#topmenu-firstlevel li.default-2 ul  li a:hover,
+div#page.default-2 div#sidemenu ul li div span.handler,
+div#page.default-2 div#sidemenu  a.current
+{
+  background-color:#F7931D;
+}
+div#topmenu ul#topmenu-firstlevel  li.default-2 ul,
+div#page.default-2  div#path
+{
+	border-color:#F7931D;
+}
+
+div#topmenu ul#topmenu-firstlevel li.default-3 a,
+div#topmenu ul#topmenu-firstlevel li.default-3 ul  li a:hover,
+div#page.default-3 div#sidemenu ul li div span.handler,
+div#page.default-3 div#sidemenu  a.current
+{
+  background-color:#71BF44;
+}
+div#topmenu ul#topmenu-firstlevel  li.default-3 ul,
+div#page.default-3  div#path
+{
+	border-color:#71BF44;
+}
+
+div#topmenu ul#topmenu-firstlevel li.default-4 a,
+div#topmenu ul#topmenu-firstlevel li.default-4 ul  li a:hover,
+div#page.default-4 div#sidemenu ul li div span.handler,
+div#page.default-4 div#sidemenu  a.current
+{
+  background-color:#3F6AB4;
+}
+div#topmenu ul#topmenu-firstlevel  li.default-4 ul,
+div#page.default-4  div#path
+{
+	border-color:#3F6AB4;
+}
+
+
+/* ovverride di default per le aree tematiche */
+div#topmenu ul#topmenu-firstlevel li#menu-aree-tematiche
+{
+	float:right;
+}
+
+div#topmenu ul#topmenu-firstlevel li#menu-aree-tematiche.hover a,
+div#topmenu ul#topmenu-firstlevel li#menu-aree-tematiche.hover ul li a:hover,
+div#topmenu ul#topmenu-firstlevel li.aree-tematiche ul  li a:hover
+{
+	background-color:#990100 !important;
+	color:#fff !important;
+}
+
+div#topmenu ul#topmenu-firstlevel li#menu-aree-tematiche.hover ul li a,
+div#topmenu ul#topmenu-firstlevel li.aree-tematiche ul  li a
+{
+	background-color:#333 !important;
+	color:#fff !important;
+}
+
+div#topmenu ul#topmenu-firstlevel li.aree-tematiche a,
+div#page.aree-tematiche div#sidemenu ul li div span.handler,
+div#page.aree-tematiche div#sidemenu  a.current
+{
+	background-color:#990100;
+}
+div#topmenu ul#topmenu-firstlevel  li.aree-tematiche ul,
+div#page.aree-tematiche div#path
+{
+	border-color:#990100;
+}
+
+
+/* ovverride di default per la singola area tematica */
+
+div#page.area_tematica div#topmenu ul#topmenu-firstlevel li.menu-area-tematica
+{
+    text-align: left;
+    width: 75%;
+}
+
+div#topmenu ul#topmenu-firstlevel li.aree-tematiche a,
+div#page.aree-tematiche div#sidemenu ul li div span.handler,
+div#page.aree-tematiche div#sidemenu a.current
+{
+    background-color: #990100;
+}
+
+div#topmenu ul#topmenu-firstlevel li.aree-tematiche ul,
+div#page.aree-tematiche div#path
+{
+    border-color: #990100;
+}
+
+div#page.area_tematica div#topmenu ul#topmenu-firstlevel li.menu-area-tematica
+{
+    text-align: left;
+    width: 75%;
+}
+
+div#page.area_tematica div#topmenu ul#topmenu-firstlevel li.menu-area-tematica a
+{
+    padding-left: 10px;
+}
+
+div#page.area_tematica div#topmenu ul#topmenu-firstlevel li a,
+div#page.area_tematica div#sidemenu ul li div span.handler,
+div#page.area_tematica div#sidemenu a.current
+{
+    background-color: #990100;
+}
+
+div#page.area_tematica div#topmenu ul#topmenu-firstlevel li.aree-tematiche a span
+{
+    display: block;
+}
+
+div#page.area_tematica div#path
+{
+    border-color: #990100;
+}
+
+div#page.area_tematica div#header
+{
+    background: no-repeat scroll right bottom #990100;
 }

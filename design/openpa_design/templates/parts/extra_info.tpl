@@ -54,7 +54,7 @@
 	compare solo nei folder e negli oggetti con padre folder
 	qualora il campo 'engine' sia valorizzato la ricerca viene estesa a tutto il database
 *}
-{if $folder}
+{if and( $folder, is_set( $folder.data_map.classi_filtro ) )}
     {$open}
     
     {def $class_filters = $folder.data_map.classi_filtro.content|explode(',')}
@@ -216,8 +216,8 @@
 {*
 	MLT SEMPLICE
 *}
-{if and( $mlt_enabled|eq( 'enabled' ), $mlt_classes|contains( $module_result_node.class_identifier )|not() )}
-{def $mlt=fetch(ezfind,moreLikeThis,hash(
+{if and( $mlt_enabled|eq( 'enabled' ), ezmodule( 'ezfind' ), $mlt_classes|contains( $module_result_node.class_identifier )|not() )}
+{def $mlt=fetch( ezfind, moreLikeThis, hash(
                                         'query_type', 'nid',
                                         'query', $module_result_node.node_id,
                                         'class_id', $mlt_class_ids,
