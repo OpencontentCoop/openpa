@@ -93,7 +93,7 @@
     {def $galleriesImages = fetch('content', 'list_count', hash( 'parent_node_id', $node.node_id,
                                                                  'class_filter_type', 'include',
                                                                  'class_filter_array', array('image') ) )
-         $galleriesImagesInMainNode = array()}
+         $galleriesImagesInMainNode = 0}
     
     {if and( $galleriesImages|eq(0), $node.node_id|ne( $node.object.main_node_id ) )}
         {set $galleriesImagesInMainNode = fetch('content', 'list_count', hash( 'parent_node_id', $node.object.main_node_id,
