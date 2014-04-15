@@ -35,7 +35,7 @@ class OpenPACalendarItem
     {
         $keys = array_keys( $this->data );
         $keys[] = 'node';
-        $keys[] = 'object';
+        $keys[] = 'object';        
         return $keys;
     }
     
@@ -77,6 +77,21 @@ class OpenPACalendarItem
     
     protected function parseEzfindResultArray()
     {        
+        if ( !isset( $this->data['name'] ) )
+        {
+            $this->data['name'] = $this->data['name_t'];
+        }
+        
+        if ( !isset( $this->data['main_node_id'] ) )
+        {
+            $this->data['main_node_id'] = $this->data['main_node_id_si'];
+        }
+        
+        if ( !isset( $this->data['main_url_alias'] ) )
+        {
+            $this->data['main_url_alias'] = $this->data['main_url_alias_ms'];
+        }
+        
         if ( !isset( $this->data['fields'] ) )
         {
             throw new Exception( "Param 'fields' not found in solr row" );
