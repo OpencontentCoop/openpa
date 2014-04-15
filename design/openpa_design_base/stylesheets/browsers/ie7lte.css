@@ -1,0 +1,132 @@
+/* IE5 + IE6 + IE7 SPECIAL CSS - 20060522 */
+
+hr  { margin:-8px auto 11px; }
+
+input#searchtext
+{
+    height: 16px;
+}
+
+div.overflow-fix /* Hides long non-breaking lines and terminates bugs */
+{
+    width: 100%;
+    overflow: hidden;
+}
+
+input.box, textarea.box
+{
+    width: 99%;
+}
+
+div#heightresize-main
+{
+    border-bottom: 1px solid #ffffff;  /* Fix if height script is used */
+}
+
+input.button
+{
+    padding: 0 0.5em 0 0.5em;
+    overflow: visible;  /* Fix for %-padding on input buttons */
+}
+/*
+div#topmenu ul#topmenu-firstlevel ul.secondlevel
+{
+	margin:-1px 0 0 -8.3%;
+}
+
+div#topmenu ul#topmenu-firstlevel ul.thirdlevel li.count-4{width:24.99%}
+div#topmenu ul#topmenu-firstlevel li
+{
+	width:24.9%;
+}
+*/
+div.columns-three
+{
+    margin-right: 0;  /* This value may need to be tuned depending on most expected width of div.columns-three */
+    padding-right: 33.3%;
+	position:static;
+	zoom:1;
+}
+
+div.columns-three div.col-1-2,
+div.columns-three div.col-1-2  .col-content,
+div.columns-three div.col-3,
+div.columns-three div.col-3 .col-content
+{
+	position:static;
+}
+
+div#sidemenu ul,
+div#sidemenu ul li,
+div#sidemenu ul li div,
+div#sidemenu ul li div a,
+div#sidemenu ul li div a span
+{
+	position:relative;
+	zoom:1;
+	height:1%;	
+}
+
+.ui-accordion .ui-accordion-content-active div.border-content 
+{
+	height:125px;
+	overflow:hdden
+}
+
+/* fix di width:auto in pagelayout.css: START*/
+div.banner-carousel div.jcarousel-container-horizontal,
+div.banner-carousel div.jcarousel-clip
+{
+	overflow:hidden;
+}
+/* fix di width:auto in pagelayout.css: END*/
+
+/* fix di width:auto in content.css: START*/
+div.global-view-full div.banner-carousel div.jcarousel-container-horizontal,
+div.global-view-full div.banner-carousel div.jcarousel-clip,
+div.content-view-full div.banner-carousel div.jcarousel-container-horizontal,
+div.content-view-full div.banner-carousel div.jcarousel-clip
+{
+	
+	overflow:hidden;
+}
+/* 
+div.col-content-design div.banner-carousel div.jcarousel-container-horizontal,
+div.col-content-design div.banner-carousel div.jcarousel-clip
+{
+	
+}
+fix di width:auto in content.css: END*/
+
+.ui-accordion .ui-accordion-header,
+.js .ui-tabs,
+.block-lista_accordion  .ui-accordion-content
+{
+	zoom:1;
+}
+
+#extrainfo legend.block-title 
+{
+	white-space:normal !important;
+	margin-left:-7px;
+    float:left;
+}
+#extrainfo .block-search
+{
+    clear:left;
+}
+div#sidemenu ul li div span.handler
+{
+	display:inline;
+}
+
+div#sidemenu ul,
+div#sidemenu ul li,
+div#sidemenu ul li div,
+div#sidemenu ul li div a,
+div#sidemenu ul li div a span
+{
+	position:relative;
+	zoom:1;
+	height:1%;	
+}

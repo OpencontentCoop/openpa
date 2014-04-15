@@ -1,0 +1,233 @@
+/* SIDE MENU */
+
+div#sidemenu-position
+{
+    width: 16em;
+    margin-left: -16em;
+    float: left;
+    display: inline; /* Fix for IE double margin bug */
+}
+
+div#sidemenu
+{
+    padding: 0
+}
+
+div#sidemenu div.border-box div
+{
+	background-image:none;
+	position:relative;
+}
+
+div.nosidemenu div#sidemenu-position
+{
+    display: none;
+}
+
+div#sidemenu ul
+{
+    list-style-type: none;
+    margin: 0;
+}
+
+div#sidemenu ul li
+{
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    list-style-image: none;
+    background-image: none;
+	background-color: #fff;
+}
+
+div#sidemenu ul.menu-list ,
+div#sidemenu ul.submenu-list,
+div#sidemenu ul.submenu-list-3,
+div#sidemenu ul.submenu-list-4
+{
+    list-style-type: none;
+	margin:0;
+}
+
+div#sidemenu ul li div
+{
+	border-top:1px solid #fff;
+	border-bottom:1px solid #fff;
+	clear:both;
+	height:1%;
+}
+
+div#sidemenu ul li div:after /* Terminate floating elements flow */
+{
+    content: "-";
+    height: 0;
+    font-size: 0;
+    visibility: hidden;
+    display: block;
+    clear: both;
+}
+
+div#sidemenu ul li div a
+{
+	display:block;
+	float:left;
+	width:100%;
+	padding:0;
+}
+
+div#sidemenu ul li div a span
+{
+	display:block;
+	padding-left:3px;
+}
+
+body.no-js div#page div#sidemenu ul li div a span.handler
+{
+	cursor:auto;
+}
+
+div#sidemenu  a.current
+{
+    font-weight: bold;
+	background-color:#fff;
+	background-image: url("../images/menu-current.png");
+	background-repeat:repeat;
+	color:#000;
+}
+
+div#sidemenu a
+{
+    font-size: 1em;
+	color:#515151;
+	cursor:pointer;
+}
+
+div.second_level_menu
+{	
+	line-height:25px;
+	padding-left:15px;
+	background-color:#d7d7d7;
+}
+div.second_level_menu span.handler
+{
+	position:relative;
+	margin-left:-15px;
+	width:15px;
+	height:25px;
+}
+
+div.third_level_menu
+{
+	background-color:#e7e7e7;
+	line-height:20px;
+	font-size: 0.94em;
+	padding-left:27px;
+	
+}
+
+div.third_level_menu span.handler
+{
+	position:relative;
+	margin-left:-11px;
+	width:11px;
+	height:20px;
+}
+
+div.fourth_level_menu
+{
+	background-color:#efefef;
+	line-height:20px;
+	font-size: 0.90em;
+	padding-left:37px;
+}
+
+div.fourth_level_menu span.handler
+{
+	position:relative;
+	margin-left:-11px;
+	width:11px;
+	height:20px;
+}
+
+div.fifth_level_menu
+{
+	background-color:#f7f7f7;
+	line-height:20px;
+	font-size: 0.89em;
+	padding-left:37px;	
+}
+
+div#sidemenu  div.fifth_level_menu a  span{ padding-left:14px; }
+div#sidemenu  div.fifth_level_menu a.current{ background: url("../images/menu-current-fifth.png") repeat-y; }
+
+div#sidemenu ul li div span.handler
+{
+	display:block;
+	float:left;
+	position:relative;
+	padding:0;
+	opacity:0;
+	filter:alpha(opacity=0);
+	display:inline;
+}
+
+div#sidemenu ul li div span.activable{
+	cursor:pointer;
+	background-color:transparent !important;
+	background-image:url("../images/menu_bullets.gif");
+	background-position:-7px center;
+	background-repeat:no-repeat;
+	opacity:1;
+	filter:alpha(opacity=100);
+}
+
+div#sidemenu ul li div span.selected{
+	cursor:pointer;
+	background:none;
+	background-image:none;
+	opacity:0.4;
+	filter:alpha(opacity=40);
+}
+
+div#sidemenu ul li div span.selected-activable{
+	cursor:pointer;
+	background-image:url("../images/menu_bullets.gif");
+	background-position:4px center;
+	background-repeat:no-repeat;
+}
+
+div#sidemenu ul li div span.active{
+	background-color:#fff;
+	background-image:url("../images/menu_bullets.gif");
+	background-position:-19px center;
+	background-repeat:no-repeat;
+	opacity:1;
+	filter:alpha(opacity=100)
+}
+
+div#sidemenu ul li div.second_level_menu span.activable
+{
+	background-position: -5px center;
+}
+
+div#sidemenu ul li div.second_level_menu span.active
+{
+	background-position: -17px center;
+}
+
+div#sidemenu ul li div.second_level_menu span.selected-activable
+{
+	background-position: 6px center;
+}
+
+div#sidemenu div.box div.box-content
+{
+    padding-left: 0.75em;
+    padding-right: 0;
+}
+
+div#sidemenu h4
+{
+    display:none;
+	margin: 0;
+}

@@ -1,0 +1,499 @@
+.jcarousel-container {
+    position: relative;
+}
+
+.jcarousel-clip {
+    z-index: 2;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.jcarousel-list {
+    z-index: 1;
+    overflow: hidden;
+    position: relative;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.jcarousel-list li,
+.jcarousel-item {
+    float: left;
+    list-style: none;
+    /* We set the width/height explicitly. No width/height causes infinite loops. */
+    width: 75px;
+    height: 75px;
+}
+
+.jcarousel-next {
+    z-index: 3;
+    display: none;
+}
+
+.jcarousel-prev {
+    z-index: 3;
+    display: none;
+}
+
+/* Big Skin*/
+.jcarousel-skin-big .jcarousel-container {
+    background: #fff;
+    border: 1px solid #fff;
+}
+
+.jcarousel-skin-big .jcarousel-container-horizontal {
+    width: auto;
+    padding: 10px 50px;
+}
+
+.jcarousel-skin-big .jcarousel-clip-horizontal {
+    width:  auto;
+    height: 220px;
+}
+
+.jcarousel-skin-big .jcarousel-item {
+    width: 160px;
+    height: 220px;
+	background: #fff;
+	padding:5px;
+	padding-right:10px;
+	border-right:1px dotted #ccc
+}
+
+.jcarousel-skin-big .jcarousel-item-horizontal {
+    margin-right: 8px;
+}
+
+.jcarousel-skin-big .jcarousel-item-placeholder {
+    background: #fff;
+    color: #000;
+}
+
+/**
+ *  Horizontal Buttons
+ */
+.jcarousel-skin-big .jcarousel-next-horizontal {
+    position: absolute;
+    top: 90px;
+    right: 5px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    background: transparent url(../images/slide/jcarousel-next.gif) no-repeat center top;
+}
+
+.jcarousel-skin-big .jcarousel-next-horizontal:hover {
+    background-position: center bottom;
+}
+
+.jcarousel-skin-big .jcarousel-next-horizontal:active {
+    background-position: center bottom;;
+}
+
+.jcarousel-skin-big .jcarousel-prev-horizontal {
+    position: absolute;
+    top: 90px;
+    left: 5px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    background: transparent url(../images/slide/jcarousel-prev.gif) no-repeat center top;
+}
+
+.jcarousel-skin-big .jcarousel-prev-horizontal:hover {
+    background-position: center bottom;
+}
+
+.jcarousel-skin-big .jcarousel-prev-horizontal:active {
+    background-position: center bottom;
+}
+
+.jcarousel-prev-disabled,
+.jcarousel-prev-disabled-horizontal,
+.jcarousel-prev-disabled-horizontal:hover,
+.jcarousel-prev-disabled-horizontal:active,
+.jcarousel-next-disabled,
+.jcarousel-next-disabled-horizontal,
+.jcarousel-next-disabled-horizontal:hover,
+.jcarousel-next-disabled-horizontal:active {
+    visibility:hidden;
+    background:none !important;
+} 
+
+/* Small Skin*/
+.jcarousel-skin-small .jcarousel-container {
+    background: #eee; 
+}
+
+.jcarousel-skin-small .jcarousel-container-horizontal {
+    width: auto;
+    padding: 5px 15px;
+}
+
+.jcarousel-skin-small .jcarousel-clip-horizontal {
+    width:  100%;
+    height: 140px;
+}
+
+.jcarousel-skin-small .jcarousel-item {
+    width: 215px;
+    height: 130px;
+	background: #eee;
+	padding:5px;
+}
+
+.jcarousel-skin-small .jcarousel-item-horizontal {
+    margin-right: 8px;
+}
+
+.jcarousel-skin-small .jcarousel-item-placeholder {
+    background: #fff;
+    color: #000;
+}
+
+/**
+ *  Horizontal Buttons
+ */
+.jcarousel-skin-small .jcarousel-next-horizontal {
+    position: absolute;
+    top: 70px;
+    right: 3px;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    background: transparent url(../images/slide/news_next.png) no-repeat center center;
+}
+
+.jcarousel-skin-small .jcarousel-next-horizontal:hover {
+    background-position: center center;
+}
+
+.jcarousel-skin-small .jcarousel-next-horizontal:active {
+    background-position: center center;;
+}
+
+.jcarousel-skin-small .jcarousel-next-disabled-horizontal,
+.jcarousel-skin-small .jcarousel-next-disabled-horizontal:hover,
+.jcarousel-skin-small .jcarousel-next-disabled-horizontal:active {
+    cursor: default;
+    background:none;
+}
+
+.jcarousel-skin-small .jcarousel-prev-horizontal {
+    position: absolute;
+    top: 70px;
+    left: 3px;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    background: transparent url(../images/slide/news_prev.png) no-repeat center center;
+}
+
+.jcarousel-skin-small .jcarousel-prev-horizontal:hover {
+    background-position: center center;
+}
+
+.jcarousel-skin-small .jcarousel-prev-horizontal:active {
+    background-position: center center;
+}
+
+.jcarousel-skin-small .jcarousel-prev-disabled-horizontal,
+.jcarousel-skin-small .jcarousel-prev-disabled-horizontal:hover,
+.jcarousel-skin-small .jcarousel-prev-disabled-horizontal:active {
+    cursor: default;
+    background: none;
+}
+
+
+/* BANNER CAROUSEL START */ 
+
+ul.jcarousel-list li.jcarousel-item {
+    float: left;
+    list-style: none;
+	margin:0 17px;
+	width:200px;
+	height:60px;
+	padding:0;
+	overflow:hidden;
+}
+.banner-carousel-position
+{
+	width:100%;
+}
+.banner-carousel
+{
+	padding:10px;
+}
+.banner-carousel .jcarousel-container-horizontal
+{
+	border:2px solid #EAEAEA;
+	width:auto;
+	padding:0 20px;
+	background-color:#EAEAEA;
+}
+
+.banner-carousel .jcarousel-clip
+{
+	height:60px;
+	overflow:hidden;
+	padding:0;
+	background-color:#EAEAEA;
+}
+
+.banner-carousel ul
+{
+	background:#fff;
+	margin:0 !important;
+}
+
+.banner-carousel .jcarousel-next-horizontal {
+    position: absolute;
+    top: 23px;
+    right: 0;
+    width: 16px;
+    height: 16px;
+	padding:0;
+    cursor: pointer;
+	background-color:#EAEAEA;
+	background-repeat:no-repeat;
+	background-position: -96px -16px;
+}
+
+.banner-carousel .jcarousel-next-horizontal:hover {
+}
+
+.banner-carousel .jcarousel-next-horizontal:active {
+}
+
+.banner-carousel .jcarousel-next-disabled-horizontal,
+.banner-carousel .jcarousel-next-disabled-horizontal:hover,
+.banner-carousel .jcarousel-next-disabled-horizontal:active {
+    cursor: default;
+	background-image:none;
+}
+
+.banner-carousel .jcarousel-prev-horizontal {
+    position: absolute;
+    top: 23px;
+    left: 0;
+    width: 16px;
+    height: 16px;
+	padding:0;
+    cursor: pointer;
+	background-color:#EAEAEA;
+	background-repeat:no-repeat;
+	background-position: -96px -48px;
+}
+
+.banner-carousel .jcarousel-prev-horizontal:hover {
+}
+
+.banner-carousel .jcarousel-prev-horizontal:active {
+}
+
+.banner-carousel .jcarousel-prev-disabled-horizontal,
+.banner-carousel .jcarousel-prev-disabled-horizontal:hover,
+.banner-carousel .jcarousel-prev-disabled-horizontal:active {
+    cursor: default;
+	background-image:none;
+}
+
+.banner-carousel ul .attribute-name
+{
+	display:none;
+}
+
+.banner-carousel ul .attribute-image,
+.banner-carousel ul .attribute-image p,
+.banner-carousel ul .attribute-image-rassegna,
+.banner-carousel ul .attribute-image-rassegna p
+{
+	float:none;
+	margin:0;
+	text-align:center;
+}
+
+.banner-carousel ul#banner_carousel  .attribute-image,
+.banner-carousel ul#banner_carousel  .attribute-image p
+{
+	padding:2px 0;
+}
+
+.global-view-full .banner-carousel
+{
+	padding:0;
+}
+
+.global-view-full .banner-carousel .attribute-image,
+.global-view-full .banner-carousel .attribute-image p
+{
+	margin:0;
+	float:none;
+	height:180px;
+}
+.global-view-full .banner-carousel .attribute-image-rassegna,
+.global-view-full .banner-carousel .attribute-image-rassegna p
+{
+	margin:0;
+	float:none;
+	height:80px;
+}
+
+.global-view-full .banner-carousel .attribute-image p a,
+.content-view-full .banner-carousel .attribute-image p a
+{
+	display:block;
+	line-height:180px;
+	height:180px;
+	display:inline;
+}
+
+
+.content-view-full .banner-carousel .attribute-image-rassegna p a
+{
+	display:block;
+	line-height:80px;
+	height:80px;
+	margin: 5px 0;
+	display:inline;
+}
+
+
+.global-view-full .banner-carousel .attribute-image p a img,
+.content-view-full .banner-carousel .attribute-image p a img
+{
+	display:inline;
+	vertical-align:middle;
+}
+
+.content-view-full .content-view-galleryline .attribute-name,
+body.no-js .global-view-full .banner-carousel ul .attribute-name,
+.content-view-full .banner-carousel ul .attribute-name
+{
+	background:#FFFFFF none repeat scroll 0 0;
+	margin-top:-30px;
+	padding:5px 0;
+	position:relative;
+	text-align:center;
+	opacity:0.7;
+	display:block;
+	height:30px;
+}
+
+.content-view-full .block-lista_carousel_rassegna_oggi  ul .attribute-name
+{
+	margin-top:0; /* JEK ??? */
+	line-height: 12px; /* JEK ??? */
+}
+.content-view-full .content-view-galleryline .attribute-name-title,
+body.no-js .global-view-full .banner-carousel ul .attribute-name-title,
+.content-view-full .banner-carousel ul .attribute-name-title
+{
+	background:#FFFFFF none repeat scroll 0 0;
+	/* margin-top:-30px; JEK */
+	padding:5px 0 0;
+	position:relative;
+	text-align:center;
+	font-weight:bold;
+	/* opacity:0.7; */
+	display:block;
+	height:35px; /* JEK ??? */
+	line-height: 12px; /* JEK ??? */
+}
+
+.content-view-full .content-view-galleryline .attribute-name-title p,
+body.no-js .global-view-full .banner-carousel ul .attribute-name-title a,
+body.no-js .global-view-full .banner-carousel ul .attribute-name-title p,
+.content-view-full .banner-carousel ul .attribute-name-title a,
+.content-view-full .banner-carousel ul .attribute-name-title p
+.content-view-full .banner-carousel ul .attribute-name-rassegna a,
+.content-view-full .banner-carousel ul .attribute-name-rassegna p
+{
+	margin:0;
+	line-height:10px;
+	font-size:0.8em;
+}
+.content-view-full .content-view-galleryline .attribute-name p,
+body.no-js .global-view-full .banner-carousel ul .attribute-name a,
+body.no-js .global-view-full .banner-carousel ul .attribute-name p,
+.content-view-full .banner-carousel ul .attribute-name a,
+.content-view-full .banner-carousel ul .attribute-name p
+{
+	margin:0;
+	line-height:10px;
+	font-size:0.8em;
+}
+
+.content-view-full .content-view-galleryline .attribute-name ul,
+body.no-js .global-view-full .banner-carousel ul .attribute-name ul,
+.content-view-full .banner-carousel ul .attribute-name ul
+{
+	display:none;
+}
+
+.global-view-full ul.jcarousel-list li.jcarousel-item ,
+.content-view-full ul.jcarousel-list li.jcarousel-item 
+{
+	width:230px;
+	height:180px;
+	padding:0 8px;
+	margin:0;
+	background:none !important;
+}
+
+.global-view-full .block-lista_carousel_rassegna_oggi ul.jcarousel-list li.jcarousel-item ,
+.content-view-full .block-lista_carousel_rassegna_oggi  ul.jcarousel-list li.jcarousel-item 
+{
+	width:230px;
+	height:270px;
+	padding:0 5px;
+	margin:0;
+	background:none !important;
+}
+
+.global-view-full .banner-carousel .jcarousel-clip,
+.content-view-full .banner-carousel .jcarousel-clip
+{
+	height:180px;
+	background:#fff;
+}
+
+.global-view-full .block-lista_carousel_rassegna_oggi .banner-carousel .jcarousel-clip,
+.content-view-full .block-lista_carousel_rassegna_oggi .banner-carousel .jcarousel-clip
+{
+	height:270px;
+	background:#fff;
+}
+
+
+.global-view-full .banner-carousel .jcarousel-prev-horizontal,
+.global-view-full .banner-carousel .jcarousel-next-horizontal ,
+.content-view-full .banner-carousel .jcarousel-prev-horizontal,
+.content-view-full .banner-carousel .jcarousel-next-horizontal 
+{
+	top:88px;
+}
+
+/* active thumbnail is raised on top of the mask using the z-index property */ 
+.global-view-full .banner-carousel .attribute-image p a.active img, 
+.content-view-full .banner-carousel .attribute-image p a.active img
+{ 
+    outline:1px solid #000; 
+    z-index:9999; 
+    position:relative; 
+}
+
+.col-content-design .banner-carousel
+{
+	padding:0;
+}
+
+.col-content-design .banner-carousel ul.jcarousel-list li.jcarousel-item
+{
+	padding:0 5px;
+}
+/* BANNER CAROUSEL END*/ 
