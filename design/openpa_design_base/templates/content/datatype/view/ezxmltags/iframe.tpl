@@ -1,0 +1,1 @@
+<iframe {if $src}src="{$src}"{/if}{if is_set($name)} name="{$name}"{/if}{if is_set($height)} height="{$height}"{/if}{if is_set($width)} width="{$width}"{/if}{if is_set($frameborder)} frameborder="{$frameborder}"{/if}{if is_set($scrolling)} scrolling="{$scrolling}"{/if}></iframe>

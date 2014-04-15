@@ -1,7 +1,7 @@
 <?php
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpaoperator.php',
                                     'class' => 'OpenPAOperator',
-                                    'operator_names' => array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract' ) );
+                                    'operator_names' => array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree' ) );
 
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/slugizeoperator.php',
                                     'class' => 'SlugizeOperator',
@@ -19,4 +19,10 @@ $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/arra
                                     'class' => 'ArraySortOperator',
                                     'operator_names' => array( 'sort', 'rsort', 'asort', 'arsort', 'ksort', 'krsort', 'natsort', 'natcasesort' ) );
 
-?>
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/findgloballayout.php',
+                                    'class' => 'FindGlobalLayoutOperator',
+                                    'operator_names' => array( 'find_global_layout' ) );
+
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/printtools.php',
+                                    'class' => 'PrintToolsOperator',
+                                    'operator_names' => array( 'query_string' ) );

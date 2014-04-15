@@ -6,6 +6,17 @@ Filters[]=centerimg=-gravity center -crop %1x%2+0+0 +repage
 Filters[]=strip=-strip
 Filters[]=sharpen=-sharpen 0.5
 
+[AliasSettings]
+AliasList[]=header_banner
+AliasList[]=header_logo
 
+[header_banner]
+Reference=reference
+Filters[]=geometry/scalewidthdownonly=1000
+Filters[]=centerimg=1000;200
+
+[header_logo]
+Reference=reference
+Filters[]=geometry/scalewidthdownonly=1000
 
 */ ?>

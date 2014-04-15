@@ -1,0 +1,261 @@
+div.columns-search
+{
+    padding: 0 17em 0 0;
+}
+
+div.columns-search div.main-column-position
+{
+    float: left;
+    width: 100%;
+}
+
+div.columns-search div.extrainfo-column-position {
+    display: block;
+    float: left;
+    margin-right: -17em;
+    width: 17em;
+}
+
+div#search_controls
+{
+	float:left;
+    margin-right:1%;
+    width:25%;
+}
+
+div#search_results
+{
+    float:left;
+    width:73%;	
+    padding-left: 5px;
+}
+
+ul#facet-list
+{
+	margin-left: 0;  
+}
+
+ul#active-facets-list li
+{
+	list-style-type: none;
+	list-style: none;
+	background-image: none;
+}
+
+div.ajax-search-spellcheck
+{
+    margin-top: 3px;
+    margin-bottom: 7px;
+    font-style: italic;
+    /* color: #F06020; */
+    padding-bottom: 3px;
+    padding-left: 2px;
+}
+
+div.ajax-search-facets
+{
+    margin-top: 5px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #F0F0F0;
+    font-size: 90%;
+    opacity: 0; /* Will be faded in by the YUI animation */	
+
+    /*height: 0;
+    width: 0;*/
+}
+
+#search-form-box div.content-navigator
+{
+    margin-bottom:1em;
+}
+
+#search-form-box div.content-navigator div.content-navigator-previous
+{
+    width:100%;
+}
+
+#search-form-box div.content-navigator div.content-navigator-previous a
+{
+	padding-left:5px;
+	float:none;
+}
+
+
+div.content-search div.col div.col-content-design,
+div.content-advancedsearch div.col div.col-content-design
+{
+	font-size:1em;
+}
+
+div.content-search div.col div.col-content-design div.titolo-blocco-titolo,
+div.content-advancedsearch div.col div.col-content-design div.titolo-blocco-titolo,
+div.content-search div.col div.col-content-design h2,
+div.content-advancedsearch div.col div.col-content-design h2
+{
+	font-size:1.2em;
+}
+
+
+div.block-search-advanced-link p.ezjs_toggleCheckboxes,
+.ezjs_toggleCheckboxes
+{
+	cursor:pointer;
+	font-weight:bold;
+	margin-left:5px;
+	padding-left:22px;
+	background:url(/design/admin/images/toggle-button-16x16.gif) no-repeat left center;
+	margin-top:15px;
+	padding-left:22px;
+	font-size:1em;
+}
+
+
+/* BLOCK SEARCH: START */
+div.block-search input
+{
+	width:100% !important;
+	margin-top:0.2em !important;
+}
+
+input#radio_or,
+input#radio_and
+{
+    width:auto !important;
+}
+div.block-search select 
+{
+	width:100%;
+	margin-top:0.2em !important;
+}
+
+div.search-full div.block-search input 
+{
+	width:auto;	
+}
+
+div.block-search input.defaultbutton
+{
+	margin:0;
+	width:auto !important;
+}
+
+div.block-search span.label,
+div.block-search label
+{
+	font-weight:normal;
+	color:#666;
+    white-space:normal;
+}
+
+div.block-search-advanced-link
+{
+	padding:5px;
+}
+
+div.block-search-advanced-link p
+{
+	margin:0;
+	font-size:1.1em;
+	color:#666;
+	color:#666;
+	background-image:url(../images/default/arrow-accordion.gif);
+	background-position:left top;
+	background-repeat:no-repeat;
+	height:1.3em;
+	line-height:1.3em;
+	overflow:hidden;
+	padding-left:22px;	
+}
+.js div.block-search-advanced-link p
+{
+	cursor:pointer;
+}
+div.block-search-advanced-link p.open
+{
+	background-position:left bottom;
+	font-weight:bold;
+}
+
+div.block-search-advanced-link p.notoggle
+{
+	margin:0;
+	font-size:1.1em;
+	color:#666;
+	color:#666;
+	background:none;
+	height:1.3em;
+	line-height:1.3em;
+	overflow:hidden;
+	padding:0;
+	cursor:auto;
+}
+
+div.block-search div.block-search-advanced 
+{
+	margin-top:0.5em;
+}
+
+.no-js div.block-search div.block-search-advanced 
+{
+	display:block;
+	cursor:default;
+}
+
+div.block-search div.block-search-advanced-container 
+{
+	margin:0.7em 0;
+}
+
+ul#active-facets-list
+{
+    margin: .5em 0;
+}
+
+ul#active-facets-list li
+{
+    background-image: none;
+    list-style: none outside none;
+    padding-left: 16px;
+    margin-left:0;
+}
+
+.close-facet
+{
+    background: url("../images/default/closefacet.png") no-repeat scroll center center transparent;
+    display: block;
+    float: left;
+    height: 16px;
+    margin-left: -16px;
+    overflow: hidden;
+    position: relative;
+    text-indent: -9999px;
+    width: 16px;
+}
+
+.text-facet
+{
+    display: block;
+    float: left;
+    padding-left: 5px;
+}
+
+#extrainfo div.block-search div.border-content
+{
+    padding: 5px;
+}
+
+/* BLOCK SEARCH: END */
+
+div.class-filter-count-1 div.columns-search
+{
+    padding-right:24em;
+}
+
+div.class-filter-count-1 div.extrainfo-column-position
+{    
+	width: 24em;
+    margin-right: -24em;    
+}

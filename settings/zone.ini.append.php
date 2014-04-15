@@ -34,6 +34,11 @@ ZoneName[right]=Colonna destra
 ZoneThumbnail=2zones_layout1.gif
 Template=2zoneslayout1.tpl
 AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 [2ZonesLayout2]
 ZoneTypeName=2 zone (tipo 2)
@@ -44,6 +49,11 @@ ZoneName[right]=Colonna destra
 ZoneThumbnail=2zones_layout2.gif
 Template=2zoneslayout2.tpl
 AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 [3ZonesLayout1]
 ZoneTypeName=3 zone (tipo 1)
@@ -56,6 +66,11 @@ ZoneName[bottom]=Zona inferiore
 ZoneThumbnail=3zones_layout1.gif
 Template=3zoneslayout1.tpl
 AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 [3ZonesLayout2]
 ZoneTypeName=3 zone (tipo 2)
@@ -68,6 +83,11 @@ ZoneName[bottom]=Zona inferiore
 ZoneThumbnail=3zones_layout2.gif
 Template=3zoneslayout2.tpl
 AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 [4ZonesLayout1]
 ZoneTypeName=4 zone (tipo 1)
@@ -83,6 +103,10 @@ ZoneThumbnail=4zones_layout1.gif
 Template=4zoneslayout1.tpl
 AvailableForClasses[]=frontpage
 AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 [3ZonesLayout3]
 ZoneTypeName=3 zone (tipo 3)
@@ -95,6 +119,11 @@ ZoneName[right]=Colonna destra
 ZoneThumbnail=3zoneslayout3.gif
 Template=3zoneslayout3.tpl
 AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 [4ZonesLayout2]
 ZoneTypeName=4 zone (tipo 2)
@@ -110,6 +139,10 @@ ZoneThumbnail=4zoneslayout2.gif
 Template=4zoneslayout2.tpl
 AvailableForClasses[]=frontpage
 AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 [5ZonesLayout1]
 ZoneTypeName=5 zone (tipo 1)
@@ -127,6 +160,10 @@ ZoneThumbnail=5zoneslayout1.jpg
 Template=5zoneslayout1.tpl
 AvailableForClasses[]=frontpage
 AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
 
 
 #usato nel folder

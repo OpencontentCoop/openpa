@@ -2,6 +2,37 @@
 <!DOCTYPE TS>
 <TS version="2.0">
 <context>
+    <name>design/standard/content/edit</name>
+    <message>
+        <source>Send for publishing</source>
+        <translation>Pubblica</translation>
+    </message>
+    <message>
+        <source>Store draft</source>
+        <translation>Salva bozza</translation>
+    </message>
+    <message>
+        <source>Store draft and exit</source>
+        <translation>Salva bozza e esci</translation>
+    </message>
+    <message>
+        <source>Discard draft</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <source>Discard</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <source>Sezioni</source>
+        <translation>Sezioni</translation>
+    </message>
+    <message>
+        <source>Stati</source>
+        <translation>Stati</translation>
+    </message>
+</context>
+<context>
     <name>kernel/navigationpart</name>
     <message>
         <source>System Information</source>
@@ -50,6 +81,18 @@
     <message>
         <source>eZFind</source>
         <translation>Motore di ricerca eZFind</translation>
+    </message>
+    <message>
+        <source>ocinigui</source>
+        <translation>Interfaccia di visualizzazione del file di configurazione</translation>
+    </message>
+    <message>
+        <source>SQLi Import</source>
+        <translation>Motore di importazione SQLi</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation>Motore di esportazione</translation>
     </message>
 </context>
 <context>
@@ -194,7 +237,27 @@
     <message>
         <source>Map</source>
         <translation>Mappa</translation>
-    </message>		
+    </message>
+    <message>
+        <source>Find address</source>
+        <translation>Cerca indirizzo</translation>
+    </message>
+    <message>
+        <source>Restore</source>
+        <translation>Annulla modifiche</translation>
+    </message>
+    <message>
+        <source>Restores location and address values to what it was on page load.</source>
+        <translation>Riporta i valori presenti al caricamento della pagina</translation>
+    </message>
+    <message>
+        <source>My current location</source>
+        <translation>La mia posizione corrente</translation>
+    </message>
+    <message>
+        <source>Gets your current position if your browser support GeoLocation and you grant this website access to it! Most accurate if you have a built in gps in your Internet device! Also note that you might still have to type in address manually!</source>
+        <translation>La tua posizione corrente viene calcolata se il tuo browser supporta questa funzionalità e solo se glielo permetti.</translation>
+    </message>
 </context>
 <context>
     <name>retecivica/view</name>

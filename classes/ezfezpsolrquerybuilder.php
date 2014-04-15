@@ -984,7 +984,7 @@ class ezfeZPSolrQueryBuilder
                     if ( is_array( $baseNameInfo ) and isset( $baseNameInfo['contentClassId'] ) )
                     {
                         //@luca patch per filtrare su data
-                        if ( strpos( $baseNameInfo['fieldName'], 'dt' ) !== false )
+                        if ( strpos( $baseNameInfo['fieldName'], 'dt' ) !== false || $value == '*' )
                         {
                            $filterQueryList[] = '( ' . eZSolr::getMetaFieldName( 'contentclass_id' ) . ':' . $baseNameInfo['contentClassId'] . ' AND ' . $baseNameInfo['fieldName'] . ':' . $value . ' )' ;                   
                         }
@@ -997,7 +997,7 @@ class ezfeZPSolrQueryBuilder
                     else
                     {
                         //@luca patch per filtrare su data
-                        if ( strpos( $baseNameInfo, 'dt' ) !== false )
+                        if ( strpos( $baseNameInfo, 'dt' ) !== false || $value == '*' )
                         {
                             $filterQueryList[] = $baseNameInfo . ':' . $value;
                         }

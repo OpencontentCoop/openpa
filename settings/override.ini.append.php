@@ -1,5 +1,40 @@
 <?php /* #?ini charset="utf-8"?
 
+[view_materia_new]
+Source=content/datatype/view/ezobjectrelationlist.tpl
+MatchFile=datatype/materia_ezobjectrelationlist.tpl
+Subdir=templates
+Match[class_identifier]=event_new
+Match[attribute_identifier]=materia
+
+[view_materia]
+Source=content/datatype/view/ezobjectrelationlist.tpl
+MatchFile=datatype/materia_ezobjectrelationlist.tpl
+Subdir=templates
+Match[class_identifier]=event
+Match[attribute_identifier]=materia
+
+[edit_materia_new]
+Source=content/datatype/edit/ezobjectrelationlist.tpl
+MatchFile=edit/datatype/materia_ezobjectrelationlist.tpl
+Subdir=templates
+Match[class_identifier]=event_new
+Match[attribute_identifier]=materia
+
+[edit_materia]
+Source=content/datatype/edit/ezobjectrelationlist.tpl
+MatchFile=edit/datatype/materia_ezobjectrelationlist.tpl
+Subdir=templates
+Match[class_identifier]=event
+Match[attribute_identifier]=materia
+
+
+[block_accesso_area_riservata]
+Source=block/view/view.tpl
+MatchFile=block/accesso_area_riservata.tpl
+Subdir=templates
+Match[type]=AreaRiservata
+Match[view]=accesso_area_riservata
 
 [block_class_filter]
 Source=block/view/view.tpl
@@ -78,12 +113,26 @@ Subdir=templates
 Match[type]=Singolo
 Match[view]=singolo_img_interne
 
+[block_singolo_img_interne_piccolo]
+Source=block/view/view.tpl
+MatchFile=block/singolo_img_interne_piccolo.tpl
+Subdir=templates
+Match[type]=Singolo
+Match[view]=singolo_img_interne_piccolo
+
 [block_singolo_imgtit_interne]
 Source=block/view/view.tpl
 MatchFile=block/singolo_imgtit_interne.tpl
 Subdir=templates
 Match[type]=Singolo
 Match[view]=singolo_imgtit_interne
+
+[block_singolo_imgtit_interne_piccolo]
+Source=block/view/view.tpl
+MatchFile=block/singolo_imgtit_interne_piccolo.tpl
+Subdir=templates
+Match[type]=Singolo
+Match[view]=singolo_imgtit_interne_piccolo
 
 [block_singolo_imgtit]
 Source=block/view/view.tpl
@@ -98,6 +147,13 @@ MatchFile=block/singolo_box.tpl
 Subdir=templates
 Match[type]=Singolo
 Match[view]=singolo_box
+
+[block_singolo_box_piccolo]
+Source=block/view/view.tpl
+MatchFile=block/singolo_box_piccolo.tpl
+Subdir=templates
+Match[type]=Singolo
+Match[view]=singolo_box_piccolo
 
 [block_singolo_banner]
 Source=block/view/view.tpl

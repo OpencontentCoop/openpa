@@ -9,11 +9,12 @@
 
     <dependencies>
         <requires>
-            <extension name="ezmultiupload" />
-            <extension name="ezjscore" />
+            <extension name="ezmultiupload" />            
         </requires>
         <extends>
             <extension name="ezwebin" />
+            <extension name="ezjscore" />
+            <extension name="wrap_operator" />
         </extends>
     </dependencies>
 

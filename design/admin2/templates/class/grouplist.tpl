@@ -1,52 +1,69 @@
+{ezscript_require( array( 'ezjsc::jquery', 'jquery.tablesorter.min.js', 'jquery.quicksearch.js' ) )}
+<script type="text/javascript">
+{literal}
+$(document).ready(function() {
+    $("table.sort").tablesorter();
+    $("table.sort th").css( 'cursor', 'pointer' );    
+});
+{/literal}
+</script>
+
 {def $groupclasses=fetch( 'class', 'list', hash( 'sort_by',  array('name', 'asc') ) )}
 
 {def $main_attributes = array('title','abstract', 'image', 'file', 'geo', 'from_time', 'to_time', 'description', 'ufficio', 'servizio', 'argomento', 'link', 'tags')}
 {def $wrong_attributes = array('parola_chiave', 'gps', 'name', 'name', 'descrizione', 'data_iniziopubblicazione', 'data_inizio_validita', 'data_archiviazione', 'data_inizio_attivita', 'data_fine_validita', 'data_finepubblicazione', 'url', 'titolo', 'oggetto')}
 
-{*
+
 <h1 class="context-title">
 	Report delle classi ({$groupclasses|count})
 </h1>
-	<span style="background-color:#CAFF70">Nome attributi corretto</span>
-	<span style="background-color:#FF3030">Nome attributo errato</span>
-<table class="list" cellspacing="0" summary="{'List of classes inside %group_name class group (%class_count)'|i18n( 'design/admin/class/classlist',, hash( '%group_name', $group.name, '%class_count', $class_count ) )|wash}">
+    
+<table id="class-list" class="list sort" cellspacing="0" summary="{'List of classes inside %group_name class group (%class_count)'|i18n( 'design/admin/class/classlist',, hash( '%group_name', $group.name, '%class_count', $class_count ) )|wash}">
+<thead>
 <tr>
-    <th class="tight"><img src={'toggle-button-16x16.gif'|ezimage} width="16" height="16" alt="{'Invert selection.'|i18n( 'design/admin/class/classlist' )}" title="{'Invert selection.'|i18n( 'design/admin/class/classlist' )}" onclick="ezjs_toggleCheckboxes( document.ClassList, 'DeleteIDArray[]' ); return false;" /></th>
-    <th>{'Name'|i18n('design/admin/class/classlist')}</th>
-    <th>{'Class attributes'|i18n('design/admin/class/classlist')}</th>
+    <th>Gruppo</th>
+    <th>Nome classe</th>
+    <th>ID classe</th>
+    <th>Identificatore classe</th>
+    <th>Numero di oggetti</th>
+    <th class="tight"></th>
 </tr>
-
+</thead>
+<tbody>
 {section var=Classes loop=$groupclasses sequence=array( bglight, bgdark )}
-<tr class="{$Classes.sequence}"> 
-    <td><input type="checkbox" name="DeleteIDArray[]" value="{$Classes.item.id}" title="{'Select class for removal.'|i18n( 'design/admin/class/classlist' )}" /></td>
-    <td>{$Classes.item.identifier|class_icon( small, $Classes.item.name|wash )}&nbsp;<a href={concat( "/class/view/", $Classes.item.id )|ezurl}>{$Classes.item.name|wash}</a>
-	<br />
-	ID: {$Classes.item.id} <br />
-	Class identifier: {$Classes.item.identifier|wash} <br />
-	<a href={concat( $module.functions.groupedit.uri, '/', $Groups.item.id )|ezurl}><img class="button" src={'edit.gif'|ezimage} width="16" height="16" alt="{'Edit'|i18n( 'design/admin/class/grouplist' )}" title="{'Edit the <%class_group_name> class group.'|i18n( 'design/admin/class/grouplist',, hash( '%class_group_name', $Groups.item.name ) )|wash}" /></a> <br />
-Numero oggetti: {$Classes.item.object_count}<br />
-<a href={concat( 'class/edit/', $Classes.item.id, '/(language)/', $Classes.item.top_priority_language_locale )|ezurl} title="{'Edit the <%class_name> class.'|i18n( 'design/admin/class/classlist',, hash( '%class_name', $Classes.item.name ) )|wash}"><img class="button" src={'edit.gif'|ezimage} width="16" height="16" alt="edit" /></a>
-	
+<tr class="{$Classes.sequence}">
+    <td>
+        {foreach $Classes.item.ingroup_list as $group }
+            <a href={concat( $module.functions.classlist.uri, '/', $group.group_id)|ezurl}>{$group.group_name}</a>
+            {delimiter}, {/delimiter}
+        {/foreach}
     </td>
     <td>
-	{section var=Attributes loop=fetch( 'class', 'attribute_list', hash( 'class_id', $Classes.item.id ) ) sequence=array( '#ADD8E6','#BFEFFF' ) }
-	<table style="background-color:{$Attributes.sequence}" width="100%">
-	<tr><td width="30%">
-		{$Attributes.item.name|wash} - 
-		<span
-		 {if $main_attributes|contains($Attributes.item.identifier)}style="background-color:#CAFF70"{/if}
-		 {if $wrong_attributes|contains($Attributes.item.identifier)}style="background-color:#FF3030"{/if}
-		>{$Attributes.item.identifier|wash}</span>
-	</td><td width="70%">
-		{class_attribute_view_gui class_attribute=$Attributes.item}
-	</td></tr>
-	</table>
-	{/section}
+        {$Classes.item.identifier|class_icon( small, $Classes.item.name|wash )}&nbsp;<a href={concat( "/class/view/", $Classes.item.id )|ezurl}>{$Classes.item.name|wash}</a>
+    </td>
+    <td>
+    	{$Classes.item.id}
+    </td>
+    <td>
+        {$Classes.item.identifier|wash}
+    </td>
+    <td>
+        {if ezmodule( 'classlists' )}
+            <a href={concat( 'classlists/list/', $Classes.item.identifier )|ezurl()}>{$Classes.item.object_count}</a>
+        {else}
+            {$Classes.item.object_count}
+        {/if}
+    </td>
+    <td>
+        <a href={concat( 'class/edit/', $Classes.item.id, '/(language)/', $Classes.item.top_priority_language_locale )|ezurl} title="{'Edit the <%class_name> class.'|i18n( 'design/admin/class/classlist',, hash( '%class_name', $Classes.item.name ) )|wash}"><img class="button" src={'edit.gif'|ezimage} width="16" height="16" alt="edit" /></a>
     </td>
 </tr>
 {/section}
+</tbody>
 </table>
-*}
+
+
+
 <form name="GroupList" method="post" action={'class/grouplist'|ezurl}>
 
 <div class="context-block">

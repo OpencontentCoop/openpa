@@ -5,9 +5,11 @@ class OpenPAOperator
     
     private $area_tematica_node = array();
     
+    protected static $_nodes = array();
+    
     function OpenPAOperator()
     {
-        $this->Operators= array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract' );
+        $this->Operators= array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree' );
     }
 
     function operatorList()
@@ -46,6 +48,14 @@ class OpenPAOperator
             'abstract' => array
             (
                 'node' => array( "type"    => "integer",   "required" => false, "default" => false )
+            ),
+            'rss_list' => array
+            (
+                'fetchList' => array( "type"    => "string",   "required" => true, "default" => 'export' )
+            ),
+            'materia_make_tree' => array
+            (
+                'relation_list' => array( "type"    => "array",   "required" => true, "default" => array() )
             )
         );
     }
@@ -75,6 +85,57 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'materia_make_tree':
+            {
+                $items = $namedParameters['relation_list'];
+                $materie = array();
+                foreach( $items as $item )
+                {
+                    if ( $item['in_trash'] == false && $item['contentclass_identifier'] == 'materia' )
+                    {
+                        $materie[] = array( 'node_id' => $item['node_id'] );
+                    }
+                }
+                foreach( $items as $item )
+                {
+                    if ( $item['in_trash'] == false && $item['contentclass_identifier'] == 'sotto_materia' )
+                    {
+                        foreach ( $materie as $index => $materia )
+                        {
+                            if ( $materia['node_id'] == $item['parent_node_id'] )
+                            {
+                                $materie[$index]['children_node_ids'][] = $item['node_id'];
+                            }
+                        }
+                    }
+                }
+                return $operatorValue = $materie;
+            } break;
+            
+            case 'rss_list':
+            {
+                $list = array();
+                if ( $namedParameters['fetchList'] == 'export' )
+                {
+                    $exportArray = eZRSSExport::fetchList();
+                    $list = array();
+                    foreach( $exportArray as $export )
+                    {
+                        $list[$export->attribute( 'id' )] = $export;
+                    }
+                }
+                elseif ( $namedParameters['fetchList'] == 'import' )
+                {
+                    $importArray = eZRSSImport::fetchList();
+                    $list = array();
+                    foreach( $importArray as $import )
+                    {
+                        $list[$import->attribute( 'id' )] = $import;
+                    }
+                }
+                return $operatorValue = $list;
+            } break;
+            
             case 'has_main_style':
             {
                 $style = false;
@@ -83,7 +144,7 @@ class OpenPAOperator
 
                 if ( is_numeric( $node ) )
                 {
-                    $node = eZContentObjectTreeNode::fetch( $node );
+                    $node = self::fetchNode( $node );
                 }
 
                 if ( $node instanceof eZContentObjectTreeNode )
@@ -110,7 +171,16 @@ class OpenPAOperator
                 if ( $viewmode && $viewmode !== 'full' )
                     return $operatorValue = $style;
                 
-                $mainStyles = $ini->hasVariable( 'Stili', 'Nodo_NomeStile' ) ? $ini->variable( 'Stili', 'Nodo_NomeStile' ) : array();
+                $mainStyles = array();
+                $mainStylesTmp = $ini->hasVariable( 'Stili', 'Nodo_NomeStile' ) ? $ini->variable( 'Stili', 'Nodo_NomeStile' ) : array();
+                foreach( $mainStylesTmp as $styleParts )
+                {
+                    $nodeStyle = explode( ';', $styleParts );
+                    if ( isset( $nodeStyle[1] ) )
+                    {
+                        $mainStyles[$nodeStyle[0]] = $nodeStyle[1];
+                    }
+                }
                 
                 foreach ( $path as $key => $item )
                 {
@@ -169,7 +239,7 @@ class OpenPAOperator
                         $pathArray = explode( '/', $currentNode->attribute( 'path_string' ) );
                         foreach( $pathArray as $p )
                         {
-                            if ( $p != '' && $p != 1 )
+                            if ( $p != '' && $p != 1 && $p != eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) )
                                 $path[] = array( 'node_id' => $p );
                         }
                         
@@ -187,7 +257,7 @@ class OpenPAOperator
                             break;
                         }
                     }
-                }
+                }                
                 $operatorValue = $result;
                 
             } break;
@@ -233,18 +303,7 @@ class OpenPAOperator
             
             case 'openpaini':
             {
-                $result = $namedParameters['default'];
-                
-                if ( $ini->hasVariable( $namedParameters['block'], $namedParameters['setting'] ) )
-                {
-                    $result = $ini->variable( $namedParameters['block'], $namedParameters['setting'] );
-                }
-                
-                if ( $namedParameters['block'] == 'openpaini' && $namedParameters['setting'] == 'debug' )
-                {
-                    $result = '<pre>' . var_export( $ini, 1 ) . '</pre>';
-                }
-                
+                $result = OpenPAINI::variable( $namedParameters['block'], $namedParameters['setting'], $namedParameters['default'] );
                 $operatorValue = $result;
                 
             } break;
@@ -326,7 +385,7 @@ class OpenPAOperator
 
                 if ( is_numeric( $node ) )
                 {
-                    $node = eZContentObjectTreeNode::fetch( $node );
+                    $node = self::fetchNode( $node );
                 }
 
                 if ( $node instanceof eZContentObjectTreeNode )
@@ -402,7 +461,7 @@ class OpenPAOperator
         {
             $ini = eZINI::instance( 'openpa.ini' );
             $areeIdentifiers = $ini->hasVariable( 'AreeTematiche', 'IdentificatoreAreaTematica' ) ? $ini->variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ) : array( 'area_tematica' );
-            $node = eZContentObjectTreeNode::fetch( $nodeID );
+            $node = self::fetchNode( $nodeID );
     
             $return = false;
         
@@ -435,6 +494,15 @@ class OpenPAOperator
             return false;
         }
         return false;
+    }
+    
+    protected static function fetchNode( $nodeID )
+    {
+        if ( !isset( self::$_nodes[$nodeID] ) )
+        {
+            self::$_nodes[$nodeID] = eZContentObjectTreeNode::fetch( $nodeID );
+        }
+        return self::$_nodes[$nodeID];
     }
 }
 
