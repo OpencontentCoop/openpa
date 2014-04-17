@@ -1453,7 +1453,7 @@ div.global-view-full  .main-image,
 {
 	margin:0 0.5em 0.5em 0;
 	float:left;
-	height: 48px;
+	/*height: 48px;*/
 }
 
 .image-small

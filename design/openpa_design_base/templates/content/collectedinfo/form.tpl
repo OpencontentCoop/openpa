@@ -21,7 +21,7 @@
 
 <h1>Informazioni per l'utente</h1>
 
-<h2>Grazie di aver compilato il form di valutazione "{$object.name|wash}"</h2>
+<h2>Grazie di aver compilato il modulo online "{$object.name|wash}"</h2>
 
 {if $error}
 
