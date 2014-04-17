@@ -2,6 +2,8 @@
 
 class OpenPABase
 {
+    const PENDING_ACTION_INDEX_OBJECTS = 'openpa_index_objects';
+    
     public static function getIniFileName( $file, $block = 'INISettings', $setting = 'INIFile' )
     {
         $ini = eZINI::instance( $file );
