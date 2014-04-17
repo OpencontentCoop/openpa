@@ -19,14 +19,19 @@
         </a>
     </h3>
 
-    {def $custom_templates_classes = openpaini( 'SideMenu', 'CachedMenuCustomTemplateClassi', array() )
-         $custom_templates_nodes = openpaini( 'SideMenu', 'CachedMenuCustomTemplateNodi', array() )}
-    {if is_set( $custom_templates_classes[$left_menu_root_node.class_identifier] )}
-        {left_menu_cached( hash( 'root_node_id', $left_menu_root_node.node_id, 'template', $custom_templates_classes[$left_menu_root_node.class_identifier] ) )}
-    {elseif is_set( $custom_templates_nodes[$left_menu_root_node.node_id] )}
-        {left_menu_cached( hash( 'root_node_id', $left_menu_root_node.node_id, 'template', $custom_templates_nodes[$left_menu_root_node.node_id] ) )}
+    {if is_area_tematica()}
+        {*include uri='design:menu/cached/leftmenu.tpl' root_node_id=$left_menu_root_node.node_id*}
+        {left_menu_cached( hash( 'root_node_id', $left_menu_root_node.node_id, 'user_hash', $user_hash ) )}
     {else}
-        {left_menu_cached( hash( 'root_node_id', $left_menu_root_node.node_id ) )}
+        {def $custom_templates_classes = openpaini( 'SideMenu', 'CachedMenuCustomTemplateClassi', array() )
+             $custom_templates_nodes = openpaini( 'SideMenu', 'CachedMenuCustomTemplateNodi', array() )}
+        {if is_set( $custom_templates_classes[$left_menu_root_node.class_identifier] )}
+            {left_menu_cached( hash( 'root_node_id', $left_menu_root_node.node_id, 'template', $custom_templates_classes[$left_menu_root_node.class_identifier] ) )}
+        {elseif is_set( $custom_templates_nodes[$left_menu_root_node.node_id] )}
+            {left_menu_cached( hash( 'root_node_id', $left_menu_root_node.node_id, 'template', $custom_templates_nodes[$left_menu_root_node.node_id] ) )}
+        {else}
+            {left_menu_cached( hash( 'root_node_id', $left_menu_root_node.node_id ) )}
+        {/if}
     {/if}
 
 </div></div></div>

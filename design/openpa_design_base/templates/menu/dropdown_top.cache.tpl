@@ -52,7 +52,46 @@
             </div>
         </li>					
     </ul>
-	{else}    
-		{top_menu_cached( hash( 'root_node_id', $pagedata.root_node ) )}
+	{else}
+
+    <ul id="topmenu-firstlevel">
+        {def $top_menu_node_ids = openpaini( 'TopMenu', 'NodiCustomMenu', array() )}
+        {if openpaini( 'TopMenu', 'NodiCustomMenu', false() )|not()}            
+            {def $root_node=fetch( 'content', 'node', hash( 'node_id', $pagedata.root_node) )                 
+                 $top_menu_items=fetch( 'content', 'list', hash( 'parent_node_id', $pagedata.root_node,
+                                                                 'sort_by', $root_node.sort_array,
+                                                                 'class_filter_type', 'include',
+                                                                 'load_data_map', false(),
+                                                                 'class_filter_array', openpaini( 'TopMenu', 'IdentificatoriMenu' ),
+                                                                 'limit', openpaini( 'TopMenu', 'LimitePrimoLivello', 4 ) ) )}
+            {foreach $top_menu_items as $node}
+                {set $top_menu_node_ids = $top_menu_node_ids|append( $node.node_id )}
+            {/foreach}        
+        {/if}
+    
+        {def $top_menu_node_ids_count = $top_menu_node_ids|count()
+             $position = array()}
+
+        {if $top_menu_node_ids_count}
+            {foreach $top_menu_node_ids as $key => $id}
+                {set $position = array()}
+                {if $key|eq(0)}
+                    {set $position = $position|append( "firstli" )}
+                {/if}
+                {if $top_menu_node_ids_count|eq( $key|inc )}                    
+                    {set $position = $position|append( "lastli" )}
+                {/if}
+                
+                {if openpaini( 'TopMenu', 'NodiAreeCustomMenu', array() )|contains( $id )}
+                    {*include uri='design:menu/cached/topmenu.tpl' root_node_id=$id position=$position*}
+                    {top_menu_cached( hash( 'root_node_id', $id, 'position', $position, 'user_hash', $user_hash ) )}                    
+                {else}
+                    {top_menu_cached( hash( 'root_node_id', $id, 'position', $position ) )}
+                {/if}
+                
+            {/foreach}
+        {/if}
+    </ul>
+    
     {/if}
 </div>

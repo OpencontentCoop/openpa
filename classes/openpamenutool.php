@@ -9,6 +9,149 @@ class OpenPAMenuTool
     
     protected static $currentUser;
     
+    public static function getLeftMenu( $parameters )
+    {        
+        return self::getMenu( self::LEFTMENU, $parameters );
+    }
+    
+    public static function getTopMenu( $parameters )
+    {        
+        return self::getMenu( self::TOPMENU, $parameters );
+    }
+    
+    public static function refreshMenu( $id = null, $siteAccess = null, $file = null )
+    {
+        if ( empty( $id ) && empty( $siteAccess ) && empty( $file ) )
+        {
+            $newList = array();
+            eZCache::clearByTag( self::CACHE_IDENTIFIER );
+        }
+        else
+        {
+            $list = self::listCachedItems();
+            $newList = $list;
+            $remove = array();
+            if ( isset( $list[$id] ) )
+            {
+                foreach( $list[$id] as $listSitaccess => $items )
+                {
+                    foreach( $items as $index => $item )
+                    {                    
+                        if ( $siteAccess )
+                        {                        
+                            if ( $listSitaccess == $siteAccess )
+                            {                            
+                                if ( $file )
+                                {                                                                
+                                    if ( basename( $item['cache_file'] ) == $file )
+                                    {
+                                        unset( $newList[$id][$siteAccess][$index] );
+                                        $remove[] = $item['cache_file'];
+                                    }
+                                }
+                                else
+                                {
+                                    unset( $newList[$id][$siteAccess][$index] );
+                                    $remove[] = $item['cache_file'];    
+                                }
+                            }                        
+                        }                    
+                        else
+                        {
+                            unset( $newList[$id] );
+                            $remove[] = $item['cache_file'];
+                        }
+                    }
+                }            
+            }        
+            foreach( $remove as $fileToRemove )
+            {
+                $cacheFileHandler = eZClusterFileHandler::instance( $fileToRemove  );
+                if ( $cacheFileHandler->exists() )
+                {
+                    $data = $cacheFileHandler->delete();
+                }            
+            }
+        }
+        self::listCachedItems( $newList );
+    }
+    
+    public static function generateAllMenus()
+    {        
+        $cli = eZCLI::instance();
+        $cli->notice( 'Svuoto i topmenu di ' . self::currentSiteaccessName());
+        self::refreshMenu( self::TOPMENU, self::currentSiteaccessName() );
+        
+        $cli->notice( 'Svuoto i leftmenu di ' . self::currentSiteaccessName() );
+        self::refreshMenu( self::LEFTMENU, self::currentSiteaccessName() );
+        
+        $menuItems = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu');
+        if ( empty( $menuItems ) )
+        {
+            $rootNode = eZContentObjectTreeNode::fetch( $rootNodeId );
+            $menuItems = $rootNode->subTree( array( 'ClassFilterType' => 'include',
+                                               'ClassFilterArray' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),
+                                               'Limit' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello' ),
+                                               'SortBy' => $rootNode->attribute( 'sort_array' ),
+                                               'Depth' => 1,
+                                               'DepthOperator' => 'eq' ) );
+        }
+        $areeContainers = OpenPAINI::variable( 'TopMenu', 'NodiAreeCustomMenu');
+        foreach( $menuItems as $index => $item )
+        {
+            $position = array();
+            if ( $index == 0 )
+            {
+                $position = array( 'firstli' );
+            }
+            if ( $index == count( $menuItems ) - 1 )
+            {
+                $position = array( 'lastli' );
+            }
+            $itemNodeid = $item;
+            if ( $item instanceof eZContentObjectTreeNode )
+            {
+                $itemNodeid = $item->attribute( 'node_id' );    
+            }
+            $params = array( 'root_node_id' => $itemNodeid,
+                             'position' => $position );
+            
+            if ( !in_array( $itemNodeid, $areeContainers ) )
+            {
+                $cli->notice( 'Genero il topmenu del nodo ' . $itemNodeid );
+                self::getTopMenu( $params );
+                
+                $cli->notice( 'Genero il leftmenu del nodo ' . $itemNodeid );
+                self::getLeftMenu( $params );  
+            }
+            
+            //if ( in_array( $itemNodeid, $areeContainers ) )
+            //{
+            //    if ( $item instanceof eZContentObjectTreeNode )
+            //    {
+            //        $itemNode = $item;
+            //    }
+            //    else
+            //    {
+            //        $itemNode = eZContentObjectTreeNode::fetch( $itemNodeid );
+            //    }
+            //    if ( $itemNode instanceof eZContentObjectTreeNode && OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica', false ) )
+            //    {
+            //        $aree = $itemNode->subTree( array( 'ClassFilterType' => 'include',
+            //                                           'ClassFilterArray' => OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ),
+            //                                           'Depth' => 1,
+            //                                           'DepthOperator' => 'eq' ) );
+            //        foreach( $aree as $area )
+            //        {
+            //            $areaParams =  array( 'root_node_id' => $area->attribute( 'node_id' ) ) ;
+            //            $cli->notice( 'Genero il leftmenu dell\'area tematica ' . $area->attribute( 'node_id' ) );
+            //            self::getLeftMenu( $areaParams );  
+            //        }
+            //    }
+            //}
+        }        
+    }
+    
     public static function cacheDirectory()
     {
         $siteINI = eZINI::instance();
@@ -100,54 +243,14 @@ class OpenPAMenuTool
             eZUser::setCurrentlyLoggedInUser( self::$currentUser, self::$currentUser->attribute( 'contentobject_id' ) );
         }
     }
-    
-    public static function getTopMenu( $parameters )
-    {        
-        $cachePath = self::cacheDirectory() . self::currentSiteaccessName() . '/';        
-        if ( $cachePath )
-        {
-            $cacheFile = $cachePath . self::TOPMENU . '.html';
-            $cacheFileHandler = eZClusterFileHandler::instance( $cacheFile );            
-            if ( !$cacheFileHandler->exists() )
-            {            
-                self::suAnonymous();
-                $contents = self::generateTopMenu( $parameters );
-                self::exitAnonymous();
-                $parameters['cache_file'] = $cacheFile;
-                self::registerCachedMenu( self::TOPMENU, self::currentSiteaccessName(), $parameters );
-                $cacheFileHandler->storeContents( $contents );
-            }
-            return $cacheFileHandler->fetchContents();
-        }
-        else
-        {
-            eZDebug::writeWarning( 'Topmenu generated without cache' );
-            return self::generateTopMenu( $parameters );
-        }
-    }
-    
-    protected static function generateTopMenu( &$parameters )
-    {        
-        eZDebug::writeNotice( 'Generate ' .  self::TOPMENU );
         
-        if ( !isset( $parameters['root_node_id'] ) )
-            $parameters['root_node_id'] = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
-        
-        if ( !isset( $parameters['template'] ) )
-            $parameters['template'] = 'menu/cached/' . self::TOPMENU . '.tpl';
-        
-        $tpl = eZTemplate::factory();
-        $tpl->setVariable( 'root_node_id', $parameters['root_node_id'] );
-        return $tpl->fetch( 'design:' . $parameters['template'] );
-    }
-    
     protected static function notice( $message )
     {
         eZCLI::instance()->notice( $message );
-    }    
+    }
     
-    public static function getLeftMenu( $parameters )
-    {        
+    protected static function getMenu( $identifier, $parameters )
+    {
         $cachePath = self::cacheDirectory() . self::currentSiteaccessName() . '/';        
         if ( $cachePath )
         {            
@@ -155,15 +258,28 @@ class OpenPAMenuTool
                 $rootNodeId = $parameters['root_node_id'];
             else
                 $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
-            $cacheFile = $cachePath . self::LEFTMENU . '_' . $rootNodeId . '.html';            
+            
+            $extraCacheKey = '';
+            if ( isset( $parameters['user_hash'] ) )
+            {
+                $extraCacheKey = md5( $parameters['user_hash'] );
+                $parameters['user_hash'] = $extraCacheKey;
+            }
+            
+            $cacheFile = $cachePath . $identifier . '_' . $rootNodeId . $extraCacheKey . '.html';            
             $cacheFileHandler = eZClusterFileHandler::instance( $cacheFile );            
             if ( !$cacheFileHandler->exists() )
             {            
-                self::suAnonymous();
-                $contents = self::generateLeftMenu( $parameters );
-                self::exitAnonymous();
+                if ( !isset( $parameters['user_hash'] ) ) self::suAnonymous();
+                
+                $contents = self::generateMenu( $identifier, $parameters );
+                
+                if ( !isset( $parameters['user_hash'] ) )  self::exitAnonymous();
+                
                 $parameters['cache_file'] = $cacheFile;
-                self::registerCachedMenu( self::LEFTMENU, self::currentSiteaccessName(), $parameters );
+                
+                self::registerCachedMenu( $identifier, self::currentSiteaccessName(), $parameters );
+                
                 $cacheFileHandler->storeContents( $contents );
             }
             return $cacheFileHandler->fetchContents();
@@ -174,130 +290,28 @@ class OpenPAMenuTool
             return self::generateTopMenu( $parameters );
         }
     }
-    
-    protected static function generateLeftMenu( &$parameters )
-    {        
-        eZDebug::writeNotice( 'Generate ' . self::LEFTMENU );
         
+    protected static function generateMenu( $identifier, &$parameters )
+    {        
         if ( !isset( $parameters['root_node_id'] ) )
             $parameters['root_node_id'] = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
         
         if ( !isset( $parameters['template'] ) )
-            $parameters['template'] = 'menu/cached/' . self::LEFTMENU . '.tpl';
+            $parameters['template'] = 'menu/cached/' . $identifier . '.tpl';
+        
+        $extraNotice = '';
+        if ( isset( $parameters['user_hash'] ) )
+        {
+            $extraNotice = ' with user_hash key';
+        }
+        eZDebug::writeNotice( 'Generate ' . $identifier . ' on node ' . $parameters['root_node_id'] . $extraNotice );
         
         $tpl = eZTemplate::factory();
-        $tpl->setVariable( 'root_node_id', $parameters['root_node_id'] );
-        return $tpl->fetch( 'design:' . $parameters['template'] );
-    }
-    
-    public static function refreshMenu( $id, $siteAccess = null, $file = null )
-    {
-        $list = self::listCachedItems();
-        $newList = $list;
-        $remove = array();
-        if ( isset( $list[$id] ) )
+        foreach( $parameters as $key => $value )
         {
-            foreach( $list[$id] as $listSitaccess => $items )
-            {
-                foreach( $items as $index => $item )
-                {                    
-                    if ( $siteAccess )
-                    {                        
-                        if ( $listSitaccess == $siteAccess )
-                        {                            
-                            if ( $file )
-                            {                                                                
-                                if ( basename( $item['cache_file'] ) == $file )
-                                {
-                                    unset( $newList[$id][$siteAccess][$index] );
-                                    $remove[] = $item['cache_file'];
-                                }
-                            }
-                            else
-                            {
-                                unset( $newList[$id][$siteAccess][$index] );
-                                $remove[] = $item['cache_file'];    
-                            }
-                        }                        
-                    }                    
-                    else
-                    {
-                        unset( $newList[$id] );
-                        $remove[] = $item['cache_file'];
-                    }
-                }
-            }            
-        }        
-        foreach( $remove as $fileToRemove )
-        {
-            $cacheFileHandler = eZClusterFileHandler::instance( $fileToRemove  );
-            if ( $cacheFileHandler->exists() )
-            {
-                $data = $cacheFileHandler->delete();
-            }            
-        }                
-        self::listCachedItems( $newList );
-    }
-    
-    public static function generateAllMenus()
-    {        
-        self::notice( 'Svuoto i topmenu di ' . self::currentSiteaccessName());
-        self::refreshMenu( self::TOPMENU, self::currentSiteaccessName() );
-        
-        self::notice( 'Svuoto i leftmenu di ' . self::currentSiteaccessName() );
-        self::refreshMenu( self::LEFTMENU, self::currentSiteaccessName() );
-
-        $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
-        $params = array( 'root_node_id' => $rootNodeId );
-        self::notice( 'Genero il topmenu del nodo ' . $rootNodeId );
-        self::getTopMenu( $params );
-        $menuItems = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu');
-        if ( empty( $menuItems ) )
-        {
-            $rootNode = eZContentObjectTreeNode::fetch( $rootNodeId );
-            $menuItems = $rootNode->subTree( array( 'ClassFilterType' => 'include',
-                                               'ClassFilterArray' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),
-                                               'Limit' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello' ),
-                                               'SortBy' => $rootNode->attribute( 'sort_array' ),
-                                               'Depth' => 1,
-                                               'DepthOperator' => 'eq' ) );
+            $tpl->setVariable( $key, $value );
         }
-        $areeContainers = OpenPAINI::variable( 'TopMenu', 'NodiAreeCustomMenu');
-        foreach( $menuItems as $item )
-        {
-            $itemNodeid = $item;
-            if ( $item instanceof eZContentObjectTreeNode )
-            {
-                $itemNodeid = $item->attribute( 'node_id' );    
-            }
-            $params = array( 'root_node_id' => $itemNodeid );
-            self::notice( 'Genero il leftmenu del nodo ' . $itemNodeid );
-            self::getLeftMenu( $params );            
-            if ( in_array( $itemNodeid, $areeContainers ) )
-            {
-                if ( $item instanceof eZContentObjectTreeNode )
-                {
-                    $itemNode = $item;
-                }
-                else
-                {
-                    $itemNode = eZContentObjectTreeNode::fetch( $itemNodeid );
-                }
-                if ( $itemNode instanceof eZContentObjectTreeNode && OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica', false ) )
-                {
-                    $aree = $itemNode->subTree( array( 'ClassFilterType' => 'include',
-                                                       'ClassFilterArray' => OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ),
-                                                       'Depth' => 1,
-                                                       'DepthOperator' => 'eq' ) );
-                    foreach( $aree as $area )
-                    {
-                        $areaParams =  array( 'root_node_id' => $area->attribute( 'node_id' ) ) ;
-                        self::notice( 'Genero il leftmenu dell\'area tematica ' . $area->attribute( 'node_id' ) );
-                        self::getLeftMenu( $areaParams );  
-                    }
-                }
-            }
-        }        
+        return $tpl->fetch( 'design:' . $parameters['template'] );
     }
     
     public static function printDebugReport( $as_html = true )
