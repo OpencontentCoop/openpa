@@ -3,25 +3,21 @@
 <head>
 {set $current_user = fetch( 'user', 'current_user' )}
 {def $user_hash = concat( $current_user.role_id_list|implode( ',' ), ',', $current_user.limited_assignment_value_list|implode( ',' ) )
-     $is_login_page = cond( and( module_params()['module_name']|eq( 'user' ), module_params()['function_name']|eq( 'login' ) ), true(), false() ) }
+     $is_login_page = cond( and( module_params()['module_name']|eq( 'user' ), module_params()['function_name']|eq( 'login' ) ), true(), false() )
+     $cookies = check_and_set_cookies()}
 
 
 {if is_set( $extra_cache_key )|not}
     {def $extra_cache_key = ''}
 {/if}
-{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key )}
-{def $browser          = checkbrowser('checkbrowser')
-     $cookies          = check_and_set_cookies()
+{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key, $cookies|implode(',') )}
+{def $browser          = checkbrowser('checkbrowser')     
      $pagedata         = ezpagedata()
      $pagestyle        = $pagedata.css_classes
      $locales          = fetch( 'content', 'translation_list' )
      $pagedesign       = $pagedata.template_look
      $current_node_id  = $pagedata.node_id
-     $main_style       = get_main_style()
-     $custom_keys      = hash( 'is_login_page', $is_login_page, 'browser', $browser, 'is_area_tematica', is_area_tematica() )|merge( $cookies )
-}
-
-{set scope=global custom_keys=$custom_keys}
+     $main_style       = get_main_style()}
 
 {include uri='design:page_head_google-site-verification.tpl'}
 {include uri='design:page_head.tpl'}
@@ -38,6 +34,10 @@
 <body class="no-js">
 <script type="text/javascript">{literal}
 //<![CDATA[
+var UiContext = {/literal}"{$ui_context}"{literal};
+var UriPrefix = {/literal}{'/'|ezurl()}{literal};
+var PathArray = [{/literal}{foreach $pagedata.path_array|reverse as $path}{$path.node_id}{delimiter},{/delimiter}{/foreach}{literal}];
+
 (function(){var c = document.body.className;
 c = c.replace(/no-js/, 'js');
 document.body.className = c;
@@ -63,15 +63,21 @@ document.body.className = c;
         {include uri='design:page_topmenu.tpl'}
     {/if}
 {/cache-block}
-{cache-block keys=array( $module_result.uri, $current_user.contentobject_id, $extra_cache_key )}
-    <div id="links">
-    
-    	{if $is_login_page|not()}
+
+<div id="links">    
+{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key, $cookies|implode(',') )}
+    {if $is_login_page|not()}
         {include uri='design:page_header_usability.tpl'}        
-        {include uri='design:page_header_links.tpl'}        
-        {/if}   
-	</div>
+    {/if}   
 {/cache-block}    
+
+{cache-block keys=array( $module_result.uri, $current_user.contentobject_id, $extra_cache_key )}
+    {if $is_login_page|not()}
+        {include uri='design:page_header_links.tpl'}        
+    {/if}   
+{/cache-block}
+</div>
+
 {cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key )}    
     {if and( $pagedata.show_path,
              $current_node_id|ne(ezini( 'NodeSettings', 'RootNode', 'content.ini' )),

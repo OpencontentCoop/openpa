@@ -294,8 +294,7 @@ class OpenPACalendarData
                 }                                
             }
         }        
-        $this->data['search_facets'] = $this->sortFacets( $resultFacets );
-        
+        $this->data['search_facets'] = $this->sortFacets( $resultFacets );        
         
         $events = array();
         foreach( $solrResult['SearchResult'] as $item )

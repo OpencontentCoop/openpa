@@ -228,7 +228,7 @@ class OpenPAOperator
             } break;
             
             case 'is_area_tematica':
-            {
+            {                
                 $result = false;
                 if ( empty( $path ) )
                 {
@@ -239,8 +239,14 @@ class OpenPAOperator
                         $pathArray = explode( '/', $currentNode->attribute( 'path_string' ) );
                         foreach( $pathArray as $p )
                         {
-                            if ( $p != '' && $p != 1 && $p != eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) )
+                            if ( $p != ''
+                                 && $p != 1
+                                 && $p != eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' )
+                                 && strpos( eZINI::instance()->variable( 'SiteSettings', 'IndexPage' ), $p ) === false
+                                 )
+                            {
                                 $path[] = array( 'node_id' => $p );
+                            }
                         }
                         
                     }
@@ -467,7 +473,9 @@ class OpenPAOperator
         
             if ( $node )
             {
-                if ( in_array( $node->attribute( 'class_identifier' ), $areeIdentifiers ) )
+                if ( in_array( $node->attribute( 'class_identifier' ), $areeIdentifiers )
+                     && $nodeID != eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' )
+                     && strpos( eZINI::instance()->variable( 'SiteSettings', 'IndexPage' ), $nodeID ) === false)
                 {
                     $return = $node;
                 }

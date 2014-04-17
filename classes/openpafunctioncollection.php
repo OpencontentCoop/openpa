@@ -344,8 +344,7 @@ class OpenPaFunctionCollection
     public static function fetchTopMenuNodes()
     {
         if ( self::$topmenu == null )
-        {
-            self::$topmenu = array();
+        {            
             $homePage = self::fetchHome();
             if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
             {

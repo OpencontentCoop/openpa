@@ -14,7 +14,8 @@
 		
         {def $aree_tematiche_level_2 = fetch('content', 'list', hash( 'parent_node_id', $aree_tematiche.node_id,
                                     		'sort_by', $aree_tematiche.sort_array, 'limit', 20,
-                                        	'class_filter_type', 'include', 
+                                        	'class_filter_type', 'include',
+                                            'limitation', array(),
                                         	'class_filter_array',  openpaini( 'TopMenu', 'IdentificatoriMenu', array() ) ) ) 
 			 $aree_tematiche_level_2_class = array()
 			 $aree_tematiche_level_2_count=0
@@ -82,12 +83,7 @@
                     {set $position = $position|append( "lastli" )}
                 {/if}
                 
-                {if openpaini( 'TopMenu', 'NodiAreeCustomMenu', array() )|contains( $id )}
-                    {*include uri='design:menu/cached/topmenu.tpl' root_node_id=$id position=$position*}
-                    {top_menu_cached( hash( 'root_node_id', $id, 'position', $position, 'user_hash', $user_hash ) )}                    
-                {else}
-                    {top_menu_cached( hash( 'root_node_id', $id, 'position', $position ) )}
-                {/if}
+                {top_menu_cached( hash( 'root_node_id', $id, 'position', $position ) )}
                 
             {/foreach}
         {/if}

@@ -1,4 +1,4 @@
-{if  $custom_keys.contrasto|eq('alto') }
+{if $cookies.contrasto|eq('alto') }
 
       {ezcss_load( array( 'altocontrasto.css',
 						  'debug.css',
@@ -48,7 +48,7 @@
 {/if}
 
 {* DEFINIZIONI INLINE DELLA DIMENSIONE DEI CARATTERI IN BASE AL COOKIE dimensione *}
-{if  $custom_keys.dimensione|eq('grande') }
+{if  $cookies.dimensione|eq('grande') }
 	{literal}
 	<style type="text/css">
 	<!--
@@ -67,7 +67,7 @@
 {/if}
 
 {* DEFINIZIONI INLINE DEL LAYOUT IN BASE AL COOKIE layout *}
-{if  $custom_keys.layout|eq('fluido') }
+{if  $cookies.layout|eq('fluido') }
 	{literal}
 	<style type="text/css">
 	<!--

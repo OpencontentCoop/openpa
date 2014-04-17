@@ -78,6 +78,8 @@ class OpenPAMenuTool
     
     public static function generateAllMenus()
     {        
+        eZCache::clearByTag( 'template' );
+        
         $cli = eZCLI::instance();
         $cli->notice( 'Svuoto i topmenu di ' . self::currentSiteaccessName());
         self::refreshMenu( self::TOPMENU, self::currentSiteaccessName() );
@@ -86,8 +88,10 @@ class OpenPAMenuTool
         self::refreshMenu( self::LEFTMENU, self::currentSiteaccessName() );
         
         $menuItems = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu');
+        
         if ( empty( $menuItems ) )
         {
+            $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
             $rootNode = eZContentObjectTreeNode::fetch( $rootNodeId );
             $menuItems = $rootNode->subTree( array( 'ClassFilterType' => 'include',
                                                'ClassFilterArray' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),
@@ -113,42 +117,54 @@ class OpenPAMenuTool
             {
                 $itemNodeid = $item->attribute( 'node_id' );    
             }
+            
             $params = array( 'root_node_id' => $itemNodeid,
                              'position' => $position );
             
-            if ( !in_array( $itemNodeid, $areeContainers ) )
+            if ( in_array( $itemNodeid, $areeContainers ) )
             {
+                if ( $item instanceof eZContentObjectTreeNode )
+                {
+                    $itemNode = $item;
+                }
+                else
+                {
+                    $itemNode = eZContentObjectTreeNode::fetch( $itemNodeid );
+                }
+                
+                if ( $itemNode instanceof eZContentObjectTreeNode )
+                {
+                    self::suAnonymous();
+                    
+                    $cli->notice( 'Genero il topmenu del nodo ' . $itemNodeid );
+                    self::getTopMenu( $params );
+                    
+                    $anonymousUserID = eZINI::instance()->variable( 'UserSettings', 'AnonymousUserID' );        
+                    $anonymousUser = eZUser::fetch( $anonymousUserID );
+                    $userHash = implode( ',', $anonymousUser->attribute( 'role_id_list' ) ) . ',' . implode( ',', $anonymousUser->attribute( 'limited_assignment_value_list' ) );
+                    
+                    $aree = $itemNode->subTree( array( 'ClassFilterType' => 'include',
+                                                       'ClassFilterArray' => OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ),
+                                                       'Depth' => 1,
+                                                       'DepthOperator' => 'eq' ) );
+                    foreach( $aree as $area )
+                    {
+                        $areaParams = array( 'root_node_id' => $area->attribute( 'node_id' ), 'user_hash' => $userHash );
+                        $cli->notice( 'Genero il leftmenu anonimo dell\'area tematica ' . $area->attribute( 'node_id' ) );
+                        self::getLeftMenu( $areaParams );  
+                    }
+                    
+                    self::exitAnonymous();
+                }
+            }
+            else
+            {                
                 $cli->notice( 'Genero il topmenu del nodo ' . $itemNodeid );
-                self::getTopMenu( $params );
+                self::getTopMenu( $params );  
                 
                 $cli->notice( 'Genero il leftmenu del nodo ' . $itemNodeid );
                 self::getLeftMenu( $params );  
             }
-            
-            //if ( in_array( $itemNodeid, $areeContainers ) )
-            //{
-            //    if ( $item instanceof eZContentObjectTreeNode )
-            //    {
-            //        $itemNode = $item;
-            //    }
-            //    else
-            //    {
-            //        $itemNode = eZContentObjectTreeNode::fetch( $itemNodeid );
-            //    }
-            //    if ( $itemNode instanceof eZContentObjectTreeNode && OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica', false ) )
-            //    {
-            //        $aree = $itemNode->subTree( array( 'ClassFilterType' => 'include',
-            //                                           'ClassFilterArray' => OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ),
-            //                                           'Depth' => 1,
-            //                                           'DepthOperator' => 'eq' ) );
-            //        foreach( $aree as $area )
-            //        {
-            //            $areaParams =  array( 'root_node_id' => $area->attribute( 'node_id' ) ) ;
-            //            $cli->notice( 'Genero il leftmenu dell\'area tematica ' . $area->attribute( 'node_id' ) );
-            //            self::getLeftMenu( $areaParams );  
-            //        }
-            //    }
-            //}
         }        
     }
     

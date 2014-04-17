@@ -62,24 +62,24 @@ $(document).ready(function(){
 <div class="accessibilita">
 <h2 class="hide">Strumenti di accessibilit&agrave;</h2>
 
-<a rel="alternate" {if $custom_keys.dimensione|eq('normale')}class="access_selected"{/if} id="riduci-caratteri" href="?dimensione=normale" title="Visualizza caratteri normali">Visualizza caratteri normali</a>
+<a rel="alternate" {if $cookies.dimensione|eq('normale')}class="access_selected"{/if} id="riduci-caratteri" href="?dimensione=normale" title="Visualizza caratteri normali">Visualizza caratteri normali</a>
 
 <span class="hide"> - </span>
 
-<a rel="alternate" {if $custom_keys.dimensione|eq('grande')}class="access_selected"{/if} id="aumenta-caratteri" href="?dimensione=grande" title="Visualizza caratteri grandi">Visualizza caratteri grandi</a>
+<a rel="alternate" {if $cookies.dimensione|eq('grande')}class="access_selected"{/if} id="aumenta-caratteri" href="?dimensione=grande" title="Visualizza caratteri grandi">Visualizza caratteri grandi</a>
 
 <span class="hide"> - </span>
 
-<a rel="alternate" {if $custom_keys.contrasto|eq('alto')}class="access_selected"{/if} id="alto-contrasto" href="?contrasto=alto" title="Visualizzazione ad alto contrasto">Visualizzazione ad alto contrasto</a>
+<a rel="alternate" {if $cookies.contrasto|eq('alto')}class="access_selected"{/if} id="alto-contrasto" href="?contrasto=alto" title="Visualizzazione ad alto contrasto">Visualizzazione ad alto contrasto</a>
 
 <span class="hide"> - </span>
 
-<a rel="alternate" id="normale" class="ac-show{if $custom_keys.contrasto|eq('normale')} access_selected{/if}" href="?contrasto=normale" title="Visualizzazione normale">Visualizzazione normale</a>
+<a rel="alternate" id="normale" class="ac-show{if $cookies.contrasto|eq('normale')} access_selected{/if}" href="?contrasto=normale" title="Visualizzazione normale">Visualizzazione normale</a>
 
 <span class="hide"> - </span>
 
-<a rel="alternate" {if $custom_keys.layout|eq('rigido')}class="access_selected"{/if} id="layout-rigido" href="?layout=rigido" title="Comprimi pagina a dimensione fissa">Comprimi pagina a dimensione fissa</a> 
+<a rel="alternate" {if $cookies.layout|eq('rigido')}class="access_selected"{/if} id="layout-rigido" href="?layout=rigido" title="Comprimi pagina a dimensione fissa">Comprimi pagina a dimensione fissa</a> 
 
-<a rel="alternate" {if $custom_keys.layout|eq('fluido')}class="access_selected"{/if} id="layout-fluido" href="?layout=fluido" title="Espandi pagina alla dimensione della finestra">Espandi pagina alla dimensione della finestra</a>
+<a rel="alternate" {if $cookies.layout|eq('fluido')}class="access_selected"{/if} id="layout-fluido" href="?layout=fluido" title="Espandi pagina alla dimensione della finestra">Espandi pagina alla dimensione della finestra</a>
 
 </div>
