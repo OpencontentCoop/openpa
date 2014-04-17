@@ -1,7 +1,6 @@
 {include name=menu_control node=$node uri='design:parts/common/menu_control.tpl'}
 
-{def $oggetti_classificazione = array('iniziativa', 'servizio', 'associazione', 'internoesterno', 'argomento', 'evento_vita')
-	 $classes_parent_to_edit=array('file_pdf', 'news')
+{def $classes_parent_to_edit=array('file_pdf', 'news')
 	 $current_user = fetch( 'user', 'current_user' )}
 
 <div class="border-box">
@@ -35,7 +34,7 @@
                 {attribute_view_gui attribute=$node.data_map.abstract}            
             {/if}
                         
-            {foreach array( 'periodo_svolgimento', 'orario_svolgimento', 'luogo_svolgimento', 'file' ) as $identifier}
+            {foreach array( 'periodo_svolgimento', 'orario_svolgimento', 'luogo_svolgimento' ) as $identifier}
             {if and( $node.data_map[$identifier].has_content, $node.data_map[$identifier].content|ne('0') )}
             <p>
                 {if $identifier|ne( 'file' )}
@@ -56,7 +55,7 @@
      
     <div class="attributi-base">
         {def $style='col-odd'}
-        {foreach $node.object.contentobject_attributes as $attribute}
+        {foreach $node.object.data_map as $attribute}
             
             {if and( $attribute.has_content, $attribute.content|ne('0') )}
             

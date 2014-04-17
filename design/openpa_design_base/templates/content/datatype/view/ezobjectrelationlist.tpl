@@ -36,33 +36,18 @@
 
 	{/if}
 {else}
-
-	{if module_params().parameters|count()|gt(0)}
-		{if module_params().parameters.NodeID}
-			{def $BNode_id=module_params().parameters.NodeID  $local_link=fetch(content,node,hash(node_id,$BNode_id))}
-		{else}
-			{def $local_link=$node}
-		{/if}
-	{/if}
-
 	{section show=$attribute.content.relation_list}
 		{section var=Relations loop=$attribute.content.relation_list sequence=array( bglight, bgdark )}
 			{section show=$Relations.item.in_trash|not()}   
 
-			{*	
-			{set $obj=fetch( content, object, hash( object_id, $Relations.item.contentobject_id ) )}
-			   {if $obj.class_identifier|eq('politico')}	
-				{node_view_gui content_node=$obj.main_node view='line'}
-			   {else}	
-			*}
-
-					
-					{content_view_gui  view=embed  content_object=fetch( content, object, hash( object_id, $Relations.item.contentobject_id ) )}
-			   {*/if*}	
-
-			{/section}
-			{*{delimiter} <span class="delimiter">-</span> {/delimiter}*}
-			{delimiter} <span class="previous">-</span> {/delimiter}
+                {set $obj=fetch( content, object, hash( object_id, $Relations.item.contentobject_id ) )}
+                {if $obj.can_read}
+                    {content_view_gui  view=embed  content_object=$obj}
+                {else}
+					{$obj.name|wash()}
+                {/if}
+			{/section}			
+			{delimiter}, {/delimiter}
 		{/section}
 	{/section}
 {/if}

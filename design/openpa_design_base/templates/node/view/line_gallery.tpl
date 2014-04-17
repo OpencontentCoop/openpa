@@ -58,7 +58,7 @@ $(document).ready(function() {
 {if $scope|eq('attribute')}
 {def $banner_folder= array($node)}
 {else}
-{def $banner_folder=fetch( 'content', 'list',  hash( 'parent_node_id', $node.object.main_node_id, 'class_filter_type', 'include', 'class_filter_array', array('image', 'flash_player', 'ezflowmedia'), 'limit', 30 ) )}
+{def $banner_folder=fetch( 'content', 'list',  hash( 'parent_node_id', $node.object.main_node_id, 'class_filter_type', 'include', 'class_filter_array', array('image', 'flash_player', 'ezflowmedia'), 'limit', 30, 'sort_by', $node.sort_array ) )}
 {/if}
 {foreach $banner_folder as $banner}
 <li class="banner-carousel-item  jcarousel-item">

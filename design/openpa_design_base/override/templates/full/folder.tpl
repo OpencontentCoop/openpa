@@ -166,7 +166,7 @@
                     {if $style|eq('col-even')}{set $style='col-odd'}{else}{set $style='col-even'}{/if}
                     <div class="{$style} col float-break col-notitle">
                     <div class="col-content"><div class="col-content-design">
-                        {node_view_gui view='line_gallery' content_node=$child}
+                        {node_view_gui view='line' content_node=$child}
                     </div></div>
                     </div>
                 {/foreach}
