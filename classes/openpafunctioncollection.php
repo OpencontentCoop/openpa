@@ -2,6 +2,7 @@
 
 class OpenPaFunctionCollection
 {
+
     protected static $topmenu;
     protected static $home;
 
@@ -168,7 +169,7 @@ class OpenPaFunctionCollection
         }
         return array( 'result' => $result );
     }
-    
+        
     public static function fetchFooterLinks()
     {
         $nodes = array();
@@ -352,6 +353,7 @@ class OpenPaFunctionCollection
                 if ( isset( $dataMap['link_al_menu_orizzontale'] ) && $dataMap['link_al_menu_orizzontale'] instanceof eZContentObjectAttribute
                      && $dataMap['link_al_menu_orizzontale']->attribute( 'has_content' ) )
                 {
+                    self::$topmenu = array();
                     $content = $dataMap['link_al_menu_orizzontale']->attribute( 'content' );
                     foreach( $content['relation_list'] as $item )
                     {

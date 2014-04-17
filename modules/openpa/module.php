@@ -48,11 +48,15 @@ $ViewList['addlocationto'] = array( 'functions' => array( 'editor_tools' ),
 $ViewList['calendar'] = array( 'functions' => array( 'calendar' ),
                            'script' => 'calendar.php',
                            'params' => array( 'NodeID' ) );
+
+$ViewList['refreshmenu'] = array( 'functions' => array( 'editor_tools' ),
+                           'script' => 'refreshmenu.php',
+                           'params' => array( 'ID', 'SiteAccess', 'File' ) );
                            
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
 $FunctionList['manage_roles'] = array();
-$FunctionList['manage_header'] = array();
+//$FunctionList['manage_header'] = array();
 $FunctionList['calendar'] = array();
 $FunctionList['editor_tools'] = array();
 

@@ -1,6 +1,7 @@
 <?php /*
 [CronjobSettings]
 ExtensionDirectories[]=openpa
+
 Scripts[]=change_section.php
 Scripts[]=index_pending.php
 
@@ -16,5 +17,8 @@ Scripts[]=clear_frontpages_cache.php
 
 [CronjobPart-changesection]
 Scripts[]=change_section.php
+
+[CronjobPart-generatemenu]
+Scripts[]=generate_menu.php
 
 */ ?>

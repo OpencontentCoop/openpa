@@ -3,6 +3,10 @@ $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/open
                                     'class' => 'OpenPAOperator',
                                     'operator_names' => array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree' ) );
 
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpamenuoperator.php',
+                                    'class' => 'OpenPAMenuOperator',
+                                    'operator_names' => array( 'top_menu_cached', 'left_menu_cached' ) );
+
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/slugizeoperator.php',
                                     'class' => 'SlugizeOperator',
                                     'operator_names' => array( 'slugize' ) );
