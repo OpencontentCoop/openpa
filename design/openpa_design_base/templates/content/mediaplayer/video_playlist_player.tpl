@@ -23,7 +23,7 @@
 <div class="video">
 
     <a	class="player no-js-hide"
-        href={concat("content/download/",$children[0].data_map.$file.contentobject_id,"/",$children[0].data_map.$file.content.contentobject_attribute_id,"/video")|ezurl}
+        href={concat("content/download/",$children[0].data_map.$file.contentobject_id,"/",$children[0].data_map.$file.content.contentobject_attribute_id,"/",$children[0].data_map.$file.content.original_filename)|ezurl}
         style="display:block;width:{$defaults['width']}px;height:{$defaults['height']}px;"
         title="{$children[0].name|wash()}"
         id="video-{$node.node_id}">
@@ -53,13 +53,13 @@ $(document).ready(function(){ldelim}
         playlist: [
         {foreach $children as $item}
             {ldelim}
-                url: "{concat('content/download/',$item.data_map.$file.contentobject_id,'/',$item.data_map.$file.content.contentobject_attribute_id,'/video')}",
+                url: "{concat('content/download/',$item.data_map.$file.contentobject_id,'/',$item.data_map.$file.content.contentobject_attribute_id,'/',$item.data_map.$file.content.original_filename)}",
                 title: "{$item.name|wash(javascript)}"
                 {if and( is_set( $item.data_map.$cover ), $item.data_map.$cover.data_type_string|eq( 'ezimage' ), $item.data_map.$cover.has_content )}
                     ,image: "{$item.data_map.$cover.content.$thumb_image_class.full_path|ezroot(no)}"
                 {/if}
                 {if and( is_set( $item.data_map.$captions ), $item.data_map.$captions.data_type_string|eq( 'ezbinaryfile' ), $item.data_map.$captions.has_content )}
-                    ,captionUrl: "{concat("content/download/",$item.data_map.$captions.contentobject_id,"/",$item.data_map.$captions.content.contentobject_attribute_id,"/caption")|ezurl(no,full)}"
+                    ,captionUrl: "{concat("content/download/",$item.data_map.$captions.contentobject_id,"/",$item.data_map.$captions.content.contentobject_attribute_id,"/",$item.data_map.$captions.content.original_filename)|ezurl(no,full)}"
                 {/if}
             {rdelim}
             {delimiter},{/delimiter}

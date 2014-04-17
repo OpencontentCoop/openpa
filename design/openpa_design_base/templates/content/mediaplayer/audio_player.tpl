@@ -23,7 +23,7 @@
 
 {def $identifiers = ezini( 'AttributeIdentifiers', 'Identifier', 'ocmediaplayer.ini' )
      $object = $attribute.object
-     $file = concat("content/download/",$attribute.contentobject_id,"/",$attribute.content.contentobject_attribute_id,"/audio")|ezurl
+     $file = concat("content/download/",$attribute.contentobject_id,"/",$attribute.content.contentobject_attribute_id,"/",$attribute.content.original_filename)|ezurl
      $cover = false()}
 
 {foreach $identifiers as $key => $identifier}
@@ -40,7 +40,7 @@
 <div class="audio">
 
     <a	class="player no-js-hide"
-        href={concat("content/download/",$attribute.contentobject_id,"/",$attribute.content.contentobject_attribute_id,"/audio")|ezurl}
+        href={concat("content/download/",$attribute.contentobject_id,"/",$attribute.content.contentobject_attribute_id,"/",$attribute.content.original_filename)|ezurl}
         style="display:block;width:100%px;height:30px;"
         title="{$object.name|wash()}"
         id="audio-{$attribute.contentobject_id}">

@@ -1,6 +1,7 @@
 {* $attribute var is required *}
 
 {def $defaults = ezini( 'DefaultSettings', 'Settings', 'ocmediaplayer.ini' )}
+
 {if $attribute.content.width|gt( 0 )}
     {def $width = $attribute.content.width}
 {else}
@@ -54,7 +55,7 @@
         {/case}
         {case match='captions'}
             {if and( is_set( $object.data_map.$identifier ), $object.data_map.$identifier.data_type_string|eq( 'ezbinaryfile' ), $object.data_map.$identifier.has_content )}
-                {set $captions = concat("content/download/",$object.data_map.$identifier.contentobject_id,"/",$object.data_map.$identifier.content.contentobject_attribute_id,"/video")|ezurl}
+                {set $captions = concat("content/download/",$object.data_map.$identifier.contentobject_id,"/",$object.data_map.$identifier.content.contentobject_attribute_id,"/",$object.data_map.$identifier.content.original_filename)|ezurl}
             {/if}
         {/case}
         {case}{/case}
@@ -65,13 +66,13 @@
 
     <a	class="player no-js-hide"
         href={concat("content/download/",$attribute.contentobject_id,"/",$attribute.content.contentobject_attribute_id,"/video")|ezurl}
-        style="display:block;width:{$width}px;height:{$height}px;"
+        style={if is_set($params.style)}{$params.style}{else}"display:block;width:{$width}px;height:{$height}px;"{/if}
         title="{$object.name|wash()}"
         id="video-{$attribute.contentobject_id}">
             {if $cover}
                 {attribute_view_gui attribute=$cover image_class=$cover_image_class}
             {else}
-                <img class='default' src={'play.png'|ezimage()} alt="{$object.name|wash()}" />
+                <img class='default' src={if is_set($params.image)}{$params.image|ezimage()}{else}{'play.png'|ezimage()}{/if} alt="{$object.name|wash()}" />
             {/if}
     </a>
     

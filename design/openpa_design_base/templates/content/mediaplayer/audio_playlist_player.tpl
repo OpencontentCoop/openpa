@@ -43,7 +43,7 @@ $(document).ready(function(){ldelim}
 </script>
 
 <a	class="player no-js-hide"
-    href="{concat('content/download/',$children[0].data_map.$file.contentobject_id,'/',$children[0].data_map.$file.content.contentobject_attribute_id,'/audio')}"
+    href="{concat('content/download/',$children[0].data_map.$file.contentobject_id,'/',$children[0].data_map.$file.content.contentobject_attribute_id,'/',$children[0].data_map.$file.content.original_filename)}"
     title="{$children[0].name|wash()}"
     id="playlistplayer-{$node.node_id}">
 </a>
@@ -54,7 +54,7 @@ $(document).ready(function(){ldelim}
 <div class="content-view-children playlist" id="playlist-{$node.node_id}">
     {foreach $children as $index => $child}				
         {if $child.data_map.$file.content.mime_type|eq('audio/mpeg')}
-            <a href="{concat('content/download/',$child.data_map.$file.contentobject_id,'/',$child.data_map.$file.content.contentobject_attribute_id,'/audio')}">{$child.name|wash()}</a>
+            <a href="{concat('content/download/',$child.data_map.$file.contentobject_id,'/',$child.data_map.$file.content.contentobject_attribute_id,'/',$child.data_map.$file.content.original_filename)}">{$child.name|wash()}</a>
         {/if}				
     {/foreach}
 </div>
