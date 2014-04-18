@@ -80,9 +80,9 @@ $(document).ready(function(){
             if ( UiContext == 'browse' ) {
                 href = '/content/browse/' + node;
             }
-            if ( UriPrefix != '/' ) {
-                href = UriPrefix + href;
-            }
+            //if ( UriPrefix != '/' ) {
+            //    href = UriPrefix + href;
+            //}
             $(this).attr( 'href', href );
             var self = $(this);
             $.each(PathArray, function(i,v){                
