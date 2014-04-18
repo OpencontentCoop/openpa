@@ -1460,7 +1460,7 @@ div.global-view-full  .main-image,
 {
 	margin:0 0.5em 0 0;
 	float:left;
-	height: 40px;
+	max-height: 40px;
 }
 
 

@@ -10,7 +10,7 @@
 {if is_set( $extra_cache_key )|not}
     {def $extra_cache_key = ''}
 {/if}
-{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key, $cookies|implode(',') )}
+{cache-block expiry=86400 keys=array( $module_result.uri, $user_hash, $extra_cache_key, $cookies|implode(',') )}
 {def $browser          = checkbrowser('checkbrowser')     
      $pagedata         = ezpagedata()
      $pagestyle        = $pagedata.css_classes
@@ -48,7 +48,7 @@ document.body.className = c;
 
 {include uri='design:page_browser_alert.tpl'}
 
-{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key )}
+{cache-block expiry=86400 keys=array( $module_result.uri, $user_hash, $extra_cache_key )}
 <div id="page" class="{$pagestyle} {$main_style}">
 
     {if and( is_set( $pagedata.persistent_variable.extra_template_list ), $pagedata.persistent_variable.extra_template_list|count() )}
@@ -65,20 +65,20 @@ document.body.className = c;
 {/cache-block}
 
 <div id="links">    
-{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key, $cookies|implode(',') )}
+{cache-block expiry=86400 keys=array( $module_result.uri, $user_hash, $extra_cache_key, $cookies|implode(',') )}
     {if $is_login_page|not()}
         {include uri='design:page_header_usability.tpl'}        
     {/if}   
 {/cache-block}    
 
-{cache-block keys=array( $module_result.uri, $current_user.contentobject_id, $extra_cache_key )}
+{cache-block expiry=86400 keys=array( $module_result.uri, $current_user.contentobject_id, $extra_cache_key )}
     {if $is_login_page|not()}
         {include uri='design:page_header_links.tpl'}        
     {/if}   
 {/cache-block}
 </div>
 
-{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key )}    
+{cache-block expiry=86400 keys=array( $module_result.uri, $user_hash, $extra_cache_key )}    
     {if and( $pagedata.show_path,
              $current_node_id|ne(ezini( 'NodeSettings', 'RootNode', 'content.ini' )),
              $module_result.uri|ne('/content/advancedsearch'),
@@ -105,7 +105,7 @@ document.body.className = c;
 
     {include uri='design:page_mainarea.tpl'}
 
-{cache-block keys=array( $module_result.uri, $user_hash, $extra_cache_key )}
+{cache-block expiry=86400 keys=array( $module_result.uri, $user_hash, $extra_cache_key )}
 
     {if is_unset($pagedesign)}
         {def $pagedata   = ezpagedata()
