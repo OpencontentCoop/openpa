@@ -239,6 +239,288 @@ class OpenPaFunctionCollection
         return array( 'result' => $result );
     }
     
+    public static function fetchReverseRelatedObjectClassFacets( $object, $classFilterType, $classFilterArray, $sortBy )
+    {
+        $resultData = array();
+        if ( $object instanceof eZContentObject )
+        {
+            $ezobjectrelationlist = eZContentClassAttribute::fetchFilteredList( array( 'data_type_string' => 'ezobjectrelationlist') );
+            $attributes = array();
+            foreach( $ezobjectrelationlist as $attribute )
+            {
+                $attributeContent = $attribute->content();
+                if ( !empty( $attributeContent['class_constraint_list'] ) )
+                {					
+                    if ( in_array( $object->attribute( 'class_identifier' ), $attributeContent['class_constraint_list']  ) )
+                    {
+                        $class = eZContentClass::fetch( $attribute->attribute('contentclass_id') );
+                        $classIdentifier = eZContentClass::classIdentifierByID( $attribute->attribute('contentclass_id') );
+                        $attributes[$classIdentifier][] = array(
+                            'class_id' => $attribute->attribute('contentclass_id'),
+                            'class_identifier' => $classIdentifier,
+                            'class_name' => $class->attribute('name'),
+                            'attribute_identifier' => $attribute->attribute('identifier'),
+                            'attribute_name' => $attribute->attribute('name'),
+                            'class_constraint_list' => $attributeContent['class_constraint_list']
+                        );
+                    }
+                }
+            }
+            
+            $contentINI = eZINI::instance( 'content.ini' );
+            $findINI = eZINI::instance( 'ezfind.ini' );
+            $solrINI = eZINI::instance( 'solr.ini' );
+            $siteINI = eZINI::instance();
+            
+            $languages = $siteINI->variable( 'RegionalSettings', 'SiteLanguageList' );
+            $currentLanguage = $languages[0];
+            
+            $facetQueryData = array();
+            $facetQuery = array();
+            $fq = array();
+            //$attributeFilter = array( 'or' );
+            $resultData = array();
+            
+            foreach( $attributes as $classIdentifier => $values )
+            {
+                foreach( $values as $value )
+                {
+                    $query = "subattr_{$value['attribute_identifier']}___name____s:\"{$object->attribute( 'name' )}\" AND meta_contentclass_id_si:{$value['class_id']}";
+                    $facetQuery[$query] = $query;
+                    $facetQueryData[$query] = $value;
+                    //$attributeFilter[] = "submeta_servizio___id_si:" . $object->attribute( 'id' );
+                }
+            }
+            
+            //if ( !empty( $attributeFilter ) )
+            //{
+            //    $fq[] = '(' . implode( ' OR ', $attributeFilter ) . ')';
+            //}
+            
+            $policies = array();
+            $accessResult = eZUser::currentUser()->hasAccessTo( 'content', 'read' );
+            if ( !in_array( $accessResult['accessWord'], array( 'yes', 'no' ) ) )
+            {
+                $policies = $accessResult['policies'];
+            }
+            
+            
+            $limitationHash = array(
+                'Class'        => eZSolr::getMetaFieldName( 'contentclass_id' ),
+                'Section'      => eZSolr::getMetaFieldName( 'section_id' ),
+                'User_Section' => eZSolr::getMetaFieldName( 'section_id' ),
+                'Subtree'      => eZSolr::getMetaFieldName( 'path_string' ),
+                'User_Subtree' => eZSolr::getMetaFieldName( 'path_string' ),
+                'Node'         => eZSolr::getMetaFieldName( 'main_node_id' ),
+                'Owner'        => eZSolr::getMetaFieldName( 'owner_id' ),
+                'Group'        => eZSolr::getMetaFieldName( 'owner_group_id' ),
+                'ObjectStates' => eZSolr::getMetaFieldName( 'object_states' ) );
+            
+            $filterQueryPolicies = array();
+            
+            // policies are concatenated with OR
+            foreach ( $policies as $limitationList )
+            {
+                // policy limitations are concatenated with AND
+                // except for locations policity limitations, concatenated with OR
+                $filterQueryPolicyLimitations = array();
+                $policyLimitationsOnLocations = array();
+            
+                foreach ( $limitationList as $limitationType => $limitationValues )
+                {
+                    // limitation values of one type in a policy are concatenated with OR
+                    $filterQueryPolicyLimitationParts = array();
+            
+                    switch ( $limitationType )
+                    {
+                        case 'User_Subtree':
+                        case 'Subtree':
+                        {
+                            foreach ( $limitationValues as $limitationValue )
+                            {
+                                $pathString = trim( $limitationValue, '/' );
+                                $pathArray = explode( '/', $pathString );
+                                // we only take the last node ID in the path identification string
+                                $subtreeNodeID = array_pop( $pathArray );
+                                $policyLimitationsOnLocations[] = eZSolr::getMetaFieldName( 'path' ) . ':' . $subtreeNodeID;                    
+                            }
+                        } break;
+            
+                        case 'Node':
+                        {
+                            foreach ( $limitationValues as $limitationValue )
+                            {
+                                $pathString = trim( $limitationValue, '/' );
+                                $pathArray = explode( '/', $pathString );
+                                // we only take the last node ID in the path identification string
+                                $nodeID = array_pop( $pathArray );
+                                $policyLimitationsOnLocations[] = $limitationHash[$limitationType] . ':' . $nodeID;                    
+                            }
+                        } break;
+            
+                        case 'Group':
+                        {
+                            foreach ( eZUser::currentUser()->attribute( 'contentobject' )->attribute( 'parent_nodes' ) as $groupID )
+                            {
+                                $filterQueryPolicyLimitationParts[] = $limitationHash[$limitationType] . ':' . $groupID;
+                            }
+                        } break;
+            
+                        case 'Owner':
+                        {
+                            $filterQueryPolicyLimitationParts[] = $limitationHash[$limitationType] . ':' . eZUser::currentUser()->attribute ( 'contentobject_id' );
+                        } break;
+            
+                        case 'Class':
+                        case 'Section':
+                        case 'User_Section':
+                        {
+                            foreach ( $limitationValues as $limitationValue )
+                            {
+                                $filterQueryPolicyLimitationParts[] = $limitationHash[$limitationType] . ':' . $limitationValue;
+                            }
+                        } break;
+            
+                        default :
+                        {
+                            //hacky, object state limitations reference the state group name in their
+                            //limitation
+                            //hence the following match on substring
+            
+                            if ( strpos( $limitationType, 'StateGroup' ) !== false )
+                            {
+                                foreach ( $limitationValues as $limitationValue )
+                                {
+                                    $filterQueryPolicyLimitationParts[] = $limitationHash['ObjectStates'] . ':' . $limitationValue;
+                                }
+                            }
+                            else
+                            {
+                                eZDebug::writeDebug( $limitationType, __METHOD__ . ' unknown limitation type: ' . $limitationType );
+                                continue;
+                            }
+                        }
+                    }
+            
+                    if ( !empty( $filterQueryPolicyLimitationParts ) )
+                        $filterQueryPolicyLimitations[] = '( ' . implode( ' OR ', $filterQueryPolicyLimitationParts ) . ' )';
+                }
+            
+                // Policy limitations on locations (node and/or subtree) need to be concatenated with OR
+                // unlike the other types of limitation
+                if ( !empty( $policyLimitationsOnLocations ) )
+                {
+                    $filterQueryPolicyLimitations[] = '( ' . implode( ' OR ', $policyLimitationsOnLocations ) . ')';
+                }
+            
+                if ( !empty( $filterQueryPolicyLimitations ) )
+                {
+                    $filterQueryPolicies[] = '( ' . implode( ' AND ', $filterQueryPolicyLimitations ) . ')';
+                }
+            }
+            
+            if ( !empty( $filterQueryPolicies ) )
+            {
+                $fq[] = implode( ' OR ', $filterQueryPolicies );
+            }
+                        
+            $fq[] = "meta_path_si:" . $contentINI->variable( 'NodeSettings', 'RootNode' );
+            $fq[] = '(' . eZSolr::getMetaFieldName( 'installation_id' ) . ':' . eZSolr::installationID() . ' AND ' . eZSolr::getMetaFieldName( 'is_invisible' ) . ':false)';
+            //$fq[] = eZSolr::getMetaFieldName( 'language_code' ) . ':' . $currentLanguage;
+            
+            $result = array();        
+            $limit = 100;
+            
+            $params = array( 'q' => '*:*',
+                             'rows' => 0,
+                             'json.nl' => 'arrarr',
+                             'facet' => 'true',
+                             'facet.field' => array( 'meta_class_identifier_ms', 'meta_class_name_ms' ),
+                             'facet.query' => array_values( $facetQuery ),
+                             'facet.limit' => 1000,
+                             'facet.method' => 'fc',
+                             'facet.mincount' => 1 );
+            
+            if ( $findINI->variable( 'LanguageSearch', 'MultiCore' ) == 'enabled' )
+            {
+               $languageMapping = $findINI->variable( 'LanguageSearch','LanguagesCoresMap' );
+               $shardMapping = $solrINI->variable( 'SolrBase', 'Shards' );
+               $fullSolrURI = $shardMapping[$languageMapping[$currentLanguage]];
+            }
+            else
+            {
+                $fullSolrURI = $solrINI->variable( 'SolrBase', 'SearchServerURI' );
+                // Autocomplete search should be done in current language and fallback languages
+                $validLanguages = array_unique(
+                    array_merge(
+                        $siteINI->variable( 'RegionalSettings', 'SiteLanguageList' ),
+                        array( $currentLanguage )
+                    )
+                );
+                $fq[] = eZSolr::getMetaFieldName( 'language_code' ) . ':(' . implode( ' OR ', $validLanguages ) . ')';        
+            }
+            
+            $params['fq'] = $fq;
+            
+            $solrBase = new eZSolrBase( $fullSolrURI );
+            $result = $solrBase->rawSolrRequest( '/select', $params, 'json' );
+        
+        
+            if ( isset( $result['facet_counts'] ) )
+            {
+                foreach( $result['facet_counts']['facet_queries'] as $query => $value )
+                {
+                    if ( isset( $facetQueryData[$query] ) && $value > 0 )
+                    {                
+                        if ( $classFilterType == 'include' && in_array( $facetQueryData[$query]['class_identifier'], $classFilterArray ) )
+                        {
+                            $do = true;
+                        }
+                        elseif ( $classFilterType == 'exclude' && in_array( $facetQueryData[$query]['class_identifier'], $classFilterArray ) )
+                        {
+                            $do = false;
+                        }
+                        else
+                        {
+                            $do = true;
+                        }
+                        
+                        if ( $do )
+                        {
+                            $facetQueryData[$query]['value'] = $value;
+                            $facetQueryData[$query]['query'] = $query;
+                            $resultData[$facetQueryData[$query]['class_name']][] = new OpenPATempletizable( $facetQueryData[$query] );                            
+                        }
+                    }
+                }
+            }
+            if ( $sortBy == 'alpha' )
+            {
+                ksort( $resultData );
+            }
+            else
+            {
+                usort( $resultData, array( 'OpenPaFunctionCollection', 'sortHashByValue' ) );
+            }
+        }        
+        return array( 'result' => $resultData );
+    }
+    
+    protected static function sortHashByValue( $a, $b )
+    {
+        $aValue = 0;
+        foreach( $a as $item )
+        {
+            $aValue += $item->attribute( 'value' );
+        }
+        $bValue = 0;
+        foreach( $b as $item )
+        {
+            $bValue += $item->attribute( 'value' );
+        }
+        return ( $aValue > $bValue ) ? -1 : 1;
+    }
+    
     // fetch non richiamabili da template (manca il  array(result => ...))
     // @todo renderle protected??
     
@@ -365,8 +647,7 @@ class OpenPaFunctionCollection
             }
         }
         return self::$topmenu;
-    }
-    
+    }    
     
 }
 

@@ -19,49 +19,20 @@
 </div>
 {/set-block}
 
-{def $enable_link=true()
-     $filter=array()
-     $filters=array()
-     $custom_filter=array()
-     $classes_name= openpaini( 'GestioneClassi', 'classi_da_escludere_da_blocco_ezfind' )
-     $classi_con_questa_relazione_array = wrap_user_func('getClassConstraintListAsArray', array( $node.class_identifier ) )
-     $temp = array()}
+{def $items = fetch( 'openpa', 'faccette_classi_oggetti_correlati_inversi', hash( 'object', $node.object,
+                                                                                     'class_filter_type', 'exclude',
+                                                                                     'class_filter_array', openpaini( 'GestioneClassi', 'classi_da_escludere_da_blocco_ezfind', array() )
+                                                                                    ) )}
 
-{foreach $classi_con_questa_relazione_array as $class => $classi_con_questa_relazione}
-    {foreach $classi_con_questa_relazione as $attribute}
-        {if and( $classes_name|contains( $class )|not(), $temp|contains( $attribute.attribute_identifier )|not() )}
-            {set $filter = setFilterParameter( concat( "submeta_", $attribute.attribute_identifier, "___main_node_id_si" ), $node.object.main_node_id )
-                 $temp = $temp|append( $attribute.attribute_identifier )}
-        {/if}
-    {/foreach}
-{/foreach}
-    
-{def $facetParameters  = array( hash( 'field', 'class' ) )}
-{set $filter = getFilterParameters( false(), 'or' )}
-{def $search_hash = hash( 
-                          'subtree_array', array( ezini( 'NodeSettings', 'RootNode', 'content.ini' ) ),
-                          'limit', 1,
-                          'facet', $facetParameters,
-                          'filter', $filter )}
-
-{def $search=fetch( ezfind, search, $search_hash )}
-{if $search['SearchCount']|gt(0)}
+{if count( $items )|gt(0)}
     {$open}
     <ul>        
-        {set $temp = array()}
-        {foreach $search['SearchExtras'].facet_fields.0.nameList as $facetID => $name}
-            {if $classes_name|contains( $name|wash() )|not()}
-                {foreach $classi_con_questa_relazione_array as $class => $classi_con_questa_relazione}
-                    {foreach $classi_con_questa_relazione as $attribute}                                                
-                        {if and( $attribute.class_name|eq( $name ), $temp|contains( $name|wash() )|not() )}
-                        {set $temp = $temp|append( $name|wash() )}
-                            <li>
-                                <a href={concat( "content/advancedsearch?filter[]=subattr_", $attribute.attribute_identifier, "___name____s", ':', concat( '"', $node.name, '"')|urlencode, '&filter[]=', $search['SearchExtras'].facet_fields.0.queryLimit[$facetID], "&SearchButton=Cerca")|ezurl()} title="Link a {$name|wash}">{$name|wash} ({$search['SearchExtras'].facet_fields.0.countList[$facetID]})</a>
-                            </li>
-                        {/if}
-                    {/foreach}
-                {/foreach}
-            {/if}            
+        {foreach $items as $item}
+            {foreach $item as $data}
+                <li>
+                    <a href={concat( "content/advancedsearch?filter[]=subattr_", $data.attribute_identifier, "___name____s", ':', concat( '"', $node.name, '"')|urlencode, '&filter[]=contentclass_id:', $data.class_id, "&SearchButton=Cerca")|ezurl()} title="Link a {$data.class_name|wash}">{$data.class_name|wash} {if count($item)|gt(1)}<small>{$data.attribute_name}</small>{/if} ({$data.value})</a>
+                </li>
+            {/foreach}
         {/foreach}
     </ul>
 {$close}

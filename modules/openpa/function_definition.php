@@ -127,4 +127,30 @@ $FunctionList['calendario_eventi'] = array( 'name' => 'eventi',
                                                     )
                                 );
 
+$FunctionList['faccette_classi_oggetti_correlati_inversi'] = array( 'name' => 'faccette_classi_oggetti_correlati_inversi',
+                               'operation_types' => array( 'read' ),
+                               'call_method' => array( 'include_file' => 'extension/openpa/classes/openpafunctioncollection.php',
+                                                        'class' => 'OpenPaFunctionCollection',
+                                                        'method' => 'fetchReverseRelatedObjectClassFacets' ),
+                               'parameter_type' => 'standard',
+                               'parameters' => array(
+                                                       array( 'name' => 'object',
+                                                              'type' => 'object',
+                                                              'required' => true,
+                                                              'default' => false ),
+                                                       array( 'name' => 'class_filter_type',
+                                                              'type' => 'string',
+                                                              'required' => false,
+                                                              'default' => 'exclude' ),
+                                                       array( 'name' => 'class_filter_array',
+                                                              'type' => 'array',
+                                                              'required' => false,
+                                                              'default' => array() ),
+                                                       array( 'name' => 'sort_by',
+                                                              'type' => 'string',
+                                                              'required' => false,
+                                                              'default' => 'count' )
+                                                    )
+                                );
+
 ?>
