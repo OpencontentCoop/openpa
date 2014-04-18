@@ -27,6 +27,12 @@ jQuery(function( $ )
         return false;
     }
 
+    function htmlEncode(value){
+        //create a in-memory div, set it's inner text(which jQuery automatically encodes)
+        //then grab the encoded contents back out.  The div never exists on the page.
+        return $('<div/>').text(value).html();
+    }
+    
     // Ajax search callback
     function _searchCallBack( data )
     {
@@ -38,7 +44,7 @@ jQuery(function( $ )
                 var html = '', arr = data.content.SearchResult, pub = $('#ezobjectrelation-search-published-text');
                 for ( var i = 0, l = arr.length; i < l; i++ )
                 {
-                        html += '<a onclick="return ezajaxrelationsSearchAddObject( this, \'' + boxID + '\', ' + arr[i].id + ',\'' + arr[i].name.replace( '&#039;', "<apostrofo>" ) + '\',\'' + arr[i].class_name + '\',\'' + arr[i].section.name + '\',\'' + pub.val() + '\'  );">' + arr[i].name + '<\/a><br \/>';
+                        html += '<a onclick="return ezajaxrelationsSearchAddObject( this, \'' + boxID + '\', ' + arr[i].id + ',\'' + htmlEncode( arr[i].name ) + '\',\'' + htmlEncode( arr[i].class_name ) + '\',\'' + htmlEncode( arr[i].section.name ) + '\',\'' + pub.val() + '\'  );">' + arr[i].name + '<\/a><br \/>';
                 }
                 $( boxID + ' div.ezobject-relation-search-browse'  ).html( html ).show();
             }
@@ -80,7 +86,6 @@ jQuery(function( $ )
         {
                 $( boxID + ' input[name*=_data_object_relation_id_]' ).val( id )
         }
-        name = name.replace( '<apostrofo>', '&#039;' ); //@luca
         tds.eq( 0 ).html( name );
         tds.eq( 1 ).html( className );
         tds.eq( 2 ).html( sectionName );
