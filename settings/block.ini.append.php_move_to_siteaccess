@@ -147,11 +147,43 @@ ViewName[lista_accordion_manual]=Schede (accordion)
 ViewName[lista_box2]=Box a 3 colonne (3 oggetti)
 ViewName[lista_tab]=Schede (tab)
 
+#[Eventi]
+#Name=Eventi (oggi e prossimamente)
+#NumberOfValidItems=1
+#NumberOfArchivedItems=0
+#ManualAddingOfItems=enabled
+#ViewList[]=eventi
+#ViewName[eventi]=Eventi (tab)
+
 [Eventi]
 Name=Eventi (oggi e prossimamente)
 NumberOfValidItems=1
 NumberOfArchivedItems=0
 ManualAddingOfItems=enabled
+CustomAttributes[]=tab_title
+CustomAttributeNames[tab_title]=Per il secondo tab - etichetta
+CustomAttributes[]=custom_interval
+CustomAttributeNames[custom_interval]=Per il secondo tab - periodo di riferimento
+CustomAttributeTypes[custom_interval]=select
+CustomAttributeSelection_custom_interval[]
+CustomAttributeSelection_custom_interval[TOMORROW]=Domani
+CustomAttributeSelection_custom_interval[TOMORROW-P1W]=Da domani per una settimana
+CustomAttributeSelection_custom_interval[TOMORROW-P2W]=Da domani per due settimane
+CustomAttributeSelection_custom_interval[TOMORROW-P1M]=Da domani per un mese
+CustomAttributeSelection_custom_interval[TOMORROW-P2M]=Da domani per due mesi
+CustomAttributeSelection_custom_interval[TODAY]=Oggi
+CustomAttributeSelection_custom_interval[TODAY-P1W]=Da oggi per una settimana
+CustomAttributeSelection_custom_interval[TODAY-P2W]=Da oggi per due settimane
+CustomAttributeSelection_custom_interval[TODAY-P1M]=Da oggi per un mese
+CustomAttributeSelection_custom_interval[TODAY-P2M]=Da oggi per due mesi
+CustomAttributes[]=custom_filter
+CustomAttributeNames[custom_filter]=Per il secondo tab - filtra solo eventi
+CustomAttributeTypes[custom_filter]=select
+CustomAttributeSelection_custom_filter[]
+CustomAttributeSelection_custom_filter[NULL]=Tutti gli eventi (nessun filtro)
+CustomAttributeSelection_custom_filter[SPECIAL]=Eventi speciali
+CustomAttributeSelection_custom_filter[MANIFESTAZIONE]=Eventi di tipo manifestazione
+CustomAttributeSelection_custom_filter[MANIFESTAZIONE+SPECIAL]=Eventi speciali di tipo manifestazione
 ViewList[]=eventi
 ViewName[eventi]=Eventi (tab)
 
