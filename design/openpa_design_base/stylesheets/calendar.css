@@ -445,7 +445,8 @@ table.smart_calendar th{
     position: relative;
     vertical-align: top;
     width: 110px;        
-    border: 1px solid #CCC;        
+    border: 1px solid #CCC;
+    padding: 2px;
 }
 table.smart_calendar td{
     border: 1px solid #CCC;        
@@ -453,6 +454,7 @@ table.smart_calendar td{
     vertical-align: top;
     width: 110px;
     height: 130px;
+    padding: 2px;
 }       
 table.smart_calendar th h2{
     font-size: 11px;

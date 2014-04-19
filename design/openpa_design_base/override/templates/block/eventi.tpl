@@ -30,16 +30,24 @@ $(document).ready(function() {
 		<h2 class="block-title">{$valid_node.name|wash()}</h2>
 	{/if}
 
-{def $calendarDataDay = fetch( openpa, calendario_eventi, hash( 'calendar', $valid_node, 'params', hash( 'interval', 'PT1439M' ) ) )
-     $calendarDataOther = fetch( openpa, calendario_eventi, hash( 'calendar', $valid_node, 'params', $block.custom_attributes ) )}
-
+{def $calendarDataDay = fetch( openpa, calendario_eventi, hash( 'calendar', $valid_node, 'params', hash( 'interval', 'PT1439M' ) ) )}
+{if is_set( $block.custom_attributes )}
+    {def $calendarDataOther = fetch( openpa, calendario_eventi, hash( 'calendar', $valid_node, 'params', $block.custom_attributes ) )}
+[else]
+    {def $calendarDataOther = false()};
+{/if}
 {debug-log var=$calendarDataDay.fetch_parameters msg='Blocco eventi fetch oggi'}
-{debug-log var=$calendarDataOther.fetch_parameters msg='Blocco eventi fetch secondo tab'}
      
 {def $day_events = $calendarDataDay.events
      $day_events_count = $calendarDataDay.search_count
-     $prossimi = $calendarDataOther.events
+     $prossimi = array()
+     $prossimi_count = 0}
+
+{if $calendarDataOther}     
+{debug-log var=$calendarDataOther.fetch_parameters msg='Blocco eventi fetch secondo tab'}
+{set $prossimi = $calendarDataOther.events
      $prossimi_count = $calendarDataOther.search_count}
+{/if}     
      
     {if and( $prossimi_count|eq(0), $day_events_count|eq(0) )}
     

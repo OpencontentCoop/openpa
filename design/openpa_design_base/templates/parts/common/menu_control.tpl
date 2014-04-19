@@ -11,13 +11,6 @@
     {ezpagedata_set( 'extra_menu', false() )}
 {/if}
 {* left menu *}
-{if or( $node.parent.class_identifier|eq( 'trasparenza' ),
-        $node.parent.class_identifier|eq( 'pagina_trasparenza' ),
-        $node.class_identifier|eq( 'trasparenza' ),
-        $node.class_identifier|eq( 'pagina_trasparenza' ) )}
-    {ezpagedata_set( 'left_menu', 'flat_left_trasparenza' )}
-{/if}
-
 {if or( openpaini( 'SideMenu', 'NascondiNeiNodi', array( 0 ) )|contains($node.node_id),
         openpaini( 'SideMenu', 'NascondiNelleClassi', array( 0 ) )|contains($node.class_identifier) )}
 	{ezpagedata_set( 'left_menu', false() )}

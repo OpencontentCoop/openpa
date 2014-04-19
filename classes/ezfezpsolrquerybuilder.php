@@ -141,7 +141,7 @@ class ezfeZPSolrQueryBuilder
      */
     public function buildSearch( $searchText, $params = array(), $searchTypes = array() )
     {
-        eZDebug::writeDebug( $params, 'search params' );
+        //eZDebug::writeDebug( $params, 'search params' );
         $searchCount = 0;
 
         $offset = ( isset( $params['SearchOffset'] ) && $params['SearchOffset'] ) ? $params['SearchOffset'] : 0;
@@ -655,9 +655,9 @@ class ezfeZPSolrQueryBuilder
      */
     public function buildMoreLikeThis( $queryType, $query, $params = array() )
     {
-        eZDebug::writeDebug( $queryType, 'mlt querytype' );
-        eZDebug::writeDebug( $query, 'mlt query' );
-        eZDebug::writeDebug( $params, 'mlt params' );
+        //eZDebug::writeDebug( $queryType, 'mlt querytype' );
+        //eZDebug::writeDebug( $query, 'mlt query' );
+        //eZDebug::writeDebug( $params, 'mlt params' );
         $searchCount = 0;
 
         $queryInstallationID = ( isset( $params['QueryInstallationID'] ) && $params['QueryInstallationID'] ) ? $params['QueryInstallationID'] : eZSolr::installationID();
@@ -1642,7 +1642,7 @@ class ezfeZPSolrQueryBuilder
             $filterQuery .= ' AND ' . eZSolr::getMetaFieldName( 'is_invisible' ) . ':false';
         }
 
-        eZDebug::writeDebug( $filterQuery, __METHOD__ );
+        //eZDebug::writeDebug( $filterQuery, __METHOD__ );
 
         return $filterQuery;
     }
