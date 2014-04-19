@@ -10,5 +10,6 @@ $file = $Params['File'];
 $redirectURI = $http->getVariable( 'RedirectURI', $http->sessionVariable( 'LastAccessesURI', '/' ) );
 
 OpenPAMenuTool::refreshMenu( $id, $siteAccess, $file );
+eZCache::clearByTag( 'template' );
 
 $module->redirectTo( $redirectURI );
