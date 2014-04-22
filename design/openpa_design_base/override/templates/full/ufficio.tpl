@@ -233,7 +233,8 @@
 	
 	
 {* ------------------------------- responsabile ------------------------------- *}		
-	{include struttura=$node style=$style icon=true uri='design:parts/ruoli_per_struttura.tpl'}    
+	{include struttura=$node style=$style icon=true uri='design:parts/ruoli_per_struttura.tpl'}
+    {if $style|eq('col-even')}{set $style='col-odd'}{else}{set $style='col-even'}{/if}
     
 	
 {* ------------------------------- orario ------------------------------- *}

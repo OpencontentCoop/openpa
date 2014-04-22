@@ -64,13 +64,13 @@ function isValidUrl( $url )
 
 $data = array();
 foreach( $siteaccess as $sa )
-{
+{    
     $ini = new eZINI( 'site.ini.append.php', 'settings/siteaccess/' . $sa );
     $openpaIni = new eZINI( 'openpa.ini.append.php', 'settings/siteaccess/' . $sa );
     $seoCode = $openpaIni->variable( 'Seo', 'GoogleAnalyticsAccountID' );
     $inputFile = 'settings/siteaccess/' . $sa . '/site.ini.append.php';    
     $opencontentUrl = 'http://' . str_replace( '_frontend', '', $sa ) . '.opencontent.it';
-    $name = $ini->variable( 'SiteSettings', 'SiteName' );
+    $name = $ini->variable( 'SiteSettings', 'SiteName' );    
     $url = 'http://' .  $ini->variable( 'SiteSettings', 'SiteURL' );
     $isValidUrl = isValidUrl( $ini->variable( 'SiteSettings', 'SiteURL' ) );    
     $data[$name] = array( 'name' => $name,
