@@ -34,7 +34,7 @@ $(document).ready(function() {
 {if is_set( $block.custom_attributes )}
     {def $calendarDataOther = fetch( openpa, calendario_eventi, hash( 'calendar', $valid_node, 'params', $block.custom_attributes ) )}
 {else}
-    {def $calendarDataOther = false()};
+    {def $calendarDataOther = false()}
 {/if}
 {debug-log var=$calendarDataDay.fetch_parameters msg='Blocco eventi fetch oggi'}
      
