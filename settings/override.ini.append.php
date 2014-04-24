@@ -1,5 +1,12 @@
 <?php /* #?ini charset="utf-8"?
 
+[edit_organo_politico_membri]
+Source=content/datatype/edit/ezobjectrelationlist.tpl
+MatchFile=edit/datatype/organo_politico_membri_ezobjectrelationlist.tpl
+Subdir=templates
+Match[class_identifier]=organo_politico
+Match[attribute_identifier]=membri
+
 [view_materia_new]
 Source=content/datatype/view/ezobjectrelationlist.tpl
 MatchFile=datatype/materia_ezobjectrelationlist.tpl

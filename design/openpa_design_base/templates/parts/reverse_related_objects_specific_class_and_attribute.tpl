@@ -52,6 +52,7 @@
                                     {attribute_view_gui attribute=$object.data_map.descrizione_ruolo_speciale}
                                 {else}
                                     {if $object.name|contains('Direttore Generale')}
+                                    {elseif $object.name|contains('Segretario')}
                                     {elseif $object.name|contains('Dirigente con Incarico Speciale')}
                                         presso {attribute_view_gui  href=nolink attribute=$object.data_map.struttura_di_riferimento}
                                     {elseif $object.name|contains('Capoufficio')}

@@ -19,6 +19,24 @@ $FunctionList['ruoli'] = array( 'name' => 'ruoli',
                                                     )
                                 );
 
+$FunctionList['nomi_ruoli_dirigenziali'] = array( 'name' => 'nomi_ruoli_dirigenziali',
+                               'operation_types' => array( 'read' ),
+                               'call_method' => array( 'include_file' => 'extension/openpa/classes/openpafunctioncollection.php',
+                                                        'class' => 'OpenPaFunctionCollection',
+                                                        'method' => 'fetchNomiRuoliDirigenziali' ),
+                               'parameter_type' => 'standard',
+                               'parameters' => array()
+                                );
+
+$FunctionList['dirigenti'] = array( 'name' => 'dirigenti',
+                               'operation_types' => array( 'read' ),
+                               'call_method' => array( 'include_file' => 'extension/openpa/classes/openpafunctioncollection.php',
+                                                        'class' => 'OpenPaFunctionCollection',
+                                                        'method' => 'fetchDirigenti' ),
+                               'parameter_type' => 'standard',
+                               'parameters' => array()
+                                );
+
 $FunctionList['footer_links'] = array(  'name' => 'footer_links',
                                 'operation_types' => array( 'read' ),
                                 'call_method' => array( 'include_file' => 'extension/openpa/classes/openpafunctioncollection.php',

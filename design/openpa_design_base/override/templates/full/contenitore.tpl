@@ -17,6 +17,11 @@
                  uri = 'design:parts/openpa/attributi_principali.tpl'
                  node = $node}
 
+        {* ATTRIBUTI BASE: mostra i contenuti del nodo *}
+        {include name = attributi_base
+                 uri = 'design:parts/openpa/attributi_base.tpl'
+                 node = $node}
+
         
         {def $children_count = fetch_alias( 'children_count', hash( 'parent_node_id', $node.node_id ) )
              $page_limit = openpaini( 'GestioneFigli', 'limite_paginazione', 25 )}
@@ -27,7 +32,7 @@
                                                     'sort_by', $node.sort_array,
                                                     'limit', $page_limit ) ) as $child max $page_limit sequence array( 'col-odd', 'col-even' ) as $style}                
                 <div class="{$style} col col-notitle float-break">
-                    <div class="col-content"><div class="col-content-design">
+                    <div class="col-content"><div class="col-content-design {$child|access_style()}">
                         {node_view_gui view='line' show_image='no' content_node=$child}
                     </div></div>
                 </div>

@@ -1,7 +1,6 @@
-{def $link_classes = array( 'servizio', 'ufficio', 'area', 'organo_politico', 'politico' )}
 <div class="content-view-embed">
     <h3>
-    {if $link_classes|contains( $node.class_identifier )}
+    {if $node.class_identifier|begins_with( 'tipo' )|not()}
         <a href={$node.url_alias|ezurl()}>{$node.name|wash()}</a>
     {else}
         {$node.name|wash()}

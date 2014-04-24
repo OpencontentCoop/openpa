@@ -138,7 +138,8 @@
                     {/case}
                 {/switch}
             
-            {else}
+            {elseif $nota|count()|eq(0)}
+            {* se non c'è nemmeno la nota occorre esporre un alert *}
                 <div class="warning message-warning">
                     <p>Sezione in allestimento</p>
                 </div>

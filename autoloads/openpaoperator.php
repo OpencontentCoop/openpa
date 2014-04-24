@@ -9,7 +9,7 @@ class OpenPAOperator
     
     function OpenPAOperator()
     {
-        $this->Operators= array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree' );
+        $this->Operators= array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree', 'access_style' );
     }
 
     function operatorList()
@@ -85,6 +85,25 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'access_style':
+            {
+                $result = '';
+                if ( $operatorValue instanceof eZContentObjectTreeNode )
+                {
+                    $anonymous = eZUser::fetch( eZUser::anonymousId() );
+                    if ( $anonymous instanceof eZUser )
+                    {
+                        $tool = new OpenPAWhoCan( $operatorValue->attribute( 'object' ), 'read', $anonymous );
+                        $can = $tool->run();
+                        if ( $can !== true )
+                        {
+                            $result = 'no-sezioni_per_tutti';
+                        }
+                    }
+                }
+                $operatorValue = $result;
+            } break;
+            
             case 'materia_make_tree':
             {
                 $items = $namedParameters['relation_list'];

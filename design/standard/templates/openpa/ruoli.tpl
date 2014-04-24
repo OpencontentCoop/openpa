@@ -2,7 +2,7 @@
     <h1>Gestione dei ruoli organizzativi dei dipendenti</h1>
     {ezscript_require( array( 'ezjsc::jquery', 'jquery.tablesorter.min.js' ) )}
     
-    {def $nomi = array( 'Segretario generale', 'Dirigente generale', 'Dirigente di Servizio', 'Responsabile di Servizio' )
+    {def $nomi = fetch( 'openpa', 'nomi_ruoli_dirigenziali' )
          $ruoli = fetch( 'openpa', 'ruoli' )}
     
     {foreach $ruoli as $role sequence array(bglight,bgdark) as $style}

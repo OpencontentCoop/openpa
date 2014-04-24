@@ -74,6 +74,43 @@ class OpenPaFunctionCollection
         return array( 'result' => $search['SearchResult'] );
     }
     
+    public static function fetchNomiRuoliDirigenziali()
+    {
+        $nomi = array( 'Segretario generale', 'Dirigente generale', 'Dirigente di Servizio', 'Responsabile di Servizio' );
+        return array( 'result' => $nomi );
+    }
+    
+    public static function fetchDirigenti()
+    {
+        $result = array();
+        $nomi = self::fetchNomiRuoliDirigenziali();        
+        if ( count( $nomi['result'] ) > 0 )
+        {
+            $params = self::$params;
+            $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ),
+                                                   eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
+            $params['SearchContentClassID'] = array( 'ruolo' );
+            $filterNomi = array( 'or' );
+            foreach( $nomi['result'] as $nome )
+            {                
+                $filterNomi[] = array( 'attr_titolo_s:"' . $nome . '"');
+            }
+            $params['Filter'][] = $filterNomi;
+            $params['AsObjects'] = false;
+            $search = self::search( $params );
+            $nodes = array();            
+            foreach( $search['SearchResult'] as $item )
+            {
+                if ( isset( $item['fields']['submeta_utente___main_node_id_si'][0] ) )
+                {
+                    $nodes[] = $item['fields']['submeta_utente___main_node_id_si'][0];
+                }
+            }            
+            $result = eZContentObjectTreeNode::fetch( $nodes );
+        }
+        return array( 'result' => $result );
+    }
+    
     public static function fetchAree()
     {
         $params = self::$params;

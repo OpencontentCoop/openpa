@@ -199,8 +199,7 @@ td.number
 ul, ol
 {
     margin: 0.75em 0 1em 0.3em;
-    padding: 0;
-	overflow:hidden;
+    padding: 0;	
 }
 
 ul
