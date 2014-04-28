@@ -9,7 +9,7 @@ class OpenPAOperator
     
     function OpenPAOperator()
     {
-        $this->Operators= array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree', 'access_style' );
+        $this->Operators= array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree', 'access_style', 'unique' );
     }
 
     function operatorList()
@@ -85,6 +85,14 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'unique':
+            {
+                if ( is_array( $operatorValue ) )
+                {
+                    $operatorValue = array_unique( $operatorValue );
+                }
+            }
+            
             case 'access_style':
             {
                 $result = '';

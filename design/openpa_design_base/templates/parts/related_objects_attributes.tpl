@@ -18,10 +18,7 @@
 {if $oggetti_correlati|count()|gt(0)}
 
     {set-block variable=correlati}
-        {def $BNode_id=module_params().parameters.NodeID
-             $local_link=fetch(content,node,hash(node_id,$BNode_id))}	 
-			 
-    {foreach $oggetti_correlati as $oggetto_correlato}
+    {foreach $oggetti_correlati|unique() as $oggetto_correlato}
         {def $classi_attributi = wrap_user_func('getClassAttributes', array(array($oggetto_correlato)) )
              $classe_attributo = false()}             
         {foreach $classi_attributi as $ca}
