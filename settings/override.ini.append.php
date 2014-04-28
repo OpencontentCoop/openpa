@@ -1,5 +1,19 @@
 <?php /* #?ini charset="utf-8"?
 
+[view_materia_associazione]
+Source=content/datatype/view/ezobjectrelationlist.tpl
+MatchFile=datatype/materia_ezobjectrelationlist.tpl
+Subdir=templates
+Match[class_identifier]=associazione
+Match[attribute_identifier]=materia
+
+[edit_materia_associazione]
+Source=content/datatype/edit/ezobjectrelationlist.tpl
+MatchFile=edit/datatype/materia_ezobjectrelationlist.tpl
+Subdir=templates
+Match[class_identifier]=associazione
+Match[attribute_identifier]=materia
+
 [edit_organo_politico_membri]
 Source=content/datatype/edit/ezobjectrelationlist.tpl
 MatchFile=edit/datatype/organo_politico_membri_ezobjectrelationlist.tpl
