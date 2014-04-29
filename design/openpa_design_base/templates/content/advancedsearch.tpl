@@ -312,10 +312,11 @@
 {set $geoBoost = concat( '_val_:\"recip(sqedist(gps_coordinates,vector(', $latitude, ',', $longitude, ')),1,1,0)\"') }
 {/if}
 
-{def $nodo_classificazioni = fetch( content, node, hash( 'node_path', 'classificazioni' ) )}
+{def $nodo_classificazioni = fetch( content, node, hash( 'node_path', 'classificazioni' ) )
+     $addFilter = array()}
 {if $nodo_classificazioni}
     {debug-log var=concat( $nodo_classificazioni.name, ' #', $nodo_classificazioni.node_id ) msg='Esclusione di sottoalbero' }
-    {set $f = setFilterParameter( '-meta_path_si', $nodo_classificazioni.node_id )}
+    {set $addFilter = array( concat( '-meta_path_si:', $nodo_classificazioni.node_id ) )}
 {/if}
 
 {if $use_template_search}
@@ -329,7 +330,7 @@
                             'limit', $page_limit,
                             'sort_by', hash( $sort_by, $order_by ),
                             'facet', array( hash( 'field', 'class', 'name', 'Tipologia di contenuto', 'limit', 1000 ) ),
-                            'filter', $filterParameters
+                            'filter', $filterParameters|merge( $addFilter )
                             )
     }
 
