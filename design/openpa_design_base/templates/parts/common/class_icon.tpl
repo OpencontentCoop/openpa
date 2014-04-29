@@ -1,3 +1,4 @@
+{if openpaini( 'GestioneClassi', 'MostraIcone', 'enabled' )|eq('enabled')}
 {def $_icon = 'empty'}
 {if is_set( $node )}
     {set $_icon = $node.class_identifier}
@@ -12,3 +13,4 @@
 {/if}
 <img class="{if is_set($css_class)}{$css_class}{/if}" {if is_set($height)}height={$height}{/if} {if is_set($width)}width={$width}{/if} src="{$default_image_path}" alt="{$_icon}" title="{if is_set($node)}{$node.object.class_name}{else}{$_icon}{/if}" />
 {undef $_icon}
+{/if}
