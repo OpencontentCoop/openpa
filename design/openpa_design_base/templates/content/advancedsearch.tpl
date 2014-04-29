@@ -96,7 +96,7 @@
     
 {/foreach}
 
-{debug-log var=$not_available_facets_names msg='faccette non visualizzate' }
+{debug-log var=$not_available_facets_names|sort|implode(', ') msg='Faccette escluse' }
 
 {* da SubTreeArray a orig_position *}
 {if $SubTreeArray}
@@ -188,9 +188,12 @@
 {if $dateFilter}
 	{set $f = setFilterParameter( 'meta_published_dt', $dateFilter )}
 {/if}
-{debug-log var=$from_attributes msg='from_attributes' }
-{debug-log var=$to_attributes msg='to_attributes' }
+
 {if and( $from_attributes, $from_attributes|count()|gt(0) )}
+
+    {debug-log var=$from_attributes msg='from_attributes' }
+    {debug-log var=$to_attributes msg='to_attributes' }
+
     {foreach $from_attributes as $filter_name => $from_attribute}
         {if $from_attribute|ne( '' )}
             {def $from_attribute_date_array = $from_attribute|explode( '-' )
@@ -256,7 +259,7 @@
     {set $filterParameters = setFilterParameter( 'meta_contentclass_id_si', $class_id )}
 {/foreach}
 
-{debug-log var=$available_classes_names msg='classi incluse nella query' }
+{debug-log var=$available_classes_names|sort|implode(', ') msg='Classi incluse nella query' }
 
 {* se si parte dal motore di ricerca globale e si filtra per una sola classe *}
 {elseif $ClassFilter|count()|eq(1)}
@@ -307,6 +310,12 @@
 
 {if and( $latitude, $longitude )}
 {set $geoBoost = concat( '_val_:\"recip(sqedist(gps_coordinates,vector(', $latitude, ',', $longitude, ')),1,1,0)\"') }
+{/if}
+
+{def $nodo_classificazioni = fetch( content, node, hash( 'node_path', 'classificazioni' ) )}
+{if $nodo_classificazioni}
+    {debug-log var=concat( $nodo_classificazioni.name, ' #', $nodo_classificazioni.node_id ) msg='Esclusione di sottoalbero' }
+    {set $f = setFilterParameter( '-meta_path_si', $nodo_classificazioni.node_id )}
 {/if}
 
 {if $use_template_search}

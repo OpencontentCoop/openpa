@@ -36,7 +36,7 @@
 //<![CDATA[
 var UiContext = {/literal}"{$ui_context}"{literal};
 var UriPrefix = {/literal}{'/'|ezurl()}{literal};
-var PathArray = [{/literal}{foreach $pagedata.path_array|reverse as $path}{$path.node_id}{delimiter},{/delimiter}{/foreach}{literal}];
+var PathArray = [{/literal}{if is_set( $pagedata.path_array[0].node_id )}{foreach $pagedata.path_array|reverse as $path}{$path.node_id}{delimiter},{/delimiter}{/foreach}{/if}{literal}];
 
 (function(){var c = document.body.className;
 c = c.replace(/no-js/, 'js');
