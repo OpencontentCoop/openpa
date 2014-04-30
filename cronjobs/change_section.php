@@ -31,7 +31,7 @@ $SectionDefault =  $ini->hasVariable( 'ChangeSection','ToSectionDefault' ) ? $in
 $ScadenzaSecondi = $ini->hasVariable( 'ChangeSection','ScadeDopoTotSecondi' ) ? $ini->variable( 'ChangeSection','ScadeDopoTotSecondi' ) : 0;
 $UsaValore = $ini->hasVariable( 'ChangeSection','UsaValore' ) ? $ini->variable( 'ChangeSection','UsaValore' ) : false;
 $Ignora = $ini->hasVariable( 'ChangeSection','Ignora' ) ? $ini->variable( 'ChangeSection','Ignora' ) : false;
-$ScadenzaDefault = $ini->hasVariable( 'ChangeSection','ScadeDopoTotSecondiDefault' ) ? $ini->variable( 'ChangeSection','ScadeDopoTotSecondiDefault' ) : 9262300400;
+$ScadenzaDefault = $ini->hasVariable( 'ChangeSection','ScadeDopoTotSecondiDefault' ) ? $ini->variable( 'ChangeSection','ScadeDopoTotSecondiDefault' ) : 0;
 $currrentDate = time();
 
 $countClasses = count( $rootNodeIDList );
