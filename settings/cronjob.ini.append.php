@@ -2,6 +2,8 @@
 [CronjobSettings]
 ExtensionDirectories[]=openpa
 
+Scripts[]=change_section.php
+
 [CronjobPart-rss]
 Scripts[]=rssimport.php
 
