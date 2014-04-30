@@ -1,5 +1,46 @@
 <?php
 
+/*
+$usa_valore = INI:UsaValore
+$ignora = INI:Ignora
+$valore_considerato = $valore_attributo = INI:DateTime
+$valore_calcolato = (published + INI:ScadeDopoTotSecondi)
+
+IF $ignora 
+
+    IF $ignora == 'attributo' 
+        $valore_considerato = $valore_calcolato
+    
+    ELSEIF $ignora == 'secondi' 
+        $valore_considerato = $valore_attributo
+
+ELSEIF $usa_valore 
+
+    IF $usa_valore == 'maggiore'
+        
+        IF $valore_attributo > $valore_calcolato
+            $valore_considerato = $valore_attributo
+        ELSE
+            $valore_considerato = $valore_calcolato
+     
+    ELSEIF $usa_valore == 'minore'
+        
+        IF $valore_attributo < $valore_calcolato
+            $valore_considerato = $valore_attributo
+        ELSE
+            $valore_considerato = $valore_calcolato
+
+
+IF $valore_considerato > 0 AND $valore_considerato < current_timestamp()
+    
+    Sposta oggetto in sezione INI:ToSection
+
+ELSE
+
+    Non fare nulla
+*/    
+
+
 eZExtension::activateExtensions();
 
 $cli = eZCLI::instance();
@@ -179,13 +220,20 @@ foreach( $rootNodeIDList as $class => $nodeID )
         $attributes = $Object->fetchAttributesByIdentifier( array( $unpublishDateAttribute ) );
         $dateAttribute = array_shift( $attributes );
 
+        if ( is_null( $dateAttribute ) )
+        {
+            $cli->error( 'Attributo non trovato' );
+            continue;
+        }
+        
         $date = $dateAttribute->content();
         $AttributeRetractDate = $date->attribute( 'timestamp' );
         $IniRetractDate = $Object->attribute( 'published' ) + $scadeDopoTotSecondi;
 
         if ( $AttributeRetractDate > 0 ) 
         {
-            $ObjectRetractDate = $AttributeRetractDate;
+            // fine giornata
+            $ObjectRetractDate = mktime( 23, 59, 59, date("n", $AttributeRetractDate), date("j", $AttributeRetractDate), date("Y", $AttributeRetractDate) );
         }
         else
         {            
@@ -226,24 +274,24 @@ foreach( $rootNodeIDList as $class => $nodeID )
         {
             $ObjectRetractDate = $AttributeRetractDate;
         }
-
-        if ( is_null( $dateAttribute ) )
-        {
-            $cli->error( 'Attributo non trovato' );
-            continue;
-        }
         
-        if ( $ObjectRetractDate > 0  && $ObjectRetractDate < $currrentDate )
+        if ( $ObjectRetractDate > 0 &&
+             $ObjectRetractDate < $currrentDate &&
+             $Node->attribute( 'object' )->attribute( 'section_id' ) !== $toSection &&
+             $toSection !== 0 )
         {            
         	$isClone = false;
-            if ( OscuraAttiHandler::isPrivacyClonedObject( $Object ) )
-            {                
-                $clones[$class][] = $Object->attribute( 'main_node_id' );
-                $isClone = true;
-            }
-            elseif ( $clone = OscuraAttiHandler::hasPrivacyClonedObject( $Object ) )
+            if ( class_exists( 'OscuraAttiHandler' ) )
             {
-                $clones[$class][] = $clone->attribute( 'main_node_id' );
+                if ( OscuraAttiHandler::isPrivacyClonedObject( $Object ) )
+                {                
+                    $clones[$class][] = $Object->attribute( 'main_node_id' );
+                    $isClone = true;
+                }
+                elseif ( $clone = OscuraAttiHandler::hasPrivacyClonedObject( $Object ) )
+                {
+                    $clones[$class][] = $clone->attribute( 'main_node_id' );
+                }
             }
             
             if ( !$isClone )
