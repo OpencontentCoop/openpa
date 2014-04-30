@@ -60,8 +60,8 @@ $(function() {
 
 <table summary="Calendario degli eventi" class="smart_calendar">
 <thead>
-<tr colspan="7">
-    <th class="month_name last_col float-break">
+<tr>
+    <th class="month_name last_col float-break" colspan="7">
         <p>
             <input type="submit" name="PrevMonthCalendarButton" class="button" value="&laquo;" />
             {$calendarData.parameters.timestamp|datetime( custom, '%F' )|upfirst()}&nbsp;{$temp_year}
