@@ -15,4 +15,6 @@ foreach( $siteaccess as $sa )
     
 }
 
+$script->shutdown();
+
 ?>
