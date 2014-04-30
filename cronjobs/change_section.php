@@ -310,7 +310,7 @@ foreach( $rootNodeIDList as $class => $nodeID )
                 {
                     eZContentOperationCollection::updateSection( $Node->attribute( 'node_id' ), $toSection );
                 }
-                
+                $cli->output( '*' );
                 eZContentCacheManager::clearContentCacheIfNeeded( $Object->attribute( 'id' ) );
             }
             eZContentObject::clearCache( $Object->attribute( 'id' ) );
