@@ -11,7 +11,7 @@ $user = eZUser::fetchByName( 'admin' );
 if ( $user )
 {
     eZUser::setCurrentlyLoggedInUser( $user, $user->attribute( 'contentobject_id' ) );
-    $cli->output( "Eseguo lo script da utente {$user->attribute( 'contentobject' )->attribute( 'name' )}" );
+    //$cli->output( "Eseguo lo script da utente {$user->attribute( 'contentobject' )->attribute( 'name' )}" );
 }
 else
 {    
@@ -148,6 +148,10 @@ foreach( $rootNodeIDList as $class => $nodeID )
                                             )
                                     );
     $count = count( $NodeArray );
+    if ( $count == 0 )
+    {
+        continue;
+    }
     $output = new ezcConsoleOutput();
     $progressBarOptions = array( 'emptyChar' => ' ', 'barChar'  => '=' );
     if ( $isQuiet )
