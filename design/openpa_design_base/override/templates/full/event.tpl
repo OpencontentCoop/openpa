@@ -150,14 +150,12 @@
         {set $iniziativa = fetch( 'content', 'node', hash( 'node_id', $node.data_map.iniziativa.content.relation_list[0].node_id ) )}
         {def $calendarData = fetch( openpa, calendario_eventi, hash( 'calendar', $node.parent, 'params', hash( 'interval', 'P1Y',
                                                                                                         'filter', array( concat( '-meta_id_si:', $node.contentobject_id ) ),
-                                                                                                        'Manifestazione', concat( '"', $iniziativa.name, '"' ) ) ) )}
+                                                                                                        'Manifestazione', concat( $iniziativa.name ) ) ) )}
     {else}
         {def $calendarData = fetch( openpa, calendario_eventi, hash( 'calendar', $node.parent, 'params', hash( 'interval', 'P1Y',
                                                                                                         'filter', array( concat( '-meta_id_si:', $node.contentobject_id ) ),
-                                                                                                        'Manifestazione', concat( '"', $node.name, '"' ) ) ) )}
-    {/if}
-    {*debug-log var=$data.parameters msg='Parametri eventi manifestazione'}
-    {debug-log var=$data.fetch_parameters msg='Fetch eventi manifestazione'*}
+                                                                                                        'Manifestazione', concat( $node.name ) ) ) )}
+    {/if}    
     
     {if $calendarData.search_count|gt(0)}
         <div class="oggetti-correlati">
