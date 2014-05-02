@@ -280,7 +280,7 @@ class OpenPACalendarData
         $solrResult = $solrSearch->search( $this->parameters['query'], $solrFetchParams );
         
         //eZDebug::writeNotice( $this->filters, __METHOD__ );
-        eZDebug::writeNotice( $solrResult, __METHOD__ );        
+        //eZDebug::writeNotice( $solrResult, __METHOD__ );        
         
         $this->data['parameters'] = $this->parameters;
         $this->data['fetch_parameters'] = $solrFetchParams;
