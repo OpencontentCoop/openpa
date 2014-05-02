@@ -213,13 +213,13 @@ class OpenPACalendarData
                     $orFilter = array( 'or' );
                     foreach( $this->parameters[$fieldName] as $value )
                     {
-                        $orFilter[] = "subattr_{$fieldIdentifier}___name____s:{$this->parameters[$fieldName]}";
+                        $orFilter[] = "subattr_{$fieldIdentifier}___name____s:\"{$this->parameters[$fieldName]}\"";
                     }
                     $this->filters[] = $orFilter;
                 }
                 else
                 {
-                    $this->filters[] = "subattr_{$fieldIdentifier}___name____s:{$this->parameters[$fieldName]}";
+                    $this->filters[] = "subattr_{$fieldIdentifier}___name____s:\"{$this->parameters[$fieldName]}\"";
                 }
             }
             
@@ -362,7 +362,7 @@ class OpenPACalendarData
                     {
                         $return[] = array( 'indent' => false,
                                            'name' => trim( $value, '"' ),
-                                           'value' => $value );
+                                           'value' => trim( $value, '"' ) );
                     }
                 }
                 else
@@ -379,7 +379,7 @@ class OpenPACalendarData
                     {
                         $return[] = array( 'indent' => false,
                                            'name' => $name,
-                                           'value' => '"' . $name . '"',
+                                           'value' => $name,
                                         );
                         foreach( $solrResult['SearchResult'] as $item )
                         {
@@ -388,7 +388,7 @@ class OpenPACalendarData
                             {
                                 $return[] = array( 'indent' => true,
                                                    'name' => $item['name'],
-                                                   'value' => '"' . $item['name'] . '"',
+                                                   'value' => $item['name'],
                                                    );
                             }
                         }
@@ -401,7 +401,7 @@ class OpenPACalendarData
                 {
                     $return[] = array( 'indent' => false,
                                        'name' => trim( $value, '"' ),
-                                       'value' => $value,
+                                       'value' => trim( $value, '"' ),
                                        );
                 }
                 break;
