@@ -30,7 +30,7 @@
         {foreach $items as $item}
             {foreach $item as $data}
                 <li>
-                    <a href={concat( "content/advancedsearch?filter[]=subattr_", $data.attribute_identifier, "___name____s", ':', concat( '"', $node.name, '"')|urlencode, '&filter[]=contentclass_id:', $data.class_id, "&SearchButton=Cerca")|ezurl()} title="Link a {$data.class_name|wash}">{$data.class_name|wash} {if count($item)|gt(1)}<small>{$data.attribute_name}</small>{/if} ({$data.value})</a>
+                    <a href={concat( "content/advancedsearch?filter[]=submeta_", $data.attribute_identifier, "___main_node_id_si", ':', $node.node_id|urlencode, '&filter[]=contentclass_id:', $data.class_id, "&SearchButton=Cerca")|ezurl()} title="Link a {$data.class_name|wash}">{$data.class_name|wash} {if count($item)|gt(1)}<small>{$data.attribute_name}</small>{/if} ({$data.value})</a>
                 </li>
             {/foreach}
         {/foreach}
