@@ -205,21 +205,23 @@ class OpenPACalendarData
         $facets = array();
         //esempio: $this->parameters['Materia'] = '"Economia e diritto"';
         foreach( self::relatedParameters() as $fieldIdentifier => $fieldName )
-        {
+        {            
             if ( isset( $this->parameters[$fieldName] ) && $this->parameters[$fieldName] !== false )
             {
                 if ( is_array( $this->parameters[$fieldName] ) )
-                {
+                {                    
                     $orFilter = array( 'or' );
                     foreach( $this->parameters[$fieldName] as $value )
                     {
-                        $orFilter[] = "subattr_{$fieldIdentifier}___name____s:\"{$this->parameters[$fieldName]}\"";
+                        $filterValue = addcslashes( $value, '"' );
+                        $orFilter[] = "subattr_{$fieldIdentifier}___name____s:\"{$filterValue}\"";
                     }
                     $this->filters[] = $orFilter;
                 }
                 else
                 {
-                    $this->filters[] = "subattr_{$fieldIdentifier}___name____s:\"{$this->parameters[$fieldName]}\"";
+                    $filterValue = addcslashes( $this->parameters[$fieldName], '"' );
+                    $this->filters[] = "subattr_{$fieldIdentifier}___name____s:\"{$filterValue}\"";
                 }
             }
             
@@ -277,6 +279,8 @@ class OpenPACalendarData
         $solrSearch = new eZSolr();
         $solrResult = $solrSearch->search( $this->parameters['query'], $solrFetchParams );
         
+        //eZDebug::writeNotice( $this->filters, __METHOD__ );
+        //eZDebug::writeNotice( $solrResult, __METHOD__ );
         //echo '<pre>';print_r($solrResult);eZDisplayDebug();eZExecution::cleanExit();
         
         $this->data['parameters'] = $this->parameters;
@@ -335,6 +339,11 @@ class OpenPACalendarData
         return $sorted;
     }
     
+    protected static function cleanQuote( $string )
+    {
+        return substr( $string, 1, -1 );
+    }
+    
     protected function makeFacetTree( $name, $values )
     {
         $return = array();
@@ -361,8 +370,8 @@ class OpenPACalendarData
                     foreach( $values as $value )
                     {
                         $return[] = array( 'indent' => false,
-                                           'name' => trim( $value, '"' ),
-                                           'value' => trim( $value, '"' ) );
+                                           'name' => self::cleanQuote( $value ),
+                                           'value' => self::cleanQuote( $value ) );
                     }
                 }
                 else
@@ -400,8 +409,8 @@ class OpenPACalendarData
                 foreach( $values as $value )
                 {
                     $return[] = array( 'indent' => false,
-                                       'name' => trim( $value, '"' ),
-                                       'value' => trim( $value, '"' ),
+                                       'name' => self::cleanQuote( $value ),
+                                       'value' => self::cleanQuote( $value ),
                                        );
                 }
                 break;
