@@ -280,22 +280,32 @@ class OpenPACalendarData
         $solrResult = $solrSearch->search( $this->parameters['query'], $solrFetchParams );
         
         //eZDebug::writeNotice( $this->filters, __METHOD__ );
-        //eZDebug::writeNotice( $solrResult, __METHOD__ );
-        //echo '<pre>';print_r($solrResult);eZDisplayDebug();eZExecution::cleanExit();
+        eZDebug::writeNotice( $solrResult, __METHOD__ );        
         
         $this->data['parameters'] = $this->parameters;
         $this->data['fetch_parameters'] = $solrFetchParams;
         
         $facetFields = $solrResult['SearchExtras']->attribute( 'facet_fields' );
+        //eZDebug::writeNotice( $solrResult['SearchExtras'], __METHOD__ );
         $resultFacets = array();
         foreach( $facets as $index => $facet )
         {
             if ( isset( $facetFields[$index]['queryLimit'] ) && !empty( $facetFields[$index]['queryLimit'] ) )
             {
-                foreach( $facetFields[$index]['fieldList'] as $key => $value )
+                if ( isset( $facetFields[$index]['fieldList'] ) )
                 {
-                    $resultFacets[ $facet['name']][] = '"' . $key . '"';
-                }                                
+                    foreach( $facetFields[$index]['fieldList'] as $key => $value )
+                    {
+                        $resultFacets[ $facet['name']][] = $key;
+                    }
+                }
+                else
+                {
+                    foreach( $facetFields[$index]['nameList'] as $key => $value )
+                    {
+                        $resultFacets[ $facet['name']][] = $key;
+                    }
+                }
             }
         }        
         $this->data['search_facets'] = $this->sortFacets( $resultFacets );        
@@ -308,8 +318,8 @@ class OpenPACalendarData
             {
                 $events[] = $event;
             }
-        }
-        //echo '<pre>';print_r($events);eZDisplayDebug();eZExecution::cleanExit();  
+        }        
+        //eZDebug::writeNotice( $events, __METHOD__ );  
         $this->data['search_count'] = count( $events );
         
         $eventsByDay = array();
@@ -325,8 +335,8 @@ class OpenPACalendarData
         
         $this->data['events'] = $events;
         $this->data['day_by_day'] = $eventsByDay;
-        //echo '<pre>';print_r($events);print_r($eventsByDay);eZDisplayDebug();eZExecution::cleanExit();          
-        //echo '<pre>';print_r($this->data['search_facets']);eZDisplayDebug();eZExecution::cleanExit();          
+        //eZDebug::writeNotice( $eventsByDay, __METHOD__ ); 
+        //eZDebug::writeNotice( $this->data['search_facets'], __METHOD__ );         
     }
     
     protected function sortFacets( $resultFacets )
@@ -339,11 +349,6 @@ class OpenPACalendarData
         return $sorted;
     }
     
-    protected static function cleanQuote( $string )
-    {
-        return substr( $string, 1, -1 );
-    }
-    
     protected function makeFacetTree( $name, $values )
     {
         $return = array();
@@ -353,7 +358,7 @@ class OpenPACalendarData
                 $filter = array( 'or' );
                 foreach( $values as $value )
                 {
-                    $filter[] = "attr_titolo_s:{$value}";
+                    $filter[] = "attr_titolo_s:\"{$value}\"";
                 }
                 $solrFetchParams = array(
                     'SearchOffset' => 0,
@@ -370,8 +375,8 @@ class OpenPACalendarData
                     foreach( $values as $value )
                     {
                         $return[] = array( 'indent' => false,
-                                           'name' => self::cleanQuote( $value ),
-                                           'value' => self::cleanQuote( $value ) );
+                                           'name' => $value,
+                                           'value' => $value );
                     }
                 }
                 else
@@ -409,9 +414,8 @@ class OpenPACalendarData
                 foreach( $values as $value )
                 {
                     $return[] = array( 'indent' => false,
-                                       'name' => self::cleanQuote( $value ),
-                                       'value' => self::cleanQuote( $value ),
-                                       );
+                                       'name' => $value,
+                                       'value' => $value );
                 }
                 break;
         }
