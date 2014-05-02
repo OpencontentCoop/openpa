@@ -66,13 +66,26 @@ $(document).ready(function(){
 		}
 		e.preventDefault();
 	});
+    
+    var openMenu = null; 
 	$('#topmenu-firstlevel > li').bind('click', function(e){
         $('ul', '#topmenu-firstlevel').not($('ul', this)).removeClass('hover');
         $('li', '#topmenu-firstlevel').not($(this)).removeClass('hover');
         $('ul', this).toggleClass('hover');
         $(this).toggleClass('hover');
+        if ( $(this).hasClass("hover") ){
+            openMenu = $(this);
+        }else{
+            openMenu = null;
+        } 
     }).not('.not-extend').attr('title', 'Click per aprire/chiudere il menu esteso');
 	
+    $(window).bind('click',function(e){
+        if( openMenu !== null && $(e.target).parents("#topmenu-firstlevel").length == 0){
+            openMenu.trigger('click');
+        }
+    }); 
+    
     $('#sidemenu a').each( function(e){
         var node = $(this).data( 'contentnode' );
         if (node) {
