@@ -430,6 +430,8 @@ button.imagebutton img
     width: 10px;
 }
 
+.placeholder { color: #aaa; }
+
 input.box, textarea.box
 {
     width: 100% !important;

@@ -38,3 +38,9 @@ div.content-view-full div.banner-carousel ul div.attribute-name
 #extrainfo legend.block-title ,
 #extrainfo legend.block-title  span {float:left;}
 #extrainfo  .block-search{clear:both;}
+
+select:focus
+{
+    width: auto;
+    position: relative;
+}
