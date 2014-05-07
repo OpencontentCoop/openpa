@@ -77,7 +77,7 @@
 		{/if}
 
         {* mostro abstract o oggetto *}
-		{if $node.class_identifier|eq('user')}
+		{if or( $node.class_identifier|eq('user'), $node.class_identifier|eq('dipendente') )}
 			{*OGGETTI INVERSAMENTE CORRELATI - RUOLI *}
 	 		{include name=reverse_related_objects_specific_class_and_attribute_asText
                      node=$node

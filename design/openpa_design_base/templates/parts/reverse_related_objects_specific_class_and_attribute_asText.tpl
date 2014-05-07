@@ -65,6 +65,7 @@
         {/if}
     {/foreach}
     </div>
-	
+{elseif and( $classe|eq('ruolo'), $node.class_identifier|eq( 'dipendente' ), $node.data_map.ruolo.has_content )}
+    <p>{attribute_view_gui attribute=$node.data_map.ruolo}</p>
 {/if}
 
