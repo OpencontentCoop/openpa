@@ -50,7 +50,7 @@
 	
 	<div class="attributi-base">
         {def $style='col-odd'}
-            {foreach $node.object.contentobject_attributes as $attribute}
+            {foreach $node.object.data_map as $attribute}
             {if $attribute.has_content}
                 {if $attributi_da_includere_user|contains($attribute.contentclass_attribute_identifier)}
                     {if $style|eq('col-even')}{set $style='col-odd'}{else}{set $style='col-even'}{/if}
@@ -72,7 +72,7 @@
             {/if}
         {/foreach}
     
-        {foreach $node.object.contentobject_attributes as $attribute}
+        {foreach $node.object.data_map as $attribute}
             {if $attributi_sotto|contains($attribute.contentclass_attribute_identifier)}
                 {if $attribute.has_content}
                     {if $attribute.content|ne(0)}

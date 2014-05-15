@@ -82,6 +82,12 @@ class OpenPABase
         }
         return $currentSiteaccess['name'];
     }
+    
+    public static function getFrontendSiteaccessName()
+    {
+        $identifier = self::getCurrentSiteaccessIdentifier();
+        return $identifier . '_frontend';
+    }
 
 }
 
