@@ -29,7 +29,7 @@
 
 {def $locations = fetch( 'content', 'tree', hash( 'parent_node_id', $block.custom_attributes.parent_node_id,
                                                   'class_filter_type', 'include',
-                                                  'class_filter_array', array( $block.custom_attributes.class ),
+                                                  'class_filter_array', $block.custom_attributes.class|explode(','),
                                                   'sort_by', array( 'name', true() ),
                                                   'limit', $limit ) )
      $attribute = $block.custom_attributes.attribute}

@@ -21,4 +21,7 @@ Scripts[]=change_section.php
 [CronjobPart-generatemenu]
 Scripts[]=generate_menu.php
 
+[CronjobPart-rename]
+Scripts[]=rename_object.php
+
 */ ?>

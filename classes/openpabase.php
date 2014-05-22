@@ -3,6 +3,7 @@
 class OpenPABase
 {
     const PENDING_ACTION_INDEX_OBJECTS = 'openpa_index_objects';
+    const PENDING_ACTION_RENAME_OBJECT = 'openpa_rename_object';
     
     public static function getIniFileName( $file, $block = 'INISettings', $setting = 'INIFile' )
     {
