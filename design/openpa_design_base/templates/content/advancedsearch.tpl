@@ -330,7 +330,8 @@
                             'limit', $page_limit,
                             'sort_by', hash( $sort_by, $order_by ),
                             'facet', array( hash( 'field', 'class', 'name', 'Tipologia di contenuto', 'limit', 1000 ) ),
-                            'filter', $filterParameters|merge( $addFilter )
+                            'filter', $filterParameters|merge( $addFilter ),
+                            'spell_check', array( true() )
                             )
     }
 
@@ -645,10 +646,9 @@
 
 
 {* FORSE CERCAVI... *}
-
 {if $search_extras.spellcheck_collation}
-	{def $spell_url=concat('content/advancedsearch/',$search_text|count_chars()|gt(0)|choose('',concat('?SearchText=',$search_extras.spellcheck_collation|urlencode)))|ezurl}
-	<p>Forse intendevi cercare per <b>{concat("<a href='",$spell_url,"'>")}{$search_extras.spellcheck_collation}</a></b> ?</p>
+{def $spell_url=concat('content/advancedsearch/',$search_text|count_chars()|gt(0)|choose('',concat('?SearchText=',$search_extras.spellcheck_collation|urlencode)))|ezurl}
+<p>Forse intendevi cercare per <b><a href={$spell_url}">{$search_extras.spellcheck_collation}</a></b> ?</p>
 {/if}
 
 {* PAROLE ESCLUSE *}
