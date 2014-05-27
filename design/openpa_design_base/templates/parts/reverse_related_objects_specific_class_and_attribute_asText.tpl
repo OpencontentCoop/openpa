@@ -29,6 +29,8 @@
         
                 {if $object.name|contains('Direttore Generale')}
                 
+                {elseif $object.name|contains('Segretario generale')}
+				
                 {elseif $object.name|contains('Dirigente con Incarico Speciale')}
                     presso {attribute_view_gui  href=nolink attribute=$object.data_map.struttura_di_riferimento}
                 {elseif $object.name|contains('Capoufficio')}

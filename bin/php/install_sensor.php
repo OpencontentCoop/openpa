@@ -58,7 +58,7 @@ try
     {
         $siteINI = eZINI::instance();
         $description = $name = $siteINI->variable( 'SiteSettings', 'SiteName' ) . ' - SensorCivico';    
-        $siteUrl = $siteINI->variable( 'SiteSettings', 'SiteURL' );
+        $siteUrl = rtrim( $siteINI->variable( 'SiteSettings', 'SiteURL' ), '/' );
         $command = "cd /home/httpd/entilocali.opencontent.it/html/; php extension/ocentilocali/bin/php/generate_oauth_app.php --nome=\"{$name}\" --descrizione=\"{$description}\" --endpoint=http://{$siteUrl}/sensorcivico/signin  -sdefault_backend; cd /home/httpd-bis/openpa.opencontent.it/html";
         $cli->output();
         $cli->warning( "Esegui il seguente il comando per generare l'app id, poi riesegui il comando iniziale passando anche il valore --appid=<valore_restituito>" );
