@@ -35,6 +35,11 @@ $ViewList['classdefinition'] = array( 'functions' => array( 'classdefinition' ),
                                       'params' => array( 'ID' ),
                                       'unordered_params' => array() );
 
+$ViewList['relations'] = array( 'functions' => array( 'classdefinition' ),
+                                      'script' => 'relations.php',                                      
+                                      'params' => array( 'ID' ),
+                                      'unordered_params' => array() );
+
 $ViewList['addlocationto'] = array( 'functions' => array( 'editor_tools' ),
                                       'script' => 'addlocationto.php',                                      
                                       'params' => array( 'ContentObjectID' ),
