@@ -11,7 +11,14 @@ $(document).ready(function() {
 {/literal}
 </script>
 {if is_set($data.error)}
-<div class="message-error"><p>{$data.error}</p></div>
+<div class="message-error">
+  <p>{$data.error}</p>  
+  {if $locale_not_found}
+    <form action={concat('openpa/class/', $request_id)ezurl()} method="post">
+        <input type="submit" name="InstallButton" value="Installa classe {$request_id}" class="defaultbutton" />                                
+    </form>
+  {/if}
+</div>
 {else}
     
     <div class="object-right">

@@ -16,7 +16,8 @@ $ViewList['class'] = array( 'functions' => array( 'class' ),
                            'script' => 'class.php',
                            'ui_context' => 'edit',
                            'default_navigation_part' => 'ezsetupnavigationpart',
-                           'single_post_actions' => array( 'SyncButton' => 'Sync' ),
+                           'single_post_actions' => array( 'SyncButton' => 'Sync',
+                                                           'InstallButton' => 'Install' ),
                            'params' => array( 'ID' ),
                            'unordered_params' => array() );
 

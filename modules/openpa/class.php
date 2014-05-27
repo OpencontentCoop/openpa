@@ -13,6 +13,13 @@ if ( isset( $_GET['format'] ) )
 
 try
 {
+    if ( $module->isCurrentAction( 'Install' ) )
+    {        
+        $tools = new OpenPAClassTools( $id, true );
+        $tools->sync();
+        return $module->redirectTo( '/openpa/class/' . $id );
+    }
+    
     $tools = new OpenPAClassTools( $id );
     
     $remote = $tools->getRemote();
@@ -88,6 +95,12 @@ if ( $format == 'json' )
 }
 else
 {
+    $tpl->setVariable( 'request_id', $id );
+    $tpl->setVariable( 'locale_not_found', empty( $id ) ? false : true );    
+    if ( eZContentClass::fetchByIdentifier( $id ) || eZContentClass::fetch( intval( $id ) ) )
+    {
+        $tpl->setVariable( 'locale_not_found', false );
+    }
     $tpl->setVariable( 'data', $result );
     $Result = array();
     $Result['content'] = $tpl->fetch( 'design:openpa/class.tpl' );
