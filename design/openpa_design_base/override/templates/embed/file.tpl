@@ -1,6 +1,4 @@
 {* File - List embed view *}
-<div class="content-view-embed">
-    <div class="class-file">
     {if $object.data_map.file.has_content}
     {def $file = $object.data_map.file}
     <div class="content-body attribute-{$file.content.mime_type_part}">
@@ -12,5 +10,3 @@
         <a href={$object.main_node.url_alias|ezurl}>{$object.name|wash}</a>
     </div>
     {/if}
-   </div>
-</div>

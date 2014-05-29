@@ -54,4 +54,24 @@ class OpenPAINI
                 return null;
         }
     }
+    
+    public static function set( $block, $settingName, $value )
+    {
+        if ( $block && $settingName && $value )
+        {
+            $frontend = OpenPABase::getFrontendSiteaccessName();
+            $path = "settings/siteaccess/{$frontend}/";
+            $iniFile = "openpa.ini";
+            $ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true );                
+            $ini->setVariable( $block, $settingName, $value );
+            eZCache::clearById( 'global_ini' );
+            if ( $ini->save() )
+            {
+                return $path . $iniFile;
+            }
+            return false;
+        }
+        return false;
+    }
+    
 }
