@@ -16,15 +16,17 @@ textarea{height:auto;overflow:auto;}
 option{padding-left:0.6em;}
 button{border:0;text-align:center;}
 ul,ol,li{list-style:none;}
-ul.table{opacity:.9;float:left;background:#fff;-moz-border-radius:10px 10px 8px 8px;border:1px solid #AAA;float:left;overflow:hidden;z-index:10;box-shadow:2px 4px 10px -6px #000;-webkit-box-shadow:2px 4px 10px -6px #000;-moz-box-shadow:2px 4px 10px -6px #000;width: 150px;margin: 10px;}
-ul.fields li{border-top:1px solid #ddd;border-bottom:1px solid #ddd;margin:0 0 -1px;padding:3px;}
+ul.table{opacity:.9;float:left;background:#fff;-moz-border-radius:10px 10px 8px 8px;border:1px solid #AAA;float:left;overflow:hidden;z-index:10;box-shadow:2px 4px 10px -6px #000;-webkit-box-shadow:2px 4px 10px -6px #000;-moz-box-shadow:2px 4px 10px -6px #000;width: 200px;margin: 10px;}
+ul.fields li{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:0 0 -1px;padding:3px;}
 ul li.title_table{-moz-border-radius:7px;background:#9ABEDE !important;cursor:move; padding: 5px 3px}
 ul.fields{margin:8px 0 0;}
 .visible{background:url("../img/visible.png") no-repeat scroll top left;height:20px;cursor:pointer;float:right;font-size:12px;font-weight:700;width:12px;margin:0 0 0 10px;padding:0 0 0 4px;}
 li.{/literal}{$current.identifier}{literal}, li.related{background: #ddd}
+li small{color: #aaa;}
+li.title_table small{color: #fff;}
 ul.current{background: #eee; border: 4px solid #aaa}
 #inverse{width: 40%;float: left}
-#current{width: 10%;float: left; min-width:200px;}
+#current{width: 10%;float: left; min-width:250px;}
 #direct{width: 40%;float: left}
 span.hidden{text-decoration: line-through}
 span.meta,span.details{font-style: italic}
@@ -48,6 +50,7 @@ $("ul.class-{$class.identifier} .{$current.identifier}").plumb({ldelim}target:'e
 {foreach $direct_relations as $class}{if $class.name}
 $("ul.current .{$class.identifier}").plumb({ldelim}target:'end-connect-{$class.identifier}'{rdelim});
 {/if}{/foreach}
+$("ul.current .{$current.identifier}").plumb({ldelim}target:'end-connect-{$current.identifier}'{rdelim});
 {literal}
             $("li[id*='connect']").css('background-color','#f5f5f5')
             jsPlumb.repaintEverything();
@@ -96,9 +99,15 @@ $("ul.current .{$class.identifier}").plumb({ldelim}target:'end-connect-{$class.i
         {def $css = ''}        
         {if $attribute.data_type_string|eq( 'ezobjectrelationlist' )}
           {set $css = $attribute.content.class_constraint_list|implode( ' ' )}
-          <li class="{$css}"><span class="{$attribute.category}">{$attribute.name|wash()}</span></li>
+          <li class="{$css}">
+			<span class="{$attribute.category}">{$attribute.name|wash()}</span> <small>({$attribute.data_type_string})</small>
+			{if $attribute.is_searchable}&reg;{/if} {if $attribute.is_required}<strong>!</strong>{/if}
+		  </li>
         {else}
-          <li><span class="{$attribute.category}">{$attribute.name|wash()}</span></li>
+          <li>
+			<span class="{$attribute.category}">{$attribute.name|wash()}</span> <small>({$attribute.data_type_string})</small>
+			{if $attribute.is_searchable}&reg;{/if} {if $attribute.is_required}<strong>!</strong>{/if}
+		  </li>
         {/if}        
         {undef $css}
       {/foreach}
@@ -121,9 +130,17 @@ $("ul.current .{$class.identifier}").plumb({ldelim}target:'end-connect-{$class.i
         {def $css = ''}        
         {if $attribute.data_type_string|eq( 'ezobjectrelationlist' )}
           {set $css = $attribute.content.class_constraint_list|implode( ' ' )}
-          <li class="{$css} related"><span class="{$attribute.category}">{$attribute.name|wash()}</span></li>
+          <li class="{$css} related">
+			<span class="{$attribute.category}">{$attribute.name|wash()}</span>
+			<small>({$attribute.data_type_string})</small>
+			{if $attribute.is_searchable}&reg;{/if} {if $attribute.is_required}<strong>!</strong>{/if}
+		  </li>
         {else}
-          <li><span class="{$attribute.category}">{$attribute.name|wash()}</span></li>
+          <li>
+			<span class="{$attribute.category}">{$attribute.name|wash()}</span>
+			<small>({$attribute.data_type_string})</small>
+			{if $attribute.is_searchable}&reg;{/if} {if $attribute.is_required}<strong>!</strong>{/if}
+		  </li>
         {/if}        
         {undef $css}
       {/foreach}
@@ -146,9 +163,17 @@ $("ul.current .{$class.identifier}").plumb({ldelim}target:'end-connect-{$class.i
         {def $css = ''}        
         {if $attribute.data_type_string|eq( 'ezobjectrelationlist' )}
           {set $css = $attribute.content.class_constraint_list|implode( ' ' )}
-          <li class="{$css}"><span class="{$attribute.category}">{$attribute.name|wash()}</span></li>
+          <li class="{$css}">
+			<span class="{$attribute.category}">{$attribute.name|wash()}</span>
+			<small>({$attribute.data_type_string})</small>
+			{if $attribute.is_searchable}&reg;{/if} {if $attribute.is_required}<strong>!</strong>{/if}
+		  </li>
         {else}
-          <li><span class="{$attribute.category}">{$attribute.name|wash()}</span></li>
+          <li>
+			<span class="{$attribute.category}">{$attribute.name|wash()}</span>
+			<small>({$attribute.data_type_string})</small>
+			{if $attribute.is_searchable}&reg;{/if} {if $attribute.is_required}<strong>!</strong>{/if}
+		  </li>
         {/if}        
         {undef $css}
       {/foreach}
