@@ -205,7 +205,8 @@ foreach( $rootNodeIDList as $class => $nodeID )
     foreach ( $NodeArray as $Node )
     {
         $progressBar->advance();
-        $Object = $Node->attribute( 'object' );         
+        $Object = $Node->attribute( 'object' );
+        $objectID = $Object->attribute( 'id' );
 
         // Debug su un nodo
         //if ( $Node->attribute( 'node_id' ) != 668195 ){continue;}
@@ -295,7 +296,7 @@ foreach( $rootNodeIDList as $class => $nodeID )
             }
             
             if ( !$isClone )
-            {
+            {                
                 if ( eZOperationHandler::operationIsAvailable( 'content_updatesection' ) )
                 {
                     $operationResult = eZOperationHandler::execute( 'content',
@@ -311,9 +312,13 @@ foreach( $rootNodeIDList as $class => $nodeID )
                     eZContentOperationCollection::updateSection( $Node->attribute( 'node_id' ), $toSection );
                 }
                 $cli->output( '*' );
-                eZContentCacheManager::clearContentCacheIfNeeded( $Object->attribute( 'id' ) );
+                eZContentCacheManager::clearContentCacheIfNeeded( $objectID );
+                
+                //add index pending            
+                eZDB::instance()->query( "INSERT INTO ezpending_actions( action, param ) VALUES ( 'index_object', '$objectID' )" );
             }
-            eZContentObject::clearCache( $Object->attribute( 'id' ) );
+            
+            eZContentObject::clearCache( $objectID );
             $Object->resetDataMap();
         }
     }
