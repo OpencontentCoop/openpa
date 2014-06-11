@@ -167,7 +167,11 @@ $FunctionList['faccette_classi_oggetti_correlati_inversi'] = array( 'name' => 'f
                                                        array( 'name' => 'sort_by',
                                                               'type' => 'string',
                                                               'required' => false,
-                                                              'default' => 'count' )
+                                                              'default' => 'count' ),
+                                                       array( 'name' => 'subtree_array',
+                                                              'type' => 'array',
+                                                              'required' => false,
+                                                              'default' => false )
                                                     )
                                 );
 
