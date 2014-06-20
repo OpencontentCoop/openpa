@@ -5,6 +5,6 @@ $siteaccess = eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAcc
 foreach( $siteaccess as $sa )
 {
     $command = "php extension/openpa/bin/php/generatemenu.php -s$sa";
-    print "Eseguo: $command \n";
+    //print "Eseguo: $command \n";
     system( $command );
 }

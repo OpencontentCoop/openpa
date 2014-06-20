@@ -80,11 +80,11 @@ class OpenPAMenuTool
     {        
         eZCache::clearByTag( 'template' );
         
-        $cli = eZCLI::instance();
-        $cli->notice( 'Svuoto i topmenu di ' . self::currentSiteaccessName());
+        //$cli = eZCLI::instance();
+        //$cli->output( 'Svuoto i topmenu di ' . self::currentSiteaccessName());
         self::refreshMenu( self::TOPMENU, self::currentSiteaccessName() );
         
-        $cli->notice( 'Svuoto i leftmenu di ' . self::currentSiteaccessName() );
+        //$cli->output( 'Svuoto i leftmenu di ' . self::currentSiteaccessName() );
         self::refreshMenu( self::LEFTMENU, self::currentSiteaccessName() );
         
         $menuItems = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu');
@@ -136,7 +136,7 @@ class OpenPAMenuTool
                 {
                     self::suAnonymous();
                     
-                    $cli->notice( 'Genero il topmenu del nodo ' . $itemNodeid );
+                    //$cli->output( 'Genero il topmenu del nodo ' . $itemNodeid );
                     self::getTopMenu( $params );
                     
                     $anonymousUserID = eZINI::instance()->variable( 'UserSettings', 'AnonymousUserID' );        
@@ -150,7 +150,7 @@ class OpenPAMenuTool
                     foreach( $aree as $area )
                     {
                         $areaParams = array( 'root_node_id' => $area->attribute( 'node_id' ), 'user_hash' => $userHash );
-                        $cli->notice( 'Genero il leftmenu anonimo dell\'area tematica ' . $area->attribute( 'node_id' ) );
+                        //$cli->output( 'Genero il leftmenu anonimo dell\'area tematica ' . $area->attribute( 'node_id' ) );
                         self::getLeftMenu( $areaParams );  
                     }
                     
@@ -159,10 +159,10 @@ class OpenPAMenuTool
             }
             else
             {                
-                $cli->notice( 'Genero il topmenu del nodo ' . $itemNodeid );
+                //$cli->output( 'Genero il topmenu del nodo ' . $itemNodeid );
                 self::getTopMenu( $params );  
                 
-                $cli->notice( 'Genero il leftmenu del nodo ' . $itemNodeid );
+                //$cli->output( 'Genero il leftmenu del nodo ' . $itemNodeid );
                 self::getLeftMenu( $params );  
             }
         }        
