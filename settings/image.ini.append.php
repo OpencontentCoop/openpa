@@ -9,6 +9,7 @@ Filters[]=sharpen=-sharpen 0.5
 [AliasSettings]
 AliasList[]=header_banner
 AliasList[]=header_logo
+AliasList[]=icon
 
 [header_banner]
 Reference=reference
@@ -18,5 +19,9 @@ Filters[]=centerimg=1000;200
 [header_logo]
 Reference=reference
 Filters[]=geometry/scalewidthdownonly=1000
+
+[icon]
+Reference=reference
+Filters[]=geometry/scaleheight=14
 
 */ ?>

@@ -276,7 +276,7 @@ class OpenPaFunctionCollection
         return array( 'result' => $result );
     }
     
-    public static function fetchReverseRelatedObjectClassFacets( $object, $classFilterType, $classFilterArray, $sortBy )
+    public static function fetchReverseRelatedObjectClassFacets( $object, $classFilterType, $classFilterArray, $sortBy, $subTree )
     {
         $resultData = array();
         if ( $object instanceof eZContentObject )
@@ -460,8 +460,21 @@ class OpenPaFunctionCollection
             {
                 $fq[] = implode( ' OR ', $filterQueryPolicies );
             }
-                        
-            $fq[] = "meta_path_si:" . $contentINI->variable( 'NodeSettings', 'RootNode' );
+            
+            if ( !$subTree )
+            {
+                $fq[] = "meta_path_si:" . $contentINI->variable( 'NodeSettings', 'RootNode' );    
+            }
+            else
+            {
+                $subTreeFilter = array( 'or' );
+                foreach( $subTree as $subTreeNodeId )
+                {
+                    $subTreeFilter[] = "meta_path_si:" . $subTreeNodeId;
+                }
+                $fq[] = $subTreeFilter;
+            }
+            
             $fq[] = '(' . eZSolr::getMetaFieldName( 'installation_id' ) . ':' . eZSolr::installationID() . ' AND ' . eZSolr::getMetaFieldName( 'is_invisible' ) . ':false)';
             //$fq[] = eZSolr::getMetaFieldName( 'language_code' ) . ':' . $currentLanguage;
             
@@ -538,8 +551,8 @@ class OpenPaFunctionCollection
             else
             {
                 usort( $resultData, array( 'OpenPaFunctionCollection', 'sortHashByValue' ) );
-            }
-        }        
+            }            
+        }
         return array( 'result' => $resultData );
     }
     
