@@ -53,6 +53,8 @@ $(function() {
 						{/if}
                         {if and( is_set( $node.data_map.abstract ), $node.data_map.abstract.has_content )}
                             {attribute_view_gui attribute=$node.data_map.abstract}
+						{elseif and( is_set( $node.data_map.short_description ), $node.data_map.short_description.has_content )}
+                            {attribute_view_gui attribute=$node.data_map.short_description}
                         {elseif $node|has_abstract()}
                             <div class="abstract"><p>{$node|abstract()|openpa_shorten(400)}</p></div>
 						{/if}

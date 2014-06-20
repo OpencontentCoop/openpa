@@ -194,11 +194,11 @@ div#page-datatype-container .yuimenu ul li
 
 /* COLUMNS layout 3 colonne: START */
 div#layout-3-colonne {
-   padding: 0 180px;
+   padding: 0 240px;
 }
 div#layout-3-colonne div.leftcol_3col{
-	width: 180px;
-    margin-left: -180px;
+	width: 240px;
+    margin-left: -240px;
     float: left;
     display: inline; /* Fix for IE double margin bug */
 	overflow:hidden;
@@ -211,8 +211,8 @@ div#layout-3-colonne div.maincol_3col{
 	position:relative;
 }
 div#layout-3-colonne div.rightcol_3col{
-    width: 180px;
-    margin-right: -180px;
+    width: 240px;
+    margin-right: -240px;
     float: left;
 	overflow:hidden;
 	position:relative;

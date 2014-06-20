@@ -48,7 +48,52 @@
 {/case}
 {/switch}
 
-{if $customs.escludi_classi|ne('')}
+{* se la sorgente è virtualizzata restituisce i risultati della virtualizzazione *}
+{if and( is_set( $nodo.data_map.classi_filtro ), $nodo.data_map.classi_filtro.has_content )}        
+	{set $classes = $nodo.data_map.classi_filtro.content|explode(',')}
+	{def $virtual_classes = array()
+		 $virtual_subtree = array()}
+	{foreach $classes as $class}
+		{set $virtual_classes = $virtual_classes|append( $class|trim() )}
+	{/foreach}
+	{if $nodo.data_map.subfolders.has_content}
+		{foreach $nodo.data_map.subfolders.content.relation_list as $relation}
+			{set $virtual_subtree = $virtual_subtree|append( $relation.node_id )}
+		{/foreach}
+	{else}
+		{set $virtual_subtree = array( ezini( 'NodeSettings', 'RootNode', 'content.ini' ) )}
+	{/if}
+	
+	{switch match=$customs.ordinamento}
+	{case match='priorita'}
+		{set $sort_array=hash('priority', 'asc')}
+	{/case}
+	{case match='pubblicato'}
+		{set $sort_array=hash('published', 'desc' )}
+	{/case}
+	{case match='modificato'}
+		{set $sort_array=hash('modified', 'desc')}
+	{/case}
+	{case match='nome'}
+		{set $sort_array=hash('name', 'asc')}
+	{/case}            
+	{case}
+		{set $sort_array=hash('published', 'desc' )}
+	{/case}
+	{/switch}
+	
+	{def $search_hash = hash( 'subtree_array', $virtual_subtree,                                  
+							  'limit', $limit,
+							  'class_id', $virtual_classes,
+							  'sort_by', $sort_array
+							  )
+		 $search = fetch( ezfind, search, $search_hash )             
+		 $children_count = $search['SearchCount']}
+{/if}
+
+{if and( is_set( $children_count ), $children_count|gt(0) )}
+	{def $children = $search['SearchResult']}
+{elseif $customs.escludi_classi|ne('')}
     {set $classes=$customs.escludi_classi|explode(',')}
     {set $classes = merge($classes, openpaini( 'GestioneClassi', 'classi_da_escludere_dai_blocchi_ezflow', array())) }
         {def $children=fetch( 'content', 'tree', hash( 'parent_node_id', $customs.node_id,

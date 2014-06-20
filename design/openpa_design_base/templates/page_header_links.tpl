@@ -58,5 +58,22 @@
 		<a href={$link_contatti.url_alias|ezurl()} title="Trova il modo migliore per contattarci">Contatti</a>
 	</li>
     {/if}
+	
+	{def $homepage = fetch( 'openpa', 'homepage' )}
+	{if and( is_set( $homepage.data_map.facebook ), $homepage.data_map.facebook.has_content )}
+	<li>	  		
+		<a href="{$homepage.data_map.facebook.content|wash( xhtml )}" title="{$homepage.data_map.facebook.data_text|wash( xhtml )}">
+		  <img src={'icons/facebook.jpg'|ezimage} alt="Facebook" />
+		</a>
+	</li>
+	{/if}
+	{if and( is_set( $homepage.data_map.twitter ), $homepage.data_map.twitter.has_content )}
+	<li>	  		
+		<a href="{$homepage.data_map.twitter.content|wash( xhtml )}" title="{$homepage.data_map.twitter.data_text|wash( xhtml )}">
+		  <img src={'icons/twitter.png'|ezimage} alt="Twitter" />
+		</a>
+	</li>
+	{/if}
+	
 {/if}
 </ul>	

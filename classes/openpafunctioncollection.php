@@ -650,6 +650,11 @@ class OpenPaFunctionCollection
     }
 
     
+    public static function fetchHomepage()
+    {
+        return array( 'result' => self::fetchHome() );
+    }
+    
     public static function fetchHome()
     {
         if ( self::$home == null )

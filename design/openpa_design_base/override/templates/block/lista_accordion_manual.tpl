@@ -104,6 +104,8 @@ $(function() {
                     
                     {elseif and( is_set( $child.data_map.abstract ), $child.data_map.abstract.has_content )}
                         {attribute_view_gui attribute=$child.data_map.abstract}
+					{elseif and( is_set( $child.data_map.short_description ), $child.data_map.short_description.has_content )}
+                            {attribute_view_gui attribute=$child.data_map.short_description}
 					{elseif $child|has_abstract()}
 						{$child|abstract()|openpa_shorten(450)}						
 					{/if}
