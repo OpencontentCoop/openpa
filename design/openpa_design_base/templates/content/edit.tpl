@@ -43,7 +43,8 @@
     {/if}
     </p>
 
-    {include uri="design:content/edit_validation.tpl"}
+    {include uri="design:parts/openpa/edit_copy_warning.tpl"}
+	{include uri="design:content/edit_validation.tpl"}
 
     {* include uri="design:content/edit_placement.tpl" *}
 

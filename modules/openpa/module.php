@@ -58,6 +58,11 @@ $ViewList['calendar'] = array( 'functions' => array( 'calendar' ),
 $ViewList['refreshmenu'] = array( 'functions' => array( 'editor_tools' ),
                            'script' => 'refreshmenu.php',
                            'params' => array( 'ID', 'SiteAccess', 'File' ) );
+
+$ViewList['add'] = array( 'functions' => array( 'editor_tools' ),
+                           'script' => 'add.php',
+                           'params' => array( 'Class' ),
+                           'unordered_params' => array() );
                            
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
