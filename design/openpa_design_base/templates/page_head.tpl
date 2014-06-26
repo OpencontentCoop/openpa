@@ -14,7 +14,7 @@
         {set reverse_path=$:reverse_path|array_prepend($:item)}
     {/section}
     {set-block scope=root variable=site_title}
-        {section loop=$Path:reverse_path}{$:item.text|wash}{delimiter} / {/delimiter}{/section} - {$site.title|wash}
+        {section loop=$Path:reverse_path}{$:item.text|wash}{delimiter} / {/delimiter}{/section}{if count($Path:reverse_path)|gt(0)} - {/if}{$site.title|wash}
     {/set-block}
     {/let}
 {/if}

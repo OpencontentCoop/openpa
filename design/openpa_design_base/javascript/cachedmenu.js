@@ -1,4 +1,4 @@
-(function($){    
+;(function($){    
 	$.fn.OpenPAAccordionMenu = function() {
 		$('ul', this).hide();
 		$('li div span', this).click( function(e) {
