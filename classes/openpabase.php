@@ -56,8 +56,7 @@ class OpenPABase
     public static function getOpenPAScriptArguments( $exclude = false )
     {
         $arguments = $GLOBALS['argv'];
-        $program = $arguments[0];
-        array_shift( $arguments );
+        $script = array_shift( $arguments );
         foreach( $arguments as $i => $argument )
         {
             if ( strpos( $argument, '-s' ) !== false )
@@ -76,12 +75,8 @@ class OpenPABase
     {
         $currentSiteaccess = eZSiteAccess::current();
         $parts = explode( '_', $currentSiteaccess['name'] );
-        $identifier = array_shift( $parts );
-        if ( $identifier )
-        {
-            return $identifier;
-        }
-        return $currentSiteaccess['name'];
+        array_pop( $parts );
+        return implode( '_', $parts );
     }
     
     public static function getFrontendSiteaccessName()
@@ -91,5 +86,3 @@ class OpenPABase
     }
 
 }
-
-?>
