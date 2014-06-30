@@ -1,115 +1,132 @@
+#!/usr/bin/env php
 <?php
+set_time_limit( 0 );
+require_once 'autoload.php';
 
-include( 'autoload.php' );
+$cli = eZCLI::instance();
+$script = eZScript::instance(
+    array(
+         'description' => ( "OpenPa Instances" ),
+         'use-session' => false,
+         'use-modules' => true,
+         'use-debug' => true,
+         'use-extensions' => true
+    )
+);
 
-$fileList = array();
-eZDir::recursiveList( 'settings/siteaccess', 'settings/siteaccess', $fileList );
-$siteaccess = array();
-foreach( $fileList as $file )
-{
-    if ( $file['type'] == 'dir' && strpos( $file['name'], '_frontend' ) !== false )
-    {
-        $siteaccess[$file['name']] = $file['name'];
-    }
-}
-ksort($siteaccess);
 
-function wikiFormat( $index, $name, $opencontentUrl, $url, $isValidUrl, $time, $seo )
-{
-    $isValid = ( $isValidUrl == true ) ? '[[span(style=color: #FF0000, si )]]' : 'no';
-    
-    $seo = $seo != '' ? '{{{' . $seo . '}}}' : '?';
-    $time = date( 'd/m/Y', $time );
-    $string = "||";
-    $string .= $index . "||";
-    $string .= $name . "||";
-    $string .= $isValidUrl ? "'''" . $url . "'''" : $url;
-    $string .= "||";
-    $string .= $isValidUrl ? $opencontentUrl : "'''" . $opencontentUrl . "'''";
-    $string .= "||";
-    $string .= $time . "||";
-    $string .= $isValid . "||";
-    $string .= $seo . "||";
-    return $string;
-}
+$options = $script->getOptions(
+    '[check][wiki][regenerate]',
+    '',
+    array(
+         'check' => 'Confronta i valori live con il file instances.yml',
+         'regenerate' => 'Rigenera il file instances.yml',
+         'wiki' => 'Stampa a video i valori in formato wiki table'
+    )
+);
+$script->initialize();
+$script->startup();
 
-function getIP( $url )
-{
-    $dns = dns_get_record( $url );    
-    foreach( $dns as $dnsItem )
-    {
-        if ( isset( $dnsItem['type'] ) && $dnsItem['type'] == 'A' )
-        {
-            return $dnsItem['ip'];
-        }
-        elseif ( isset( $dnsItem['type'] ) && $dnsItem['type'] == 'CNAME' )
-        {
-            return getIP( $dnsItem['target'] );
-        }
-    }
-}
+$errors = array();
 
-function isValidUrl( $url )
-{
-    if ( stripos( $url, 'opencontent' ) === false )
-    {    
-        $url = rtrim( $url, '/' );
-        $url = str_replace( 'http://', '', $url );
-        $ip = getIP( $url );
-        //eZCLI::instance()->output( $url . ' ' . $ip . ' ' . intval( $ip == ' 194.105.50.4' ));    
-        return $ip == '194.105.50.4';    
-    }
-    return false;
-}
+$siteaccess = OpenPABase::getInstances();
+ksort( $siteaccess );
 
+/** @var OpenPAInstance[] $data */
 $data = array();
-foreach( $siteaccess as $sa )
-{    
-    $ini = new eZINI( 'site.ini.append.php', 'settings/siteaccess/' . $sa );
-    $openpaIni = new eZINI( 'openpa.ini.append.php', 'settings/siteaccess/' . $sa );
-    $seoCode = $openpaIni->variable( 'Seo', 'GoogleAnalyticsAccountID' );
-    $inputFile = 'settings/siteaccess/' . $sa . '/site.ini.append.php';    
-    $opencontentUrl = 'http://' . str_replace( '_frontend', '', $sa ) . '.opencontent.it';
-    $name = $ini->variable( 'SiteSettings', 'SiteName' );    
-    $url = 'http://' .  $ini->variable( 'SiteSettings', 'SiteURL' );
-    $isValidUrl = isValidUrl( $ini->variable( 'SiteSettings', 'SiteURL' ) );    
-    $data[$name] = array( 'name' => $name,
-                          'ocurl' => $opencontentUrl,
-                          'url' => $url,
-                          'valid' => $isValidUrl,
-                          'time' => filemtime( $inputFile ),
-                          'seo' => $seoCode );    
+foreach ( $siteaccess as $sa )
+{
+    $openPaInstance = new OpenPAInstance( $sa );
+    $data[$openPaInstance->getName()] = $openPaInstance;
 }
 ksort( $data );
-$output1 = $output2 = array();
-$index1 = $index2 = 1;
-foreach( $data as $name => $item )
+
+// output wiki table
+if ( $options['wiki'] )
 {
-  if ( strpos( $name, 'Comune' ) === false )
-  {
-    $output1[] = wikiFormat( $index1, $item['name'], $item['ocurl'], $item['url'], $item['valid'], $item['time'], $item['seo'] );
-    $index1++;
-  }
-  else
-  {
-    $output2[] = wikiFormat( $index2, $item['name'], $item['ocurl'], $item['url'], $item['valid'], $item['time'], $item['seo'] );
-    $index2++;
-  }  
+    $output1 = $output2 = array();
+    $index1 = $index2 = 1;
+    $headers = false;
+    foreach ( $data as $name => $instance )
+    {
+        if ( !$headers )
+        {
+            $headers = $instance->toWikiTableRow( '', true );
+        }
+
+        if ( strpos( $name, 'Comune' ) === false )
+        {
+            $output1[] = $instance->toWikiTableRow( $index1 );
+            $index1++;
+        }
+        else
+        {
+            $output2[] = $instance->toWikiTableRow( $index2 );
+            $index2++;
+        }
+    }
+    eZCLI::instance()->output( $headers );
+    foreach ( $output1 as $item )
+    {
+        eZCLI::instance()->output( $item );
+    }
+
+    eZCLI::instance()->output( $headers );
+    foreach ( $output2 as $item )
+    {
+        eZCLI::instance()->output( $item );
+    }
 }
 
-$headers = "||=N=||=Ente=||=Dominio di produzione=||=Dominio di staging=||=Data=||=In prod=||=GoogleID=||";
-
-eZCLI::instance()->output( $headers );
-foreach( $output1 as $item )
+// save instances.yml
+if ( $options['regenerate'] )
 {
-  eZCLI::instance()->output( $item );  
+    $sitesYmlData = array();
+    $sitesYmlData['server'] = eZSys::serverURL();
+    $sitesYmlData['document_root'] = eZSys::rootDir();
+    $sitesYmlData['instances'] = array();
+    foreach ( $data as $name => $instance )
+    {
+        if ( $instance->isLive() )
+        {
+            $sitesYmlData['instances'][$instance->getSiteAccessBaseName()] = $instance->toHash();
+        }
+    }
+    $yaml = Symfony\Component\Yaml\Yaml::dump( $sitesYmlData, 10 );
+    $fileHandler = eZClusterFileHandler::instance( 'instances.yml' );
+    $fileHandler->fileStoreContents( 'instances.yml', $yaml, 'opencontent_sys' );
 }
 
-eZCLI::instance()->output( $headers );
-foreach( $output2 as $item )
+if ( $options['check'] )
 {
-  eZCLI::instance()->output( $item );  
+    $fileHandler = eZClusterFileHandler::instance( 'instances.yml' );
+    $yaml = Symfony\Component\Yaml\Yaml::parse( $fileHandler->fetchContents() );
+    foreach( $yaml['instances'] as $instanceName => $yamlValue )
+    {
+        try
+        {
+            OpenPAInstance::compare( $instanceName, $yamlValue );
+        }
+        catch( Exception $e )
+        {
+            $errors[$instanceName][] = $e->getMessage();
+        }
+    }
 }
 
+$exitCode = false;
+$exitText = false;
 
+if ( count( $errors ) > 0 )
+{
+    $exitCode = 1;
+    $exitText = '';
+    foreach( $errors as $instanceName => $error )
+    {
+        $exitText .= "Errori in " . $instanceName . "\n";
+        $exitText .= implode( "\n", $error ) . "\n\n";
+    }
+}
+
+$script->shutdown( $exitCode, $exitText );
 ?>
