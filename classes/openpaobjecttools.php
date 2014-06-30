@@ -78,7 +78,7 @@ class OpenPAObjectTools
         $newObject = $object->copy( $allVersions );
         // We should reset section that will be updated in updateSectionID().
         // If sectionID is 0 then the object has been newly created
-        $newObject->setAttribute( 'section_id', 0 );
+        $newObject->setAttribute( 'section_id', $object->attribute( 'section_id' ) );
         $newObject->store();
     
         $curVersion        = $newObject->attribute( 'current_version' );
