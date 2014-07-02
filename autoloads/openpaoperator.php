@@ -290,7 +290,21 @@ class OpenPAOperator
                             break;
                         }
                     }
-                }                
+                }
+                
+                if ( OpenPAINI::variable( 'AreeTematiche', 'UsaStileInMotoreRicerca', false ) == 'enabled' )
+                {                    
+                    $http = eZHTTPTool::instance();
+                    if ( $http->hasGetVariable( 'SubTreeArray' ) )
+                    {
+                        $subTreeArray = $http->getVariable( 'SubTreeArray' );
+                        if ( count( $subTreeArray ) == 1 )
+                        {
+                            $result = $this->get_area_tematica_node( $subTreeArray[0] );
+                        }
+                    }
+                }
+                
                 $operatorValue = $result;
                 
             } break;
