@@ -32,7 +32,26 @@ try
 
     $surveyClassIdentifier = 'survey';
     $surveyAttributeClassIdentifier = 'survey_attribute';
-    $nodeID = '1130';
+
+    $remoteId = $siteaccess['name'] . '_survey_attributes';
+    $contentObject = eZContentObject::fetchByRemoteID( $remoteId );
+    if ( !$contentObject instanceof eZContentObject )
+    {
+        $params                     = array();
+        $params['class_identifier'] = 'folder';
+        $params['remote_id']        = $remoteId;
+        $params['parent_node_id']   = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' );
+        $params['attributes']       = array( 'name' => 'Testi questionari' );
+        $contentObject = eZContentFunctions::createAndPublishObject( $params );
+    }
+    if ( $contentObject )
+    {
+        $nodeID = $contentObject->attribute( 'main_node_id' );
+    }
+    else
+    {
+        throw new Exception( "Fallita creazione nodo parent survey attributes" );
+    }
 
     $surveyWizard = eZSurveyWizard::instance();
     if ( $surveyWizard->databaseStatus() === false )
@@ -50,7 +69,7 @@ try
     //$surveyAttributeClass->sync();
 
     $configList = eZSurveyRelatedConfig::fetchList();
-    if ( isset( $configList[0] ) && $config[0] instanceof eZSurveyRelatedConfig )
+    if ( isset( $configList[0] ) && $configList[0] instanceof eZSurveyRelatedConfig )
     {
         $config = $configList[0];
     }
@@ -73,6 +92,6 @@ catch( Exception $e )
 {    
     $errCode = $e->getCode();
     $errCode = $errCode != 0 ? $errCode : 1; // If an error has occured, script must terminate with a status other than 0
-    //OpenPALog::error( $e->getMessage() );
+    OpenPALog::error( $e->getMessage() );
     $script->shutdown( $errCode, $e->getMessage() );
 }
