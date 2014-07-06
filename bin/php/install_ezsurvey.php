@@ -62,11 +62,11 @@ try
 
     OpenPALog::notice( "Installo la classe $surveyClassIdentifier" );
     $surveyClass = new OpenPAClassTools( $surveyClassIdentifier, true );
-    //$surveyClass->sync();
+    $surveyClass->sync();
 
     OpenPALog::notice( "Installo la classe $surveyAttributeClassIdentifier" );
     $surveyAttributeClass = new OpenPAClassTools( $surveyAttributeClassIdentifier, true );
-    //$surveyAttributeClass->sync();
+    $surveyAttributeClass->sync();
 
     $configList = eZSurveyRelatedConfig::fetchList();
     if ( isset( $configList[0] ) && $configList[0] instanceof eZSurveyRelatedConfig )
