@@ -3,16 +3,18 @@
 {literal}
 $(document).ready(function(){
     var pageUrl = "{/literal}{$node.url_alias|ezurl(no)}{/literal}";
-    $(window).bind( 'hashchange', function(e) {
-        $("#children").css( 'opacity', '0.3' );
+    $(window).bind( 'hashchange', function(e) {        
         var href = $.bbq.getState('page');
-         $.get(href, function(data) {
-            var children = $('#children', data).html();
-            var select = $('#select', data).html();
-            $("#children").html(children);
-            $("#select").html(select);
-            $("#children").css( 'opacity', '1' );            
-        });        
+        if(href){
+		  $("#children").css( 'opacity', '0.3' );
+		  $.get(href, function(data) {
+			  var children = $('#children', data).html();
+			  var select = $('#select', data).html();
+			  $("#children").html(children);
+			  $("#select").html(select);
+			  $("#children").css( 'opacity', '1' );            
+		  });
+		}
     });
     $(window).trigger( 'hashchange' );
     $( '#facetsearch .facet-list a, #facetsearch .pagenavigator a, #facetsearch a.spellcheck, #facetsearch a.helper' ).live( 'click', function(event){        

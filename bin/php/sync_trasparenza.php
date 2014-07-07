@@ -63,7 +63,16 @@ try
                 {
                     if ( $child->classIdentifier == 'pagina_trasparenza' )
                     {
-                        OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child );    
+                        OpenPALog::notice( '  |-- ', false );
+                        OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child );
+                        foreach( $child->getChildren() as $child2 )
+                        {
+                            if ( $child2->classIdentifier == 'pagina_trasparenza' )
+                            {
+                                OpenPALog::notice( '  |-- ', false );
+                                OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child2 );    
+                            }
+                        }
                     }
                 }
             }
