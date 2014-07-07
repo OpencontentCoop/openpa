@@ -20,7 +20,7 @@
                     {$attribute.name} ({$attribute.identifier})
                 </td>
                 <td>{$attribute.description}</td>
-                <td>{$attribute.data_type.information.name}</td>
+                <td>{$attribute.data_type.information.name} ({$attribute.data_type_string})</td>
                 <td style="text-align: center">{if $attribute.is_required}X{/if}</td>
                 <td style="text-align: center">{if $attribute.is_searchable}X{/if}</td>
             </tr>
