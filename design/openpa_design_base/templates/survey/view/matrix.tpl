@@ -25,9 +25,9 @@
 
             {for 0 to $question.num|wash('xhtml')|dec as $j}
                 {if eq( $i, 0 )}
-                <td class="full">{$matrix.0[$j]}</td>
+                <td class="full" style="text-align: center">{$matrix.0[$j]}</td>
                 {else}
-                <td>
+                <td style="text-align: center">
                     <input type="radio" name="{$prefix_attribute}_ezsurvey_answer_{$question.id}_{$attribute_id}[{$i|dec}]" value="{$j}" {if and( is_set( $answer[$i|dec] ), eq( $answer[$i|dec], $j ))}checked="checked"{/if} />
                 </td>
                 {/if}
