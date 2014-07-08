@@ -83,7 +83,7 @@ var isSurveySubmitted = false;
 		{/let}
 		
 		<div class="block">
-		<input class="button" type="submit" name="{$prefixAttribute}_ezsurvey_store_button_{$attribute.id}" value="{'Submit'|i18n( 'survey' )}" />
+		<input class="defaultbutton" type="submit" name="{$prefixAttribute}_ezsurvey_store_button_{$attribute.id}" value="{'Submit'|i18n( 'survey' )}" />
 		</div>
 		
 		{if $module_param_value|ne('content/edit')}
