@@ -15,7 +15,7 @@ $classes_parent_to_edit = openpaini( 'GestioneClassi', 'classi_figlie_da_editare
         <div class="global-view-full content-view-full">
             <div class="class-{$node.object.class_identifier}">
 
-                <h1>{$node.name|wash()}</h1>
+                <h1>{attribute_view_gui attribute=$node.data_map.name}</h1>
 
                 {* DATA e ULTIMAMODIFICA *}
                 {include name = last_modified
@@ -33,7 +33,11 @@ $classes_parent_to_edit = openpaini( 'GestioneClassi', 'classi_figlie_da_editare
                 uri = 'design:parts/openpa/attributi_principali.tpl'
                 node = $node}
 
-                {attribute_view_gui attribute=$node.data_map.survey}
+                <div class="attributi-principali float-break col col-notitle">
+                <div class="col-content"><div class="col-content-design">
+                    {attribute_view_gui attribute=$node.data_map.survey}
+                </div></div>
+                </div>
 
             </div>
         </div>
