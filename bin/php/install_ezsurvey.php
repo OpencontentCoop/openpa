@@ -33,7 +33,7 @@ try
     $surveyClassIdentifier = 'survey';
     $surveyAttributeClassIdentifier = 'survey_attribute';
 
-    $remoteId = $siteaccess['name'] . '_survey_attributes';
+    $remoteId = OpenPABase::getFrontendSiteaccessName() . '_survey_attributes';
     $contentObject = eZContentObject::fetchByRemoteID( $remoteId );
     if ( !$contentObject instanceof eZContentObject )
     {
