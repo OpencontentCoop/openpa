@@ -1,7 +1,7 @@
 <div class="survey-view">
 {def $survey=$attribute.content.survey
      $survey_questions=$survey.questions}
- {* The survey questions need to be fetched before validation can be runned, beacause of static variables are updated *}
+{* The survey questions need to be fetched before validation can be runned, beacause of static variables are updated *}
 {if is_set($attribute.content.survey_validation.one_answer_need_login)}
 <p>{"You need to log in in order to answer this survey"|i18n('survey')}.</p>
 {include uri='design:user/login.tpl'}
@@ -10,6 +10,7 @@
 <p>{"The survey is not active"|i18n('survey')}.</p>
 {else}
 {def $survey_validation=first_set($survey.global_survey_content.survey_validation, $attribute.content.survey_validation)}
+{include uri="design:survey/curtesy_message.tpl"}
 {if or(is_set( $survey_validation.one_answer ), and(is_set($survey_validation.one_answer_count), $survey_validation.one_answer_count|gt(0)))}
 <p>{"The survey does already have an answer from you"|i18n('survey')}.</p>
 {else}
