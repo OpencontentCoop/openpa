@@ -196,7 +196,8 @@ class OpenPaFunctionCollection
     {
         $result = false;
         $homePage = self::fetchHome();
-        if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
+        if ( $homePage instanceof eZContentObjectTreeNode
+             && $homePage->attribute( 'class_identifier' ) == 'homepage' )
         {
             $dataMap = $homePage->attribute( 'data_map' );
             if ( isset( $dataMap['note_footer'] ) && $dataMap['note_footer'] instanceof eZContentObjectAttribute && $dataMap['note_footer']->attribute( 'has_content' ) )
@@ -211,7 +212,8 @@ class OpenPaFunctionCollection
     {
         $nodes = array();
         $homePage = self::fetchHome();
-        if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
+        if ( $homePage instanceof eZContentObjectTreeNode
+             && $homePage->attribute( 'class_identifier' ) == 'homepage' )
         {
             $dataMap = $homePage->attribute( 'data_map' );
             if ( isset( $dataMap['link_nel_footer'] ) && $dataMap['link_nel_footer'] instanceof eZContentObjectAttribute && $dataMap['link_nel_footer']->attribute( 'has_content' ) )
@@ -596,7 +598,8 @@ class OpenPaFunctionCollection
     {
         $result = false;
         $homePage = self::fetchHome();
-        if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
+        if ( $homePage instanceof eZContentObjectTreeNode
+             && $homePage->attribute( 'class_identifier' ) == 'homepage' )
         {
             $headerObject = $homePage->attribute( 'object' );
             if ( $headerObject instanceof eZContentObject )
