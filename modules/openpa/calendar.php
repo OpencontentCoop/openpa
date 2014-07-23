@@ -72,9 +72,18 @@ if ( $http->hasGetVariable( 'SearchDate' ) )
         $parameters['day'] = $dateTime->format( OpenPACalendarData::DAY_IDENTIFIER_FORMAT );
         $parameters['month'] = $dateTime->format( OpenPACalendarData::MONTH_IDENTIFIER_FORMAT );
         $parameters['year'] = $dateTime->format( OpenPACalendarData::YEAR_IDENTIFIER_FORMAT );
-        if ( $parameters['view'] == 'program' )
+        if ( isset( $parameters['view'] ) && $parameters['view'] == 'program' )
         {
             $redirectSuffix = "#day-" . $dateTime->format( OpenPACalendarData::FULLDAY_IDENTIFIER_FORMAT );
+        }
+        if ( $http->hasGetVariable( 'SearchEndDate' ) )
+        {
+            $endDateTime = DateTime::createFromFormat( OpenPACalendarData::PICKER_DATE_FORMAT, $http->getVariable( 'SearchEndDate' ) , OpenPACalendarData::timezone() );
+            $interval = $dateTime->diff( $endDateTime );
+            if ( $interval instanceof DateInterval )
+            {
+                $parameters['interval'] = OpenPACalendarData::DateIntervalString( $interval );
+            }
         }
     }
 }

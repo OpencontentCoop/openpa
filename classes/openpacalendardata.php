@@ -156,6 +156,7 @@ class OpenPACalendarData
         );
         $originalStartDateTime = DateTime::createFromFormat( 'H i s n j Y', implode( ' ', $startDateArray ), self::timezone() );
         $this->parameters['picker_date'] = date( self::PICKER_DATE_FORMAT, $originalStartDateTime->getTimestamp() );
+        $this->parameters['search_from_picker_date'] = $this->parameters['picker_date'];
         if ( $this->parameters['interval'] == self::INTERVAL_MONTH )
              //&& $this->view == self::VIEW_CALENDAR )
         {
@@ -189,6 +190,7 @@ class OpenPACalendarData
         $endTimeStamp = $endDateTime->format( 'U' );
         $toDate = ezfSolrDocumentFieldBase::preProcessValue( $endDateTime->getTimestamp() - 1 , 'date' );                
         $this->parameters['search_to_timestamp'] = $endDateTime->getTimestamp();
+        $this->parameters['search_to_picker_date'] = date( self::PICKER_DATE_FORMAT, $endDateTime->getTimestamp() );
         
         // filter        
         $this->filters[] = array(
@@ -452,6 +454,30 @@ class OpenPACalendarData
         $related = array_fill_keys( self::relatedParameters(), false );
         return array_merge( $default, $related );
     }
+    
+    public static function DateIntervalString( DateInterval $delta )
+    {
+        //Read all date-parts there are not 0
+        $date = array_filter( array( 'Y' => $delta->y,
+                                     'M' => $delta->m,
+                                     'D' => $delta->d ) );
+        
+        //Read all time-parts there are not 0
+        $time = array_filter( array( 'H' => $delta->h,
+                                     'M' => $delta->i,
+                                     'S' => $delta->s ) );
+    
+        //Convert each part to spec-Strings
+        foreach ( $date as $key => &$value ) $value = $value.$key;
+        foreach ( $time as $key => &$value ) $value = $value.$key;
+    
+        //Create date spec-string
+        $spec = 'P' . implode('', $date);            
+        //add time spec-string
+        if ( count( $time ) > 0 )
+            $spec .= 'T' . implode( '', $time );
+        return $spec;        
+    }   
     
     function attributes()
     {

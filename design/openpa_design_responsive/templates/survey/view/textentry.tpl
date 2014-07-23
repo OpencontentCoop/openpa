@@ -9,7 +9,7 @@
 		{/if}
 		<input class="form-control" name="{$prefix_attribute}_ezsurvey_answer_{$question.id}_{$attribute_id}" type="text" size="{$question.num}" value="{if is_set($previous_vars.extra_answer)}{$previous_vars.extra_answer}{else}{$question_result.text|wash('xhtml')}{/if}" />
 	  {section-else}
-		<input class="form-control" name="{$prefix_attribute}_ezsurvey_answer_{$question.id}_{$attribute_id}" type="text" size="{$question.num}" value="{$question.answer|wash('xhtml')}" />
+		<input class="form-control" name="{$prefix_attribute}_ezsurvey_answer_{$question.id}_{$attribute_id}" type="text" size="{$question.num}" value="{if $question.answer}{$question.answer}{elseif $question.default_value}{$question.default_value|wash('xhtml')}{/if}" />
 	  {/section}
 	{/case}
 	
@@ -20,7 +20,7 @@
 		{/if}
 		<textarea class="form-control" name="{$prefix_attribute}_ezsurvey_answer_{$question.id}_{$attribute_id}" rows="{$question.num2}" cols="{$question.num}">{if is_set($previous_vars.answer)}{$previous_vars.extra_answer}{else}{$question_result.text|wash('xhtml')}{/if}</textarea>
 	  {section-else}
-		<textarea class="form-control" name="{$prefix_attribute}_ezsurvey_answer_{$question.id}_{$attribute_id}" rows="{$question.num2}" cols="{$question.num}">{$question.answer|wash('xhtml')}</textarea>
+		<textarea class="form-control" name="{$prefix_attribute}_ezsurvey_answer_{$question.id}_{$attribute_id}" rows="{$question.num2}" cols="{$question.num}">{if $question.answer}{$question.answer}{elseif $question.default_value}{$question.default_value|wash('xhtml')}{/if}</textarea>
 	  {/section}
 	{/case}
 	
