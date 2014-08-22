@@ -84,5 +84,80 @@ class OpenPABase
         $identifier = self::getCurrentSiteaccessIdentifier();
         return $identifier . '_frontend';
     }
+    
+    public static function getDataByURL( $url, $justCheckURL = false, $userAgent = false )
+    {
+        if ( extension_loaded( 'curl' ) )
+        {
+            $ch = curl_init( $url );
+            // Options used to perform in a similar way than PHP's fopen()
+            curl_setopt_array(
+                $ch,
+                array(
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_SSL_VERIFYPEER => false
+                )
+            );
+            if ( $justCheckURL )
+            {
+                curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 1 );
+                curl_setopt( $ch, CURLOPT_TIMEOUT, 2 );
+                curl_setopt( $ch, CURLOPT_FAILONERROR, 1 );
+                curl_setopt( $ch, CURLOPT_NOBODY, 1 );
+            }
+            else
+            {
+                curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 1 );
+                curl_setopt( $ch, CURLOPT_TIMEOUT, 2 );
+            }
+
+            if ( $userAgent )
+            {
+                curl_setopt( $ch, CURLOPT_USERAGENT, $userAgent );
+            }
+
+            $ini = eZINI::instance();
+            $proxy = $ini->hasVariable( 'ProxySettings', 'ProxyServer' ) ? $ini->variable( 'ProxySettings', 'ProxyServer' ) : false;
+            // If we should use proxy
+            if ( $proxy )
+            {
+                curl_setopt ( $ch, CURLOPT_PROXY , $proxy );
+                $userName = $ini->hasVariable( 'ProxySettings', 'User' ) ? $ini->variable( 'ProxySettings', 'User' ) : false;
+                $password = $ini->hasVariable( 'ProxySettings', 'Password' ) ? $ini->variable( 'ProxySettings', 'Password' ) : false;
+                if ( $userName )
+                {
+                    curl_setopt ( $ch, CURLOPT_PROXYUSERPWD, "$userName:$password" );
+                }
+            }
+            // If we should check url without downloading data from it.
+            if ( $justCheckURL )
+            {
+                if ( !curl_exec( $ch ) )
+                {
+                    curl_close( $ch );
+                    return false;
+                }
+
+                curl_close( $ch );
+                return true;
+            }
+            // Getting data
+            ob_start();
+            if ( !curl_exec( $ch ) )
+            {
+                curl_close( $ch );
+                ob_end_clean();
+                return false;
+            }
+
+            curl_close ( $ch );
+            $data = ob_get_contents();
+            ob_end_clean();
+
+            return $data;
+        }
+
+        return false;
+    }
 
 }

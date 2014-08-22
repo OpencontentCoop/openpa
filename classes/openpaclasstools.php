@@ -438,7 +438,7 @@ class OpenPAClassTools
         $originalRepositoryUrl = self::$remoteUrl . $identifier;        
         if ( stripos( $originalRepositoryUrl, $currentUrl ) === false )
         {
-            $original = json_decode( eZHTTPTool::getDataByURL( $originalRepositoryUrl ) );            
+            $original = json_decode( OpenPABase::getDataByURL( $originalRepositoryUrl ) );            
             if ( isset( $original->error ) )
             {
                 throw new Exception( $original->error );

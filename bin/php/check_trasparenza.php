@@ -31,17 +31,17 @@ try
     
     // sincronizzazaione classi
     $classiTrasparenza = array(
-        'conferimento_incarico',
-        'consulenza',
+        //'conferimento_incarico',
+        //'consulenza',
         'nota_trasparenza',
         'pagina_trasparenza',
-        'responsabile_trasparenza',
+        //'responsabile_trasparenza',
         'trasparenza',
-        'tasso_assenza',
-        'dipendente',
-        'incarico',
-        'sovvenzione_contributo',
-        'organo_politico'
+        //'tasso_assenza',
+        //'dipendente',
+        //'incarico',
+        //'sovvenzione_contributo',
+        //'organo_politico'
     );
     
     foreach( $classiTrasparenza as $identifier )
@@ -84,7 +84,7 @@ try
         $errorTreeCount++;
     }
     
-    $dataTree = json_decode( eZHTTPTool::getDataByURL( $treeUrl ), true );
+    $dataTree = json_decode( OpenPABase::getDataByURL( $treeUrl ), true );
     if ( $dataTree )
     {
         foreach( $dataTree['childrenNodes'] as $item )

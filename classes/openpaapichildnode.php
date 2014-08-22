@@ -28,7 +28,7 @@ class OpenPAApiChildNode implements ArrayAccess
         {
             $this->children = array();
             $treeUrl = rtrim( $this->link, '/' ) . '/list'; 
-            $children = json_decode( eZHTTPTool::getDataByURL( $treeUrl ), true );            
+            $children = json_decode( OpenPABase::getDataByURL( $treeUrl ), true );            
             foreach( $children['childrenNodes'] as $item )
             {
                 $this->children[] = new OpenPAApiChildNode( $item );

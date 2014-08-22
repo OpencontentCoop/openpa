@@ -5,7 +5,7 @@ class OpenPAApiNode implements ArrayAccess
 
     public static function fromLink( $url )
     {
-        $data = json_decode( eZHTTPTool::getDataByURL( $url ), true );
+        $data = json_decode( OpenPABase::getDataByURL( $url ), true );
         if ( $data )
         {
             return new self( $data );

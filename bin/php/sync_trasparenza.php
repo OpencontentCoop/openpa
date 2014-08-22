@@ -50,7 +50,7 @@ try
     
     OpenPAObjectTools::syncObjectFormRemoteApiNode( OpenPAApiNode::fromLink( $treeNode ) );
     
-    $dataTree = json_decode( eZHTTPTool::getDataByURL( $treeUrl ), true );
+    $dataTree = json_decode( OpenPABase::getDataByURL( $treeUrl ), true );
     if ( $dataTree )
     {
         foreach( $dataTree['childrenNodes'] as $item )
