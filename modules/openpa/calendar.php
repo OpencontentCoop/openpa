@@ -48,7 +48,7 @@ if ( $http->hasGetVariable( 'TodayButton' ) )
 if ( $http->hasGetVariable( 'Query' ) )
 {
     $query = $http->getVariable( 'Query' );
-    if ( !empty( $query ) )
+    if ( !empty( $query ) && $query != 'Cerca testo' ) //@todo workaround per errore ie su jquery.placeholder.js
     {
         $parameters['query'] = $query;
     }

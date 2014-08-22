@@ -23,6 +23,7 @@ if ( ezcConsoleDialogViewer::displayDialog( $question ) == "n" )
     if ( ezcConsoleDialogViewer::displayDialog( $question ) == "y" )
     {
         //salva i site.ini
+        throw new Exception( "Qualcosa non ha funzionato nel salvataggio del file ini. Forse lo script non è finito??" );
     }
     else
     {

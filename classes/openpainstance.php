@@ -223,6 +223,11 @@ class OpenPAInstance
         {
             throw new Exception( implode( "\n", $errors ) );
         }
+        $googleId = $instance->getGoogleId();
+        if ( empty( $googleId ) )
+        {
+            throw new Exception( "Attenzione valore GoogleId vuoto" );
+        }
     }
 
 }
