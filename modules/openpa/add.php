@@ -23,9 +23,9 @@ if ( $http->hasGetVariable( 'parent' ) )
     {
         $languageCode = eZINI::instance()->variable( 'RegionalSettings', 'Locale' );    
         $object = eZContentObject::createWithNodeAssignment( $node,
-                                                                    $class->attribute( 'id' ),
-                                                                    $languageCode,
-                                                                    false );
+                                                             $class->attribute( 'id' ),
+                                                             $languageCode,
+                                                             false );
         if ( $object )
         {                
             $module->redirectTo( 'content/edit/' . $object->attribute( 'id' ) . '/' . $object->attribute( 'current_version' ) . $queryString );

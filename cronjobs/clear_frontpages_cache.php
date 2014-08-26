@@ -6,9 +6,12 @@ $params = array( 'Limitation'  => array(),
                  'ClassFilterArray' => array( 'frontpage' )
                  );
 $root = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
+
 $frontpages = eZContentObjectTreeNode::subTreeByNodeID( $params, $root );
+$frontpages[] = eZContentObjectTreeNode::fetch( $root );
+
 if ( !$isQuiet )
-{    
+{
     $cli->output( "Cleaning frontpage content cache for " . count( $frontpages ) . " objects" );
 }
 

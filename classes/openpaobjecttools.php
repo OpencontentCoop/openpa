@@ -49,7 +49,7 @@ class OpenPAObjectTools
      * @throws Exception
      * @return eZContentObject
      */
-    public static function copyObject( eZContentObject $object, $allVersions = false, $newParentNodeID = null )
+    public static function copyObject( eZContentObject $object, $allVersions = true, $newParentNodeID = null )
     {
         if ( !$object instanceof eZContentObject )
             throw new InvalidArgumentException( 'Object not found' );

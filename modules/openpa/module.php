@@ -68,6 +68,11 @@ $ViewList['add'] = array( 'functions' => array( 'editor_tools' ),
                            'script' => 'add.php',
                            'params' => array( 'Class' ),
                            'unordered_params' => array() );
+
+$ViewList['object'] = array( 'functions' => array( 'object' ),
+                             'script' => 'object.php',
+                             'params' => array( 'ObjectID' ),
+                             'unordered_params' => array() );
                            
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
@@ -75,6 +80,7 @@ $FunctionList['manage_roles'] = array();
 //$FunctionList['manage_header'] = array();
 $FunctionList['calendar'] = array();
 $FunctionList['editor_tools'] = array();
+$FunctionList['object'] = array();
 
 
 
