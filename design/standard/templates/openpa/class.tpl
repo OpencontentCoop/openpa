@@ -22,8 +22,8 @@ $(document).ready(function() {
 {else}
     
     <div class="object-right">
-        <a class="button" href="{concat('exportas/csv/', $locale.identifier)|ezurl(no)}">Salva oggetti in CSV</a>
-        <a class="button" href="{concat('exportas/xml/', $locale.identifier)|ezurl(no)}">Salva oggetti in XML</a>
+        <a class="button" href="{concat('exportas/csv/', $locale.identifier, '/1')|ezurl(no)}">Salva oggetti in CSV</a>
+        <a class="button" href="{concat('exportas/xml/', $locale.identifier, '/1')|ezurl(no)}">Salva oggetti in XML</a>
     </div>
     
     <h1>
