@@ -73,6 +73,11 @@ $ViewList['object'] = array( 'functions' => array( 'object' ),
                              'script' => 'object.php',
                              'params' => array( 'ObjectID' ),
                              'unordered_params' => array() );
+
+$ViewList['data'] = array( 'functions' => array( 'object' ),
+                             'script' => 'data.php',
+                             'params' => array( 'Identifier' ),
+                             'unordered_params' => array() );
                            
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
