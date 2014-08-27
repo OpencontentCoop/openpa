@@ -6,7 +6,7 @@ $data = array();
 
 switch( $identifier )
 {
-    case 'consiglieri':
+    case 'politici':
         $politicoClassId = eZContentClass::classIDByIdentifier( 'politico' );
         $politici = eZContentObject::fetchSameClassList( $politicoClassId );
         //$search = eZSearch::search(
