@@ -31,14 +31,46 @@ switch( $identifier )
             if ( $politico instanceof eZContentObject
                  && $politico->attribute( 'can_read' ) )
             {
-                $gruppoPolitico = $ruolo = array();
+                $gruppoPolitico = $lista = $parte = $ruolo = array();
                 $politicoDataMap = $politico->attribute( 'data_map' );
 
                 if ( isset( $politicoDataMap['"gruppo_politico'] ) &&
                      $politicoDataMap['"gruppo_politico'] instanceof eZContentObjectAttribute &&
                      $politicoDataMap['"gruppo_politico']->hasContent() )
                 {
-                    $gruppoPolitico = explode( '-', $politicoDataMap['"gruppo_politico']->toString() );
+                    $detailPolitici = explode( '-', $politicoDataMap['"gruppo_politico']->toString() );
+                    foreach( $detailPolitici as $detail )
+                    {
+                        $url = '/api/opendata/v1/content/object/' . $detail;
+                        eZURI::transformURI( $url, false, 'full' );
+                        $gruppoPolitico[] = $url;
+                    }
+                }
+                
+                if ( isset( $politicoDataMap['"lista_elettorale'] ) &&
+                     $politicoDataMap['"lista_elettorale'] instanceof eZContentObjectAttribute &&
+                     $politicoDataMap['"lista_elettorale']->hasContent() )
+                {
+                    $detailPolitici = explode( '-', $politicoDataMap['"lista_elettorale']->toString() );
+                    foreach( $detailPolitici as $detail )
+                    {
+                        $url = '/api/opendata/v1/content/object/' . $detail;
+                        eZURI::transformURI( $url, false, 'full' );
+                        $lista[] = $url;
+                    }
+                }
+                
+                if ( isset( $politicoDataMap['"maggioranza_minoranza'] ) &&
+                     $politicoDataMap['"maggioranza_minoranza'] instanceof eZContentObjectAttribute &&
+                     $politicoDataMap['"maggioranza_minoranza']->hasContent() )
+                {
+                    $detailPolitici = explode( '-', $politicoDataMap['"lista_elettorale']->toString() );
+                    foreach( $detailPolitici as $detail )
+                    {
+                        $url = '/api/opendata/v1/content/object/' . $detail;
+                        eZURI::transformURI( $url, false, 'full' );
+                        $parte[] = $url;
+                    }
                 }
 
                 if ( isset( $politicoDataMap['ruolo'] ) &&
@@ -69,11 +101,17 @@ switch( $identifier )
                     }
                 }
 
+                $url = '/api/opendata/v1/content/object/' . $politico->attribute( 'id' );
+                eZURI::transformURI( $url, false, 'full' );
+                
                 $politicoData = array(
                     'id' => $politico->attribute( 'id' ),
+                    'api' => $url,
                     'nominativo' => $politico->attribute( 'name' ),
                     'ruolo' => $ruolo,
-                    'gruppo_politico' => $gruppoPolitico
+                    'gruppo_politico' => $gruppoPolitico,
+                    'lista' => $lista,
+                    'parte' => $parte
                 );
                 $data[] = $politicoData;
             }
