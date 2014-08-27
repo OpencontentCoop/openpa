@@ -92,14 +92,11 @@
         </ul>
 
         {* TIENIMI AGGIORNATO *}
-		{if and( $logged_user.is_logged_in, or( $node.class_identifier|eq( 'pagina_sito' ), $node.class_identifier|eq( 'folder' ) ) )}
-            {def $notification_access=fetch( 'user', 'has_access_to', hash( 'module', 'notification', 'function', 'use' ) )}
-            {if $notification_access}        		
-                <form method="post" action={"/content/action/"|ezurl}>			   
-                    <input class="defaultbutton" type="submit" name="ActionAddToNotification" value="{'Keep me updated'|i18n('design/retecivica/full/folder')}" />
-                    <input type="hidden" name="ContentNodeID" value="{$node.node_id}" />
-                </form>
-            {/if}
+		{if and( $logged_user.is_logged_in, $node.object.content_class.is_container, fetch( 'user', 'has_access_to', hash( 'module', 'notification', 'function', 'use' ) ) )}
+		  <form method="post" action={"/content/action/"|ezurl}>			   
+			  <input class="defaultbutton" type="submit" name="ActionAddToNotification" value="{'Keep me updated'|i18n('design/retecivica/full/folder')}" />
+			  <input type="hidden" name="ContentNodeID" value="{$node.node_id}" />
+		  </form>            
 		{/if}
         
 		</div>

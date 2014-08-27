@@ -74,7 +74,7 @@ $ViewList['object'] = array( 'functions' => array( 'object' ),
                              'params' => array( 'ObjectID' ),
                              'unordered_params' => array() );
 
-$ViewList['data'] = array( 'functions' => array( 'object' ),
+$ViewList['data'] = array( 'functions' => array( 'data' ),
                              'script' => 'data.php',
                              'params' => array( 'Identifier' ),
                              'unordered_params' => array() );
