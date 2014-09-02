@@ -146,27 +146,27 @@ div.box-3 div.border-bc
 /* VIOLET START */
 div.box-violet div.border-tl
 {
-    background-image: url(../images/borders//box-violet/border-tl.jpg);
+    background-image: url(../images/borders/box-violet/border-tl.jpg);
 }
 
 div.box-violet div.border-tr
 {
-    background-image: url(../images/borders//box-violet/border-tr.jpg);
+    background-image: url(../images/borders/box-violet/border-tr.jpg);
 }
 
 div.box-violet div.border-tc
 {
-    background-image: url(../images/borders//box-violet/border-tc.jpg);
+    background-image: url(../images/borders/box-violet/border-tc.jpg);
 }
 
 div.box-violet div.border-ml
 {
-    background-image: url(../images/borders//box-violet/border-ml.jpg);
+    background-image: url(../images/borders/box-violet/border-ml.jpg);
 }
 
 div.box-violet div.border-mr
 {
-    background-image: url(../images/borders//box-violet/border-mr.jpg);
+    background-image: url(../images/borders/box-violet/border-mr.jpg);
     padding: 0 2px;
 }
 
@@ -178,17 +178,17 @@ div.box-violet div.border-mc
 
 div.box-violet div.border-bl
 {
-    background-image: url(../images/borders//box-violet/border-bl.jpg);
+    background-image: url(../images/borders/box-violet/border-bl.jpg);
 }
 
 div.box-violet div.border-br
 {
-    background-image: url(../images/borders//box-violet/border-br.jpg);
+    background-image: url(../images/borders/box-violet/border-br.jpg);
 }
 
 div.box-violet div.border-bc
 {
-    background-image: url(../images/borders//box-violet/border-bc.jpg);
+    background-image: url(../images/borders/box-violet/border-bc.jpg);
 	background-color:#fff;
 }
 
@@ -202,27 +202,27 @@ div.box-violet div.border-content
 /* VIOLET-GRAY START */
 div.box-violet-gray div.border-tl
 {
-    background-image: url(../images/borders//box-violet-gray/border-tl.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-tl.jpg);
 }
 
 div.box-violet-gray div.border-tr
 {
-    background-image: url(../images/borders//box-violet-gray/border-tr.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-tr.jpg);
 }
 
 div.box-violet-gray div.border-tc
 {
-    background-image: url(../images/borders//box-violet-gray/border-tc.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-tc.jpg);
 }
 
 div.box-violet-gray div.border-ml
 {
-    background-image: url(../images/borders//box-violet-gray/border-ml.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-ml.jpg);
 }
 
 div.box-violet-gray div.border-mr
 {
-    background-image: url(../images/borders//box-violet-gray/border-mr.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-mr.jpg);
     padding: 0 2px;
 }
 
@@ -234,17 +234,17 @@ div.box-violet-gray div.border-mc
 
 div.box-violet-gray div.border-bl
 {
-    background-image: url(../images/borders//box-violet-gray/border-bl.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-bl.jpg);
 }
 
 div.box-violet-gray div.border-br
 {
-    background-image: url(../images/borders//box-violet-gray/border-br.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-br.jpg);
 }
 
 div.box-violet-gray div.border-bc
 {
-    background-image: url(../images/borders//box-violet-gray/border-bc.jpg);
+    background-image: url(../images/borders/box-violet-gray/border-bc.jpg);
 	background-color:#ccc;
 }
 
@@ -258,27 +258,27 @@ div.box-violet-gray div.border-content
 /* GRAY START */
 div.box-gray div.border-tl
 {
-    background-image: url(../images/borders//box-gray/border-tl.jpg);
+    background-image: url(../images/borders/box-gray/border-tl.jpg);
 }
 
 div.box-gray div.border-tr
 {
-    background-image: url(../images/borders//box-gray/border-tr.jpg);
+    background-image: url(../images/borders/box-gray/border-tr.jpg);
 }
 
 div.box-gray div.border-tc
 {
-    background-image: url(../images/borders//box-gray/border-tc.jpg);
+    background-image: url(../images/borders/box-gray/border-tc.jpg);
 }
 
 div.box-gray div.border-ml
 {
-    background-image: url(../images/borders//box-gray/border-ml.jpg);
+    background-image: url(../images/borders/box-gray/border-ml.jpg);
 }
 
 div.box-gray div.border-mr
 {
-    background-image: url(../images/borders//box-gray/border-mr.jpg);
+    background-image: url(../images/borders/box-gray/border-mr.jpg);
     padding: 0 2px;
 }
 
@@ -290,17 +290,17 @@ div.box-gray div.border-mc
 
 div.box-gray div.border-bl
 {
-    background-image: url(../images/borders//box-gray/border-bl.jpg);
+    background-image: url(../images/borders/box-gray/border-bl.jpg);
 }
 
 div.box-gray div.border-br
 {
-    background-image: url(../images/borders//box-gray/border-br.jpg);
+    background-image: url(../images/borders/box-gray/border-br.jpg);
 }
 
 div.box-gray div.border-bc
 {
-    background-image: url(../images/borders//box-gray/border-bc.jpg);
+    background-image: url(../images/borders/box-gray/border-bc.jpg);
 	background-color:#f0f0f0;
 }
 
@@ -315,12 +315,12 @@ div.box-gray div.border-content
 
 div.box-trans-blue div.border-tl
 {
-    background-image: url(../images/borders//box-trans-blue/border-tl.gif);
+    background-image: url(../images/borders/box-trans-blue/border-tl.gif);
 }
 
 div.box-trans-blue div.border-tr
 {
-    background-image: url(../images/borders//box-trans-blue/border-tr.gif);
+    background-image: url(../images/borders/box-trans-blue/border-tr.gif);
 }
 
 div.box-trans-blue div.border-tc
@@ -351,12 +351,12 @@ div.box-trans-blue div.border-mc
 
 div.box-trans-blue div.border-bl
 {
-    background-image: url(../images/borders//box-trans-blue/border-bl.gif);
+    background-image: url(../images/borders/box-trans-blue/border-bl.gif);
 }
 
 div.box-trans-blue div.border-br
 {
-    background-image: url(../images/borders//box-trans-blue/border-br.gif);
+    background-image: url(../images/borders/box-trans-blue/border-br.gif);
 }
 
 div.box-trans-blue div.border-bc
@@ -376,12 +376,12 @@ div.box-trans-blue div.border-content
 
 div.box-trans-gray div.border-tl
 {
-    background-image: url(../images/borders//box-trans-gray/border-tl.gif);
+    background-image: url(../images/borders/box-trans-gray/border-tl.gif);
 }
 
 div.box-trans-gray div.border-tr
 {
-    background-image: url(../images/borders//box-trans-gray/border-tr.gif);
+    background-image: url(../images/borders/box-trans-gray/border-tr.gif);
 }
 
 div.box-trans-gray div.border-tc
@@ -412,12 +412,12 @@ div.box-trans-gray div.border-mc
 
 div.box-trans-gray div.border-bl
 {
-    background-image: url(../images/borders//box-trans-gray/border-bl.gif);
+    background-image: url(../images/borders/box-trans-gray/border-bl.gif);
 }
 
 div.box-trans-gray div.border-br
 {
-    background-image: url(../images/borders//box-trans-gray/border-br.gif);
+    background-image: url(../images/borders/box-trans-gray/border-br.gif);
 }
 
 div.box-trans-gray div.border-bc
@@ -433,12 +433,12 @@ div.box-trans-gray div.border-content
 
 div.box-trans-gray-2 div.border-tl
 {
-    background-image: url(../images/borders//box-trans-gray-2/border-tl.gif);
+    background-image: url(../images/borders/box-trans-gray-2/border-tl.gif);
 }
 
 div.box-trans-gray-2 div.border-tr
 {
-    background-image: url(../images/borders//box-trans-gray-2/border-tr.gif);
+    background-image: url(../images/borders/box-trans-gray-2/border-tr.gif);
 }
 
 div.box-trans-gray-2 div.border-tc
@@ -469,12 +469,12 @@ div.box-trans-gray-2 div.border-mc
 
 div.box-trans-gray-2 div.border-bl
 {
-    background-image: url(../images/borders//box-trans-gray-2/border-bl.gif);
+    background-image: url(../images/borders/box-trans-gray-2/border-bl.gif);
 }
 
 div.box-trans-gray-2 div.border-br
 {
-    background-image: url(../images/borders//box-trans-gray-2/border-br.gif);
+    background-image: url(../images/borders/box-trans-gray-2/border-br.gif);
 }
 
 div.box-trans-gray-2 div.border-bc
@@ -490,12 +490,12 @@ div.box-trans-gray-2 div.border-content
 
 div.box-trans-gray-3 div.border-tl
 {
-    background-image: url(../images/borders//box-trans-gray-3/border-tl.gif);
+    background-image: url(../images/borders/box-trans-gray-3/border-tl.gif);
 }
 
 div.box-trans-gray-3 div.border-tr
 {
-    background-image: url(../images/borders//box-trans-gray-3/border-tr.gif);
+    background-image: url(../images/borders/box-trans-gray-3/border-tr.gif);
 }
 
 div.box-trans-gray-3 div.border-tc
@@ -526,12 +526,12 @@ div.box-trans-gray-3 div.border-mc
 
 div.box-trans-gray-3 div.border-bl
 {
-    background-image: url(../images/borders//box-trans-gray-3/border-bl.gif);
+    background-image: url(../images/borders/box-trans-gray-3/border-bl.gif);
 }
 
 div.box-trans-gray-3 div.border-br
 {
-    background-image: url(../images/borders//box-trans-gray-3/border-br.gif);
+    background-image: url(../images/borders/box-trans-gray-3/border-br.gif);
 }
 
 div.box-trans-gray-3 div.border-bc
@@ -551,12 +551,12 @@ div.box-trans-gray-3 div.border-content
 
 div.box-trans-white div.border-tl
 {
-    background-image: url(../images/borders//box-trans-white/border-tl.gif);
+    background-image: url(../images/borders/box-trans-white/border-tl.gif);
 }
 
 div.box-trans-white div.border-tr
 {
-    background-image: url(../images/borders//box-trans-white/border-tr.gif);
+    background-image: url(../images/borders/box-trans-white/border-tr.gif);
 }
 
 div.box-trans-white div.border-tc
@@ -586,12 +586,12 @@ div.box-trans-white div.border-mc
 
 div.box-trans-white div.border-bl
 {
-    background-image: url(../images/borders//box-trans-white/border-bl.gif);
+    background-image: url(../images/borders/box-trans-white/border-bl.gif);
 }
 
 div.box-trans-white div.border-br
 {
-    background-image: url(../images/borders//box-trans-white/border-br.gif);
+    background-image: url(../images/borders/box-trans-white/border-br.gif);
 }
 
 div.box-trans-white div.border-bc
@@ -917,12 +917,12 @@ div.global-view-full div.attributi-base div.col-odd div.factbox-header div.borde
 
 div.box-trans-dark div.border-tl
 {
-    background-image: url(../images/borders//box-trans-dark/border-tl.gif);
+    background-image: url(../images/borders/box-trans-dark/border-tl.gif);
 }
 
 div.box-trans-dark div.border-tr
 {
-    background-image: url(../images/borders//box-trans-dark/border-tr.gif);
+    background-image: url(../images/borders/box-trans-dark/border-tr.gif);
 }
 
 div.box-trans-dark div.border-tc
@@ -953,12 +953,12 @@ div.box-trans-dark div.border-mc
 
 div.box-trans-dark div.border-bl
 {
-    background-image: url(../images/borders//box-trans-dark/border-bl.gif);
+    background-image: url(../images/borders/box-trans-dark/border-bl.gif);
 }
 
 div.box-trans-dark div.border-br
 {
-    background-image: url(../images/borders//box-trans-dark/border-br.gif);
+    background-image: url(../images/borders/box-trans-dark/border-br.gif);
 }
 
 div.box-trans-dark div.border-bc

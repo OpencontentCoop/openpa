@@ -31,17 +31,17 @@ try
     
     // sincronizzazaione classi
     $classiTrasparenza = array(
-        //'conferimento_incarico',
-        //'consulenza',
+        'conferimento_incarico',
+        'consulenza',
         'nota_trasparenza',
         'pagina_trasparenza',
-        //'responsabile_trasparenza',
+        'responsabile_trasparenza',
         'trasparenza',
-        //'tasso_assenza',
-        //'dipendente',
+        'tasso_assenza',
+        'dipendente',
         //'incarico',
-        //'sovvenzione_contributo',
-        //'organo_politico'
+        'sovvenzione_contributo',
+        'organo_politico'
     );
     
     foreach( $classiTrasparenza as $identifier )
