@@ -1,1 +1,0 @@
-{include uri="design:content/mediaplayer/video_player.tpl" attribute=$object.data_map.file}
