@@ -1,14 +1,25 @@
-{def $banner_folder=fetch( 'content', 'list', hash(
-                            'parent_node_id', openpaini( 'LinkSpeciali', 'NodoBannerHomepage', 0 ), 
-							'limit', 15,
-							'sort_by', array( 'priority', true() )
-						  ) )}
+{def $banner_folder = array()}
+{if openpaini( 'LinkSpeciali', 'NodoBannerHomepage', true() )}
+  {set $banner_folder=fetch( 'content', 'list', hash(
+							  'parent_node_id', openpaini( 'LinkSpeciali', 'NodoBannerHomepage', 0 ), 
+							  'limit', 15,
+							  'sort_by', array( 'priority', true() )
+							) )}
+{else}
+  {def $banner_relations = cond( is_set( fetch( openpa, homepage ).data_map.banners ), fetch( openpa, homepage ).data_map.banners, false() )}
+  {if $banner_relations}
+	{foreach $banner_relations.content.relation_list as $item}
+	  {set $banner_folder = $banner_folder|append( fetch( content, object, hash( object_id, $item.contentobject_id ) ) )}
+	{/foreach}
+  {/if}
+  {undef $banner_relations}
+{/if}
 
-{if $banner_folder}
+{if count($banner_folder)gt(0)}
 
 {ezscript_require(array( 'ezjsc::jquery', 'jcarousel.js' ) )}
 
-{if count($banner_folder|gt(3))}
+{if count($banner_folder)|gt(3)}
 <script type="text/javascript">
 {literal}
 $(document).ready(function() {

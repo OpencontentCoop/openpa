@@ -19,7 +19,7 @@ $FunctionList['ruoli'] = array( 'name' => 'ruoli',
                                                     )
                                 );
 
-$FunctionList['homepage'] = array( 'name' => 'nomi_ruoli_dirigenziali',
+$FunctionList['homepage'] = array( 'name' => 'homepage',
                                'operation_types' => array( 'read' ),
                                'call_method' => array( 'include_file' => 'extension/openpa/classes/openpafunctioncollection.php',
                                                         'class' => 'OpenPaFunctionCollection',
