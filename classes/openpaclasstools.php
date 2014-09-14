@@ -107,7 +107,7 @@ class OpenPAClassTools
                     $class = $this->createNew( $id );
                     if ( !$class instanceof eZContentClass )
                     {
-                        throw new Exception( "Fallita la creazionde della classe $id" );                    
+                        throw new Exception( "Fallita la creazione della classe $id" );
                     }                    
                 }
                 else
@@ -434,9 +434,13 @@ class OpenPAClassTools
     
     protected static function fetchRemoteByIdentifier( $identifier )
     {
-        $currentUrl = eZINI::instance()->variable( 'SiteSettings', 'SiteURL' );
-        $originalRepositoryUrl = self::$remoteUrl . $identifier;        
-        if ( stripos( $originalRepositoryUrl, $currentUrl ) === false )
+        $currentUrl = 'http://' . eZINI::instance()->variable( 'SiteSettings', 'SiteURL' );
+        $originalRepositoryUrl = self::$remoteUrl . $identifier;
+
+        $repository = parse_url( $originalRepositoryUrl );
+        $locale = parse_url( $currentUrl );
+
+        if ( $repository['host'] != $locale['host'] )
         {
             $original = json_decode( OpenPABase::getDataByURL( $originalRepositoryUrl ) );            
             if ( isset( $original->error ) )
