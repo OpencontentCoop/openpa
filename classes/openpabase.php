@@ -84,6 +84,12 @@ class OpenPABase
         $identifier = self::getCurrentSiteaccessIdentifier();
         return $identifier . '_frontend';
     }
+
+    public static function getDebugSiteaccessName()
+    {
+        $identifier = self::getCurrentSiteaccessIdentifier();
+        return $identifier . '_debug';
+    }
     
     public static function getDataByURL( $url, $justCheckURL = false, $userAgent = false )
     {
