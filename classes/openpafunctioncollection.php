@@ -594,7 +594,7 @@ class OpenPaFunctionCollection
         return false;
     }
     
-    protected static function fetchHeaderImage()
+    public static function fetchHeaderImage()
     {
         $result = false;
         $homePage = self::fetchHome();
@@ -620,6 +620,37 @@ class OpenPaFunctionCollection
                 if ( isset( $dataMap['image'] ) && $dataMap['image'] instanceof eZContentObjectAttribute && $dataMap['image']->attribute( 'has_content' ) )
                 {
                     $result = $dataMap['image']->attribute( 'content' )->attribute( 'header_banner' );                    
+                }
+            }
+        }
+        return $result;
+    }
+
+    public static function fetchHeaderLogo()
+    {
+        $result = false;
+        $homePage = self::fetchHome();
+        if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
+        {
+            $headerObject = $homePage->attribute( 'object' );
+            if ( $headerObject instanceof eZContentObject )
+            {
+                $dataMap = $headerObject->attribute( 'data_map' );
+                if ( isset( $dataMap['logo'] ) && $dataMap['logo'] instanceof eZContentObjectAttribute && $dataMap['logo']->attribute( 'has_content' ) )
+                {
+                    $result = $dataMap['logo']->attribute( 'content' )->attribute( 'header_logo' );
+                }
+            }
+        }
+        else
+        {
+            $headerObject = eZContentObject::fetchByRemoteID( self::$remoteLogo );
+            if ( $headerObject instanceof eZContentObject )
+            {
+                $dataMap = $headerObject->attribute( 'data_map' );
+                if ( isset( $dataMap['image'] ) && $dataMap['image'] instanceof eZContentObjectAttribute && $dataMap['image']->attribute( 'has_content' ) )
+                {
+                    $result = $dataMap['image']->attribute( 'content' )->attribute( 'header_logo' );
                 }
             }
         }

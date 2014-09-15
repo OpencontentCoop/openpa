@@ -30,3 +30,7 @@ $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/find
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/printtools.php',
                                     'class' => 'PrintToolsOperator',
                                     'operator_names' => array( 'query_string' ) );
+
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpapagedata.php',
+                                    'class' => 'OpenPAPageData',
+                                    'operator_names' => array( 'openpapagedata' ) );
