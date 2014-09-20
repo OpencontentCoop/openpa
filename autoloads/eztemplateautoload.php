@@ -5,7 +5,7 @@ $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/open
 
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpamenuoperator.php',
                                     'class' => 'OpenPAMenuOperator',
-                                    'operator_names' => array( 'top_menu_cached', 'left_menu_cached' ) );
+                                    'operator_names' => array( 'top_menu_cached', 'left_menu_cached', 'tree_menu' ) );
 
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/slugizeoperator.php',
                                     'class' => 'SlugizeOperator',
@@ -34,3 +34,7 @@ $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/prin
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpapagedata.php',
                                     'class' => 'OpenPAPageData',
                                     'operator_names' => array( 'openpapagedata' ) );
+
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpahandlersoperator.php',
+                                    'class' => 'OpenPAHandlerOperators',
+                                    'operator_names' => array( 'object_handler' ) );

@@ -10,7 +10,7 @@ class OpenPAMenuOperator
     
     function OpenPAMenuOperator()
     {
-        $this->Operators= array( 'top_menu_cached', 'left_menu_cached' );
+        $this->Operators= array( 'top_menu_cached', 'left_menu_cached', 'tree_menu' );
     }
 
     function operatorList()
@@ -33,6 +33,9 @@ class OpenPAMenuOperator
             'left_menu_cached' => array
             (
                 'parameters' => array( "type" => "array", "required" => false, "default" => array() )
+            ),
+            'tree_menu' => array(
+                'parameters' => array( "type" => "array", "required" => true, "default" => array() )
             )
         );
     }
@@ -49,6 +52,11 @@ class OpenPAMenuOperator
             case 'left_menu_cached':
             {
                 return $operatorValue = OpenPAMenuTool::getLeftMenu( $namedParameters['parameters'] );
+            } break;
+
+            case 'tree_menu':
+            {
+                return $operatorValue = OpenPAMenuTool::getTreeMenu( $namedParameters['parameters'] );
             } break;
         }
         return false;
