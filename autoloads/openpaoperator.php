@@ -5,11 +5,19 @@ class OpenPAOperator
     
     private $area_tematica_node = array();
     
-    protected static $_nodes = array();
-    
     function OpenPAOperator()
     {
-        $this->Operators= array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree', 'access_style', 'unique' );
+        $this->Operators= array(
+            'openpaini',
+            'get_main_style', 'has_main_style',
+            'is_area_tematica', 'get_area_tematica_style',
+            'is_dipendente',
+            'openpa_shorten',
+            'has_abstract', 'abstract',
+            'rss_list',
+            'materia_make_tree',
+            'access_style',
+            'unique' );
     }
 
     function operatorList()
@@ -27,35 +35,35 @@ class OpenPAOperator
         return array(
             'openpaini' => array
             (
-                'block' 	    => array( 'type' 	=> 'string',	'required' => true ),
-                'setting' 	    => array( 'type'	=> 'string', 	'required' => true ),
-                'default' 	    => array( 'type'	=> 'mixed', 	'required' => false, 'default' => false )
+                'block' 	    => array( 'type' => 'string', 'required' => true ),
+                'setting' 	    => array( 'type' => 'string', 'required' => true ),
+                'default' 	    => array( 'type' => 'mixed', 'required' => false, 'default' => false )
             ),
             'has_main_style' => array
             (
-                'node'          => array( 'type' 	=> 'mixed',	    'required' => true )
+                'node'          => array( 'type' => 'mixed', 'required' => true )
             ),
             'openpa_shorten' => array
             (
-                'chars_to_keep' => array( "type"    => "integer",   "required" => false, "default" => 80 ),
-                'str_to_append' => array( "type"    => "string",    "required" => false, "default" => "..." ),
-                'trim_type'     => array( "type"    => "string",    "required" => false, "default" => "right" )
+                'chars_to_keep' => array( "type" => "integer", "required" => false, "default" => 80 ),
+                'str_to_append' => array( "type" => "string", "required" => false, "default" => "..." ),
+                'trim_type'     => array( "type" => "string", "required" => false, "default" => "right" )
             ),
             'has_abstract' => array
             (
-                'node' => array( "type"    => "integer",   "required" => false, "default" => false )                
+                'node' => array( "type" => "integer", "required" => false, "default" => false )
             ),
             'abstract' => array
             (
-                'node' => array( "type"    => "integer",   "required" => false, "default" => false )
+                'node' => array( "type" => "integer", "required" => false, "default" => false )
             ),
             'rss_list' => array
             (
-                'fetchList' => array( "type"    => "string",   "required" => true, "default" => 'export' )
+                'fetchList' => array( "type" => "string", "required" => true, "default" => 'export' )
             ),
             'materia_make_tree' => array
             (
-                'relation_list' => array( "type"    => "array",   "required" => true, "default" => array() )
+                'relation_list' => array( "type"  => "array", "required" => true, "default" => array() )
             )
         );
     }
@@ -90,7 +98,7 @@ class OpenPAOperator
                 if ( is_array( $operatorValue ) )
                 {
                     $operatorValue = array_unique( $operatorValue );
-                }
+                } break;
             }
             
             case 'access_style':
@@ -171,7 +179,7 @@ class OpenPAOperator
 
                 if ( is_numeric( $node ) )
                 {
-                    $node = self::fetchNode( $node );
+                    $node = OpenPABase::fetchNode( $node );
                 }
 
                 if ( $node instanceof eZContentObjectTreeNode )
@@ -432,7 +440,7 @@ class OpenPAOperator
 
                 if ( is_numeric( $node ) )
                 {
-                    $node = self::fetchNode( $node );
+                    $node = OpenPABase::fetchNode( $node );
                 }
 
                 if ( $node instanceof eZContentObjectTreeNode )
@@ -508,7 +516,7 @@ class OpenPAOperator
         {
             $ini = eZINI::instance( 'openpa.ini' );
             $areeIdentifiers = $ini->hasVariable( 'AreeTematiche', 'IdentificatoreAreaTematica' ) ? $ini->variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ) : array( 'area_tematica' );
-            $node = self::fetchNode( $nodeID );
+            $node = OpenPABase::fetchNode( $nodeID );
     
             $return = false;
         
@@ -544,15 +552,7 @@ class OpenPAOperator
         }
         return false;
     }
-    
-    protected static function fetchNode( $nodeID )
-    {
-        if ( !isset( self::$_nodes[$nodeID] ) )
-        {
-            self::$_nodes[$nodeID] = eZContentObjectTreeNode::fetch( $nodeID );
-        }
-        return self::$_nodes[$nodeID];
-    }
+
 }
 
 ?>

@@ -3,7 +3,10 @@
 class OpenPABase
 {
     const PENDING_ACTION_INDEX_OBJECTS = 'openpa_index_objects';
+
     const PENDING_ACTION_RENAME_OBJECT = 'openpa_rename_object';
+
+    protected static $cacheNodes = array();
     
     public static function getIniFileName( $file, $block = 'INISettings', $setting = 'INIFile' )
     {
@@ -164,6 +167,20 @@ class OpenPABase
         }
 
         return false;
+    }
+
+    /**
+     * @param $nodeID
+     *
+     * @return eZContentObjectTreeNode
+     */
+    public static function fetchNode( $nodeID )
+    {
+        if ( !isset( self::$cacheNodes[$nodeID] ) )
+        {
+            self::$cacheNodes[$nodeID] = eZContentObjectTreeNode::fetch( $nodeID );
+        }
+        return self::$cacheNodes[$nodeID];
     }
 
 }

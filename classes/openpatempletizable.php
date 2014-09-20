@@ -2,7 +2,7 @@
 
 class OpenPATempletizable
 {
-    protected $data;
+    protected $data = array();
     
     public function attributes()
     {
@@ -21,7 +21,7 @@ class OpenPATempletizable
         {
             return $this->data[$key];
         }        
-        eZDebug::writeNotice( "Attribute $key does not exist", __METHOD__ );
+        eZDebug::writeNotice( "Attribute $key does not exist", get_called_class() );
         return false;
     }
     

@@ -7,7 +7,7 @@ class OpenPAINI
         //'SideMenu::EsponiLink'
     );
     
-    public static function variable( $block, $value, $default )
+    public static function variable( $block, $value, $default = null )
     {
         if ( self::hasFilter( $block, $value, $default ) )
         {
