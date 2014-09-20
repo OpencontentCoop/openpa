@@ -321,15 +321,31 @@ class OpenPAMenuTool
         {
             $settingsScope = $parameters['scope'];
             $handlerObject = OpenPAObjectHandler::instanceFromObject( null );
-            $classIdentifiers = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope . '_classes' );
-            $excludeNodes = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope . '_exclude' );
-            $limits  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope . '_limits' );
+
+            $classIdentifiers = array();
+            $excludeNodes = array();
+            $limits = array();
+            $maxRecursion = 10;
+            $fetchParameters = array();
+            $customMaxRecursion = array();
+            if ( $handlerObject->hasAttribute( 'control_menu' )
+                 && in_array( $settingsScope, $handlerObject->attribute( 'control_menu' )->attribute( 'available_menu' ) ) )
+            {
+                $classIdentifiers = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'classes' );
+                $excludeNodes = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'exclude' );
+                $limits  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'limits' );
+                $maxRecursion  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'max_recursion' );
+                $fetchParameters  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'custom_fetch_parameters' );
+                $customMaxRecursion  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'custom_max_recursion' );
+            }
 
             $settings = array(
                 'limit' => $limits,
                 'class_identifiers' => $classIdentifiers,
-                'exclude_node_ids' => $excludeNodes
-
+                'exclude_node_ids' => $excludeNodes,
+                'max_recursion' => $maxRecursion,
+                'custom_fetch_parameters' => $fetchParameters,
+                'custom_max_recursion' => $customMaxRecursion
             );
             return serialize( self::treeMenu( $parameters['root_node_id'], $settings ) );
         }
@@ -396,6 +412,16 @@ class OpenPAMenuTool
 
     public static function getTreeMenu( $parameters )
     {
+        if ( isset( $parameters['user_hash'] ) )
+        {
+            $parameters['user_hash'] = $parameters['scope'] . '_' . $parameters['user_hash'];
+        }
+        else
+        {
+            $parameters['user_hash'] = $parameters['scope'];
+        }
+        // per testare senza cache
+        //return unserialize( self::generateMenu( self::TREEMENU, $parameters ) );
         return unserialize( self::getMenu( self::TREEMENU, $parameters ) );
     }
 
@@ -413,29 +439,46 @@ class OpenPAMenuTool
     protected static function treeMenuItem( eZContentObjectTreeNode $rootNode, array $settings, $level )
     {
         $handlerObject = OpenPAObjectHandler::instanceFromObject( $rootNode );
-        $menuItem = array();
-        $menuItem['item'] = array(
-            'node_id' => $rootNode->attribute( 'node_id' ),
-            'name' => $rootNode->attribute( 'name' ),
-            'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ),
-            'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
-            'target' => $handlerObject->attribute( 'content_link' )->attribute( 'target' )
-        );
-        $menuItem['level'] = $level;
-        $menuItem['children'] = array();
-        if ( $level < 4 )
+
+        if ( isset( $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )] ) )
         {
+            $settings['max_recursion'] = $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )];
+        }
+
+        $menuItem = array(
+            'item' => array(
+                'node_id' => $rootNode->attribute( 'node_id' ),
+                'name' => $rootNode->attribute( 'name' ),
+                'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ),
+                'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
+                'target' => $handlerObject->attribute( 'content_link' )->attribute( 'target' ),
+            ),
+            'max_recursion' => $settings['max_recursion'],
+            'level' => $level,
+            'children' => array()
+        );
+
+        $fetchChildren = $level < $settings['max_recursion'];
+        if ( $fetchChildren )
+        {
+            $childrenLimit = isset( $settings['limit']['level_' . $level] ) ? $settings['limit']['level_' . $level] : null;
+
+            $childrenFetchParameters = array();
+            if ( isset( $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )] ) )
+            {
+                $childrenFetchParameters = $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )];
+            }
             $nodes = eZFunctionHandler::execute(
                 'content',
                 'list',
-                array(
+                array_merge( array(
                      'parent_node_id' => $rootNode->attribute( 'node_id' ),
                      'sort_by' => $rootNode->attribute( 'sort_array' ),
                      'data_map_load' => false,
-                     'limit' => isset( $settings['limit']['level_' . $level] ) ? $settings['limit']['level_' . $level] : null,
+                     'limit' => $childrenLimit,
                      'class_filter_type' => 'include',
-                     'class_filter_array' => $settings['class_identifiers']
-                )
+                     'class_filter_array' => $settings['class_identifiers'],
+                ), $childrenFetchParameters )
             );
             if ( count( $nodes ) > 0 )
             {

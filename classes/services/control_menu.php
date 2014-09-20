@@ -4,13 +4,71 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
 {
     function run()
     {
+        $this->data['available_menu'] = array( 'top_menu', 'side_menu' );
+
+        $this->data['show_top_menu'] = true;
+        $this->data['top_menu'] = new OpenPATempletizable( array(
+            'root_node'=> OpenPaFunctionCollection::fetchHome(),
+            'classes' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu', array() ),
+            'exclude' => OpenPAINI::variable( 'TopMenu', 'NascondiNodi', array() ),
+            'limits' => array(
+                'level_2' => OpenPAINI::variable( 'TopMenu', 'LimiteTerzoLivello', 10 )
+            ),
+            'user_hash' => null,
+            'max_recursion' => 1,
+            'custom_max_recursion' => $this->getTopMenuCustomRecursions(),
+            'custom_fetch_parameters' => $this->getTopMenuCustomFetchParameters()
+        ));
+
         $this->data['show_side_menu'] = $this->hasSideMenu();
-        $this->data['side_menu_root_node'] = $this->getSideMenuRootNode();
-        $this->data['side_menu_classes'] = $this->getSideMenuClassIdentifiers();
-        $this->data['side_menu_exclude'] = OpenPAINI::variable( 'SideMenu', 'NascondiNodi', array() );
-        $this->data['side_menu_limits'] = array();
-        $this->data['side_menu_user_hash'] = $this->getSideMenuUserHash();
+        $this->data['side_menu'] = new OpenPATempletizable( array(
+            'root_node' => $this->getSideMenuRootNode(),
+            'classes' => $this->getSideMenuClassIdentifiers(),
+            'exclude' => OpenPAINI::variable( 'SideMenu', 'NascondiNodi', array() ),
+            'limits' => array(),
+            'user_hash' => $this->getSideMenuUserHash(),
+            'max_recursion' => 4,
+            'custom_max_recursion' => array(),
+            'custom_fetch_parameters' => array()
+        ));
     }
+
+    protected function getTopMenuCustomFetchParameters()
+    {
+        $data = array();
+        $topMenuRootNodeIds = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu', array() );
+        foreach( $topMenuRootNodeIds as $nodeId )
+        {
+            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiAreeCustomMenu', array() ) ) )
+            {
+                $data[$nodeId] = array(
+                    'limitation' => array()
+                );
+            }
+            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiEstesiCustomMenu', array( '6062' ) ) ) )
+            {
+                $data[$nodeId] = array(
+                    'limit' => OpenPAINI::variable( 'TopMenu', 'LimiteSecondoLivello', 4 )
+                );
+            }
+        }
+        return $data;
+    }
+
+    protected function getTopMenuCustomRecursions()
+    {
+        $data = array();
+        $topMenuRootNodeIds = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu' );
+        foreach( $topMenuRootNodeIds as $nodeId )
+        {
+            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiEstesiCustomMenu', array( '6062' ) ) ) )
+            {
+                $data[$nodeId] = 2;
+            }
+        }
+        return $data;
+    }
+
 
     protected function hasSideMenu()
     {
@@ -57,7 +115,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
     protected function getSideMenuClassIdentifiers()
     {
         $classes = false;
-        $rootNode = $this->data['side_menu_root_node'];
+        $rootNode = $this->getSideMenuRootNode();
         if ( $rootNode instanceof eZContentObjectTreeNode )
         {
             $classes = OpenPAINI::variable( 'SideMenu', 'IdentificatoriMenu_' . $rootNode->attribute( 'class_identifier' ), false );

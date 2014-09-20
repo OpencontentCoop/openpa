@@ -734,6 +734,39 @@ class OpenPaFunctionCollection
                     }
                 }
             }
+
+            // non usare qui OpenPAINI perchè questa funzione è un filtro di OpenPAIINI::filter
+            if ( eZINI::instance( 'openpa.ini' )->hasVariable( 'TopMenu', 'NodiCustomMenu' ) )
+            {
+                $fromIni = eZINI::instance( 'openpa.ini' )->variable( 'TopMenu', 'NodiCustomMenu' );
+            }
+            if ( empty( self::$topmenu ) && !empty( $fromIni ) )
+            {
+                self::$topmenu = $fromIni;
+            }
+            if ( empty( self::$topmenu ) )
+            {
+                $home = self::fetchHome();
+                $nodes = eZFunctionHandler::execute(
+                    'content',
+                    'list',
+                    array(
+                         'parent_node_id' => $home->attribute( 'node_id' ),
+                         'sort_by' => $home->attribute( 'sort_array' ),
+                         'class_filter_type' => 'include',
+                         'load_data_map' => false,
+                         'class_filter_array' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),
+                         'limit' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello', 4 )
+                    )
+                );
+                if ( count( $nodes ) )
+                {
+                    foreach( $nodes as $node )
+                    {
+                        self::$topmenu[] = $node->attribute( 'node_id' );
+                    }
+                }
+            }
         }
         return self::$topmenu;
     }    
