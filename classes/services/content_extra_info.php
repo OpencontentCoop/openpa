@@ -1,0 +1,94 @@
+<?php
+
+class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
+{
+    protected $currentExtraInfoNode;
+
+    function run()
+    {
+        $this->findGlobalLayout();
+        $this->data['extra_info'] = $this->getExtraInfoData();
+    }
+
+    function getExtraInfoData()
+    {
+        $data = array();
+        $layout = $this->findGlobalLayout();
+        if ( $layout instanceof eZContentObjectAttribute && $layout->attribute( 'has_content' ) )
+        {
+            echo '<pre>';print_r($layout->attribute('content'));die();
+        }
+        return $data;
+    }
+
+    /**
+     * @return eZContentObjectAttribute|false
+     */
+    protected function findGlobalLayout()
+    {
+        $data = false;
+        if ( $this->currentExtraInfoNode instanceof eZContentObjectTreeNode )
+        {
+            $dataMap = $this->currentExtraInfoNode->attribute( 'data_map' );
+            foreach( $dataMap as $attribute )
+            {
+                if ( $attribute->attribute( 'data_type_string' ) == 'ezpage' )
+                {
+                    $data = $attribute;
+                    break;
+                }
+            }
+        }
+        return $data;
+    }
+
+    protected function findGlobalLayoutNode()
+    {
+        if ( $this->currentExtraInfoNode === null )
+        {
+            $nodesParams = array();
+            foreach( $this->container->currentPathNodeIds as $pathNodeId )
+            {
+                $nodesParams[] = array(
+                    'ParentNodeID' => $pathNodeId,
+                    'ResultID' => 'ezcontentobject_tree.node_id',
+                    'ClassFilterType' => 'include',
+                    'ClassFilterArray' => array( 'global_layout' ),
+                    'Depth' => 1,
+                    'DepthOperator' => 'eq',
+                    'AsObject' => false
+                );
+            }
+
+            $findNodes = eZContentObjectTreeNode::subTreeMultiPaths( $nodesParams, array( 'SortBy' => array( 'node_id', false ) ) );
+            $resultSortByParentNodeID = array();
+
+            if ( !empty( $findNodes ) )
+            {
+                foreach( $findNodes as $findNode )
+                {
+                    $resultSortByParentNodeID[ $findNode['parent_node_id'] ] = $findNode;
+                }
+                krsort( $resultSortByParentNodeID );
+
+                $reversePathArray = array_reverse( $this->container->currentPathNodeIds );
+                foreach( $reversePathArray as $pathNodeId )
+                {
+                    if ( isset( $resultSortByParentNodeID[$pathNodeId] ) )
+                    {
+                        $result = eZContentObjectTreeNode::makeObjectsArray( array( $resultSortByParentNodeID[$pathNodeId] ) );
+                        if ( !empty( $result ) )
+                        {
+                            if ( $result[0]->attribute( 'can_read' ) )
+                            {
+                                $this->currentExtraInfoNode = $result[0];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            $this->currentExtraInfoNode = false;
+        }
+    }
+}

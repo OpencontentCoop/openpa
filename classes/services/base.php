@@ -36,6 +36,13 @@ abstract class ObjectHandlerServiceBase extends OpenPATempletizable implements O
 
     function template()
     {
-        return "design:openpa/services/{$this->identifier}.tpl";
+        $currentErrorReporting = error_reporting();
+        error_reporting( 0 );
+        $templateUri = "design:openpa/services/{$this->identifier}.tpl";
+        $tpl = eZTemplate::factory();
+        $result = $tpl->loadURIRoot( $templateUri, false, $extraParameters );
+        error_reporting( $currentErrorReporting );
+        return $result ? $templateUri : false;
     }
+
 }
