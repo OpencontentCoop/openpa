@@ -67,6 +67,10 @@ class OpenPAObjectHandler
         {
             return self::instanceFromContentObject( $object->attribute( 'object' ), $object );
         }
+        elseif ( $object instanceof eZPageBlock )
+        {
+            return self::blockHandler( $object );
+        }
         return new OpenPAObjectHandler();
     }
 
@@ -198,6 +202,27 @@ class OpenPAObjectHandler
         }
         eZDebug::writeNotice( "Attribute $key does not exist", __METHOD__ );
         return false;
+    }
+
+    public static function blockHandler( eZPageBlock $block )
+    {
+        $class = 'OpenPABlockHandler';
+        $parameters = array();
+        $blockHandlersList = OpenPAINI::variable( 'BlockHandlers', 'Handlers', array() );
+        $currentType = $block->attribute( 'type' );
+        $currentView = $block->attribute( 'view' );
+        foreach( $blockHandlersList as $parameters => $className )
+        {
+            $parameters = explode( '/', $parameters );
+            $type = $parameters[0];
+            $view = $parameters[1];
+            if ( ( $type == '*' || $type == $currentType )
+                 && ( $view == '*' || $view == $currentView ) )
+            {
+                $class = $className;
+            }
+        }
+        return new $class( $block, $parameters );
     }
 
     public function attributeHandler( eZContentObjectAttribute $attribute )

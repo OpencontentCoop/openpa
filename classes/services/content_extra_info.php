@@ -6,7 +6,6 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
 
     function run()
     {
-        $this->findGlobalLayout();
         $this->data['extra_info'] = $this->getExtraInfoData();
     }
 
@@ -16,7 +15,11 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
         $layout = $this->findGlobalLayout();
         if ( $layout instanceof eZContentObjectAttribute && $layout->attribute( 'has_content' ) )
         {
-            echo '<pre>';print_r($layout->attribute('content'));die();
+            $content = $layout->attribute( 'content' );
+            foreach( $content->attribute( 'zones' ) as $zone )
+            {
+                $data[$zone->attribute( 'identifier' )] = $zone;
+            }
         }
         return $data;
     }
@@ -26,6 +29,7 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
      */
     protected function findGlobalLayout()
     {
+        $this->findGlobalLayoutNode();
         $data = false;
         if ( $this->currentExtraInfoNode instanceof eZContentObjectTreeNode )
         {
@@ -44,7 +48,7 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
 
     protected function findGlobalLayoutNode()
     {
-        if ( $this->currentExtraInfoNode === null )
+        if ( $this->currentExtraInfoNode == null )
         {
             $nodesParams = array();
             foreach( $this->container->currentPathNodeIds as $pathNodeId )
@@ -59,7 +63,6 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
                     'AsObject' => false
                 );
             }
-
             $findNodes = eZContentObjectTreeNode::subTreeMultiPaths( $nodesParams, array( 'SortBy' => array( 'node_id', false ) ) );
             $resultSortByParentNodeID = array();
 
@@ -70,7 +73,6 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
                     $resultSortByParentNodeID[ $findNode['parent_node_id'] ] = $findNode;
                 }
                 krsort( $resultSortByParentNodeID );
-
                 $reversePathArray = array_reverse( $this->container->currentPathNodeIds );
                 foreach( $reversePathArray as $pathNodeId )
                 {
@@ -82,13 +84,14 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
                             if ( $result[0]->attribute( 'can_read' ) )
                             {
                                 $this->currentExtraInfoNode = $result[0];
-                                break;
+                                return true;
                             }
                         }
                     }
                 }
             }
             $this->currentExtraInfoNode = false;
+            return false;
         }
     }
 }

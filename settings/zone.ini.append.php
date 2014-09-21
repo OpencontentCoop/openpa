@@ -23,6 +23,7 @@ ZoneName[main]=Zona unica
 ZoneThumbnail=globalzone_layout.gif
 Template=globalzonelayout.tpl
 AvailableForClasses[]=global_layout
+AvailableForClasses[]=area
 
 
 [2ZonesLayout1]

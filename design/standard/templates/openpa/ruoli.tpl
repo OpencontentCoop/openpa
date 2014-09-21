@@ -102,7 +102,7 @@
                 <td>{attribute_view_gui attribute=$role.data_map.struttura_di_riferimento}</td>
                 <td>{attribute_view_gui attribute=$role.data_map.utente}</td>
                 <td><a href={$role.url_alias|ezurl()}>{$role.name|wash()}</a></td>            
-                <td width="1"><div class="listbutton"><a href={concat("content/edit/",$role.contentobject_id,"/f/ita-IT")|ezurl}><img class="button" src={"edit.gif"|ezimage} width="16" height="16" alt="Edit" /></a></div></td>
+                <td width="1"><div class="listbutton"><a href={concat("content/edit/",$role.contentobject_id,"/f/ita-IT")|ezurl}><img src={"edit.gif"|ezimage} width="16" height="16" alt="Edit" /></a></div></td>
                 <td width="1">
                     {if $role.object.can_remove}
                         <form method="post" action={"content/action"|ezurl} style="display: inline">                        

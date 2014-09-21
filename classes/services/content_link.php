@@ -10,6 +10,13 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
         $this->data['link'] = $this->getLink();
         $this->data['is_internal'] = $this->isInternal;
         $this->data['target'] = $this->getTarget();
+
+        $link = $this->data['link'];
+        if ( $this->data['is_internal'] )
+        {
+            eZURI::transformURI( $link, false, 'full' );
+        }
+        $this->data['full_link'] = $link;
     }
 
     protected function getLink()

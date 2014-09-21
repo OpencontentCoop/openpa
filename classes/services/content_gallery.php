@@ -55,7 +55,7 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
                      'limit' => 1
                 )
             );
-            if ( count( $galleryChildren ) > 0 )
+            if ( count( $galleryChildren ) > 0 && $galleryChildren[0] instanceof eZContentObjectTreeNode )
             {
                 $imageChildren = eZFunctionHandler::execute(
                     'content',

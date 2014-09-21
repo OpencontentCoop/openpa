@@ -10,7 +10,7 @@ class OpenPaFunctionCollection
     public static $remoteLogo = 'OpenPaLogo';
     public static $remoteRoles = 'OpenPaRuoli';
 
-    protected static $params = array(
+    public static $params = array(
         'SearchOffset' => 0,
         'SearchLimit' => 1000,
         'Facet' => null,
@@ -34,7 +34,7 @@ class OpenPaFunctionCollection
         'ExtendedAttributeFilter' => array()
     );
     
-    protected static function search( $params, $query = '' )
+    public static function search( $params, $query = '' )
     {
         $solrSearch = new eZSolr();
         return $solrSearch->search( $query, $params );
