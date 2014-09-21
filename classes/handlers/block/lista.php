@@ -111,7 +111,7 @@ class BlockHandlerLista extends OpenPABlockHandler
                 if ( isset( $this->fetchParameters['sort_array'] ) )
                 {
                     $sortArray = $this->fetchParameters['sort_array'];
-                    $sortOrder = $sortArray[1] ? 'asc' : 'desc';
+                    $sortOrder = isset( $sortArray[1] ) && $sortArray[1] ? 'asc' : 'desc';
                     $orderBy = false;
                     switch( $sortArray[0] )
                     {
