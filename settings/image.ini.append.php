@@ -10,6 +10,7 @@ Filters[]=sharpen=-sharpen 0.5
 AliasList[]=header_banner
 AliasList[]=header_logo
 AliasList[]=icon
+AliasList[]=imagelargeoverlay
 
 [header_banner]
 Reference=reference
@@ -24,4 +25,7 @@ Filters[]=geometry/scalewidthdownonly=1000
 Reference=reference
 Filters[]=geometry/scaleheight=14
 
-*/ ?>
+[imagelargeoverlay]
+Reference=
+Filters[]
+Filters[]=geometry/scaledownonly=800;600

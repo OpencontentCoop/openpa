@@ -121,8 +121,14 @@ class OpenPACalendarItem
             {
                 throw new Exception( "Param 'attr_to_time_dt' is not a valid date" );
             }
+            if ( $toDate->getTimestamp() == 0 ) // workarpund in caso di eventi (importati) senza data di termine
+            {
+                $toDate = clone $this->data['fromDateTime'];
+                $toDate->add( new DateInterval('PT1H') );
+            }
+
             $this->data['toDateTime'] = $toDate;            
-            $this->data['to'] = $toDate->getTimestamp();            
+            $this->data['to'] = $toDate->getTimestamp();
         }
         else
         {

@@ -97,9 +97,9 @@ class OpenPACalendarData
             $dataMap = $this->calendar->attribute( 'data_map' );
             if ( isset( $dataMap['subtree_array'] )
                  && $dataMap['subtree_array'] instanceof eZContentObjectAttribute
+                 && $dataMap['subtree_array']->attribute( 'data_type_string' ) == 'ezobjectrelationlist'
                  && $dataMap['subtree_array']->attribute( 'has_content' ) )
-            {
-                $defaultParameters['subtree'] = array();
+            {            
                 $content = $dataMap['subtree_array']->attribute( 'content' );
                 foreach( $content['relation_list'] as $item )
                 {
@@ -107,6 +107,17 @@ class OpenPACalendarData
                     {
                         $defaultParameters['subtree'][] = $item['node_id'];
                     }
+                }
+            }
+            elseif ( isset( $dataMap['subtree'] )
+                     && $dataMap['subtree'] instanceof eZContentObjectAttribute
+                     && $dataMap['subtree']->attribute( 'data_type_string' ) == 'ezobjectrelation'
+                     && $dataMap['subtree']->attribute( 'has_content' ) )
+            {                
+                $content = $dataMap['subtree']->attribute( 'content' );
+                if ( $content instanceof eZContentObject )
+                {
+                    $defaultParameters['subtree'][] = $content->attribute( 'main_node_id' );
                 }
             }
         }

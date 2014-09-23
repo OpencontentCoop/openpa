@@ -163,7 +163,7 @@ class OpenPaFunctionCollection
         {
             $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );   
         }        
-        $params['SearchContentClassID'] = array( 'dipendente' );
+        $params['SearchContentClassID'] = array( 'dipendente', 'personale' );
         $params['SortBy'] = array( 'name' => 'asc' );
         if ( $struttura instanceof eZContentObjectTreeNode )
         {
