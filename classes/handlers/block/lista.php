@@ -15,7 +15,10 @@ class BlockHandlerLista extends OpenPABlockHandler
     protected function run()
     {
         $this->data['fetch_parameters'] = $this->getFetchParameters();
-        $this->data['content'] = $this->getContent();
+        $content = $this->getContent();
+        $this->data['has_content'] = $content['SearchCount'] > 0;
+        $this->data['content'] = $content['SearchResult'];
+        $this->data['search_parameters'] = $content['SearchParams'];
     }
 
     protected function getContent()
@@ -27,12 +30,9 @@ class BlockHandlerLista extends OpenPABlockHandler
             'SortBy' => $this->solrFetchParameter( 'SortBy' ),
         );
         $search = OpenPaFunctionCollection::search( $params );
-        if ( $search['SearchCount'] > 0 )
-        {
-            $data = $search['SearchResult'];
-        }
         //eZDebug::writeDebug( $params, __METHOD__ );
-        return $data;
+        $search['SearchParams'] = $params;
+        return $search;
     }
 
     protected function solrFetchParameter( $key )
@@ -121,8 +121,9 @@ class BlockHandlerLista extends OpenPABlockHandler
                             break;
 
                         case 'priority':
-                            eZDebug::writeNotice( "Priority non ammesso in ordinamento ezfind", __METHOD__ );
-                            $orderBy = 'name';
+                            eZDebug::writeNotice( "Priority non ammesso in ordinamento ezfind, viene usato published => desc", __METHOD__ );
+                            $orderBy = 'published';
+                            $sortOrder = 'desc';
                             break;
 
                         case 'modified':
@@ -185,6 +186,7 @@ class BlockHandlerLista extends OpenPABlockHandler
         switch( $key )
         {
             case 'livello_profondita':
+                $this->fetchParameters['depth_start'] = $this->currentSubTreeNode instanceof eZContentObjectTreeNode ? $this->currentSubTreeNode->attribute( 'depth' ) : 0;
                 $this->fetchParameters['depth'] = $value;
                 break;
 
@@ -235,7 +237,8 @@ class BlockHandlerLista extends OpenPABlockHandler
                     default:
                         if ( $this->currentSubTreeNode instanceof eZContentObjectTreeNode )
                         {
-                            $this->fetchParameters['sort_array'] = $this->currentSubTreeNode->attribute( 'sort_array' );
+                            $nodeSortArray = $this->currentSubTreeNode->attribute( 'sort_array' );
+                            $this->fetchParameters['sort_array'] = $nodeSortArray[0];
                         }
                         break;
                 }

@@ -38,8 +38,26 @@ class OpenPaFunctionCollection
     {
         $solrSearch = new eZSolr();
         return $solrSearch->search( $query, $params );
-    }  
-    
+    }
+
+    static public function fetchObjectTree( $parentNodeID, $sortBy, $onlyTranslated, $language, $offset, $limit, $depth, $depthOperator,
+                                            $classID, $attribute_filter, $extended_attribute_filter, $class_filter_type, $class_filter_array,
+                                            $groupBy, $mainNodeOnly, $ignoreVisibility, $limitation, $asObject, $objectNameFilter, $loadDataMap = null )
+    {
+        return eZContentFunctionCollection::fetchObjectTree( $parentNodeID, $sortBy, $onlyTranslated, $language, $offset, $limit, $depth, $depthOperator,
+            $classID, $attribute_filter, $extended_attribute_filter, $class_filter_type, $class_filter_array,
+            $groupBy, $mainNodeOnly, $ignoreVisibility, $limitation, $asObject, $objectNameFilter, $loadDataMap );
+    }
+
+    static public function fetchObjectTreeCount( $parentNodeID, $onlyTranslated, $language, $class_filter_type, $class_filter_array,
+                                                 $attributeFilter, $depth, $depthOperator,
+                                                 $ignoreVisibility, $limitation, $mainNodeOnly, $extendedAttributeFilter, $objectNameFilter )
+    {
+        return eZContentFunctionCollection::fetchObjectTreeCount( $parentNodeID, $onlyTranslated, $language, $class_filter_type, $class_filter_array,
+            $attributeFilter, $depth, $depthOperator,
+            $ignoreVisibility, $limitation, $mainNodeOnly, $extendedAttributeFilter, $objectNameFilter );
+    }
+
     public static function fetchCalendarioEventi( $calendar, $params )
     {
         try

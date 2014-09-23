@@ -14,6 +14,7 @@ class OpenPAAttributeHandler extends OpenPATempletizable
         $this->data['full_identifier'] = $this->data['contentclass']->attribute( 'identifier' ) . '/' . $this->data['contentclass_attribute']->attribute( 'identifier' );
         $this->data['full'] = $this->fullData();
         $this->data['line'] = $this->lineData();
+        $this->data['has_content'] = $this->hasContent();
     }
 
     public function is( $settingValue, $defaults = array() )
@@ -32,9 +33,15 @@ class OpenPAAttributeHandler extends OpenPATempletizable
             'show_label' => !$this->is( 'oggetti_senza_label' ),
             'exclude' => $this->is( 'attributi_da_escludere' ),
             'highlight' => $this->is( 'attributi_da_evidenziare' ),
-            'has_content' => $this->data['contentobject_attribute']->hasContent() || $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) ), //@todo
+            'has_content' => $this->hasContent(),
             'show_link' => !$this->is( 'attributi_senza_link' )
         );
+    }
+
+    //@todo
+    protected function hasContent()
+    {
+        return $this->data['contentobject_attribute']->attribute( 'has_content' ) || $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) );
     }
 
     protected function lineData()
