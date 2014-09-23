@@ -54,8 +54,9 @@ class OpenPACalendarData
                     $startTag = $parts[0];
                     switch( $startTag )
                     {
-                        case self::CUSTOM_TAG_TODAY:
+                        case self::CUSTOM_TAG_TODAY:                            
                             break;
+                        
                         case self::CUSTOM_TAG_TOMORROW:
                             $tomorrow = mktime( 0, 0, 0, date("m"), date("d") + 1, date("Y") );
                             $this->setParameter( 'day', date( self::DAY_IDENTIFIER_FORMAT, $tomorrow ) );
@@ -89,6 +90,7 @@ class OpenPACalendarData
     
     public function setParameters( $params )
     {            
+        //eZDebug::writeNotice( $params, __METHOD__ );
         $defaultParameters = self::defaultParameters();
         
         if ( $this->calendar instanceof eZContentObjectTreeNode )
@@ -119,7 +121,7 @@ class OpenPACalendarData
                 {
                     $defaultParameters['subtree'][] = $content->attribute( 'main_node_id' );
                 }
-            }
+            }            
         }
         
         foreach( $defaultParameters as $key => $value )
@@ -153,6 +155,7 @@ class OpenPACalendarData
         {
             $this->view = $params['view'];
         }
+        //eZDebug::writeNotice( $this->parameters, __METHOD__ );
     }
     
     public function fetch()
@@ -168,8 +171,7 @@ class OpenPACalendarData
         $originalStartDateTime = DateTime::createFromFormat( 'H i s n j Y', implode( ' ', $startDateArray ), self::timezone() );
         $this->parameters['picker_date'] = date( self::PICKER_DATE_FORMAT, $originalStartDateTime->getTimestamp() );
         $this->parameters['search_from_picker_date'] = $this->parameters['picker_date'];
-        if ( $this->parameters['interval'] == self::INTERVAL_MONTH )
-             //&& $this->view == self::VIEW_CALENDAR )
+        if ( $this->parameters['interval'] == self::INTERVAL_MONTH && !$this->hasCustomParameters )             
         {
             $startDateArray['day'] = 1;
         }
@@ -292,7 +294,7 @@ class OpenPACalendarData
         $solrSearch = new eZSolr();
         $solrResult = $solrSearch->search( $this->parameters['query'], $solrFetchParams );
         
-        //eZDebug::writeNotice( $this->filters, __METHOD__ );
+        //eZDebug::writeNotice( $solrFetchParams, __METHOD__ );
         //eZDebug::writeNotice( $solrResult, __METHOD__ );        
         
         $this->data['parameters'] = $this->parameters;

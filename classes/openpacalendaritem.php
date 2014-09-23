@@ -132,7 +132,11 @@ class OpenPACalendarItem
         }
         else
         {
-            throw new Exception( "Key 'attr_to_time_dt' not found" );
+            //throw new Exception( "Key 'attr_to_time_dt' not found" );
+            $toDate = clone $this->data['fromDateTime'];
+            $toDate->add( new DateInterval('PT1H') );
+            $this->data['toDateTime'] = $toDate;            
+            $this->data['to'] = $toDate->getTimestamp();
         }
         
         $this->data['duration'] = $this->data['to'] - $this->data['from'];
