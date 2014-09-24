@@ -39,7 +39,11 @@ if ( interface_exists( 'ezfIndexPlugin' ) )
                 $availableLanguages = $version->translationList( false, false );
                 foreach ( $availableLanguages as $languageCode )
                 {
-                    $docList[$languageCode]->addField('extra_event_duration_s', $duration );
+                    $xpath = new DomXpath( $docList[$languageCode]->Doc );
+                    if( $xpath->evaluate( '//field[@name="extra_event_duration_s"]')->length == 0 )
+                    {
+                        $docList[$languageCode]->addField('extra_event_duration_s', $duration );
+                    }
                 }
             }
     

@@ -2,5 +2,6 @@
 
 [IndexPlugins]
 General[]=ezfIndexEventDuration
+General[]=ezfIndexNodePriority
 
 */ ?>
