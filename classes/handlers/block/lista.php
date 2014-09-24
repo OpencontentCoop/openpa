@@ -15,6 +15,7 @@ class BlockHandlerLista extends OpenPABlockHandler
     protected function run()
     {
         $this->data['fetch_parameters'] = $this->getFetchParameters();
+        //eZDebug::writeDebug( $this->currentCustomAttributes );
         $content = $this->getContent();
         $this->data['has_content'] = $content['SearchCount'] > 0;
         $this->data['content'] = $content['SearchResult'];
@@ -30,7 +31,7 @@ class BlockHandlerLista extends OpenPABlockHandler
             'SortBy' => $this->solrFetchParameter( 'SortBy' ),
         );
         $search = OpenPaFunctionCollection::search( $params );
-        //eZDebug::writeDebug( $params, __METHOD__ );
+        //eZDebug::writeDebug( $search['SearchExtras'], __METHOD__ );
         $search['SearchParams'] = $params;
         return $search;
     }
@@ -61,12 +62,19 @@ class BlockHandlerLista extends OpenPABlockHandler
                      && !empty( $this->fetchParameters['class_filter_array'] ))
                 {
                     $filterType = $this->fetchParameters['class_filter_type'] == 'exclude' ? '-' : '';
-                    
+
+                    $classFilter = array( $this->fetchParameters['class_filter_type'] == 'exclude' ? 'and' : 'or' );
                     foreach( $this->fetchParameters['class_filter_array'] as $class )
                     {
                         if ( !empty( $class ) )
-                            $defaultFilter[] =  $filterType . "meta_class_identifier_ms:" . $class;
-                    }                    
+                        {
+                            $classFilter[] =  $filterType . "meta_class_identifier_ms:" . $class;
+                        }
+                    }
+                    if ( count( $classFilter ) > 1 )
+                    {
+                        $defaultFilter[] = $classFilter;
+                    }
                 }
 
                 if ( $this->fetchParameters['class_filter_type'] == 'include'
@@ -129,6 +137,12 @@ class BlockHandlerLista extends OpenPABlockHandler
                         case 'modified':
                         case 'published':
                             $orderBy = $sortArray[0];
+                            break;
+                        case 'modificato':
+                            $orderBy = 'modified';
+                            break;
+                        case 'pubblicato':
+                            $orderBy = 'published';
                             break;
                     }
                     if ( $orderBy )
