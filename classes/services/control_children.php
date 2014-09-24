@@ -12,37 +12,39 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
     );
     protected $currentView;
 
-    function __construct( $data = array() )
+    protected function getCurrentView()
     {
-        parent::__construct( $data );
-
-        if ( isset( $this->container->attributesHandlers['children_view'] )
-             && $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
+        if ( $this->currentView === null )
         {
-            $contentClassAttributeContent = $this->container->attributesHandlers['children_view']->attribute( 'contentclass_attribute' )->attribute( 'content' );
-            $this->availableViews = $contentClassAttributeContent['options'];
-
-            $value = $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'content' );
-            if ( is_array( $value ) )
+            if ( isset( $this->container->attributesHandlers['children_view'] )
+                 && $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
             {
-                $value = $value[0];
-                if ( isset( $contentClassAttributeContent['options'][$value] ) )
+                $contentClassAttributeContent = $this->container->attributesHandlers['children_view']->attribute( 'contentclass_attribute' )->attribute( 'content' );
+                $this->availableViews = $contentClassAttributeContent['options'];
+
+                $value = $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'content' );
+                if ( is_array( $value ) )
                 {
-                    $this->currentView = strtolower( $contentClassAttributeContent['options'][$value] );
+                    $value = $value[0];
+                    if ( isset( $contentClassAttributeContent['options'][$value] ) )
+                    {
+                        $this->currentView = strtolower( $contentClassAttributeContent['options'][$value] );
+                    }
                 }
             }
-        }
 
-        if ( $this->container->currentClassIdentifier == 'event_calendar'
-             && isset( $this->container->attributesHandlers['view'] )
-             && $this->container->attributesHandlers['view']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
-        {
-            $this->currentView = $this->container->attributesHandlers['view']->attribute( 'contentobject_attribute' )->attribute( 'content' );
+            if ( $this->container->currentClassIdentifier == 'event_calendar'
+                 && ( isset( $this->container->attributesHandlers['view'] )
+                      && $this->container->attributesHandlers['view']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) ) )
+            {
+                $this->currentView = $this->container->attributesHandlers['view']->attribute( 'contentobject_attribute' )->attribute( 'content' );
+            }
         }
     }
 
     function run()
     {
+        $this->getCurrentView();
         $this->data['views'] = array();
         foreach( $this->availableViews as $view )
         {
@@ -61,6 +63,7 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
 
     function template()
     {
+        $this->getCurrentView();
         $templateName = 'default';
         if ( $this->currentView != null )
         {

@@ -14,12 +14,14 @@ class ObjectHandlerServiceContentDetail extends ObjectHandlerServiceBase
     {
         $list = array();
         $mainContent = $this->container->attribute( 'content_main' );
+        $extraInfoCollectors = $this->container->attribute( 'content_infocollection' )->attribute( 'extra_identifiers' );
         foreach( $this->container->attributesHandlers as $attribute )
         {
             $fullData = $attribute->attribute( 'full' );
             if ( $fullData['has_content']
                  && !$fullData['exclude']
-                 && !in_array( $attribute->attribute( 'identifier' ), $mainContent->attribute( 'identifiers' ) ) )
+                 && !in_array( $attribute->attribute( 'identifier' ), $mainContent->attribute( 'identifiers' ) )
+                 && !in_array( $attribute->attribute( 'identifier' ), $extraInfoCollectors ) )
             {
                 $list[$attribute->attribute( 'identifier' )] = $attribute;
             }

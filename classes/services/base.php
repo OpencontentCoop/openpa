@@ -17,21 +17,21 @@ abstract class ObjectHandlerServiceBase extends OpenPATempletizable implements O
         $this->data = $data;
     }
 
-    function data()
+    final function data()
     {
+        $this->data['template'] = $this->template();
         $this->run();
         return $this;
     }
 
-    function setContainer( OpenPAObjectHandler $handler )
+    final function setContainer( OpenPAObjectHandler $handler )
     {
         $this->container = $handler;
     }
 
-    function setIdentifier( $identifier )
+    final function setIdentifier( $identifier )
     {
         $this->identifier = $identifier;
-        $this->data['template'] = $this->template();
     }
 
     function template()
