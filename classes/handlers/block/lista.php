@@ -132,7 +132,7 @@ class BlockHandlerLista extends OpenPABlockHandler
                         case 'priorita':
                         case 'priority':
                             //eZDebug::writeNotice( "Priority non ammesso in ordinamento ezfind, viene usato published => desc", __METHOD__ );
-                            $orderBy = 'extra_priority_si';
+                            $orderBy = ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY;
                             $sortOrder = 'desc';
                             break;
 
@@ -148,7 +148,9 @@ class BlockHandlerLista extends OpenPABlockHandler
                             break;
                     }
                     if ( $orderBy )
+                    {
                         $data = array( $orderBy => $sortOrder );
+                    }
                 }
                 break;
 

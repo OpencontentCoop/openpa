@@ -44,6 +44,25 @@ class OpenPaFunctionCollection
                                             $classID, $attribute_filter, $extended_attribute_filter, $class_filter_type, $class_filter_array,
                                             $groupBy, $mainNodeOnly, $ignoreVisibility, $limitation, $asObject, $objectNameFilter, $loadDataMap = null )
     {
+        $parentNode = OpenPABase::fetchNode( $parentNodeID );
+        $handler = OpenPAObjectHandler::instanceFromObject( $parentNode );
+        if ( $handler instanceof OpenPAObjectHandler )
+        {
+            $virtualParameters = $handler->attribute( 'content_virtual' )->attribute( 'folder' );
+            if ( $virtualParameters )
+            {
+                $params = array(
+                    'SearchSubTreeArray' => $virtualParameters['subtree'],
+                    'SearchOffset' => $offset,
+                    'SearchLimit' => $limit,
+                    'SearchContentClassID' => $virtualParameters['classes'],
+                    'SortBy' => $virtualParameters['sort']
+                );
+                $search = self::search( $params );
+                return array( 'result', $search['SearchResult'] );
+            }
+        }
+
         return eZContentFunctionCollection::fetchObjectTree( $parentNodeID, $sortBy, $onlyTranslated, $language, $offset, $limit, $depth, $depthOperator,
             $classID, $attribute_filter, $extended_attribute_filter, $class_filter_type, $class_filter_array,
             $groupBy, $mainNodeOnly, $ignoreVisibility, $limitation, $asObject, $objectNameFilter, $loadDataMap );
@@ -53,6 +72,24 @@ class OpenPaFunctionCollection
                                                  $attributeFilter, $depth, $depthOperator,
                                                  $ignoreVisibility, $limitation, $mainNodeOnly, $extendedAttributeFilter, $objectNameFilter )
     {
+        $parentNode = OpenPABase::fetchNode( $parentNodeID );
+        $handler = OpenPAObjectHandler::instanceFromObject( $parentNode );
+        if ( $handler instanceof OpenPAObjectHandler )
+        {
+            $virtualParameters = $handler->attribute( 'content_virtual' )->attribute( 'folder' );
+            if ( $virtualParameters )
+            {
+                $params = array(
+                    'SearchSubTreeArray' => $virtualParameters['subtree'],
+                    'SearchLimit' => 1,
+                    'SearchContentClassID' => $virtualParameters['classes'],
+                    'SortBy' => $virtualParameters['sort']
+                );
+                $search = self::search( $params );
+                return array( 'result', $search['SearchCount'] );
+            }
+        }
+
         return eZContentFunctionCollection::fetchObjectTreeCount( $parentNodeID, $onlyTranslated, $language, $class_filter_type, $class_filter_array,
             $attributeFilter, $depth, $depthOperator,
             $ignoreVisibility, $limitation, $mainNodeOnly, $extendedAttributeFilter, $objectNameFilter );

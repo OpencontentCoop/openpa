@@ -22,7 +22,7 @@ if ( interface_exists( 'ezfIndexPlugin' ) )
             
             foreach ( $availableLanguages as $languageCode ) 
             {
-                $docList[$languageCode]->addField( 'extra_priority_si', $priority );
+                $docList[$languageCode]->addField( ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY, $priority );
             }
         }
     }
