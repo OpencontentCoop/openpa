@@ -13,12 +13,16 @@ if ( interface_exists( 'ezfIndexPlugin' ) )
                 return;
             }
             $availableLanguages = $version->translationList( false, false );
-            foreach ( $availableLanguages as $languageCode )
+            
+            $priority = 0;
+            foreach( $nodes as $node )
             {
-                foreach( $nodes as $node )
-                {
-                    $docList[$languageCode]->addField('extra_priority___s', $node->attribute( 'priority' ) );
-                }
+                $priority += $node->attribute( 'priority' );
+            }
+            
+            foreach ( $availableLanguages as $languageCode ) 
+            {
+                $docList[$languageCode]->addField( 'extra_priority_si', $priority );
             }
         }
     }
