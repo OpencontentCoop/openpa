@@ -59,7 +59,7 @@ class OpenPaFunctionCollection
                     'SortBy' => $virtualParameters['sort']
                 );
                 $search = self::search( $params );
-                return array( 'result', $search['SearchResult'] );
+                return array( 'result' => $search['SearchResult'] );
             }
         }
 
@@ -77,6 +77,7 @@ class OpenPaFunctionCollection
         if ( $handler instanceof OpenPAObjectHandler )
         {
             $virtualParameters = $handler->attribute( 'content_virtual' )->attribute( 'folder' );
+            
             if ( $virtualParameters )
             {
                 $params = array(
@@ -84,9 +85,9 @@ class OpenPaFunctionCollection
                     'SearchLimit' => 1,
                     'SearchContentClassID' => $virtualParameters['classes'],
                     'SortBy' => $virtualParameters['sort']
-                );
+                );                
                 $search = self::search( $params );
-                return array( 'result', $search['SearchCount'] );
+                return array( 'result' => $search['SearchCount'] );
             }
         }
 

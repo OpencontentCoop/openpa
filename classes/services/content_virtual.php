@@ -21,7 +21,7 @@ class ObjectHandlerServiceContentVirtual extends ObjectHandlerServiceBase
             $sort = $this->sortBy();
             if ( $classes )
             {
-                $data = array( 'classes' => $classes, 'subtree' => $subtree, 'sort', $sort );
+                $data = array( 'classes' => $classes, 'subtree' => $subtree, 'sort' => $sort );
             }
         }
         return $data;
@@ -107,7 +107,7 @@ class ObjectHandlerServiceContentVirtual extends ObjectHandlerServiceBase
             }
             if ( empty( $subtree ) )
             {
-                $subtree = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
+                $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
             }
         }
         return $subtree;
