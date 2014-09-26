@@ -45,4 +45,9 @@ abstract class ObjectHandlerServiceBase extends OpenPATempletizable implements O
         return $result ? $templateUri : false;
     }
 
+    function filter( $filterIdentifier, $action )
+    {
+        return OpenPAObjectHandler::FILTER_CONTINUE;
+    }
+
 }

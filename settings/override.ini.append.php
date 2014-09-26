@@ -1,5 +1,10 @@
 <?php /* #?ini charset="utf-8"?
 
+#####################################################
+##################### DATATYPE ######################
+#####################################################
+
+
 [view_materia_associazione]
 Source=content/datatype/view/ezobjectrelationlist.tpl
 MatchFile=datatype/materia_ezobjectrelationlist.tpl
@@ -49,6 +54,9 @@ Subdir=templates
 Match[class_identifier]=event
 Match[attribute_identifier]=materia
 
+#####################################################
+###################### BLOCCHI ######################
+#####################################################
 
 [block_accesso_area_riservata]
 Source=block/view/view.tpl

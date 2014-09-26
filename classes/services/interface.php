@@ -33,4 +33,11 @@ interface OpenPAObjectHandlerServiceInterface
      */
     function template();
 
+    /**
+     * @param $filterIdentifier
+     * @param $action
+     * @return int OpenPAObjectHandler::FILTER_* const
+     */
+    function filter( $filterIdentifier, $action );
+
 }

@@ -1,6 +1,9 @@
 <?php
 class OpenPAObjectHandler
 {
+    const FILTER_HALT = 0;
+    const FILTER_CONTINUE = 1;
+
     /**
      * @var OpenPAObjectHandler[]
      */
@@ -22,7 +25,7 @@ class OpenPAObjectHandler
     protected $services = array();
 
     /**
-     * @var OpenPAAttributeHandler[]
+     * @var ObjectHandlerServiceBase[]
      */
     public $attributesHandlers = array();
 
@@ -157,8 +160,7 @@ class OpenPAObjectHandler
             if ( class_exists( $className ) )
             {
                 $check = new ReflectionClass( $className );
-                if ( $check->isSubclassOf( 'OpenPATempletizable' )
-                     && $check->implementsInterface( 'OpenPAObjectHandlerServiceInterface' ))
+                if ( $check->isSubclassOf( 'ObjectHandlerServiceBase' ) )
                 {
                     $this->services[$serviceId] = new $className;
                     $this->services[$serviceId]->setIdentifier( $serviceId );
@@ -166,7 +168,7 @@ class OpenPAObjectHandler
                 }
                 else
                 {
-                    eZDebug::writeError( "Service $serviceId does not implement OpenPAObjectHandlerServiceInterface and/or does not extend OpenPATempletizable", __METHOD__ );
+                    eZDebug::writeError( "Service $serviceId does not extend ObjectHandlerServiceBase", __METHOD__ );
                 }
             }
             else
@@ -254,17 +256,34 @@ class OpenPAObjectHandler
     {
         if ( $this->contentObject instanceof eZContentObject )
         {
-            $objectID = $this->contentObject->attribute( 'id' );
-
-            /** @var eZSolr $eZSolr */
+            /*
             $eZSolr = eZSearch::getEngine();
             $eZSolr->addObject( $this->contentObject, false );
             $eZSolr->commit();
-            
-            eZContentCacheManager::clearContentCacheIfNeeded( $objectID );
-            
+             */
+            $this->addPendingIndex();
+            eZContentCacheManager::clearContentCacheIfNeeded( $this->currentObjectId );
             $this->contentObject->resetDataMap();
-            eZContentObject::clearCache( array( $objectID ) );            
+            eZContentObject::clearCache( array( $this->currentObjectId ) );
         }
+    }
+
+    public function filter( $filterIdentifier, $action )
+    {
+        $result = true;
+        foreach( $this->services as $id => $service )
+        {
+            $result = $service->filter( $filterIdentifier, $action );
+            if ( $result == self::FILTER_HALT  )
+            {
+                return false;
+            }
+        }
+        return $result;
+    }
+
+    public function addPendingIndex()
+    {
+        eZDB::instance()->query( "INSERT INTO ezpending_actions( action, param ) VALUES ( 'index_object', '{$this->currentObjectId}' )" );
     }
 }
