@@ -194,26 +194,26 @@ class OpenPACalendarData
         $endOfMonthDateTime = DateTime::createFromFormat( 'H i s n j Y', implode( ' ', $endOfMonthArray ), self::timezone() );                  
         $this->parameters['end_weekday'] = date( 'w', $endOfMonthDateTime->getTimestamp() );
         $fromTimeStamp = $startDateTime->format( 'U' );
-        $fromDate = ezfSolrDocumentFieldBase::preProcessValue( $startDateTime->getTimestamp(), 'date' );
+        $this->parameters['search_from_solr'] = ezfSolrDocumentFieldBase::preProcessValue( $startDateTime->getTimestamp(), 'date' );
         $this->parameters['search_from_timestamp'] = $startDateTime->getTimestamp();
         
         // end day
         $endDateTime = clone $startDateTime;
         $endDateTime->add( $interval );
         $endTimeStamp = $endDateTime->format( 'U' );
-        $toDate = ezfSolrDocumentFieldBase::preProcessValue( $endDateTime->getTimestamp() - 1 , 'date' );                
+        $this->parameters['search_to_solr'] = ezfSolrDocumentFieldBase::preProcessValue( $endDateTime->getTimestamp() - 1 , 'date' );
         $this->parameters['search_to_timestamp'] = $endDateTime->getTimestamp();
         $this->parameters['search_to_picker_date'] = date( self::PICKER_DATE_FORMAT, $endDateTime->getTimestamp() );
         
         // filter        
         $this->filters[] = array(
             'or',
-            'attr_from_time_dt:[' . $fromDate . ' TO ' . $toDate . ']',
-            'attr_to_time_dt:[' . $fromDate . ' TO ' . $toDate . ']',
+            'attr_from_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
+            'attr_to_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
             array(
                 'and',
-                'attr_from_time_dt:[* TO ' . $fromDate . ']',
-                'attr_to_time_dt:[' . $toDate . ' TO *]'
+                'attr_from_time_dt:[* TO ' . $this->parameters['search_from_solr'] . ']',
+                'attr_to_time_dt:[' . $this->parameters['search_to_solr'] . ' TO *]'
             )
         );
         
@@ -333,10 +333,10 @@ class OpenPACalendarData
             {
                 $events[] = $event;
             }
-        }        
+        }
+        $events = array_merge( $events, $this->fetchTimeTableEvents() );
         //eZDebug::writeNotice( $events, __METHOD__ );  
         $this->data['search_count'] = count( $events );
-        
         $eventsByDay = array();
         $byDayInterval = new DateInterval( 'P1D' );
         $byDayPeriod = new DatePeriod( $startDateTime, $byDayInterval, $endDateTime );        
@@ -347,13 +347,43 @@ class OpenPACalendarData
             $calendarDay->addEvents( $events );
             $eventsByDay[$identifier] = $calendarDay;            
         }
-        
         $this->data['events'] = $events;
         $this->data['day_by_day'] = $eventsByDay;
         //eZDebug::writeNotice( $eventsByDay, __METHOD__ ); 
         //eZDebug::writeNotice( $this->data['search_facets'], __METHOD__ );         
     }
-    
+
+    protected function fetchTimeTableEvents()
+    {
+        $events = array();
+
+        $filters = array(
+            'or',
+            'attr_timetable_from_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
+            'attr_timetable_to_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
+            array(
+                'and',
+                'attr_timetable_from_time_dt:[* TO ' . $this->parameters['search_from_solr'] . ']',
+                'attr_timetable_to_time_dt:[' . $this->parameters['search_to_solr'] . ' TO *]'
+            )
+        );
+
+        $solrFetchParams = array(
+            'SearchOffset' => 0,
+            'SearchLimit' => 1000,
+            'Filter' => $filters,
+            'SearchSubTreeArray' => $this->parameters['subtree']
+        );
+        $solrSearch = new eZSolr();
+        $solrResult = $solrSearch->search( $this->parameters['query'], $solrFetchParams );
+
+        foreach( $solrResult['SearchResult'] as $item )
+        {
+            $events = array_merge( $events, OpenPACalendarTimeTable::getEvents( $item, $this->parameters ) );
+        }
+        return $events;
+    }
+
     protected function sortFacets( $resultFacets )
     {
         $sorted = array();

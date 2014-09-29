@@ -14,6 +14,7 @@ class BlockHandlerLista extends OpenPABlockHandler
 
     protected function run()
     {
+        $this->data['root_node'] = null;
         $this->data['fetch_parameters'] = $this->getFetchParameters();
         //eZDebug::writeDebug( $this->currentCustomAttributes );
         $content = $this->getContent();
@@ -162,6 +163,7 @@ class BlockHandlerLista extends OpenPABlockHandler
 
     protected function getFetchParameters()
     {
+        $this->fetchParameters['subtree_array'] = array();
         if ( isset( $this->currentCustomAttributes['node_id'] ) )
         {
             $this->currentSubTreeNode = OpenPABase::fetchNode( $this->currentCustomAttributes['node_id'] );
