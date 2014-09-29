@@ -68,7 +68,7 @@ class OpenPaFunctionCollection
                 $params = array(
                     'SearchSubTreeArray' => $virtualParameters['subtree'],
                     'SearchOffset' => $offset,
-                    'SearchLimit' => $limit,
+                    'SearchLimit' => $limit ? $limit : 50,
                     'SearchContentClassID' => $classes,
                     'SortBy' => $virtualParameters['sort'],
                     'Limitation' => $limitation

@@ -57,7 +57,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
                     'limitation' => array()
                 );
             }
-            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiEstesiCustomMenu', array( '6062' ) ) ) )
+            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiEstesiCustomMenu', array() ) ) )
             {
                 $data[$nodeId] = array(
                     'limit' => OpenPAINI::variable( 'TopMenu', 'LimiteSecondoLivello', 4 )
@@ -73,9 +73,13 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         $topMenuRootNodeIds = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu' );
         foreach( $topMenuRootNodeIds as $nodeId )
         {
-            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiEstesiCustomMenu', array( '6062' ) ) ) )
+            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiEstesiCustomMenu', array() ) ) )
             {
                 $data[$nodeId] = 2;
+            }
+            if ( in_array( $nodeId, OpenPAINI::variable( 'TopMenu', 'NodiSoloPrimoLivello', array() ) ) )
+            {
+                $data[$nodeId] = 1;
             }
         }
         return $data;

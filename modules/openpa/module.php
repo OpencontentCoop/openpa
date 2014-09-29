@@ -78,6 +78,10 @@ $ViewList['data'] = array( 'functions' => array( 'data' ),
                              'script' => 'data.php',
                              'params' => array( 'Identifier' ),
                              'unordered_params' => array() );
+
+$ViewList['settings'] = array( 'functions' => array( 'editor_tools' ),
+                           'script' => 'settings.php',
+                           'params' => array( 'Action', 'Value' ) );
                            
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
