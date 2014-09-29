@@ -2,73 +2,95 @@
 
 class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
 {
+    public $fetchParams = array();
+    public $imageCount;
+    
     function run()
     {
+        $this->data['has_images'] = $this->getImageListCount();
         $this->data['images'] = $this->getImageList();
     }
 
-    function getImageList()
-    {
-        $imageChildren = array();
-        $fetchParams = array(
-            'parent_node_id' => $this->container->currentNodeId,
-            'class_filter_type' => 'include',
-            'class_filter_array' => array( 'image' )
-        );
-        $imageChildrenCount = eZFunctionHandler::execute(
-            'content',
-            'list_count',
-            $fetchParams
-        );
-
-        if ( $imageChildrenCount == 0 && $this->container->currentNodeId != $this->container->currentMainNodeId )
+    function getImageListCount()
+    {        
+        if ( $this->imageCount === null )
         {
-            $fetchParams = array(
-                'parent_node_id' => $this->container->currentMainNodeId,
+            $this->fetchParams = array(
+                'parent_node_id' => $this->container->currentNodeId,
                 'class_filter_type' => 'include',
                 'class_filter_array' => array( 'image' )
             );
-            $imageChildrenCount = eZFunctionHandler::execute(
+            $this->imageCount = eZFunctionHandler::execute(
                 'content',
                 'list_count',
-                $fetchParams
+                $this->fetchParams
             );
-        }
-
-        if ( $imageChildrenCount > 0 )
-        {
-            $imageChildren = eZFunctionHandler::execute(
-                'content',
-                'list',
-                $fetchParams
-            );
-        }
-        else
-        {
-            $galleryChildren = eZFunctionHandler::execute(
-                'content',
-                'list_count',
-                array(
-                     'parent_node_id' => $this->container->currentNodeId,
-                     'class_filter_type' => 'include',
-                     'class_filter_array' => array( 'gallery' ),
-                     'limit' => 1
-                )
-            );
-            if ( count( $galleryChildren ) > 0 && $galleryChildren[0] instanceof eZContentObjectTreeNode )
+    
+            if ( $this->imageCount == 0 && $this->container->currentNodeId != $this->container->currentMainNodeId )
+            {
+                $this->fetchParams = array(
+                    'parent_node_id' => $this->container->currentMainNodeId,
+                    'class_filter_type' => 'include',
+                    'class_filter_array' => array( 'image' )
+                );
+                $this->imageCount = eZFunctionHandler::execute(
+                    'content',
+                    'list_count',
+                    $this->fetchParams
+                );
+            }
+    
+            if ( $this->imageCount > 0 )
             {
                 $imageChildren = eZFunctionHandler::execute(
                     'content',
-                    'list_count',
-                    array(
-                         'parent_node_id' => $galleryChildren[0]->attribute( 'node_id' ),
-                         'class_filter_type' => 'include',
-                         'class_filter_array' => array( 'image' )
-                    )
+                    'list',
+                    $this->fetchParams
                 );
             }
+            else
+            {            
+                $galleryChildren = eZFunctionHandler::execute(
+                    'content',
+                    'list',
+                    array(
+                         'parent_node_id' => $this->container->currentNodeId,
+                         'class_filter_type' => 'include',
+                         'class_filter_array' => array( 'gallery' ),
+                         'limit' => 1
+                    )
+                );            
+                if ( count( $galleryChildren ) > 0 && $galleryChildren[0] instanceof eZContentObjectTreeNode )
+                {
+                    
+                    $this->fetchParams = array(
+                        'parent_node_id' => $galleryChildren[0]->attribute( 'node_id' ),                         
+                        'class_filter_type' => 'include',
+                        'class_filter_array' => array( 'image' )
+                    );
+                    
+                    $this->imageCount = eZFunctionHandler::execute(
+                        'content',
+                        'list_count',
+                        $this->fetchParams
+                    );                
+                }
+            }
         }
-
-        return $imageChildren;
+        return $this->imageCount > 0;
     }
+    
+    function getImageList()
+    {
+        if ( $this->getImageListCount() > 0 )
+        {
+            return eZFunctionHandler::execute(
+                'content',
+                'list',
+                $this->fetchParams
+            );
+        }
+        return array();
+    }
+
 }

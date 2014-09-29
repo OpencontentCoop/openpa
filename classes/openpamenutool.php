@@ -469,7 +469,7 @@ class OpenPAMenuTool
                 $childrenFetchParameters = $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )];
             }
             $nodes = eZFunctionHandler::execute(
-                'content',
+                'openpa',
                 'list',
                 array_merge( array(
                      'parent_node_id' => $rootNode->attribute( 'node_id' ),

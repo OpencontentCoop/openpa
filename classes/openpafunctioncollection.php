@@ -56,7 +56,8 @@ class OpenPaFunctionCollection
                     'SearchOffset' => $offset,
                     'SearchLimit' => $limit,
                     'SearchContentClassID' => $virtualParameters['classes'],
-                    'SortBy' => $virtualParameters['sort']
+                    'SortBy' => $virtualParameters['sort'],
+                    'Limitation' => $limitation
                 );
                 $search = self::search( $params );
                 return array( 'result' => $search['SearchResult'] );
@@ -116,8 +117,17 @@ class OpenPaFunctionCollection
     public static function fetchRuoli( $struttura, $dipendente )
     {
         $params = self::$params;
-        $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ),
-                                               eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
+        
+        $parentObject = eZContentObject::fetchByRemoteID( self::$remoteRoles );
+        if ( $parentObject instanceof eZContentObject )
+        {
+            $params['SearchSubTreeArray'] = array( $parentObject->attribute( 'main_node_id' ) );
+        }
+        else
+        {
+            $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ),
+                                                   eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
+        }
         $params['SearchContentClassID'] = array( 'ruolo' );    
         if ( $struttura || $dipendente )
         {
@@ -125,7 +135,7 @@ class OpenPaFunctionCollection
                 $params['Filter'][] = array( 'submeta_struttura_di_riferimento___id_si:' . $struttura );
             elseif( $dipendente )
                 $params['Filter'][] = array( 'submeta_utente___id_si:' . $dipendente );
-        }
+        }        
         $search = self::search( $params );        
         return array( 'result' => $search['SearchResult'] );
     }

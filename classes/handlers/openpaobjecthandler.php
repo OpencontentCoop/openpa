@@ -252,7 +252,7 @@ class OpenPAObjectHandler
     }
 
 
-    public function flush()
+    public function flush( $index = true )
     {
         if ( $this->contentObject instanceof eZContentObject )
         {
@@ -261,10 +261,14 @@ class OpenPAObjectHandler
             $eZSolr->addObject( $this->contentObject, false );
             $eZSolr->commit();
              */
-            $this->addPendingIndex();
+            if ( $index )
+            {
+                $this->addPendingIndex();
+            }
             eZContentCacheManager::clearContentCacheIfNeeded( $this->currentObjectId );
             $this->contentObject->resetDataMap();
             eZContentObject::clearCache( array( $this->currentObjectId ) );
+            unset( self::$instances[$this->currentObjectId] );
         }
     }
 
@@ -272,8 +276,8 @@ class OpenPAObjectHandler
     {
         $result = true;
         foreach( $this->services as $id => $service )
-        {
-            $result = $service->filter( $filterIdentifier, $action );
+        {            
+            $result = $service->filter( $filterIdentifier, $action );            
             if ( $result == self::FILTER_HALT  )
             {
                 return false;

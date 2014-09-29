@@ -11,5 +11,6 @@ $redirectURI = $http->getVariable( 'RedirectURI', $http->sessionVariable( 'LastA
 
 OpenPAMenuTool::refreshMenu( $id, $siteAccess, $file );
 eZCache::clearByTag( 'template' );
+eZCache::clearByTag( 'content' );
 
 $module->redirectTo( $redirectURI );

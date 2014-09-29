@@ -31,6 +31,18 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'custom_max_recursion' => array(),
             'custom_fetch_parameters' => array()
         ));
+        
+        $this->data['show_extra_menu'] = $this->hasExtraMenu();
+    }
+    
+    protected function hasExtraMenu()
+    {
+        $result = false;
+        if ( $this->container->hasAttribute( 'content_gallery' ) )
+        {
+            $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
+        }
+        return $result;
     }
 
     protected function getTopMenuCustomFetchParameters()

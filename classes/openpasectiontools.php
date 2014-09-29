@@ -190,9 +190,9 @@ class OpenPASectionTools
         if ( $this->log )
         {
             $this->cli->output();
-//            $memoryMax = memory_get_peak_usage(); // Result is in bytes
-//            $memoryMax = round( $memoryMax / 1024 / 1024, 2 ); // Convert in Megabytes
-//            $this->cli->output( ' Memoria usata: '.$memoryMax.'M' );
+            $memoryMax = memory_get_peak_usage(); // Result is in bytes
+            $memoryMax = round( $memoryMax / 1024 / 1024, 2 ); // Convert in Megabytes
+            $this->cli->output( ' Memoria usata: '.$memoryMax.'M' );
         }
     }
 
@@ -288,10 +288,11 @@ class OpenPASectionTools
                 {
                     eZContentOperationCollection::updateSection( $currentNode->attribute( 'node_id' ), $this->currentSectionDestinationId );
                 }
-                self::$changeNodeIds[$this->currentClassIdentifier][] = $currentNode->attribute( 'node_id' );
+                self::$changeNodeIds[$this->currentClassIdentifier][] = $currentNode->attribute( 'node_id' );                
                 $handler->flush();
                 return true;
             }
+            $handler->flush( false );
         }
         return false;
     }

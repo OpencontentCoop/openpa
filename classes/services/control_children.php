@@ -8,6 +8,7 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
         'filters',
         'icons',
         'map',
+        'datatable',
         'calendar'
     );
     protected $currentView;
@@ -22,13 +23,13 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
                 $contentClassAttributeContent = $this->container->attributesHandlers['children_view']->attribute( 'contentclass_attribute' )->attribute( 'content' );
                 $this->availableViews = $contentClassAttributeContent['options'];
 
-                $value = $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'content' );
+                $value = $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'value' );
                 if ( is_array( $value ) )
                 {
                     $value = $value[0];
                     if ( isset( $contentClassAttributeContent['options'][$value] ) )
                     {
-                        $this->currentView = strtolower( $contentClassAttributeContent['options'][$value] );
+                        $this->currentView = strtolower( $contentClassAttributeContent['options'][$value]['name'] );
                     }
                 }
             }
@@ -37,7 +38,17 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
                  && ( isset( $this->container->attributesHandlers['view'] )
                       && $this->container->attributesHandlers['view']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) ) )
             {
-                $this->currentView = $this->container->attributesHandlers['view']->attribute( 'contentobject_attribute' )->attribute( 'content' );
+                $contentClassAttributeContent = $this->container->attributesHandlers['view']->attribute( 'contentclass_attribute' )->attribute( 'content' );
+                $value = $this->container->attributesHandlers['view']->attribute( 'contentobject_attribute' )->attribute( 'value' );
+                
+                if ( is_array( $value ) )
+                {                    
+                    $value = $value[0];                    
+                    if ( isset( $contentClassAttributeContent['options'][$value] ) )
+                    {
+                        $this->currentView = strtolower( $contentClassAttributeContent['options'][$value]['name'] );
+                    }
+                }
             }
         }
     }
