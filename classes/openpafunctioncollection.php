@@ -47,15 +47,29 @@ class OpenPaFunctionCollection
         $parentNode = OpenPABase::fetchNode( $parentNodeID );
         $handler = OpenPAObjectHandler::instanceFromObject( $parentNode );
         if ( $handler instanceof OpenPAObjectHandler )
-        {
+        {            
             $virtualParameters = $handler->attribute( 'content_virtual' )->attribute( 'folder' );
             if ( $virtualParameters )
             {
+                
+                if ( $class_filter_type == 'include' )
+                {
+                    $classes = array_intersect( $class_filter_array, $virtualParameters['classes'] );
+                }
+                elseif ( $class_filter_type == 'exclude' )
+                {
+                    $classes = array_diff( $virtualParameters['classes'], $class_filter_array );
+                }                
+                if ( empty( $classes ) )
+                {
+                    return array( 'result' => array() );
+                }
+                
                 $params = array(
                     'SearchSubTreeArray' => $virtualParameters['subtree'],
                     'SearchOffset' => $offset,
                     'SearchLimit' => $limit,
-                    'SearchContentClassID' => $virtualParameters['classes'],
+                    'SearchContentClassID' => $classes,
                     'SortBy' => $virtualParameters['sort'],
                     'Limitation' => $limitation
                 );
@@ -81,6 +95,18 @@ class OpenPaFunctionCollection
             
             if ( $virtualParameters )
             {
+                if ( $class_filter_type == 'include' )
+                {
+                    $classes = array_intersect( $class_filter_array, $virtualParameters['classes'] );
+                }
+                elseif ( $class_filter_type == 'exclude' )
+                {
+                    $classes = array_diff( $virtualParameters['classes'], $class_filter_array );
+                }                
+                if ( empty( $classes ) )
+                {
+                    return array( 'result' => 0 );
+                }
                 $params = array(
                     'SearchSubTreeArray' => $virtualParameters['subtree'],
                     'SearchLimit' => 1,

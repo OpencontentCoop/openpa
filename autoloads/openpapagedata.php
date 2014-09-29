@@ -66,8 +66,58 @@ class OpenPAPageData
                 $openPaOperator->modify( $tpl, $openPaOperatorName, $operatorParameters, $rootNamespace, $currentNamespace, $style, $namedParameters );
                 $data['current_theme'] = $style;
 
+                $data['contacts'] = $this->getContactsData();
+                
                 $operatorValue = $data;
             }
         }
+    }
+
+    function getContactsData()
+    {
+        $data = array();
+        $homePage = OpenPaFunctionCollection::fetchHome();
+        if ( $homePage instanceof eZContentObjectTreeNode
+             && $homePage->attribute( 'class_identifier' ) == 'homepage' )
+        {
+            $homeObject = $homePage->attribute( 'object' );
+            if ( $homeObject instanceof eZContentObject )
+            {
+                $dataMap = $homeObject->attribute( 'data_map' );
+                if ( isset( $dataMap['contacts'] )
+                     && $dataMap['contacts'] instanceof eZContentObjectAttribute
+                     && $dataMap['contacts']->attribute( 'has_content' ) )
+                {
+                    $trans = eZCharTransform::instance();
+                    $matrix = $dataMap['contacts']->attribute( 'content' )->attribute( 'matrix' );
+                    foreach( $matrix['rows']['sequential'] as $row )
+                    {                        
+                        $columns = $row['columns'];
+                        $name = $columns[0];
+                        $identifier = $trans->transformByGroup( $name, 'identifier' );
+                        if ( !empty( $columns[1] ) )
+                        {
+                            $data[$identifier] = $columns[1];
+                        }
+                    }
+                }
+                else
+                {
+                    if( isset( $dataMap['facebook'] )
+                        && $dataMap['facebook'] instanceof eZContentObjectAttribute
+                        && $dataMap['facebook']->attribute( 'has_content' ) )
+                    {
+                        $data['facebook'] = $dataMap['facebook']->toString();
+                    }
+                    if( isset( $dataMap['twitter'] )
+                        && $dataMap['twitter'] instanceof eZContentObjectAttribute
+                        && $dataMap['twitter']->attribute( 'has_content' ) )
+                    {
+                        $data['twitter'] = $dataMap['twitter']->toString();
+                    }
+                }
+            }
+        }
+        return $data;
     }
 }

@@ -54,6 +54,18 @@ Subdir=templates
 Match[class_identifier]=event
 Match[attribute_identifier]=materia
 
+[view_timetable]
+Source=content/datatype/view/ezmatrix.tpl
+MatchFile=datatype/timetable_ezmatrix.tpl
+Subdir=templates
+Match[attribute_identifier]=timetable
+
+[edit_contacts]
+Source=content/datatype/edit/ezmatrix.tpl
+MatchFile=edit/datatype/contacts_ezmatrix.tpl
+Subdir=templates
+Match[attribute_identifier]=contacts
+
 #####################################################
 ###################### BLOCCHI ######################
 #####################################################
