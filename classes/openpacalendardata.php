@@ -334,7 +334,11 @@ class OpenPACalendarData
                 $events[] = $event;
             }
         }
-        $events = array_merge( $events, $this->fetchTimeTableEvents() );
+        $timeTableEvents = $this->fetchTimeTableEvents();
+        if ( count( $timeTableEvents ) )
+        {
+            $events = self::reorderEvents( array_merge( $events, $timeTableEvents ) );
+        }
         //eZDebug::writeNotice( $events, __METHOD__ );  
         $this->data['search_count'] = count( $events );
         $eventsByDay = array();
@@ -352,6 +356,17 @@ class OpenPACalendarData
         //eZDebug::writeNotice( $eventsByDay, __METHOD__ ); 
         //eZDebug::writeNotice( $this->data['search_facets'], __METHOD__ );         
     }
+
+    protected static function reorderEvents( $items )
+    {
+        usort(
+            $items, function( OpenPACalendarItem $a, OpenPACalendarItem $b ) {
+                return intval( $a->attribute( 'fromDateTime' ) > $b->attribute( 'fromDateTime' ) );
+             }
+        );
+        return $items;
+    }
+
 
     protected function fetchTimeTableEvents()
     {
