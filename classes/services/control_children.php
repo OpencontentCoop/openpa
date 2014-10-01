@@ -18,7 +18,7 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
         $this->getCurrentView();
         $this->data['views'] = array();
         foreach( $this->availableViews as $view )
-        {
+        {            
             $this->data['views'][$view] = array(
                 'current_view' => $this->currentView,
                 'identifier' => $view,
@@ -54,7 +54,11 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
                      && $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
                 {
                     $contentClassAttributeContent = $this->container->attributesHandlers['children_view']->attribute( 'contentclass_attribute' )->attribute( 'content' );
-                    $this->availableViews = $contentClassAttributeContent['options'];
+                    $this->availableViews = array();
+                    foreach( $contentClassAttributeContent['options'] as $value )
+                    {
+                        $this->availableViews[] = strtolower( $value['name'] );
+                    }
     
                     $value = $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'value' );
                     if ( is_array( $value ) )

@@ -1,7 +1,7 @@
 <?php
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpaoperator.php',
                                     'class' => 'OpenPAOperator',
-                                    'operator_names' => array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree', 'access_style', 'unique' ) );
+                                    'operator_names' => array( 'openpaini', 'get_main_style', 'has_main_style', 'is_area_tematica', 'get_area_tematica_style', 'is_dipendente', 'openpa_shorten', 'has_abstract', 'abstract', 'rss_list', 'materia_make_tree', 'access_style', 'unique', 'find_first_parent' ) );
 
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/openpa/autoloads/openpamenuoperator.php',
                                     'class' => 'OpenPAMenuOperator',

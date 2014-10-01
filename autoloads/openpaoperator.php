@@ -17,7 +17,9 @@ class OpenPAOperator
             'rss_list',
             'materia_make_tree',
             'access_style',
-            'unique' );
+            'unique',
+            'find_first_parent'
+        );
     }
 
     function operatorList()
@@ -64,6 +66,10 @@ class OpenPAOperator
             'materia_make_tree' => array
             (
                 'relation_list' => array( "type"  => "array", "required" => true, "default" => array() )
+            ),
+            'find_first_parent' => array
+            (
+                'class' => array( "type"  => "string", "required" => true, "default" => null )
             )
         );
     }
@@ -93,6 +99,25 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'find_first_parent':
+            {
+                $startNode = $operatorValue;
+                $operatorValue = false;
+                if ( $startNode instanceof eZContentObjectTreeNode )
+                {
+                    $path = $startNode->attribute( 'path' );
+                    foreach( $path as $item )
+                    {
+                        if ( $item->attribute( 'class_identifier' ) == $namedParameters['class'] )
+                        {
+                            $operatorValue = $item;
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+            
             case 'unique':
             {
                 if ( is_array( $operatorValue ) )
