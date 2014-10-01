@@ -49,10 +49,12 @@ elseif ( $http->hasGetVariable( 'from' ) )
     }
     catch( InvalidArgumentException $e )
     {
+        eZLog::write( $e->getMessage(), 'editor_tools.log' );
         return $Module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
     }
     catch( Exception $e )
     {
+        eZLog::write( $e->getMessage(), 'editor_tools.log' );
         return $Module->handleError( eZError::KERNEL_ACCESS_DENIED, 'kernel' );
     }
 }

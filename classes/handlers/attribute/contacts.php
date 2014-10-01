@@ -12,10 +12,9 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
     {
         $data = array();
         $trans = eZCharTransform::instance();
-        if ( $this->data['contentclass_attribute']->attribute( 'has_content' )
-             && $this->data['contentclass_attribute']->attribute( 'data_type_string' ) == 'ezmatrix' )
+        if ( $this->data['contentobject_attribute']->attribute( 'has_content' ) )
         {
-            $matrix = $this->data['contentclass_attribute']->attribute( 'content' )->attribute( 'matrix' );
+            $matrix = $this->data['contentobject_attribute']->attribute( 'content' )->attribute( 'matrix' );
             foreach( $matrix['rows']['sequential'] as $row )
             {
                 $columns = $row['columns'];

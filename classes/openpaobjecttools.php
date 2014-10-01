@@ -60,17 +60,16 @@ class OpenPAObjectTools
     
         // check if we can create node under the specified parent node
         if( ( $newParentNode = eZContentObjectTreeNode::fetch( $newParentNodeID ) ) === null )
+        {
             throw new InvalidArgumentException( 'Parent node not found' );
+        }
     
         $classID = $object->attribute('contentclass_id');
     
-        if ( !$newParentNode->checkAccess( 'create', $classID ) )
+        if ( !$newParentNode->attribute( 'object' )->checkAccess( 'create', $classID ) )
         {
             $objectID = $object->attribute( 'id' );
-            eZDebug::writeError( "Cannot copy object $objectID to node $newParentNodeID, " .
-                                   "the current user does not have create permission for class ID $classID",
-                                 'content/copy' );
-            throw new Exception( 'Object not found' );
+            throw new Exception( "Cannot copy object $objectID to node $newParentNodeID, the current user does not have create permission for class ID $classID " );            
         }
     
         $db = eZDB::instance();

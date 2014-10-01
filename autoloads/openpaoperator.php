@@ -69,7 +69,7 @@ class OpenPAOperator
             ),
             'find_first_parent' => array
             (
-                'class' => array( "type"  => "string", "required" => true, "default" => null )
+                'class' => array( "type"  => "mixed", "required" => true, "default" => null )
             )
         );
     }
@@ -103,19 +103,23 @@ class OpenPAOperator
             {
                 $startNode = $operatorValue;
                 $operatorValue = false;
+                $class = is_array( $namedParameters['class'] ) ? $namedParameters['class'] : array( $namedParameters['class'] );
                 if ( $startNode instanceof eZContentObjectTreeNode )
                 {
                     $path = $startNode->attribute( 'path' );
-                    foreach( $path as $item )
+                    $path = array_reverse( $path );
+                    foreach( $class as $identifier )
                     {
-                        if ( $item->attribute( 'class_identifier' ) == $namedParameters['class'] )
+                        foreach( $path as $item )
                         {
-                            $operatorValue = $item;
-                            break;
+                            if ( $item->attribute( 'class_identifier' ) == $identifier )
+                            {
+                                $operatorValue = $item;
+                                return true;
+                            }
                         }
                     }
-                }
-                break;
+                }                
             }
             
             case 'unique':
