@@ -183,12 +183,12 @@ class OpenPAObjectHandler
 
     public function attributes()
     {
-        return array_keys( $this->services );
+        return array_merge( array_keys( $this->services ), array_keys( $this->attributesHandlers ) );
     }
 
     public function hasAttribute( $key )
     {
-        return in_array( $key, array_keys( $this->services ) );
+        return in_array( $key, array_merge( array_keys( $this->services ), array_keys( $this->attributesHandlers ) ) );
     }
 
     /**
@@ -198,11 +198,15 @@ class OpenPAObjectHandler
      */
     public function attribute( $key )
     {
-        if ( $this->hasAttribute( $key ) )
+        if ( isset( $this->services[$key] ) )
         {
             return $this->services[$key]->data();
         }
-        eZDebug::writeNotice( "Attribute $key does not exist", __METHOD__ );
+        elseif ( isset( $this->attributesHandlers[$key] ) )
+        {
+            return $this->attributesHandlers[$key];
+        }
+        eZDebug::writeNotice( "Service or AttributeHandler $key does not exist", __METHOD__ );
         return false;
     }
 
