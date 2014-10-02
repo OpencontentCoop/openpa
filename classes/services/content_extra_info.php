@@ -63,28 +63,31 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
                     'AsObject' => false
                 );
             }
-            $findNodes = eZContentObjectTreeNode::subTreeMultiPaths( $nodesParams, array( 'SortBy' => array( 'node_id', false ) ) );
-            $resultSortByParentNodeID = array();
-
-            if ( !empty( $findNodes ) )
+            if ( !empty( $nodesParams ) )
             {
-                foreach( $findNodes as $findNode )
+                $findNodes = eZContentObjectTreeNode::subTreeMultiPaths( $nodesParams, array( 'SortBy' => array( 'node_id', false ) ) );
+                $resultSortByParentNodeID = array();
+    
+                if ( !empty( $findNodes ) )
                 {
-                    $resultSortByParentNodeID[ $findNode['parent_node_id'] ] = $findNode;
-                }
-                krsort( $resultSortByParentNodeID );
-                $reversePathArray = array_reverse( $this->container->currentPathNodeIds );
-                foreach( $reversePathArray as $pathNodeId )
-                {
-                    if ( isset( $resultSortByParentNodeID[$pathNodeId] ) )
+                    foreach( $findNodes as $findNode )
                     {
-                        $result = eZContentObjectTreeNode::makeObjectsArray( array( $resultSortByParentNodeID[$pathNodeId] ) );
-                        if ( !empty( $result ) )
+                        $resultSortByParentNodeID[ $findNode['parent_node_id'] ] = $findNode;
+                    }
+                    krsort( $resultSortByParentNodeID );
+                    $reversePathArray = array_reverse( $this->container->currentPathNodeIds );
+                    foreach( $reversePathArray as $pathNodeId )
+                    {
+                        if ( isset( $resultSortByParentNodeID[$pathNodeId] ) )
                         {
-                            if ( $result[0]->attribute( 'can_read' ) )
+                            $result = eZContentObjectTreeNode::makeObjectsArray( array( $resultSortByParentNodeID[$pathNodeId] ) );
+                            if ( !empty( $result ) )
                             {
-                                $this->currentExtraInfoNode = $result[0];
-                                return true;
+                                if ( $result[0]->attribute( 'can_read' ) )
+                                {
+                                    $this->currentExtraInfoNode = $result[0];
+                                    return true;
+                                }
                             }
                         }
                     }

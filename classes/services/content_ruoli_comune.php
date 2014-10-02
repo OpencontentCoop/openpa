@@ -27,5 +27,5 @@ class ObjectHandlerServiceContentRuoliComune extends ObjectHandlerServiceBase
         );
 
         return $data;
-    }
+    }    
 }

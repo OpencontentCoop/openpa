@@ -42,7 +42,20 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     //@todo
     protected function hasContent()
     {
-        return $this->data['contentobject_attribute']->attribute( 'has_content' ) || $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) );
+        $hasContent = $this->data['contentobject_attribute']->attribute( 'has_content' );
+        if ( $this->data['contentobject_attribute']->attribute( 'data_type_string' ) == 'ezinteger'
+             && $this->data['contentobject_attribute']->toString() == 0 )
+        {
+            if ( $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) ) )
+            {
+                $hasContent = true;
+            }
+            else
+            {
+                $hasContent = false;
+            }
+        }
+        return $hasContent;
     }
 
     protected function lineData()

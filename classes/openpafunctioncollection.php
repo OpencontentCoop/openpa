@@ -854,7 +854,7 @@ class OpenPaFunctionCollection
                 if ( count( $nodes ) )
                 {
                     foreach( $nodes as $node )
-                    {
+                    {                        
                         self::$topmenu[] = $node->attribute( 'node_id' );
                     }
                 }

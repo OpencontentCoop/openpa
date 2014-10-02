@@ -15,6 +15,8 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
     {        
         if ( $this->imageCount === null )
         {
+            $this->imageCount = 0;
+            
             $this->fetchParams = array(
                 'parent_node_id' => $this->container->currentNodeId,
                 'class_filter_type' => 'include',
@@ -40,42 +42,34 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
                 );
             }
     
-            if ( $this->imageCount > 0 )
-            {
-                $imageChildren = eZFunctionHandler::execute(
-                    'content',
-                    'list',
-                    $this->fetchParams
-                );
-            }
-            else
-            {            
-                $galleryChildren = eZFunctionHandler::execute(
-                    'content',
-                    'list',
-                    array(
-                         'parent_node_id' => $this->container->currentNodeId,
-                         'class_filter_type' => 'include',
-                         'class_filter_array' => array( 'gallery' ),
-                         'limit' => 1
-                    )
-                );            
-                if ( count( $galleryChildren ) > 0 && $galleryChildren[0] instanceof eZContentObjectTreeNode )
-                {
-                    
-                    $this->fetchParams = array(
-                        'parent_node_id' => $galleryChildren[0]->attribute( 'node_id' ),                         
-                        'class_filter_type' => 'include',
-                        'class_filter_array' => array( 'image' )
-                    );
-                    
-                    $this->imageCount = eZFunctionHandler::execute(
-                        'content',
-                        'list_count',
-                        $this->fetchParams
-                    );                
-                }
-            }
+            //if ( $this->imageCount == 0 )
+            //{            
+            //    $galleryChildren = eZFunctionHandler::execute(
+            //        'content',
+            //        'list',
+            //        array(
+            //             'parent_node_id' => $this->container->currentNodeId,
+            //             'class_filter_type' => 'include',
+            //             'class_filter_array' => array( 'gallery' ),
+            //             'limit' => 1
+            //        )
+            //    );            
+            //    if ( count( $galleryChildren ) > 0 && $galleryChildren[0] instanceof eZContentObjectTreeNode )
+            //    {
+            //        
+            //        $this->fetchParams = array(
+            //            'parent_node_id' => $galleryChildren[0]->attribute( 'node_id' ),                         
+            //            'class_filter_type' => 'include',
+            //            'class_filter_array' => array( 'image' )
+            //        );
+            //        
+            //        $this->imageCount = eZFunctionHandler::execute(
+            //            'content',
+            //            'list_count',
+            //            $this->fetchParams
+            //        );                
+            //    }
+            //}
         }
         return $this->imageCount > 0;
     }

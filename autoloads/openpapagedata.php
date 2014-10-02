@@ -68,6 +68,22 @@ class OpenPAPageData
 
                 $data['contacts'] = $this->getContactsData();
                 
+                $pathArray = $data['path_array'];
+                $openpaPathArray = array();
+                $start = false;
+                foreach( $pathArray as $path )
+                {
+                    if ( isset( $path['node_id'] ) && $path['node_id'] == eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) )
+                    {
+                        $start = true;
+                    }
+                    if ( $start )
+                    {
+                        $openpaPathArray[] = $path;
+                    }
+                }
+                $data['path_array'] = $openpaPathArray;
+                
                 $operatorValue = $data;
             }
         }
@@ -77,8 +93,7 @@ class OpenPAPageData
     {
         $data = array();
         $homePage = OpenPaFunctionCollection::fetchHome();
-        if ( $homePage instanceof eZContentObjectTreeNode
-             && $homePage->attribute( 'class_identifier' ) == 'homepage' )
+        if ( $homePage instanceof eZContentObjectTreeNode  )
         {
             $homeObject = $homePage->attribute( 'object' );
             if ( $homeObject instanceof eZContentObject )
@@ -86,6 +101,7 @@ class OpenPAPageData
                 $dataMap = $homeObject->attribute( 'data_map' );
                 if ( isset( $dataMap['contacts'] )
                      && $dataMap['contacts'] instanceof eZContentObjectAttribute
+                     && $dataMap['contacts']->attribute( 'data_type_string' ) == 'ezmatrix'
                      && $dataMap['contacts']->attribute( 'has_content' ) )
                 {
                     $trans = eZCharTransform::instance();

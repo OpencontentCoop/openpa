@@ -116,19 +116,40 @@ class OpenPAObjectHandler
             if ( $this->contentNode !== null )
             {
                 $pathArray = explode( '/', $this->contentNode->attribute( 'path_string' ) );
+                $start = false;
                 foreach( $pathArray as $nodeId )
                 {
-                    if ( $nodeId != ''
-                         && $nodeId != 1
-                         && $nodeId != eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' )
-                         && strpos( eZINI::instance()->variable( 'SiteSettings', 'IndexPage' ), $nodeId ) === false
+                    
+                    $do = true;
+                    if ( $nodeId == eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) )
+                    {
+                        $start = true;
+                    }
+                    if ( $nodeId == ''
+                         || $nodeId == 1                         
+                         || $nodeId == eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' )
+                         || strpos( eZINI::instance()->variable( 'SiteSettings', 'IndexPage' ), $nodeId ) !== false
                     )
+                    {
+                        $do = false;                        
+                    }
+                    if ( $start && $do )
                     {
                         $this->currentPathNodeIds[] = $nodeId;
                     }
+                    
+                    //if ( $nodeId != ''
+                    //     && $nodeId != 1
+                    //     && $nodeId != eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' )
+                    //     && strpos( eZINI::instance()->variable( 'SiteSettings', 'IndexPage' ), $nodeId ) === false
+                    //)
+                    //{
+                    //    $this->currentPathNodeIds[] = $nodeId;
+                    //}
                 }
+                //eZDebug::writeNotice($this->currentNodeId . ' ' . var_export( $this->currentPathNodeIds,1));
             }
-        }
+        }        
     }
 
     public function getContentNode()

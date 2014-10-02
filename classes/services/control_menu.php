@@ -35,6 +35,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         $this->data['show_extra_menu'] = $this->hasExtraMenu();
     }
     
+    //@todo
     protected function hasExtraMenu()
     {
         $result = false;
@@ -125,6 +126,10 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         {
             $rootNode = OpenPABase::fetchNode( $this->container->currentPathNodeIds[0] );
         }
+        //if ( !$rootNode instanceof eZContentObjectTreeNode )
+        //{
+        //    $rootNode = OpenPaFunctionCollection::fetchHome();
+        //}
         return $rootNode;
     }
 
