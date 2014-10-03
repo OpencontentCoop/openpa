@@ -2,6 +2,8 @@
 
 class ObjectHandlerServiceContentDetail extends ObjectHandlerServiceBase
 {
+    protected $attributeList;
+    
     function run()
     {
         $list = $this->getAttributeList();
@@ -12,20 +14,23 @@ class ObjectHandlerServiceContentDetail extends ObjectHandlerServiceBase
 
     function getAttributeList()
     {
-        $list = array();
-        $mainContent = $this->container->attribute( 'content_main' );
-        $extraInfoCollectors = $this->container->attribute( 'content_infocollection' )->attribute( 'extra_identifiers' );
-        foreach( $this->container->attributesHandlers as $attribute )
+        if ( $this->attributeList === null )
         {
-            $fullData = $attribute->attribute( 'full' );
-            if ( $fullData['has_content']
-                 && !$fullData['exclude']
-                 && !in_array( $attribute->attribute( 'identifier' ), $mainContent->attribute( 'identifiers' ) )
-                 && !in_array( $attribute->attribute( 'identifier' ), $extraInfoCollectors ) )
+            $this->attributeList = array();
+            $mainContent = $this->container->attribute( 'content_main' );
+            $extraInfoCollectors = $this->container->attribute( 'content_infocollection' )->attribute( 'extra_identifiers' );
+            foreach( $this->container->attributesHandlers as $attribute )
             {
-                $list[$attribute->attribute( 'identifier' )] = $attribute;
+                $fullData = $attribute->attribute( 'full' );
+                if ( $fullData['has_content']
+                     && !$fullData['exclude']
+                     && !in_array( $attribute->attribute( 'identifier' ), $mainContent->attribute( 'identifiers' ) )
+                     && !in_array( $attribute->attribute( 'identifier' ), $extraInfoCollectors ) )
+                {
+                    $this->attributeList[$attribute->attribute( 'identifier' )] = $attribute;
+                }
             }
         }
-        return $list;
+        return $this->attributeList;
     }
 }

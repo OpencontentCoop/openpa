@@ -5,6 +5,8 @@ class OpenPAOperator
     
     private $area_tematica_node = array();
     
+    private static $currentObjectId;
+    
     function OpenPAOperator()
     {
         $this->Operators= array(
@@ -18,7 +20,8 @@ class OpenPAOperator
             'materia_make_tree',
             'access_style',
             'unique',
-            'find_first_parent'
+            'find_first_parent',
+            'current_object_id'
         );
     }
 
@@ -99,6 +102,11 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'current_object_id':
+            {
+                $operatorValue = self::currentObjectId();                
+            } break;
+            
             case 'find_first_parent':
             {
                 $startNode = $operatorValue;
@@ -580,6 +588,25 @@ class OpenPAOperator
             return false;
         }
         return false;
+    }
+    
+    public function currentObjectId()
+    {
+        if ( self::$currentObjectId === null )
+        {
+            self::$currentObjectId = 0;
+            $globalParams = $GLOBALS['eZRequestedModuleParams'];
+            if ( $globalParams['module_name'] == 'content' && $globalParams['function_name'] == 'view'  )
+            {
+                $currentNodeId = isset( $globalParams['parameters']['NodeID'] ) ? $globalParams['parameters']['NodeID'] : false;
+                $currentObject = eZContentObject::fetchByNodeID( $currentNodeId, false );
+                if ( is_array( $currentObject ) )
+                {
+                    self::$currentObjectId = $currentObject['id'];    
+                }
+            }
+        }
+        return self::$currentObjectId;
     }
 
 }

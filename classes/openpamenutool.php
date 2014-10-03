@@ -283,7 +283,7 @@ class OpenPAMenuTool
                 $parameters['user_hash'] = $extraCacheKey;
             }
 
-            if ( $identifier == self::TREEMENU )
+            if ( strpos( $identifier, self::TREEMENU ) !== false )
             {
                 $cacheFile = $cachePath . $identifier . '_' . $rootNodeId . $extraCacheKey . '.cache';
             }
@@ -317,7 +317,7 @@ class OpenPAMenuTool
         
     protected static function generateMenu( $identifier, &$parameters )
     {        
-        if ( $identifier == self::TREEMENU )
+        if ( strpos( $identifier, self::TREEMENU ) !== false )
         {
             $settingsScope = $parameters['scope'];
             $handlerObject = OpenPAObjectHandler::instanceFromObject( null );
@@ -411,18 +411,10 @@ class OpenPAMenuTool
     }
 
     public static function getTreeMenu( $parameters )
-    {
-        if ( isset( $parameters['user_hash'] ) )
-        {
-            $parameters['user_hash'] = $parameters['scope'] . '_' . $parameters['user_hash'];
-        }
-        else
-        {
-            $parameters['user_hash'] = $parameters['scope'];
-        }
+    {                
         // per testare senza cache
-        //return unserialize( self::generateMenu( self::TREEMENU, $parameters ) );
-        return unserialize( self::getMenu( self::TREEMENU, $parameters ) );
+        //return unserialize( self::generateMenu( self::TREEMENU . $parameters['scope'], $parameters ) );
+        return unserialize( self::getMenu( self::TREEMENU . $parameters['scope'], $parameters ) );
     }
 
     public static function treeMenu( $rootNodeId, $settings )
@@ -432,7 +424,7 @@ class OpenPAMenuTool
         if ( $rootNode instanceof eZContentObjectTreeNode )
         {
             $data = self::treeMenuItem( $rootNode, $settings, 0 );
-        }
+        }        
         return $data;
     }
 
@@ -484,9 +476,9 @@ class OpenPAMenuTool
             {
                 $level++;
                 foreach( $nodes as $node )
-                {
+                {                    
                     if ( !in_array( $node->attribute( 'node_id' ), $settings['exclude_node_ids'] ) )
-                    {
+                    {                        
                         $menuItem['children'][] = self::treeMenuItem( $node, $settings, $level );
                     }
                 }

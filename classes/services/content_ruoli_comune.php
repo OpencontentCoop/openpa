@@ -2,6 +2,8 @@
 
 class ObjectHandlerServiceContentRuoliComune extends ObjectHandlerServiceBase
 {
+    protected $usersAndRolesBySubtree;
+    
     function run()
     {
         $this->data['ruoli'] = $this->fetchRuoli();
@@ -25,7 +27,15 @@ class ObjectHandlerServiceContentRuoliComune extends ObjectHandlerServiceBase
                  'struttura_object_id' => $this->container->currentObjectId
             )
         );
-
+        
+        $data['subtree'] = eZFunctionHandler::execute(
+            'openpa',
+            'ruoli',
+            array(
+                 'subtree_array' => array( $this->container->currentNodeId )
+            )
+        );
+        
         return $data;
     }    
 }

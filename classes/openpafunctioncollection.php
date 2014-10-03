@@ -140,30 +140,182 @@ class OpenPaFunctionCollection
         
     }
 
-    public static function fetchRuoli( $struttura, $dipendente )
+    public static function fetchRuoli( $struttura, $dipendente, $subtree, $roleNameType, $roleNamesArray )
     {
-        $params = self::$params;
-        
-        $parentObject = eZContentObject::fetchByRemoteID( self::$remoteRoles );
-        if ( $parentObject instanceof eZContentObject )
+        $result = array();
+        if ( empty( $subtree) )
         {
-            $params['SearchSubTreeArray'] = array( $parentObject->attribute( 'main_node_id' ) );
-        }
-        else
-        {
-            $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ),
-                                                   eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
-        }
-        $params['SearchContentClassID'] = array( 'ruolo' );    
-        if ( $struttura || $dipendente )
-        {
+            $params = self::$params;        
+            $parentObject = eZContentObject::fetchByRemoteID( self::$remoteRoles );
+            if ( $parentObject instanceof eZContentObject )
+            {
+                $params['SearchSubTreeArray'] = array( $parentObject->attribute( 'main_node_id' ) );
+            }
+            else
+            {
+                $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ),
+                                                       eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
+            }
+            $params['SearchContentClassID'] = array( 'ruolo' );                
             if ( $struttura )
                 $params['Filter'][] = array( 'submeta_struttura_di_riferimento___id_si:' . $struttura );
             elseif( $dipendente )
                 $params['Filter'][] = array( 'submeta_utente___id_si:' . $dipendente );
-        }        
-        $search = self::search( $params );        
-        return array( 'result' => $search['SearchResult'] );
+                    
+            $search = self::search( $params );
+            $result = $search['SearchResult'];
+        }
+        elseif( $subtree )
+        {            
+            $data = array();
+            
+            $dipendentiSenzaRuoloIds = array();
+            $params = OpenPaFunctionCollection::$params;
+            $params['SearchContentClassID'] = array( 'dipendente' );
+            $params['SearchSubTreeArray'] = $subtree;
+            if ( count( $subtree ) > 1 )
+            {
+                $params['AsObjects'] = false;
+                $params['FieldsToReturn'] = class_exists( 'ObjectHandlerServiceContentVirtual' ) ? array( ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY ) : null;
+            }
+            else
+            {
+                $params['AsObjects'] = true;
+            }
+            $search = OpenPaFunctionCollection::search( $params );
+            if ( $search['SearchCount'] > 0 )
+            {                
+                foreach( $search['SearchResult'] as $item )
+                {                                        
+                    if ( count( $subtree ) > 1 )
+                    {
+                        $id = $item['id_si'];
+                        $priority = class_exists( 'ObjectHandlerServiceContentVirtual' ) ? $item['fields'][ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY] : 0;
+                    }
+                    else
+                    {
+                        $id = $item->attribute( 'contentobject_id' );
+                        $priority = $item->attribute( 'priority' );
+                    }
+                    $dipendentiSenzaRuoloIds[$id] = $id;
+                    $dipendentiIdPriority[$id] = $priority;
+                }
+            }            
+            $params = OpenPaFunctionCollection::$params;
+            $parentObject = eZContentObject::fetchByRemoteID( OpenPaFunctionCollection::$remoteRoles );
+            if ( $parentObject instanceof eZContentObject )
+            {
+                $params['SearchSubTreeArray'] = array( $parentObject->attribute( 'main_node_id' ) );
+            }
+            else
+            {
+                $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ),
+                                                       eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
+            }
+            $params['SearchContentClassID'] = array( 'ruolo' );    
+            foreach( $subtree as $nodeId )
+                $params['Filter'][] = array( 'submeta_utente___path_si:' . $nodeId );
+            $params['AsObjects'] = true;
+            $search = OpenPaFunctionCollection::search( $params );
+            if ( $search['SearchCount'] > 0 )
+            {
+                $idsData = array();
+                foreach( $search['SearchResult'] as $item )
+                {
+                    $users = array();
+                    $dataMap = $item->attribute( 'data_map' );                
+                    if ( isset( $dataMap['utente'] ) && $dataMap['utente'] instanceof eZContentObjectAttribute )
+                    {
+                        $users = explode( '-', $dataMap['utente']->toString() );
+                    }
+                    if ( isset( $idsData[$item->attribute( 'name' )] ) )
+                    {
+                        $idsData[$item->attribute( 'name' )] = array_merge( $idsData[$item->attribute( 'name' )], $users );
+                    }
+                    else
+                    {
+                        $idsData[$item->attribute( 'name' )] = $users;   
+                    }
+                    $idsData[$item->attribute( 'name' )] = array_unique( $idsData[$item->attribute( 'name' )] );
+                }
+                
+                foreach( $idsData as $ruolo => $ids )
+                {
+                    $data[$ruolo] = array();
+                    foreach( $ids as $id )
+                    {
+                        if ( isset( $dipendentiSenzaRuoloIds[$id] ) )
+                        {
+                            unset( $dipendentiSenzaRuoloIds[$id] );
+                        }
+                        $object = eZContentObject::fetch( $id );
+                        if ( $object instanceof eZContentObject && $object->attribute( 'can_read' ) )
+                        {
+                            $data[$ruolo][$object->attribute('name')] = $object;
+                        }
+                        ksort( $data[$ruolo] );
+                    }                    
+                }
+                $data['SenzaRuolo'] = array();
+                foreach( $dipendentiSenzaRuoloIds as $id )
+                {
+                    $object = eZContentObject::fetch( $id );
+                    if ( $object instanceof eZContentObject && $object->attribute( 'can_read' ) )
+                    {
+                        $data['SenzaRuolo'][$object->attribute('name')] = $object;
+                    }
+                    ksort( $data['SenzaRuolo'] );
+                }
+                
+                if ( $roleNameType )
+                {
+                    $filterData = array();
+                    if ( $roleNameType == 'include' )
+                    {
+                        foreach( $data as $name => $objects )
+                        {
+                            if ( in_array( $name, $roleNamesArray ) )
+                            {
+                                foreach( $objects as $object )
+                                {
+                                    $filterData[$object->attribute( 'id' )] = $object;
+                                }
+                            }
+                        }
+                    }
+                    elseif ( $roleNameType == 'exclude' )
+                    {
+                        foreach( $data as $name => $objects )
+                        {
+                            if ( !in_array( $name, $roleNamesArray ) )
+                            {
+                                foreach( $objects as $object )
+                                {
+                                    $filterData[$object->attribute( 'id' )] = $object;
+                                }
+                            }
+                        }
+                    }                   
+                    
+                    $data = $filterData;                    
+                    uasort( $data, function( $a, $b ) use ( $dipendentiIdPriority ) {
+                        $aPriority = isset( $dipendentiIdPriority[$a->attribute( 'id' )] ) ? $dipendentiIdPriority[$a->attribute( 'id' )] : 0;
+                        $bPriority = isset( $dipendentiIdPriority[$b->attribute( 'id' )] ) ? $dipendentiIdPriority[$b->attribute( 'id' )] : 0;
+                        if ( $aPriority == $bPriority ) {
+                            $return = 0;
+                        }
+                        else
+                        {
+                            $return = ( $aPriority < $bPriority ) ? 1 : -1;
+                        }
+                        return $return;
+                    });                    
+                }
+            }
+            
+            $result = $data;
+        }
+        return array( 'result' => $result );
     }
     
     public static function fetchNomiRuoliDirigenziali()

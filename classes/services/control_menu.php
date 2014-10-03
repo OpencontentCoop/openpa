@@ -62,7 +62,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             {
                 $data[$nodeId] = array(
                     'limit' => OpenPAINI::variable( 'TopMenu', 'LimiteSecondoLivello', 4 )
-                );
+                );                
             }
         }
         return $data;

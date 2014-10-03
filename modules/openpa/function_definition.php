@@ -15,6 +15,18 @@ $FunctionList['ruoli'] = array( 'name' => 'ruoli',
                                                        array( 'name' => 'dipendente_object_id',
                                                               'type' =>'integer',
                                                               'required' => false,
+                                                              'default' => false ),
+                                                       array( 'name' => 'subtree_array',
+                                                              'type' =>'array',
+                                                              'required' => false,
+                                                              'default' => false ),                                                       
+                                                       array( 'name' => 'role_names_type',
+                                                              'type' =>'string',
+                                                              'required' => false,
+                                                              'default' => false ),
+                                                       array( 'name' => 'role_names_array',
+                                                              'type' =>'array',
+                                                              'required' => false,
                                                               'default' => false )
                                                     )
                                 );

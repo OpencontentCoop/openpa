@@ -4,6 +4,7 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
 {
     public $fetchParams = array();
     public $imageCount;
+    public $imageList;
     
     function run()
     {
@@ -76,15 +77,18 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
     
     function getImageList()
     {
-        if ( $this->getImageListCount() > 0 )
+        if ( $this->imageList === null )
         {
-            return eZFunctionHandler::execute(
-                'content',
-                'list',
-                $this->fetchParams
-            );
+            if ( $this->getImageListCount() > 0 )
+            {
+                $this->imageList = eZFunctionHandler::execute(
+                    'content',
+                    'list',
+                    $this->fetchParams
+                );
+            }
         }
-        return array();
+        return $this->imageList;
     }
 
 }

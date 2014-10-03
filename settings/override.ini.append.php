@@ -273,6 +273,13 @@ Subdir=templates
 Match[type]=Eventi
 Match[view]=eventi
 
+[block_eventi_manual]
+Source=block/view/view.tpl
+MatchFile=block/eventi_manual.tpl
+Subdir=templates
+Match[type]=Eventi
+Match[view]=eventi_manual
+
 [block_iosono]
 Source=block/view/view.tpl
 MatchFile=block/iosono.tpl
