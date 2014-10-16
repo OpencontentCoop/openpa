@@ -51,6 +51,9 @@ class OpenPAObjectTools
      */
     public static function copyObject( eZContentObject $object, $allVersions = true, $newParentNodeID = null )
     {
+        $db = eZDB::instance();
+        $db->setErrorHandling( eZDB::ERROR_HANDLING_EXCEPTIONS );
+        
         if ( !$object instanceof eZContentObject )
             throw new InvalidArgumentException( 'Object not found' );
         
@@ -74,7 +77,15 @@ class OpenPAObjectTools
     
         $db = eZDB::instance();
         $db->begin();
-        $newObject = $object->copy( $allVersions );
+        try
+        {
+            $newObject = $object->copy( $allVersions );
+        }
+        catch( eZDBException $e )
+        {            
+            $db->rollback();
+            throw new InvalidArgumentException( $e->getMessage() );
+        }
         // We should reset section that will be updated in updateSectionID().
         // If sectionID is 0 then the object has been newly created
         $newObject->setAttribute( 'section_id', $object->attribute( 'section_id' ) );

@@ -13,6 +13,18 @@ if ( $objectID )
     {
         $redirect = $node[0]->attribute( 'url_alias' );        
     }
+    else
+    {
+        $object = eZContentObject::fetchByRemoteID( $objectID );
+        if ( $object instanceof eZContentObject )
+        {
+            $node = $object->attribute( 'main_node' );
+            if ( $node instanceof eZContentObjectTreeNode )
+            {
+                $redirect = $node->attribute( 'url_alias' );        
+            }
+        }
+    }
 }
 
 return $module->redirectTo( $redirect );

@@ -46,7 +46,7 @@ elseif ( $http->hasGetVariable( 'from' ) )
         $copy = OpenPAObjectTools::copyObject( $object );
         $module->redirectTo( 'content/edit/' . $copy->attribute( 'id' ) . '/' . $copy->attribute( 'current_version' ) . $queryString );
         return;
-    }
+    }    
     catch( InvalidArgumentException $e )
     {
         eZLog::write( $e->getMessage(), 'editor_tools.log' );

@@ -108,9 +108,12 @@ class OpenPAObjectHandler
             }
             elseif ( $this->contentObject instanceof eZContentObject )
             {
-                $this->contentNode = $this->contentObject->attribute( 'main_node' );
-                $this->currentNodeId = $this->contentNode->attribute( 'node_id' );
-                $this->currentMainNodeId = $this->currentNodeId;
+                if ( $this->contentObject->attribute( 'main_node' ) instanceof eZContentObjectTreeNode )
+                {
+                    $this->contentNode = $this->contentObject->attribute( 'main_node' );
+                    $this->currentNodeId = $this->contentNode->attribute( 'node_id' );
+                    $this->currentMainNodeId = $this->currentNodeId;
+                }
             }
 
             if ( $this->contentNode !== null )
