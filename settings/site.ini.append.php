@@ -10,6 +10,12 @@ id=openpamenu
 tags[]=openpamenu
 path=openpamenu
 
+[RoleSettings]
+PolicyOmitList[]=openpa/classdefinition
+PolicyOmitList[]=openpa/calendar
+PolicyOmitList[]=openpa/object
+PolicyOmitList[]=openpa/data
+PolicyOmitList[]=robots.txt
 
 [RegionalSettings]
 TranslationExtensions[]=openpa
