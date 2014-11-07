@@ -25,7 +25,7 @@ class OpenPAObjectHandler
     protected $services = array();
 
     /**
-     * @var ObjectHandlerServiceBase[]
+     * @var OpenPAAttributeHandler[]
      */
     public $attributesHandlers = array();
 
@@ -231,6 +231,16 @@ class OpenPAObjectHandler
             return $this->attributesHandlers[$key];
         }
         eZDebug::writeNotice( "Service or AttributeHandler $key does not exist", __METHOD__ );
+        return false;
+    }
+
+    public function service( $key )
+    {
+        if ( isset( $this->services[$key] ) )
+        {
+            return $this->services[$key];
+        }
+        eZDebug::writeNotice( "Service $key does not exist", __METHOD__ );
         return false;
     }
 

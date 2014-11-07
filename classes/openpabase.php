@@ -183,4 +183,77 @@ class OpenPABase
         return self::$cacheNodes[$nodeID];
     }
 
+
+    /**
+     * @param $groupIdentifier
+     * @param $stateIdentifiers
+     * @return eZContentObjectState[]
+     * @throws Exception
+     */
+    public static function initStateGroup( $groupIdentifier, $stateIdentifiers )
+    {
+        $states = array();
+        $transStates = array();
+        foreach( $stateIdentifiers as $state )
+        {
+            $transStates[$state] = str_replace( '_', ' ', ucfirst( $state ) );
+        }
+        $group = array(
+            'identifier' => $groupIdentifier,
+            'name' => str_replace( '_', ' ', ucfirst( $groupIdentifier ) ),
+            'states' => $transStates
+        );
+
+        $stateGroup = eZContentObjectStateGroup::fetchByIdentifier( $group['identifier'] );
+        if ( !$stateGroup instanceof eZContentObjectStateGroup )
+        {
+            $stateGroup = new eZContentObjectStateGroup();
+            $stateGroup->setAttribute( 'identifier', $group['identifier'] );
+            $stateGroup->setAttribute( 'default_language_id', 2 );
+
+            /** @var eZContentObjectStateLanguage[] $translations */
+            $translations = $stateGroup->allTranslations();
+            foreach( $translations as $translation )
+            {
+                $translation->setAttribute( 'name', $group['name'] );
+                $translation->setAttribute( 'description', $group['name'] );
+            }
+
+            $messages = array();
+            $isValid = $stateGroup->isValid( $messages );
+            if ( !$isValid )
+            {
+                throw new Exception( implode( ',', $messages ) );
+            }
+            $stateGroup->store();
+        }
+
+        foreach( $group['states'] as $StateIdentifier => $StateName )
+        {
+            $stateObject = $stateGroup->stateByIdentifier( $StateIdentifier );
+            if ( !$stateObject instanceof eZContentObjectState )
+            {
+                $stateObject = $stateGroup->newState( $StateIdentifier );
+                $stateObject->setAttribute( 'default_language_id', 2 );
+                /** @var eZContentObjectStateLanguage[] $stateTranslations */
+                $stateTranslations = $stateObject->allTranslations();
+                foreach( $stateTranslations as $translation )
+                {
+                    $translation->setAttribute( 'name', $StateName );
+                    $translation->setAttribute( 'description', $StateName );
+                }
+                $messages = array();
+                $isValid = $stateObject->isValid( $messages );
+                if ( !$isValid )
+                {
+                    throw new Exception( implode( ',', $messages ) );
+                }
+                $stateObject->store();
+            }
+            $id = $group['identifier'] . '.' . $StateIdentifier;
+            $states[$id] = $stateObject;
+        }
+        return $states;
+    }
+
 }

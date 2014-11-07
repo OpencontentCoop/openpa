@@ -4,17 +4,17 @@ class OpenPADataHandler
 {
     /**
      * @param string $identifier
-     * @param eZModule $module
+     * @param array $Params
      * @return mixed
      * @throws Exception
      */
-    public static function runHandler( $identifier, $module )
+    public static function runHandler( $identifier, $Params )
     {
         if ( !in_array( $identifier, self::availableHandlers() ) )
         {
             throw new Exception( "Data handler $identifier not found" );
         }
-        $handler = self::handler( $identifier, $module );
+        $handler = self::handler( $identifier, $Params );
         return $handler->getData();
     }
 
@@ -29,11 +29,11 @@ class OpenPADataHandler
 
     /**
      * @param string $identifier
-     * @param eZModule $module
+     * @param array $Params
      * @return OpenPADataHandlerInterface
      * @throws Exception
      */
-    public static function handler( $identifier, $module )
+    public static function handler( $identifier, $Params )
     {
         $className = false;
         $handlers = OpenPAINI::variable( 'DataHandlers', 'Handlers', array() );
@@ -43,14 +43,14 @@ class OpenPADataHandler
         }
         if ( class_exists( $className ) )
         {
-            $handler = new $className( $module );
+            $handler = new $className( $Params );
             if ( $handler instanceof OpenPADataHandlerInterface )
             {
                 return $handler;
             }
             throw new Exception( "Data handler $className must implement OpenPADataHandlerInterface" );
         }
-        throw new Exception( "Data handler class '$className'' not found" );
+        throw new Exception( "Data handler class '$className' not found" );
     }
 
 }

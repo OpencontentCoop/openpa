@@ -1,13 +1,13 @@
 <?php
 /** @var eZModule $module */
 $module = $Params['Module'];
-$identifier = $Params['Identifier'];
+$identifier = $Params['HandlerIdentifier'];
 $data = array();
 
 try
 {
     header( 'HTTP/1.1 200 OK' );
-    $data = OpenPADataHandler::runHandler( $identifier, $module );
+    $data = OpenPADataHandler::runHandler( $identifier, $Params );
 }
 catch ( Exception $e )
 {

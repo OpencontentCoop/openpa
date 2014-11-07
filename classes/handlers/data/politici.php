@@ -2,9 +2,13 @@
 
 class DataHandlerPolitici implements OpenPADataHandlerInterface
 {
-    public function __construct( eZModule $module )
+    public function __construct( array $Params )
     {
-        $module->setTitle( "Politici" );
+        $module = isset( $Params['Module'] ) ? $Params['Module'] : false;
+        if ( $module instanceof eZModule )
+        {
+            $module->setTitle( "Politici" );
+        }
     }
 
     public function getData()

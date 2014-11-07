@@ -2,7 +2,7 @@
 
 interface OpenPADataHandlerInterface
 {
-    public function __construct( eZModule $module );
+    public function __construct( array $Params );
 
     /**
      * @return string|array|object
