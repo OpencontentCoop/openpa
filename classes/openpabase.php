@@ -260,7 +260,11 @@ class OpenPABase
 
     public static function initSection( $name, $identifier, $navigationPart = 'ezcontentnavigationpart' )
     {
-        $section = eZSection::fetchByIdentifier( $identifier );
+        $section = eZSection::fetchByIdentifier( $identifier, false );
+        if ( isset( $section['id'] ) )
+        {
+            $section = eZSection::fetch( $section['id'] );
+        }
         if ( !$section instanceof eZSection )
         {
             $section = new eZSection( array() );
@@ -268,6 +272,10 @@ class OpenPABase
             $section->setAttribute( 'identifier', $identifier );
             $section->setAttribute( 'navigation_part_identifier', $navigationPart );
             $section->store();
+        }
+        if ( !$section instanceof eZSection )
+        {
+            throw new Exception( "Section $identifier not found" );
         }
         return $section;
     }
