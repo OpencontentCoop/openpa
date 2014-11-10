@@ -7,7 +7,9 @@ class OpenPABase
     const PENDING_ACTION_RENAME_OBJECT = 'openpa_rename_object';
 
     protected static $cacheNodes = array();
-    
+
+    protected static $sudoFlag = false;
+
     public static function getIniFileName( $file, $block = 'INISettings', $setting = 'INIFile' )
     {
         $ini = eZINI::instance( $file );
@@ -254,6 +256,49 @@ class OpenPABase
             $states[$id] = $stateObject;
         }
         return $states;
+    }
+
+    public static function initSection( $name, $identifier, $navigationPart = 'ezcontentnavigationpart' )
+    {
+        $section = eZSection::fetchByIdentifier( $identifier );
+        if ( !$section instanceof eZSection )
+        {
+            $section = new eZSection( array() );
+            $section->setAttribute( 'name', $name );
+            $section->setAttribute( 'identifier', $identifier );
+            $section->setAttribute( 'navigation_part_identifier', $navigationPart );
+            $section->store();
+        }
+        return $section;
+    }
+
+    public static function sudo( Closure $callback )
+    {
+        if ( self::$sudoFlag === true )
+            throw new RuntimeException( "Recursive sudo use detected, abort abort!" );
+
+        self::$sudoFlag = true;
+
+        $loggedUser = eZUser::currentUser();
+        $admin = eZUser::fetchByName( 'admin' );
+        if ( $admin instanceof eZUser )
+        {
+            eZUser::setCurrentlyLoggedInUser( $admin, $admin->attribute( 'contentobject_id' ), 1 );
+        }
+        try
+        {
+            $returnValue = $callback();
+        }
+        catch ( Exception $e  )
+        {
+            self::$sudoFlag = false;
+            eZUser::setCurrentlyLoggedInUser( $loggedUser, $loggedUser->attribute( 'contentobject_id' ), 1 );
+            throw $e;
+        }
+
+        self::$sudoFlag = false;
+        eZUser::setCurrentlyLoggedInUser( $loggedUser, $loggedUser->attribute( 'contentobject_id' ), 1 );
+        return $returnValue;
     }
 
 }

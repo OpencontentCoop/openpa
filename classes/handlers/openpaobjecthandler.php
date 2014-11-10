@@ -70,6 +70,10 @@ class OpenPAObjectHandler
         {
             return self::instanceFromContentObject( $object->attribute( 'object' ), $object );
         }
+        elseif ( $object instanceof eZContentObject )
+        {
+            return self::instanceFromContentObject( $object, $object->attribute( 'main_node' ) );
+        }
         elseif ( $object instanceof eZPageBlock )
         {
             return self::blockHandler( $object );
