@@ -17,9 +17,9 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
             'description',
             'descrizione'
         );
-        $this->data['attributes'] = $this->getAttributeList();
-        $this->data['has_content'] = count( $this->data['attributes'] ) > 0;
-        $this->data['parts'] = $this->getParts();
+        $this->fnData['attributes'] = 'getAttributeList';
+        $this->fnData['has_content'] = 'getAttributeCount';
+        $this->fnData['parts'] = 'getParts';
     }
 
     protected function getParts()
@@ -56,6 +56,11 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
             $data['full_text'] = $this->data['attributes']['description'];
         }
         return $data;
+    }
+
+    protected function getAttributeCount()
+    {
+        return count( $this->getAttributeList() ) > 0;
     }
 
     protected function getAttributeList()

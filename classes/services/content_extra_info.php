@@ -6,7 +6,7 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
 
     function run()
     {
-        $this->data['extra_info'] = $this->getExtraInfoData();
+        $this->fnData['extra_info'] = 'getExtraInfoData';
     }
 
     function getExtraInfoData()

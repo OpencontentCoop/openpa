@@ -6,8 +6,8 @@ class ObjectHandlerServiceControlAreaTematica extends ObjectHandlerServiceBase
 
     function run()
     {
-        $this->data['area_tematica'] = $this->getAreaTematicaNode();
-        $this->data['is_area_tematica'] = $this->data['area_tematica'] != false;
+        $this->fnData['area_tematica'] = 'getAreaTematicaNode';
+        $this->fnData['is_area_tematica'] = 'getAreaTematicaNode'; //@todo
     }
 
     protected function getAreaTematicaNode()

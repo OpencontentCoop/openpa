@@ -4,8 +4,8 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
 {
     function run()
     {
-        $this->data['info'] = $this->infoList();
-        $this->data['classification'] = $this->classificationList();
+        $this->fnData['info'] = 'infoList';
+        $this->fnData['classification'] = 'classificationList';
 
     }
 

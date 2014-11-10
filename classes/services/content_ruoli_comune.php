@@ -6,7 +6,7 @@ class ObjectHandlerServiceContentRuoliComune extends ObjectHandlerServiceBase
     
     function run()
     {
-        $this->data['ruoli'] = $this->fetchRuoli();
+        $this->fnData['ruoli'] = 'fetchRuoli';
     }
 
     protected function fetchRuoli()

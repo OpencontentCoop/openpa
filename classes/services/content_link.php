@@ -7,16 +7,26 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
 
     function run()
     {
-        $this->data['link'] = $this->getLink();
-        $this->data['is_internal'] = $this->isInternal;
-        $this->data['target'] = $this->getTarget();
+        $this->fnData['link'] = 'getLink';
+        $this->fnData['is_internal'] = 'isInternal';
+        $this->fnData['target'] = 'getTarget';
+        $this->fnData['full_link'] = 'getFullLink';
+    }
 
-        $link = $this->data['link'];
-        if ( $this->data['is_internal'] )
+    protected function getFullLink()
+    {
+        $link = $this->getLink();
+        if ( $this->isInternal )
         {
             eZURI::transformURI( $link, false, 'full' );
         }
-        $this->data['full_link'] = $link;
+        return $link;
+    }
+
+    protected function isInternal()
+    {
+        $this->getLink();
+        return $this->isInternal;
     }
 
     protected function getLink()

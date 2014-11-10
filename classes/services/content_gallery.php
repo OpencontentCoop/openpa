@@ -8,8 +8,8 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
     
     function run()
     {
-        $this->data['has_images'] = $this->getImageListCount();
-        $this->data['images'] = $this->getImageList();
+        $this->fnData['has_images'] = 'getImageListCount';
+        $this->fnData['images'] = 'getImageList';
     }
 
     function getImageListCount()

@@ -6,8 +6,8 @@ class ObjectHandlerServiceContentVirtual extends ObjectHandlerServiceBase
 
     function run()
     {
-        $this->data['folder'] = $this->isVirtualFolder();
-        $this->data['calendar'] = $this->isVirtualCalendar();
+        $this->fnData['folder'] = 'isVirtualFolder';
+        $this->fnData['calendar'] = 'isVirtualCalendar';
     }
 
     protected function isVirtualFolder()
