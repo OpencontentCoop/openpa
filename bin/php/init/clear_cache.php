@@ -1,4 +1,7 @@
 <?php
 
-$cli->output( 'Svuoto tutte le cache' );
-eZContentCacheManager::clearAllContentCache( true );
+if ( !$reload )
+{
+    $cli->output( 'Svuoto tutte le cache' );
+    eZContentCacheManager::clearAllContentCache( true );
+}

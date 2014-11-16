@@ -10,10 +10,11 @@ $script = eZScript::instance( array( 'description' => ( "OpenPA Init\n\n" ),
 $script->startup();
 
 $options = $script->getOptions(
-    '[go-live]',
+    '[go-live][reload]',
     '',
     array(
-         'go-live' => 'Esegue le operazioni per la messa in produzione'
+         'go-live' => 'Esegue le operazioni per la messa in produzione',
+         'reload' => 'Non esegue le operazioni di installazione iniziale'
     )
 );
 
@@ -22,6 +23,7 @@ $script->setUseDebugAccumulators( true );
 
 try
 {
+    $reload = $options['reload'];
     $siteaccess = eZSiteAccess::current();
     $instance = new OpenPAInstance( $siteaccess['name'] );
 
@@ -45,6 +47,7 @@ try
     {
         require( 'init/site_name.php' );
         require( 'init/anonymous_user_login.php' );
+        require( 'init/create_app_section.php' );
         require( 'init/reindex.php' );
         require( 'init/clear_cache.php' );
     }

@@ -5,5 +5,6 @@ ExtensionRepositories[]=openpa
 
 ModuleList[]=openpa
 ModuleList[]=robots.txt
+ModuleList[]=apps
 
 */ ?>

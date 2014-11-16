@@ -15,4 +15,28 @@ MenuThumbnail=menu/left_top.jpg
 TopMenu=dropdown_top.cache
 LeftMenu=flat_left.cache
 
+[NavigationPart]
+Part[ezappsnavigationpart]=Apps
+
+[TopAdminMenu]
+Tabs[]=apps
+
+[Topmenu_apps]
+NavigationPartIdentifier=ezappsnavigationpart
+Name=Apps
+Tooltip=Gestisci contenuti delle apps
+URL[]
+URL[default]=apps/dashboard
+Enabled[]
+Enabled[default]=true
+Enabled[browse]=false
+Enabled[edit]=false
+Shown[]
+Shown[default]=true
+Shown[navigation]=true
+Shown[browse]=false
+
+# Tabs policy on admin interface in 4.3
+PolicyList[]=apps/dashboard
+
 */ ?>

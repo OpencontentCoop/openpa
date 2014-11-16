@@ -2,8 +2,6 @@
 
 // Privilegi ruolo anonimo
 
-$cli->output( 'Aggiungo policy user/login al ruolo Anonymous' );
-
 $frontend = false;
 $siteaccessList = (array) eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' );
 foreach( eZSiteAccess::siteAccessList() as $sa )
@@ -34,6 +32,7 @@ if ( $anonymousRole instanceof eZRole && $frontend )
     }
     if ( $do )
     {
+        $cli->output( 'Aggiungo policy user/login al ruolo Anonymous' );
         $anonymousRole->appendPolicy( 'user', 'login', array( 'SiteAccess' => array( $frontend['id'] ) ) );
         $anonymousRole->store();
     }

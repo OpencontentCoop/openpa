@@ -449,7 +449,7 @@ class OpenPAClassTools
             }
             return $original;             
         }
-        return null;
+        throw new Exception( "Server remoto e server locale coincidono" );
     }
     
     protected function compareProperties( $remote = null )

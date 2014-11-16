@@ -238,6 +238,11 @@ class OpenPAObjectHandler
         return false;
     }
 
+    /**
+     * @param $key
+     *
+     * @return OpenPATempletizable|OpenPAObjectHandlerServiceInterface
+     */
     public function service( $key )
     {
         if ( isset( $this->services[$key] ) )

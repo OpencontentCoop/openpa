@@ -2,16 +2,16 @@
 
 // Modifica della Homepage
 
-$cli->output( 'Modifico il titolo dell\'homepage con i valori del site.ini [SiteSettings]SiteName' );
-
+$siteName = eZINI::instance()->variable( 'SiteSettings', 'SiteName' );
 $rootNode = eZContentObjectTreeNode::fetch( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
-if ( $rootNode instanceof eZContentObjectTreeNode )
+if ( $rootNode instanceof eZContentObjectTreeNode && $rootNode->attribute( 'name' ) != $siteName )
 {
     if ( $rootNode->attribute( 'class_identifier' ) == 'homepage' )
     {
+        $cli->output( 'Modifico il titolo dell\'homepage con i valori del site.ini [SiteSettings]SiteName' );
         $contentObject = $rootNode->attribute( 'object' );
         $attributeList = array(
-            'name' => eZINI::instance()->variable( 'SiteSettings', 'SiteName' )
+            'name' => $siteName
         );
         if ( $rootNode->attribute( 'name' ) != $attributeList['name'] )
         {

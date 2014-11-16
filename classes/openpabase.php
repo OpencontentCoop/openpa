@@ -196,10 +196,18 @@ class OpenPABase
     {
         $states = array();
         $transStates = array();
-        foreach( $stateIdentifiers as $state )
+        foreach( $stateIdentifiers as $key => $state )
         {
-            $transStates[$state] = str_replace( '_', ' ', ucfirst( $state ) );
+            if ( is_string( $key ) )
+            {
+                $transStates[$key] = $state;
+            }
+            else
+            {
+                $transStates[$state] = str_replace( '_', ' ', ucfirst( $state ) );
+            }
         }
+
         $group = array(
             'identifier' => $groupIdentifier,
             'name' => str_replace( '_', ' ', ucfirst( $groupIdentifier ) ),
