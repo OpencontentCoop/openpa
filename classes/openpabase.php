@@ -81,6 +81,13 @@ class OpenPABase
         $currentSiteaccess = eZSiteAccess::current();
         $parts = explode( '_', $currentSiteaccess['name'] );
         array_pop( $parts );
+        if ( count( $parts ) > 1 )
+        {
+            if ( in_array( $parts[1], eZLocale::languageList() ) )
+            {
+                unset( $parts[1] );       
+            }
+        }
         return implode( '_', $parts );
     }
     

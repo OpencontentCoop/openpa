@@ -2,6 +2,9 @@
 
 class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
 {
+    
+    protected static $attributeList;
+    
     function run()
     {
         //@todo
@@ -24,36 +27,37 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
 
     protected function getParts()
     {
+        $attributes = $this->getAttributeList();
         $data = array();
-        if ( isset( $this->data['attributes']['image'] ) )
+        if ( isset( $attributes['image'] ) )
         {
-            $data['image'] = $this->data['attributes']['image'];
+            $data['image'] = $attributes['image'];
         }
 
-        if ( isset( $this->data['attributes']['abstract'] ) )
+        if ( isset( $attributes['abstract'] ) )
         {
-            $data['abstract'] = $this->data['attributes']['abstract'];
+            $data['abstract'] = $attributes['abstract'];
         }
-        elseif ( isset( $this->data['attributes']['short_description'] ) )
+        elseif ( isset( $attributes['short_description'] ) )
         {
-            $data['abstract'] = $this->data['attributes']['short_description'];
+            $data['abstract'] = $attributes['short_description'];
         }
-        elseif ( isset( $this->data['attributes']['oggetto'] ) )
+        elseif ( isset( $attributes['oggetto'] ) )
         {
-            $data['abstract'] = $this->data['attributes']['oggetto'];
+            $data['abstract'] = $attributes['oggetto'];
         }
-        elseif ( isset( $this->data['attributes']['ruolo'] ) )
+        elseif ( isset( $attributes['ruolo'] ) )
         {
-            $data['abstract'] = $this->data['attributes']['ruolo'];
+            $data['abstract'] = $attributes['ruolo'];
         }
 
-        if ( isset( $this->data['attributes']['descrizione'] ) )
+        if ( isset( $attributes['descrizione'] ) )
         {
-            $data['full_text'] = $this->data['attributes']['descrizione'];
+            $data['full_text'] = $attributes['descrizione'];
         }
-        elseif ( isset( $this->data['attributes']['description'] ) )
+        elseif ( isset( $attributes['description'] ) )
         {
-            $data['full_text'] = $this->data['attributes']['description'];
+            $data['full_text'] = $attributes['description'];
         }
         return $data;
     }
@@ -65,16 +69,19 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
 
     protected function getAttributeList()
     {
-        $list = array();
-        foreach( $this->container->attributesHandlers as $attribute )
+        if ( self::$attributeList === null )
         {
-            $fullData = $attribute->attribute( 'full' );
-            if ( in_array( $attribute->attribute( 'identifier' ), $this->data['identifiers'] )
-                 && $fullData['has_content'] )
+            self::$attributeList = array();
+            foreach( $this->container->attributesHandlers as $attribute )
             {
-                $list[$attribute->attribute( 'identifier' )] = $attribute;
+                $fullData = $attribute->attribute( 'full' );
+                if ( in_array( $attribute->attribute( 'identifier' ), $this->data['identifiers'] )
+                     && $fullData['has_content'] )
+                {
+                    self::$attributeList[$attribute->attribute( 'identifier' )] = $attribute;
+                }
             }
         }
-        return $list;
+        return self::$attributeList;
     }
 }
