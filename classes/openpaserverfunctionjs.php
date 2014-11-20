@@ -52,12 +52,16 @@ class OpenPAServerFunctionsJs extends ezjscServerFunctionsJs
         $ezjscoreIni = eZINI::instance( 'ezjscore.ini' );
         if ( $ezjscoreIni->hasVariable( 'eZJSCore', 'ForceScriptSettingsExtension' ) )
         {
-            $extension = $ezjscoreIni->variable( 'eZJSCore', 'ForceScriptSettingsExtension' );
-            $activeExtension = eZExtension::activeExtensions();
+            $extension = $ezjscoreIni->variable( 'eZJSCore', 'ForceScriptSettingsExtension' );            
+            $activeExtension = eZExtension::activeExtensions();            
             if ( in_array( $extension, $activeExtension ) )
             {
-                $rootDir = eZSys::rootDir() . '/' . eZExtension::baseDirectory() . '/' . $extension . '/settings';
-                $ezjscoreIni = new eZINI( 'ezjscore.ini.append.php', $rootDir, null, false, false, true );
+                $rootDir = eZSys::rootDir() . '/' . eZExtension::baseDirectory() . '/' . $extension . '/settings';                
+                $ezjscoreIni = new eZINI( 'ezjscore.ini.append.php', $rootDir, null, false, false, true );                
+                if ( empty( $ezjscoreIni->BlockValues ) )
+                {
+                    $ezjscoreIni->parseFile( $rootDir . '/ezjscore.ini.append.php' );                
+                }
             }
         }
         return $ezjscoreIni;

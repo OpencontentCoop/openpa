@@ -105,7 +105,7 @@ class OpenPACalendarData
                 $content = $dataMap['subtree_array']->attribute( 'content' );
                 foreach( $content['relation_list'] as $item )
                 {
-                    if ( isset( $item['node_id'] ) )
+                    if ( isset( $item['node_id'] ) && intval( $item['node_id'] ) > 0  )
                     {
                         $defaultParameters['subtree'][] = $item['node_id'];
                     }
@@ -119,7 +119,10 @@ class OpenPACalendarData
                 $content = $dataMap['subtree']->attribute( 'content' );
                 if ( $content instanceof eZContentObject )
                 {
-                    $defaultParameters['subtree'][] = $content->attribute( 'main_node_id' );
+                    if ( intval( $content->attribute( 'main_node_id' ) ) > 0 )
+                    {
+                        $defaultParameters['subtree'][] = $content->attribute( 'main_node_id' );
+                    }
                 }
             }            
         }
