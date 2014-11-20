@@ -39,6 +39,14 @@ $ViewList['classdefinition'] = array(
     'params' => array('ID'),
     'unordered_params' => array());
 
+$ViewList['classsettings'] = array(
+    'functions' => array('class'),
+    'script' => 'classsettings.php',
+    'ui_context' => 'edit',
+    'default_navigation_part' => 'ezsetupnavigationpart',
+    'params' => array('Identifier'),
+    'unordered_params' => array());
+
 $ViewList['relations'] = array(
     'functions' => array('classdefinition'),
     'script' => 'relations.php',

@@ -60,6 +60,12 @@ class OpenPAAttributeHandler extends OpenPATempletizable
 
     protected function lineData()
     {
-        return array();
+        return array(
+            'show_label' => !$this->is( 'attributes_with_title' ),
+            'exclude' => !$this->is( 'attributes_to_show' ) || $this->data['is_information_collector'],
+            'highlight' => $this->is( 'line_attributi_da_evidenziare' ),
+            'has_content' => $this->hasContent(),
+            'show_link' => !$this->is( 'line_attributi_senza_link' )
+        );
     }
 }
