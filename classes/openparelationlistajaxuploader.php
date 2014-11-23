@@ -112,6 +112,10 @@ class OpenPARelationListAjaxUploader
         }
 
         $classContent = $this->attribute->attribute( 'class_content' );
+        if ( in_array( 'file', $classContent['class_constraint_list'] ) )
+        {
+            $classContent['class_constraint_list'][] = 'file_pdf';
+        }
 
         if ( !empty( $classContent['class_constraint_list'] )
             && !in_array( $classIdentifier, $classContent['class_constraint_list'] ) )
