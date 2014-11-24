@@ -113,6 +113,29 @@ if ( $http->hasGetVariable( 'PrevMonthCalendarButton' ) )
     }
 }
 
+if ( $http->hasGetVariable( 'NextDayCalendarButton' ) )
+{
+    $dateTime = DateTime::createFromFormat( OpenPACalendarData::PICKER_DATE_FORMAT, $http->getVariable( 'SearchDate' ) , OpenPACalendarData::timezone() );
+    if ( $dateTime instanceof DateTime )
+    {
+        $dateTime->add( new DateInterval('P1D') );
+        $parameters['day'] = $dateTime->format( OpenPACalendarData::DAY_IDENTIFIER_FORMAT );
+        $parameters['month'] = $dateTime->format( OpenPACalendarData::MONTH_IDENTIFIER_FORMAT );
+        $parameters['year'] = $dateTime->format( OpenPACalendarData::YEAR_IDENTIFIER_FORMAT );
+    }
+}
+if ( $http->hasGetVariable( 'PrevDayCalendarButton' ) )
+{
+    $dateTime = DateTime::createFromFormat( OpenPACalendarData::PICKER_DATE_FORMAT, $http->getVariable( 'SearchDate' ) , OpenPACalendarData::timezone() );
+    if ( $dateTime instanceof DateTime )
+    {
+        $dateTime->sub( new DateInterval('P1D') );
+        $parameters['day'] = $dateTime->format( OpenPACalendarData::DAY_IDENTIFIER_FORMAT );
+        $parameters['month'] = $dateTime->format( OpenPACalendarData::MONTH_IDENTIFIER_FORMAT );
+        $parameters['year'] = $dateTime->format( OpenPACalendarData::YEAR_IDENTIFIER_FORMAT );
+    }
+}
+
 if ( $http->hasGetVariable( 'SearchBlockButton' ) )
 {    
     $parameters['interval'] = $http->hasGetVariable( 'SearchBlockInterval' ) ? $http->getVariable( 'SearchBlockInterval' ) : 'P1M'; // intervallo per la ricerca dal blocco: 1 anno di default

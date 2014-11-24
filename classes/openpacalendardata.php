@@ -488,13 +488,14 @@ class OpenPACalendarData
     
     protected static function relatedParameters()
     {
-        return array(
+        $default = array(
             'tipo_evento' => 'Tipologia',
             'materia' => 'Materia',
             'io_sono' => 'Destinatari',
             'iniziativa' => 'Manifestazione',                     
             'circoscrizione' => 'Circoscrizione'
         );
+        return OpenPAINI::variable( 'CalendarSettings', 'RelationFilters', $default );
     }
     
     public static function defaultParameters()
