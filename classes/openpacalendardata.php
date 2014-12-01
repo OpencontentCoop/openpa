@@ -3,6 +3,7 @@
 class OpenPACalendarData
 {
     const INTERVAL_MONTH = 'P1M';
+    const INTERVAL_WEEK = 'P1W';
     const PICKER_DATE_FORMAT = 'd-m-Y';
     const FULLDAY_IDENTIFIER_FORMAT = 'Y-n-j';
     const DAY_IDENTIFIER_FORMAT = 'j';
@@ -28,8 +29,8 @@ class OpenPACalendarData
     
     public static function timezone()
     {
-        //@todo
-        return new DateTimeZone( 'Europe/Rome' );
+        //@todo                
+        return new DateTimeZone( date_default_timezone_get() );
     }
     
     function __construct( eZContentObjectTreeNode $calendar )
@@ -96,6 +97,7 @@ class OpenPACalendarData
         if ( $this->calendar instanceof eZContentObjectTreeNode )
         {
             $defaultParameters['subtree'] = array( $this->calendar->attribute( 'node_id' ) );
+            /** @var eZContentObjectAttribute[] $dataMap */
             $dataMap = $this->calendar->attribute( 'data_map' );
             if ( isset( $dataMap['subtree_array'] )
                  && $dataMap['subtree_array'] instanceof eZContentObjectAttribute
@@ -137,7 +139,16 @@ class OpenPACalendarData
                 }
                 else
                 {
-                    $this->setParameter( $key, $params[$key] );
+                    if ( is_string( $params[$key] ) )
+                    {
+                        $paramValue = explode( '|', $params[$key] );
+                        if ( count( $paramValue ) == 1 ) $paramValue = $paramValue[0];                        
+                    }
+                    else
+                    {
+                        $paramValue = $params[$key];
+                    }
+                    $this->setParameter( $key, $paramValue );
                 }
             }
             else
@@ -172,13 +183,27 @@ class OpenPACalendarData
             'year' => $this->parameters['year']          
         );
         $originalStartDateTime = DateTime::createFromFormat( 'H i s n j Y', implode( ' ', $startDateArray ), self::timezone() );
+        if ( !$originalStartDateTime instanceof DateTime )
+        {
+            throw new Exception( "Data non valida" );
+        }
         $this->parameters['picker_date'] = date( self::PICKER_DATE_FORMAT, $originalStartDateTime->getTimestamp() );
         $this->parameters['search_from_picker_date'] = $this->parameters['picker_date'];
         if ( $this->parameters['interval'] == self::INTERVAL_MONTH && !$this->hasCustomParameters )             
         {
             $startDateArray['day'] = 1;
+            $startDateTime = DateTime::createFromFormat( 'H i s n j Y', implode( ' ', $startDateArray ), self::timezone() );        
         }
-        $startDateTime = DateTime::createFromFormat( 'H i s n j Y', implode( ' ', $startDateArray ), self::timezone() );        
+        elseif ( $this->parameters['interval'] == self::INTERVAL_WEEK && !$this->hasCustomParameters )             
+        {
+            $startDateTime = clone $originalStartDateTime;
+            $dayOfWeek = $startDateTime->format( "w" ) - 1;
+            $startDateTime->modify( "-$dayOfWeek day" );
+        }
+        else
+        {
+            $startDateTime = clone $originalStartDateTime;
+        }
         if ( !$startDateTime instanceof DateTime )
         {
             throw new Exception( "Data non valida" );
@@ -196,14 +221,12 @@ class OpenPACalendarData
         $endOfMonthArray = array_merge( $startDateArray, array( 'day' => $this->parameters['days_of_month'] ) );
         $endOfMonthDateTime = DateTime::createFromFormat( 'H i s n j Y', implode( ' ', $endOfMonthArray ), self::timezone() );                  
         $this->parameters['end_weekday'] = date( 'w', $endOfMonthDateTime->getTimestamp() );
-        $fromTimeStamp = $startDateTime->format( 'U' );
         $this->parameters['search_from_solr'] = ezfSolrDocumentFieldBase::preProcessValue( $startDateTime->getTimestamp(), 'date' );
         $this->parameters['search_from_timestamp'] = $startDateTime->getTimestamp();
         
         // end day
         $endDateTime = clone $startDateTime;
         $endDateTime->add( $interval );
-        $endTimeStamp = $endDateTime->format( 'U' );
         $this->parameters['search_to_solr'] = ezfSolrDocumentFieldBase::preProcessValue( $endDateTime->getTimestamp() - 1 , 'date' );
         $this->parameters['search_to_timestamp'] = $endDateTime->getTimestamp();
         $this->parameters['search_to_picker_date'] = date( self::PICKER_DATE_FORMAT, $endDateTime->getTimestamp() );
@@ -267,6 +290,8 @@ class OpenPACalendarData
         }
         
         $sortBy['attr_from_time_dt'] = 'asc';
+                
+        $this->parameters['fields_to_return'] = array_unique( array_merge( $this->parameters['fields_to_return'], array( 'attr_from_time_dt', 'attr_to_time_dt', 'meta_node_id_si', 'meta_url_alias_ms' ) ) );
         
         $solrFetchParams = array(
             'SearchOffset' => 0,
@@ -287,12 +312,7 @@ class OpenPACalendarData
             'ForceElevation' => true,
             'SearchDate' => null,
             'DistributedSearch' => null,
-            'FieldsToReturn' => array(
-                'attr_from_time_dt',
-                'attr_to_time_dt',
-                'meta_node_id_si',
-                'meta_url_alias_ms'
-            ),
+            'FieldsToReturn' => $this->parameters['fields_to_return'],
             'SearchResultClustering' => null,
             'ExtendedAttributeFilter' => array()
         );        
@@ -305,7 +325,9 @@ class OpenPACalendarData
         $this->data['parameters'] = $this->parameters;
         $this->data['fetch_parameters'] = $solrFetchParams;
         
-        $facetFields = $solrResult['SearchExtras']->attribute( 'facet_fields' );
+        /** @var ezfSearchResultInfo $extra */
+        $extra = $solrResult['SearchExtras'];
+        $facetFields = $extra->attribute( 'facet_fields' );
         //eZDebug::writeNotice( $solrResult['SearchExtras'], __METHOD__ );
         $resultFacets = array();
         foreach( $facets as $index => $facet )
@@ -349,7 +371,8 @@ class OpenPACalendarData
         $this->data['search_count'] = count( $events );
         $eventsByDay = array();
         $byDayInterval = new DateInterval( 'P1D' );
-        $byDayPeriod = new DatePeriod( $startDateTime, $byDayInterval, $endDateTime );        
+        /** @var DateTime[] $byDayPeriod */
+        $byDayPeriod = new DatePeriod( $startDateTime, $byDayInterval, $endDateTime );
         foreach( $byDayPeriod as $date )
         {
             $identifier = $date->format( self::FULLDAY_IDENTIFIER_FORMAT );            
@@ -535,7 +558,11 @@ class OpenPACalendarData
             'current_year' => date( self::YEAR_IDENTIFIER_FORMAT ),
             'interval' => 'P1M',
             'offset' => 0,            
-            'filter' => false
+            'filter' => false,
+            'fields_to_return' => array(
+                'attr_from_time_dt',
+                'attr_to_time_dt',                
+            )
         );
         $related = array_fill_keys( self::relatedParameters(), false );
         return array_merge( $default, $related );
@@ -581,6 +608,7 @@ class OpenPACalendarData
         {
             return $this->data[$key];
         }
-        eZDebug::writeNotice( "Attribute $key does not exist" );
+        eZDebug::writeNotice( "Attribute $key does not exist", __METHOD__ );
+        return null;
     }
 }
