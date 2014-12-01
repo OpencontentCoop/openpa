@@ -289,7 +289,9 @@ class OpenPACalendarData
             'DistributedSearch' => null,
             'FieldsToReturn' => array(
                 'attr_from_time_dt',
-                'attr_to_time_dt',                
+                'attr_to_time_dt',
+                'meta_node_id_si',
+                'meta_url_alias_ms'
             ),
             'SearchResultClustering' => null,
             'ExtendedAttributeFilter' => array()
@@ -330,7 +332,8 @@ class OpenPACalendarData
         
         $events = array();
         foreach( $solrResult['SearchResult'] as $item )
-        {
+        {            
+            $item = $this->fixMainNode( $item );
             $event = OpenPACalendarItem::fromEzfindResultArray( $item );
             if ( $event->isValid() )
             {
@@ -358,6 +361,27 @@ class OpenPACalendarData
         $this->data['day_by_day'] = $eventsByDay;
         //eZDebug::writeNotice( $eventsByDay, __METHOD__ ); 
         //eZDebug::writeNotice( $this->data['search_facets'], __METHOD__ );         
+    }
+    
+    protected function fixMainNode( $item )
+    {
+        $useIndex = false;
+        foreach( $item['path_string'] as $key => $path )
+        {
+            $pathArray = explode( '/', ltrim( $path, '/' ) );
+            $isInSubTree = array_intersect( $this->parameters['subtree'], $pathArray );            
+            if ( count( $isInSubTree ) > 0 )
+            {
+                $useIndex = $key;
+                break;
+            }
+        }        
+        if ( $useIndex !== false && isset( $item['url_alias'][$useIndex] ) && isset( $item['node_id'][$useIndex] ) )
+        {
+            $item['main_node_id'] = $item['node_id'][$useIndex];
+            $item['main_url_alias'] = $item['url_alias'][$useIndex];
+        }
+        return $item;
     }
 
     protected static function reorderEvents( $items )
