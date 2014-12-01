@@ -64,14 +64,26 @@ class OpenPACalendarItem
     }
     
     protected function __construct( $data )
-    {
+    {        
         $this->data = $data;
     }
     
     protected static function getDateTime( $string )
     {        
         // '%Y-%m-%dT%H:%M:%SZ' -> Y-m-d\TH:i:s\Z
-        $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, OpenPACalendarData::timezone() );        
+        $timestamp = mktime( 11, 30, 0, 12, 5, 1977 );
+        $gmstrftimeTimestamp = '1977-12-05T10:30:00Z';
+        if( ezfSolrDocumentFieldBase::convertTimestampToDate( $timestamp ) == $gmstrftimeTimestamp )
+        {
+            $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, new DateTimeZone( 'UTC' ) );
+            $date->setTimeZone( OpenPACalendarData::timezone() );    
+        }
+        else
+        {
+            $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, OpenPACalendarData::timezone() );
+        }
+        
+        
         return $date;
     }
     
@@ -95,6 +107,13 @@ class OpenPACalendarItem
         if ( !isset( $this->data['fields'] ) )
         {
             throw new Exception( "Param 'fields' not found in solr row" );
+        }
+        foreach( $this->data['fields'] as $key => $value )
+        {
+            if ( empty( $value ) )
+            {
+                unset( $this->data['fields'][$key] );
+            }
         }
         $this->fields = $this->data['fields'];
         
