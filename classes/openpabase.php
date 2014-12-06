@@ -295,6 +295,22 @@ class OpenPABase
         return $section;
     }
 
+    public static function initRole( $name, $policies )
+    {
+        $role = eZRole::fetchByName( $name );
+        if ( !$role instanceof eZRole )
+        {
+            $role = eZRole::create( $name );
+            $role->store();
+
+            foreach( $policies as $policy )
+            {
+                $role->appendPolicy( $policy['ModuleName'], $policy['FunctionName'], $policy['Limitation'] );
+            }
+        }
+        return $role;
+    }
+
     public static function sudo( Closure $callback )
     {
         if ( self::$sudoFlag === true )
