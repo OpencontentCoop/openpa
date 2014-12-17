@@ -39,17 +39,20 @@ if ( interface_exists( 'ezfIndexPlugin' ) )
                 $availableLanguages = $version->translationList( false, false );
                 foreach ( $availableLanguages as $languageCode )
                 {
-                    if ( $docList[$languageCode]->Doc instanceof DOMDocument )
+                    if ( $docList[$languageCode] instanceof eZSolrDoc )
                     {
-                        $xpath = new DomXpath( $docList[$languageCode]->Doc );
-                        if( $xpath->evaluate( '//field[@name="extra_event_duration_s"]')->length == 0 )
+                        if ( $docList[$languageCode]->Doc instanceof DOMDocument )
                         {
+                            $xpath = new DomXpath( $docList[$languageCode]->Doc );
+                            if( $xpath->evaluate( '//field[@name="extra_event_duration_s"]')->length == 0 )
+                            {
+                                $docList[$languageCode]->addField('extra_event_duration_s', $duration );
+                            }
+                        }
+                        elseif ( is_array( $docList[$languageCode]->Doc ) && !isset( $docList[$languageCode]->Doc['extra_event_duration_s'] ))
+                        {                        
                             $docList[$languageCode]->addField('extra_event_duration_s', $duration );
                         }
-                    }
-                    elseif ( is_array( $docList[$languageCode]->Doc ) && !isset( $docList[$languageCode]->Doc['extra_event_duration_s'] ))
-                    {                        
-                        $docList[$languageCode]->addField('extra_event_duration_s', $duration );
                     }
                 }
             }

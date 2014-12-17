@@ -291,7 +291,7 @@ class OpenPACalendarData
         
         $sortBy['attr_from_time_dt'] = 'asc';
                 
-        $this->parameters['fields_to_return'] = array_unique( array_merge( $this->parameters['fields_to_return'], array( 'attr_from_time_dt', 'attr_to_time_dt', 'meta_node_id_si', 'meta_url_alias_ms' ) ) );
+        $this->parameters['fields_to_return'] = array_unique( array_merge( $this->parameters['fields_to_return'], array( 'attr_from_time_dt', 'attr_to_time_dt', 'meta_node_id_si', 'meta_url_alias_ms', 'meta_main_url_alias_ms' ) ) );
         
         $solrFetchParams = array(
             'SearchOffset' => 0,
@@ -404,6 +404,7 @@ class OpenPACalendarData
             $item['main_node_id'] = $item['node_id'][$useIndex];
             $item['main_url_alias'] = $item['url_alias'][$useIndex];
         }
+        //eZDebug::writeNotice( $item, __METHOD__ );
         return $item;
     }
 

@@ -117,6 +117,11 @@ class OpenPACalendarItem
         }
         $this->fields = $this->data['fields'];
         
+        if ( isset( $this->fields['meta_main_url_alias_ms'] ) )
+        {
+            $this->data['main_url_alias'] = $this->fields['meta_main_url_alias_ms'];
+        }
+        
         if ( isset( $this->fields['attr_from_time_dt'] ) )
         {
             $fromDate = self::getDateTime( $this->fields['attr_from_time_dt'] );

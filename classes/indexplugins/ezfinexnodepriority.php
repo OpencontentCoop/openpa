@@ -22,7 +22,21 @@ if ( interface_exists( 'ezfIndexPlugin' ) )
             
             foreach ( $availableLanguages as $languageCode ) 
             {
-                $docList[$languageCode]->addField( ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY, $priority );
+                if ( $docList[$languageCode] instanceof eZSolrDoc )
+                {
+                    if ( $docList[$languageCode]->Doc instanceof DOMDocument )
+                    {
+                        $xpath = new DomXpath( $docList[$languageCode]->Doc );
+                        if( $xpath->evaluate( '//field[@name="'.ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY.'"]')->length == 0 )
+                        {
+                            $docList[$languageCode]->addField(ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY, $priority );
+                        }
+                    }
+                    elseif ( is_array( $docList[$languageCode]->Doc ) && !isset( $docList[$languageCode]->Doc[ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY] ))
+                    {                        
+                        $docList[$languageCode]->addField(ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY, $priority );
+                    }
+                }                
             }
         }
     }
