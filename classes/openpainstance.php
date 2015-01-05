@@ -205,6 +205,7 @@ class OpenPAInstance
      */
     public static function compare( $instanceName, $compareValues )
     {
+        $silentErrorKeys = array( 'production_date' );
         $errors = array();
         $instance = new self( $instanceName . '_frontend' );
         $liveData = $instance->toHash();
@@ -216,7 +217,8 @@ class OpenPAInstance
             }
             elseif ( $liveData[$name] !== $value )
             {
-                $errors[] = "Il valore di '$name' è '$value', nell'installazione corrente invece è '$liveData[$name]'";
+                if ( !in_array( $name, $silentErrorKeys ) )
+                    $errors[] = "Il valore di '$name' è '$value', nell'installazione corrente invece è '$liveData[$name]'";
             }
         }
         if ( count( $errors ) > 0 )

@@ -32,7 +32,7 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     {
         return array(
             'show_label' => !$this->is( 'oggetti_senza_label' ),
-            'exclude' => $this->is( 'attributi_da_escludere' ) || $this->data['is_information_collector'],
+            'exclude' => $this->is( 'attributi_da_escludere' ) || $this->data['is_information_collector'] || $this->is( 'attributi_da_escludere' ),
             'highlight' => $this->is( 'attributi_da_evidenziare' ),
             'has_content' => $this->hasContent(),
             'show_link' => !$this->is( 'attributi_senza_link' )

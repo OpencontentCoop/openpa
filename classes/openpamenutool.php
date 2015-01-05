@@ -94,12 +94,15 @@ class OpenPAMenuTool
         {
             $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
             $rootNode = eZContentObjectTreeNode::fetch( $rootNodeId );
-            $menuItems = $rootNode->subTree( array( 'ClassFilterType' => 'include',
-                                               'ClassFilterArray' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),
-                                               'Limit' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello' ),
-                                               'SortBy' => $rootNode->attribute( 'sort_array' ),
-                                               'Depth' => 1,
-                                               'DepthOperator' => 'eq' ) );
+            if ( $rootNode instanceof eZContentObjectTreeNode )
+            {
+                $menuItems = $rootNode->subTree( array( 'ClassFilterType' => 'include',
+                                                   'ClassFilterArray' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),
+                                                   'Limit' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello' ),
+                                                   'SortBy' => $rootNode->attribute( 'sort_array' ),
+                                                   'Depth' => 1,
+                                                   'DepthOperator' => 'eq' ) );
+            }
         }
         $areeContainers = OpenPAINI::variable( 'TopMenu', 'NodiAreeCustomMenu');
         foreach( $menuItems as $index => $item )
@@ -461,7 +464,7 @@ class OpenPAMenuTool
                 $childrenFetchParameters = $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )];
             }
             $nodes = eZFunctionHandler::execute(
-                'openpa',
+                in_array( $rootNode->attribute( 'node_id' ), OpenPAINI::variable( 'Menu', 'IgnoraVirtualizzazioneNodi', array() ) ) ? 'content' : 'openpa',
                 'list',
                 array_merge( array(
                      'parent_node_id' => $rootNode->attribute( 'node_id' ),

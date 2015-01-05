@@ -39,9 +39,17 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
     protected function hasExtraMenu()
     {
         $result = false;
-        if ( $this->container->hasAttribute( 'content_gallery' ) )
+        if ( !$result && $this->container->hasAttribute( 'content_gallery' ) )
         {
             $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
+        }
+        if ( !$result && $this->container->hasAttribute( 'content_related' ) )
+        {
+            $result = $this->container->attribute( 'content_related' )->attribute( 'has_data' );
+        }
+        if ( !$result && $this->container->hasAttribute( 'content_facets' ) )
+        {
+            $result = $this->container->attribute( 'content_facets' )->attribute( 'has_data' );
         }
         return $result;
     }

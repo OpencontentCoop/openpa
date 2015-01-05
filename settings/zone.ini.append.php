@@ -40,6 +40,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 [2ZonesLayout2]
 ZoneTypeName=2 zone (tipo 2)
@@ -55,6 +56,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 [3ZonesLayout1]
 ZoneTypeName=3 zone (tipo 1)
@@ -72,6 +74,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 [3ZonesLayout2]
 ZoneTypeName=3 zone (tipo 2)
@@ -89,6 +92,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 [4ZonesLayout1]
 ZoneTypeName=4 zone (tipo 1)
@@ -108,6 +112,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 [3ZonesLayout3]
 ZoneTypeName=3 zone (tipo 3)
@@ -125,6 +130,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 [4ZonesLayout2]
 ZoneTypeName=4 zone (tipo 2)
@@ -144,6 +150,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 [5ZonesLayout1]
 ZoneTypeName=5 zone (tipo 1)
@@ -165,6 +172,7 @@ AvailableForClasses[]=progetto
 AvailableForClasses[]=homepage
 AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
 
 
 #usato nel folder

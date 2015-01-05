@@ -949,9 +949,8 @@ class OpenPaFunctionCollection
     public static function fetchHome()
     {
         if ( self::$home == null )
-        {
-            //eZDebug::writeNotice( 'Fetch home' );
-            self::$home = eZContentObjectTreeNode::fetch( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
+        {                        
+            self::$home = eZContentObjectTreeNode::fetch( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );            
         }
         return self::$home;
     }
@@ -961,7 +960,7 @@ class OpenPaFunctionCollection
         if ( self::$topmenu == null )
         {            
             $homePage = self::fetchHome();
-            if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
+            if ( $homePage instanceof eZContentObjectTreeNode && $homePage->attribute( 'class_identifier' ) == 'homepage' )
             {
                 $dataMap = $homePage->attribute( 'data_map' );
                 if ( isset( $dataMap['link_al_menu_orizzontale'] ) && $dataMap['link_al_menu_orizzontale'] instanceof eZContentObjectAttribute
@@ -988,15 +987,14 @@ class OpenPaFunctionCollection
             {
                 self::$topmenu = $fromIni;
             }
-            if ( empty( self::$topmenu ) )
-            {
-                $home = self::fetchHome();
+            if ( empty( self::$topmenu ) && $homePage instanceof eZContentObjectTreeNode )
+            {                
                 $nodes = eZFunctionHandler::execute(
                     'content',
                     'list',
                     array(
-                         'parent_node_id' => $home->attribute( 'node_id' ),
-                         'sort_by' => $home->attribute( 'sort_array' ),
+                         'parent_node_id' => $homePage->attribute( 'node_id' ),
+                         'sort_by' => $homePage->attribute( 'sort_array' ),
                          'class_filter_type' => 'include',
                          'load_data_map' => false,
                          'class_filter_array' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),

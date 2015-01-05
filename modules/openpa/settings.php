@@ -44,8 +44,18 @@ switch( $action )
         $object = eZContentObject::fetchByNodeID( $value, false );
         eZContentCacheManager::clearContentCache( $object['id'] );
         break;
+    
+    case 'ignore_virtual':
+        $current = OpenPAINI::variable( 'Menu', 'IgnoraVirtualizzazioneNodi', array() );
+        $current[] = $value;
+        $current = array_unique( $current );
+        OpenPAINI::set( 'Menu', 'IgnoraVirtualizzazioneNodi', $current );
+        $object = eZContentObject::fetchByNodeID( $value, false );
+        eZContentCacheManager::clearContentCache( $object['id'] );
+        break;
 }
 
 $redirectURI = $http->getVariable( 'RedirectURI', $http->sessionVariable( 'LastAccessesURI', '/' ) );
-
+eZDisplayDebug();
+eZExecution::cleanExit();
 $module->redirectTo( $redirectURI );

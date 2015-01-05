@@ -31,6 +31,7 @@ class BlockHandlerLista extends OpenPABlockHandler
             'Filter' => $this->solrFetchParameter( 'Filter' ),
             'SortBy' => $this->solrFetchParameter( 'SortBy' ),
         );
+        //eZDebug::writeDebug( $params, __METHOD__ );
         $search = OpenPaFunctionCollection::search( $params );
         //eZDebug::writeDebug( $search['SearchExtras'], __METHOD__ );
         $search['SearchParams'] = $params;
@@ -88,7 +89,7 @@ class BlockHandlerLista extends OpenPABlockHandler
                 if ( isset( $this->fetchParameters['depth'] )
                      && !empty( $this->fetchParameters['depth'] ))
                 {
-                    $defaultFilter[] = "meta_depth_si:[* TO {$this->fetchParameters['depth']}]";
+                    $defaultFilter[] = "meta_depth_si:[{$this->fetchParameters['start_depth']} TO {$this->fetchParameters['depth']}]";
                 }
                 
                 if ( isset( $this->fetchParameters['virtual_subtree_array'] )
@@ -206,8 +207,11 @@ class BlockHandlerLista extends OpenPABlockHandler
         switch( $key )
         {
             case 'livello_profondita':
-                $this->fetchParameters['depth_start'] = $this->currentSubTreeNode instanceof eZContentObjectTreeNode ? $this->currentSubTreeNode->attribute( 'depth' ) : 0;
-                $this->fetchParameters['depth'] = $value;
+                if ( !empty( $value ) )
+                {
+                    $this->fetchParameters['start_depth'] = $this->currentSubTreeNode instanceof eZContentObjectTreeNode ? $this->currentSubTreeNode->attribute( 'depth' ) : 1;
+                    $this->fetchParameters['depth'] = $this->fetchParameters['start_depth'] + $value;
+                }
                 break;
 
             case 'limite':

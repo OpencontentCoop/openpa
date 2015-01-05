@@ -388,8 +388,17 @@ class OpenPACalendarData
     
     protected function fixMainNode( $item )
     {
-        $useIndex = false;
-        foreach( $item['path_string'] as $key => $path )
+        $useIndex = false;        
+        $pathStringArray = array();
+        if ( isset( $item['path_string_ms'] ) )
+        {
+            $pathStringArray = $item['path_string_ms'];
+        }
+        elseif ( isset( $item['path_string'] ) )
+        {
+            $pathStringArray = $item['path_string'];
+        }
+        foreach( $pathStringArray as $key => $path )
         {
             $pathArray = explode( '/', ltrim( $path, '/' ) );
             $isInSubTree = array_intersect( $this->parameters['subtree'], $pathArray );            
@@ -401,8 +410,15 @@ class OpenPACalendarData
         }        
         if ( $useIndex !== false && isset( $item['url_alias'][$useIndex] ) && isset( $item['node_id'][$useIndex] ) )
         {
-            $item['main_node_id'] = $item['node_id'][$useIndex];
-            $item['main_url_alias'] = $item['url_alias'][$useIndex];
+            if ( isset( $item['main_node_id_si'] ) )
+                $item['main_node_id_si'] = $item['node_id'][$useIndex];
+            elseif ( isset( $item['main_node_id'] ) )
+                $item['main_node_id'] = $item['node_id'][$useIndex];
+            
+            if ( isset( $item['main_url_alias_ms'] ) )
+                $item['main_url_alias_ms'] = $item['url_alias'][$useIndex];
+            elseif ( isset( $item['main_url_alias'] ) )
+                $item['main_url_alias'] = $item['url_alias'][$useIndex];
         }
         return $item;
     }

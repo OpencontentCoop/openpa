@@ -6,16 +6,21 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
     {
         $this->fnData['info'] = 'infoList';
         $this->fnData['classification'] = 'classificationList';
+        $this->data['has_data'] = ( $this->classificationList( true ) + $this->infoList( true ) ) > 0;
 
     }
 
-    protected function infoList()
+    protected function infoList( $count = false )
     {
+        if ( $count )
+            return $this->objectCount( OpenPAINI::variable( 'DisplayBlocks', 'oggetti_correlati_centro', array() ) );
         return $this->objectList( OpenPAINI::variable( 'DisplayBlocks', 'oggetti_correlati_centro', array() ) );
     }
 
-    protected function classificationList()
+    protected function classificationList( $count = false )
     {
+        if ( $count )
+            return $this->objectCount( OpenPAINI::variable( 'DisplayBlocks', 'oggetti_classificazione', array() ) );
         return $this->objectList( OpenPAINI::variable( 'DisplayBlocks', 'oggetti_classificazione', array() ) );
     }
 
@@ -49,6 +54,31 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
                             $objects[$className][] = $object;
                         }
                     }
+                }
+            }
+        }
+        return $objects;
+    }
+    
+    protected function objectCount( $attributeList )
+    {
+        $objects = 0;
+        if ( !empty( $attributeList ) )
+        {
+            foreach( $attributeList as $attributeIdentifier )
+            {
+                if ( isset( $this->container->attributesHandlers[$attributeIdentifier] ) )
+                {
+                    /** @var eZContentObject[] $relatedObjects */
+                    $relatedObjectsCount = eZFunctionHandler::execute(
+                        'content',
+                        'related_objects_count',
+                        array(
+                             'object_id' => $this->container->currentObjectId,
+                             'attribute_identifier' => $this->container->currentClassIdentifier . '/' . $attributeIdentifier
+                        )
+                    );
+                    $objects += $relatedObjectsCount;
                 }
             }
         }

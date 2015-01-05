@@ -22,7 +22,8 @@ class OpenPAObjectTools
         
         try
         {            
-            $handler = OpenPAObjectHandler::instanceFromContentObject( $object );            
+            $handler = OpenPAObjectHandler::instanceFromContentObject( $object );
+            OpenPALog::notice( ' (' . $object->attribute( 'id' ) . ') ', false );
             if ( $data->updateContentObject( $object ) )
             {                    
                 if ( $localRemoteIdPrefix !== null )
