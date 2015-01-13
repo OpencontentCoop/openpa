@@ -55,9 +55,13 @@ class AddCalendarByEventType extends eZWorkflowEventType
                                         $relationAttributeContent = $relationDataMap[$typeCalendarsIdentifier]->attribute( 'content' );
                                         foreach( $relationAttributeContent['relation_list'] as $item )
                                         {
-                                            if ( isset( $item['node_id'] ) )
+                                            if ( isset( $item['contentobject_id'] ) )
                                             {
-                                                $addLocations[] = $item['node_id'];
+                                                $calendar = eZContentObject::fetch( $item['contentobject_id'] );
+                                                if ( $calendar instanceof eZContentObject )
+                                                {
+                                                    $addLocations[] = $calendar->attribute( 'main_node_id' );
+                                                }
                                             }
                                         }
                                     }

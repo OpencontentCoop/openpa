@@ -50,7 +50,7 @@ class OpenPAObjectTools
      * @throws Exception
      * @return eZContentObject
      */
-    public static function copyObject( eZContentObject $object, $allVersions = true, $newParentNodeID = null )
+    public static function copyObject( eZContentObject $object, $allVersions = false, $newParentNodeID = null )
     {
         $db = eZDB::instance();
         $db->setErrorHandling( eZDB::ERROR_HANDLING_EXCEPTIONS );
@@ -112,6 +112,25 @@ class OpenPAObjectTools
                                                          'is_main' => 1
                                                          ) );
         $nodeAssignment->store();
+        
+        // fix images onPublish
+        $dataMap = $object->attribute( 'data_map' );
+        $newDataMap = $newObject->attribute( 'data_map' );
+        foreach( $newDataMap as $identifier => $attribute )
+        {
+            if ( $attribute instanceof eZContentObjectAttribute )
+            {
+                if ( $attribute->attribute( 'data_type_string' ) == 'ezimage' )
+                {
+                    $attribute->setAttribute( "data_text", '' );
+                    if ( isset( $dataMap[$identifier] ) )
+                    {
+                        $attribute->fromString( $dataMap[$identifier]->toString() );                        
+                    }
+                    $attribute->store();
+                }
+            }
+        }
     
         $db->commit();
         return $newObject;

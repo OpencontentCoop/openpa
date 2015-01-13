@@ -169,6 +169,12 @@ class OpenPACalendarData
         {
             $this->view = $params['view'];
         }
+        
+        if ( isset( $params['sort_by'] ) )
+        {
+            $this->setParameter( 'sort_by',  $params['sort_by'] );
+        }
+        
         //eZDebug::writeNotice( $this->parameters, __METHOD__ );
     }
     
@@ -279,17 +285,24 @@ class OpenPACalendarData
             $this->filters = array_merge( $this->filters, $this->parameters['filter'] );
         }
         
-        $sortBy = array(            
-            'attr_priority_si' => 'desc',
-            'attr_special_b' => 'desc'
-        );
-        
-        if ( class_exists( 'ezfIndexEventDuration' ) )
+        if ( isset( $this->parameters['sort_by'] ) )
         {
-            $sortBy['extra_event_duration_s'] = 'asc';    
+            $sortBy = $this->parameters['sort_by'];
         }
-        
-        $sortBy['attr_from_time_dt'] = 'asc';
+        else
+        {
+            $sortBy = array(            
+                'attr_priority_si' => 'desc',
+                'attr_special_b' => 'desc'
+            );
+            
+            if ( class_exists( 'ezfIndexEventDuration' ) )
+            {
+                $sortBy['extra_event_duration_s'] = 'asc';    
+            }
+            
+            $sortBy['attr_from_time_dt'] = 'asc';
+        }
                 
         $this->parameters['fields_to_return'] = array_unique( array_merge( $this->parameters['fields_to_return'], array( 'attr_from_time_dt', 'attr_to_time_dt', 'meta_node_id_si', 'meta_url_alias_ms', 'meta_main_url_alias_ms' ) ) );
         
