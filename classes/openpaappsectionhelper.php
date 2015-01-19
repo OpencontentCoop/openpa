@@ -110,6 +110,8 @@ class OpenPAAppSectionHelper
      */
     protected static function createRootNode()
     {
+        OpenPAClassTools::installClasses( array( self::ROOT_CLASSIDENTIFIER ) );
+
         $section = OpenPABase::initSection(
             self::SECTION_NAME,
             self::SECTION_IDENTIFIER,

@@ -754,5 +754,31 @@ class OpenPAClassTools
             $attribute->store();
         }
     }
+
+    public static function installClasses( $destinationClassIdentifiers )
+    {
+        $data = array();
+        foreach ( $destinationClassIdentifiers as $destinationClassIdentifier  )
+        {
+            $destinationClass = eZContentClass::fetchByIdentifier( $destinationClassIdentifier );
+            if ( !$destinationClass instanceof eZContentClass )
+            {
+                //throw new Exception( "Classe $destinationClassId non trovata" );
+                $tool = new OpenPAClassTools( $destinationClassIdentifier, true );
+                $tool->compare();
+                $tool->sync();
+                $destinationClass = eZContentClass::fetchByIdentifier( $destinationClassIdentifier );
+            }
+
+            if ( !$destinationClass instanceof eZContentClass )
+            {
+                throw new Exception( "Classe $destinationClassIdentifier non trovata" );
+            }
+            else
+            {
+                $data[$destinationClassIdentifier] = $destinationClass;
+            }
+        }
+    }
     
 }
