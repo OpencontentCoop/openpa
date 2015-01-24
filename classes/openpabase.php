@@ -317,7 +317,7 @@ class OpenPABase
 
             foreach( $policies as $policy )
             {
-                $role->appendPolicy( $policy['ModuleName'], $policy['FunctionName'], $policy['Limitation'] );
+                $role->appendPolicy( $policy['ModuleName'], $policy['FunctionName'], isset( $policy['Limitation'] ) ? $policy['Limitation'] : array() );
             }
         }
         return $role;
