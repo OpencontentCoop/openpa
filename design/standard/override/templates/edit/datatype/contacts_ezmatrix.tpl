@@ -10,7 +10,8 @@
   "PEC",
   "Indirizzo",
   "Facebook",
-  "Twitter"
+  "Twitter",
+  "Web"
 )}
 
 <table cellspacing="0" class="list">
