@@ -4,7 +4,7 @@ class OpenPAPageData
 {
     function operatorList()
     {
-        return array( 'openpapagedata' );
+        return array( 'openpapagedata', 'fill_contacts_matrix' );
     }
 
     function namedParameterPerOperator()
@@ -18,6 +18,10 @@ class OpenPAPageData
             'openpapagedata' => array(
                 'params' => array( 'type' => 'array', 'required' => false, 'default' => array() )
             ),
+            'fill_contacts_matrix' => array(
+                'attribute' => array( 'type' => 'object', 'required' => true ),
+                'fields' => array( 'type' => 'array', 'required' => true )
+            ),
         );
     }
 
@@ -25,6 +29,15 @@ class OpenPAPageData
     {
         switch ( $operatorName )
         {
+            case 'fill_contacts_matrix':
+            {
+                $attribute = $namedParameters['attribute'];
+                if ( $attribute instanceof eZContentObjectAttribute )
+                {
+
+                }
+            } break;
+
             case 'openpapagedata':
             {
                 $ezPageData = new eZPageData();
