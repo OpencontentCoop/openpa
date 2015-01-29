@@ -2,7 +2,7 @@
 
 class OpenPADBTools
 {
-    public static function insertFromSqlFile( $db, $file, $onlyOutputQueries = false )
+    public static function insertFromSqlFile( eZDBInterface $db, $file, $onlyOutputQueries = false )
     {
         eZDB::setErrorHandling( eZDB::ERROR_HANDLING_EXCEPTIONS );
         $delimiter = ';';
@@ -54,7 +54,7 @@ class OpenPADBTools
                     $queries[] = $sql;
                     if ( !$onlyOutputQueries )
                     {
-                        $db->query($sql);
+                        $db->query( $sql );
                     }
 
                     $row = substr( $row, $delimiterOffset + strlen( $delimiter ) );
@@ -69,7 +69,7 @@ class OpenPADBTools
             $queries[] = $row;
             if ( !$onlyOutputQueries )
             {
-                $db->query($sql);
+                $db->query( $row );
             }
         }
 
