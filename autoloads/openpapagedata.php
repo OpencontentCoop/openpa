@@ -32,10 +32,36 @@ class OpenPAPageData
             case 'fill_contacts_matrix':
             {
                 $attribute = $namedParameters['attribute'];
+                $fields = $namedParameters['fields'];
+                $existingFields = array();
                 if ( $attribute instanceof eZContentObjectAttribute )
                 {
-
+                    $matrix = $attribute->attribute( 'content' );
+                    if ( $attribute->hasContent() )
+                    {
+                        $rows = $matrix->attribute( 'rows' );                        
+                        foreach( $rows['sequential'] as $row )
+                        {
+                            if ( in_array( $row['columns'][0], $fields ) )
+                            {
+                                $existingFields[] = $row['columns'][0];
+                            }
+                        }
+                    }
+                    foreach( $fields as $field )
+                    {
+                        if ( !in_array( $field, $existingFields ) )
+                        {
+                            $matrix->addRow();
+                        }
+                    }
+                    
+                    $attribute->setAttribute( 'data_text', $matrix->xmlString() );
+                    $matrix->decodeXML( $attribute->attribute( 'data_text' ) );
+                    $attribute->setContent( $matrix );
+                    $attribute->store();                    
                 }
+                $operatorValue = $attribute;
             } break;
 
             case 'openpapagedata':
