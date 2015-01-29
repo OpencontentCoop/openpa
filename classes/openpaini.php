@@ -4,6 +4,7 @@ class OpenPAINI
 {
     protected static $filters = array(
         'TopMenu::NodiCustomMenu',
+        'GestioneSezioni::sezioni_per_tutti',
         //'SideMenu::EsponiLink'
     );
     
@@ -32,6 +33,22 @@ class OpenPAINI
         }
     }
     
+    protected static function filterSezioniPerTutti()
+    {
+        $result = array();
+        $ini = eZINI::instance( 'openpa.ini' );        
+        if ( $ini->hasVariable( 'GestioneSezioni', 'sezioni_per_tutti' ) )
+        {
+            $result = (array) $ini->variable( 'GestioneSezioni', 'sezioni_per_tutti' );
+        }
+        $alboSection = eZSection::fetchByIdentifier( 'albotelematicotrentino', false );
+        if ( is_array( $alboSection ) )
+        {            
+            $result[] = $alboSection['id'];
+        }        
+        return $result; 
+    }
+    
     protected static function filter( $block, $value, $default )
     {
         $filter = $block . '::' . $value;
@@ -39,6 +56,10 @@ class OpenPAINI
         {
             case 'TopMenu::NodiCustomMenu':
                 return OpenPaFunctionCollection::fetchTopMenuNodes();              
+            break;
+        
+            case 'GestioneSezioni::sezioni_per_tutti':
+                return self::filterSezioniPerTutti();              
             break;
         
             //case 'SideMenu::EsponiLink':
