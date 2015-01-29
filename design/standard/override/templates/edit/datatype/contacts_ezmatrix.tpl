@@ -1,7 +1,4 @@
 {default attribute_base=ContentObjectAttribute}
-{let matrix=$attribute.content}
-
-{def $rows = $matrix.rows.sequential}
 
 {def $contactsForm = array(
   "Telefono",
@@ -13,6 +10,11 @@
   "Twitter",
   "Web"
 )}
+{set $attribute = fill_contacts_matrix( $attribute, $contactsForm )}
+
+{let matrix=$attribute.content}
+
+{def $rows = $matrix.rows.sequential}
 
 <table cellspacing="0" class="list">
 <tbody>
