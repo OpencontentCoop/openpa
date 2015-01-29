@@ -47,6 +47,24 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                 $link = $this->container->attributesHandlers['location']->attribute( 'contentobject_attribute' )->attribute( 'content' );
                 $this->isInternal = false;
             }
+            if ( isset( $this->container->attributesHandlers['internal_location'] )
+                && $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
+            {
+                $content = $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'content' );
+                if ( isset( $content['relation_list'] ) )
+                {
+                    foreach( $content['relation_list'] as $relation )
+                    {
+                        $object = eZContentObject::fetch( $relation['contentobject_id'] );
+                        if ( $object instanceof eZContentObject )
+                        {
+                            $link = $object->attribute( 'main_node' )->attribute( 'url_alias' );
+                        }
+                    }
+
+                }
+                $this->isInternal = false;
+            }
         }
         return $link;
     }
