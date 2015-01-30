@@ -59,4 +59,29 @@ class OpenPALog
             eZLog::write( $message, self::$logFileName );
         }
     }
+
+    public static function writeCsv( $message, $type, $filePath = null )
+    {
+        if ( empty( $message ) || empty( $type ) )
+            return false;
+
+        if ( !$filePath )
+        {
+            $directory = eZINI::instance()->variable( 'FileSettings', 'VarDir' ) . '/log/';
+            $logFileName = 'log_' . date( 'j-m-Y' ) . '.csv';
+            $filePath = $directory . $logFileName;
+        }
+        if ( !file_exists( $filePath ) )
+        {
+            eZFile::create( $filePath );
+            $fp = fopen( $filePath, 'w' );
+            fputcsv( $fp, array( 'date', 'message', 'type' ) );
+            fclose( $fp );
+        }
+
+        $fp = fopen( $filePath, 'a+' );
+        fputcsv( $fp, array( date( 'j-m-Y H:m:i' ), $message, $type ) );
+        fclose( $fp );
+        return true;
+    }
 }
