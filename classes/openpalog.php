@@ -67,9 +67,9 @@ class OpenPALog
 
         if ( !$filePath )
         {
-            $directory = rtrim( eZINI::instance()->variable( 'FileSettings', 'LogDir' ), '/' ) . '/openpa/';
+            $directory = 'var/log/openpa';
             $logFileName = 'log_' . date( 'j-m-Y' ) . '.csv';
-            $filePath = $directory . $logFileName;
+            $filePath = $directory . '/' . $logFileName;
         }
         if ( !file_exists( $filePath ) )
         {
