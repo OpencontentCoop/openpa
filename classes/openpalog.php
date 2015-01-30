@@ -67,7 +67,7 @@ class OpenPALog
 
         if ( !$filePath )
         {
-            $directory = eZINI::instance()->variable( 'FileSettings', 'VarDir' ) . '/log/';
+            $directory = rtrim( eZINI::instance()->variable( 'FileSettings', 'LogDir' ), '/' ) . '/openpa/';
             $logFileName = 'log_' . date( 'j-m-Y' ) . '.csv';
             $filePath = $directory . $logFileName;
         }
@@ -75,12 +75,12 @@ class OpenPALog
         {
             eZFile::create( $filePath );
             $fp = fopen( $filePath, 'w' );
-            fputcsv( $fp, array( 'date', 'message', 'type' ) );
+            fputcsv( $fp, array( 'site', 'date', 'message', 'type' ) );
             fclose( $fp );
         }
 
         $fp = fopen( $filePath, 'a+' );
-        fputcsv( $fp, array( date( 'j-m-Y H:m:i' ), $message, $type ) );
+        fputcsv( $fp, array( OpenPABase::getCurrentSiteaccessIdentifier(), date( 'j-m-Y H:m:i' ), $message, $type ) );
         fclose( $fp );
         return true;
     }
