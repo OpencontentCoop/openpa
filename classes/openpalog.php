@@ -60,27 +60,34 @@ class OpenPALog
         }
     }
 
-    public static function writeCsv( $message, $type, $filePath = null )
+    public static function writeCsv( $message, $type )
     {
         if ( empty( $message ) || empty( $type ) )
             return false;
 
-        if ( !$filePath )
-        {
-            $directory = 'var/log/openpa';
-            $logFileName = 'log_' . date( 'j-m-Y' ) . '.csv';
-            $filePath = $directory . '/' . $logFileName;
-        }
+        $directory = 'var/log/openpa';
+        $logFileName = 'log-' . date( 'Y-m-d' ) . '.csv';
+        $filePath = $directory . '/' . $logFileName;
         if ( !file_exists( $filePath ) )
         {
-            eZFile::create( $filePath );
-            $fp = fopen( $filePath, 'w' );
-            fputcsv( $fp, array( 'site', 'date', 'message', 'type' ) );
-            fclose( $fp );
+            eZFile::create( $logFileName, $directory );            
         }
-
+        $processUser = posix_getpwuid( posix_geteuid() );
         $fp = fopen( $filePath, 'a+' );
-        fputcsv( $fp, array( OpenPABase::getCurrentSiteaccessIdentifier(), date( 'j-m-Y H:m:i' ), $message, $type ) );
+        $values = array( $processUser['name'], OpenPABase::getCurrentSiteaccessIdentifier(), date( 'Y-m-d H:i:s' ), $message );
+        if ( is_string( $type ) )
+        {
+            $values[] = $type;
+        }
+        elseif( is_array( $type ) )
+        {
+            $values = array_merge( $values, $type );
+        }
+        else
+        {
+            $values[] = var_export( $type, 1 );
+        }
+        fputcsv( $fp, $values );
         fclose( $fp );
         return true;
     }
