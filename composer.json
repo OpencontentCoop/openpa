@@ -1,4 +1,4 @@
-{
+I{
     "name": "opencontent/openpa-ls",
     "description": "OpenContent OpenPA",
     "type": "ezpublish-legacy-extension",
@@ -44,9 +44,7 @@
         "opencontent/ocuserprofile-ls": "dev-master",
         "lolautruche/sqliimport": "~1.2",
         "opencontent/openpa_booking": "dev-master",
-        "opencontent/openpa_comuneintasca": "dev-master",
-        "opencontent/openpa_designs": "dev-master",
-        "opencontent/openpa_frontendsettings": "dev-master",
+        "opencontent/openpa_comuneintasca": "dev-master",        
         "opencontent/openpa_importers": "dev-master",
         "opencontent/openpa_newsletter": "dev-master",
         "opencontent/openpa_sensor": "dev-master",
