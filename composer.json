@@ -10,6 +10,12 @@
     ],
     "license": "GPL-2.0",    
     "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://repo.opencontent.it"
+        }
+    ],
     "require": {
         "ezsystems/ezpublish-legacy-installer": "*",
         "opencontent/bccie-ls": "dev-master",
