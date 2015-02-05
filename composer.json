@@ -48,16 +48,16 @@
         "opencontent/ocselfimport-ls": "dev-master",        
         "opencontent/ocsurvey_userlogin-ls": "dev-master",        
         "opencontent/ocuserprofile-ls": "dev-master",
-        "lolautruche/sqliimport": "~1.2",
-        "opencontent/openpa_booking": "dev-master",
-        "opencontent/openpa_comuneintasca": "dev-master",        
-        "opencontent/openpa_importers": "dev-master",
-        "opencontent/openpa_newsletter": "dev-master",
-        "opencontent/openpa_sensor": "dev-master",
-        "opencontent/openpa_theme_2010": "dev-master",
-        "opencontent/openpa_theme_2014": "dev-master",
-        "opencontent/opensemantic": "dev-master",
-        "opencontent/weather": "dev-master"
+        "lolautruche/sqliimport": "~1.2",    
+        "opencontent/openpa_booking-ls": "dev-master",
+        "opencontent/openpa_comuneintasca-ls": "dev-master",        
+        "opencontent/openpa_importers-ls": "dev-master",
+        "opencontent/openpa_newsletter-ls": "dev-master",
+        "opencontent/openpa_sensor-ls": "dev-master",
+        "opencontent/openpa_theme_2010-ls": "dev-master",
+        "opencontent/openpa_theme_2014-ls": "dev-master",
+        "opencontent/opensemantic-ls": "dev-master",
+        "opencontent/weather-ls": "dev-master"
     },
     "extra": {
         "ezpublish-legacy-extension-name": "openpa"
