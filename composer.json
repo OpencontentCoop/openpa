@@ -1,0 +1,61 @@
+{
+    "name": "opencontent/openpa-ls",
+    "description": "OpenContent OpenPA",
+    "type": "ezpublish-legacy-extension",
+    "authors": [        
+        {
+            "name": "OpenContent",
+            "homepage": "http://www.opencontent.it"
+        }
+    ],
+    "license": "GPL-2.0",    
+    "minimum-stability": "dev",
+    "require": {
+        "ezsystems/ezpublish-legacy-installer": "*",
+        "opencontent/bccie-ls": "dev-master",
+        "opencontent/bcgooglesitemaps-ls": "dev-master",
+        "opencontent/cjwnewsletter-ls": "dev-master",
+        "opencontent/ezchangeclass-ls": "dev-master",
+        "opencontent/ezclasslists-ls": "dev-master",
+        "ezsystems/ezcomments-ls-extension": "~5.3",
+        "opencontent/ezflip-ls": "~2.2",
+        "ezsystems/ezsurvey-ls": "~5.3",
+        "gggeek/ggsysinfo": "~0.8",
+        "gggeek/ggwebservices": "~0.14",
+        "opencontent/jcremoteid-ls": "dev-master",
+        "opencontent/mugosurvey_addons-ls": "dev-openpa",
+        "opencontent/nxc_captcha-ls": "dev-master",
+        "opencontent/ocbonificobancario-ls": "dev-master",
+        "opencontent/occhangeloginname-ls": "dev-master",
+        "opencontent/occosmos-ls": "dev-master",
+        "opencontent/occsvimport-ls": "dev-master",
+        "opencontent/ocembed-ls": "~1.0",
+        "opencontent/ocexportas-ls": "dev-master",
+        "opencontent/ocextensionsorder-ls": "dev-master",
+        "opencontent/ocimportalbo-ls": "dev-master",
+        "opencontent/ocinigui-ls": "dev-master",
+        "opencontent/ocmaintenance-ls": "dev-master",
+        "opencontent/ocmediaplayer-ls": "dev-master",
+        "opencontent/ocopendata-ls": "dev-master",
+        "opencontent/ocoperatorscollection-ls": "dev-master",        
+        "opencontent/ocsearchtools-ls": "dev-master",        
+        "opencontent/ocselfimport-ls": "dev-master",        
+        "opencontent/ocsurvey_userlogin-ls": "dev-master",        
+        "opencontent/ocuserprofile-ls": "dev-master",
+        "lolautruche/sqliimport": "~1.2",
+        "opencontent/openpa_booking": "dev-master",
+        "opencontent/openpa_comuneintasca": "dev-master",
+        "opencontent/openpa_designs": "dev-master",
+        "opencontent/openpa_frontendsettings": "dev-master",
+        "opencontent/openpa_importers": "dev-master",
+        "opencontent/openpa_newsletter": "dev-master",
+        "opencontent/openpa_sensor": "dev-master",
+        "opencontent/openpa_theme_2010": "dev-master",
+        "opencontent/openpa_theme_2014": "dev-master",
+        "opencontent/opensemantic": "dev-master",
+        "opencontent/weather": "dev-master"
+    },
+    "extra": {
+        "ezpublish-legacy-extension-name": "openpa"
+    }
+}
