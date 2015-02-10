@@ -253,6 +253,24 @@ class OpenPAObjectHandler
         return false;
     }
 
+    /**
+     * @param $key
+     *
+     * @return OpenPATempletizable|OpenPAObjectHandlerServiceInterface
+     */
+    public function serviceByClassName( $className )
+    {
+        foreach( $this->services as $key => $service )
+        {
+            if ( get_class( $service ) == $className )
+            {
+                return $service;
+            }
+        }
+        eZDebug::writeNotice( "Service by $className does not exist", __METHOD__ );
+        return false;
+    }
+
     public static function blockHandler( eZPageBlock $block )
     {
         $class = 'OpenPABlockHandler';

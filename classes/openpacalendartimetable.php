@@ -2,7 +2,14 @@
 
 class OpenPACalendarTimeTable
 {
-    public static function getEvents( eZContentObjectTreeNode $node, array $parameters )
+    /**
+     * @param eZContentObjectTreeNode $node
+     * @param array $parameters
+     * @param string $timetableAttributeIdentifier
+     *
+     * @return OpenPACalendarItem[]
+     */
+    public static function getEvents( eZContentObjectTreeNode $node, array $parameters, $timetableAttributeIdentifier = 'timetable' )
     {
         $events = array();
         $base = array(
@@ -23,14 +30,30 @@ class OpenPACalendarTimeTable
                 date( 'n', $parameters['search_from_timestamp'] ),
                 date( 'j', $parameters['search_from_timestamp'] )
             );
-            $endDate = clone $startDate;
-            $endDate->add( new DateInterval( $parameters['interval'] ) );
+            if ( isset( $parameters['search_to_timestamp']) )
+            {
+                $endDate = new DateTime( 'now', OpenPACalendarData::timezone() );
+                $endDate->setDate(
+                    date( 'Y', $parameters['search_to_timestamp'] ),
+                    date( 'n', $parameters['search_to_timestamp'] ),
+                    date( 'j', $parameters['search_to_timestamp'] )
+                );
+            }
+            elseif ( isset( $parameters['interval']) )
+            {
+                $endDate = clone $startDate;
+                $endDate->add( new DateInterval( $parameters['interval'] ) );
+            }
+            else
+            {
+                throw new Exception( "Specify search_to_timestamp or interval parameter" );
+            }
 
             $byDayInterval = new DateInterval( 'P1D' );
             /** @var DateTime[] $byDayPeriod */
             $byDayPeriod = new DatePeriod( $startDate, $byDayInterval, $endDate );
 
-            $timeTable = self::getTimeTableFromNode( $node );
+            $timeTable = self::getTimeTableFromNode( $node, $timetableAttributeIdentifier );
             foreach( $byDayPeriod as $date )
             {
                 $weekDay = $date->format( 'w' );
@@ -56,14 +79,14 @@ class OpenPACalendarTimeTable
         return $events;
     }
 
-    public static function getTimeTableFromNode( eZContentObjectTreeNode $node )
+    public static function getTimeTableFromNode( eZContentObjectTreeNode $node, $timetableAttributeIdentifier = 'timetable' )
     {
         $dataMap = $node->attribute( 'data_map' );
-        if ( isset( $dataMap['timetable'] )
-             && $dataMap['timetable'] instanceof eZContentObjectAttribute
-             && $dataMap['timetable']->attribute( 'has_content' ))
+        if ( isset( $dataMap[$timetableAttributeIdentifier] )
+             && $dataMap[$timetableAttributeIdentifier] instanceof eZContentObjectAttribute
+             && $dataMap[$timetableAttributeIdentifier]->attribute( 'has_content' ))
         {
-            $timeTableContent = $dataMap['timetable']->attribute( 'content' )->attribute( 'matrix' );
+            $timeTableContent = $dataMap[$timetableAttributeIdentifier]->attribute( 'content' )->attribute( 'matrix' );
             $timeTable = array();
             foreach( $timeTableContent['columns']['sequential'] as $column )
             {

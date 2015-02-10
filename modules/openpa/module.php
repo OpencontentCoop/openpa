@@ -104,6 +104,12 @@ $ViewList['settings'] = array(
     'script' => 'settings.php',
     'params' => array('Action', 'Value'));
 
+$ViewList['signup'] = array(
+    'script' =>	'signup.php',
+    'params' => array(),
+    'functions' => array( 'signup' )
+);
+
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
 $FunctionList['manage_roles'] = array();
@@ -111,6 +117,7 @@ $FunctionList['data'] = array();
 $FunctionList['calendar'] = array();
 $FunctionList['editor_tools'] = array();
 $FunctionList['object'] = array();
+$FunctionList['signup'] = array();
 
 
 

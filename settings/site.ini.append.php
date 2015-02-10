@@ -15,6 +15,7 @@ PolicyOmitList[]=openpa/classdefinition
 PolicyOmitList[]=openpa/calendar
 PolicyOmitList[]=openpa/object
 PolicyOmitList[]=openpa/data
+PolicyOmitList[]=openpa/signup
 PolicyOmitList[]=robots.txt
 
 [RegionalSettings]
