@@ -47,11 +47,13 @@ if ( interface_exists( 'ezfIndexPlugin' ) )
                             if( $xpath->evaluate( '//field[@name="extra_event_duration_s"]')->length == 0 )
                             {
                                 $docList[$languageCode]->addField('extra_event_duration_s', $duration );
+                                $docList[$languageCode]->addField('extra_event_duration_si', intval( $duration ) );
                             }
                         }
                         elseif ( is_array( $docList[$languageCode]->Doc ) && !isset( $docList[$languageCode]->Doc['extra_event_duration_s'] ))
                         {                        
                             $docList[$languageCode]->addField('extra_event_duration_s', $duration );
+                            $docList[$languageCode]->addField('extra_event_duration_si', intval( $duration ) );
                         }
                     }
                 }

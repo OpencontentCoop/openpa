@@ -1,14 +1,14 @@
 <?php
 require 'autoload.php';
 
-$script = eZScript::instance( array( 'description' => ( "OpenPA Remove Node\n\n" ),
+$script = eZScript::instance( array( 'description' => ( "OpenPA Remove Object\n\n" ),
                                      'use-session' => false,
                                      'use-modules' => true,
                                      'use-extensions' => true ) );
 
 $script->startup();
 
-$options = $script->getOptions( '[node_id:]', '', array( 'node_id'  => 'Node id') );
+$options = $script->getOptions( '[id:]', '', array( 'id'  => 'Object id') );
 $script->initialize();
 $script->setUseDebugAccumulators( true );
 
@@ -18,11 +18,11 @@ try
     $user = eZUser::fetchByName( 'admin' );
     eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
     
-    if ( $options['node_id'] )
+    if ( $options['id'] )
     {        
-        $nodeId = trim( $options['node_id'] );
-        OpenPALog::notice( "Remove $nodeId" );
-        eZContentObjectTreeNode::removeNode( $nodeId );
+        $id = trim( $options['id'] );
+        OpenPALog::notice( "Remove $id" );
+        eZContentObjectOperations::remove( $id );
     }
     
     $script->shutdown();

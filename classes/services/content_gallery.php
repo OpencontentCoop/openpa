@@ -2,93 +2,114 @@
 
 class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
 {
-    public $fetchParams = array();
-    public $imageCount;
-    public $imageList;
+    protected static $cache = array();
     
     function run()
     {
         $this->fnData['has_images'] = 'getImageListCount';
         $this->fnData['images'] = 'getImageList';
+        $this->fnData['title'] = 'getGalleryTitle';
     }
 
     function getImageListCount()
     {        
-        if ( $this->imageCount === null )
-        {
-            $this->imageCount = 0;
+        if ( !isset( self::$cache[$this->container->currentNodeId] ) )
+        {            
+            $imageCount = 0;
+            $title = false;
             
-            $this->fetchParams = array(
+            $fetchParams = array(
                 'parent_node_id' => $this->container->currentNodeId,
                 'class_filter_type' => 'include',
                 'class_filter_array' => array( 'image' )
             );
-            $this->imageCount = eZFunctionHandler::execute(
+            $imageCount = eZFunctionHandler::execute(
                 'content',
                 'list_count',
-                $this->fetchParams
+                $fetchParams
             );
     
-            if ( $this->imageCount == 0 && $this->container->currentNodeId != $this->container->currentMainNodeId )
+            if ( $imageCount == 0 && $this->container->currentNodeId != $this->container->currentMainNodeId )
             {
-                $this->fetchParams = array(
+                $fetchParams = array(
                     'parent_node_id' => $this->container->currentMainNodeId,
                     'class_filter_type' => 'include',
                     'class_filter_array' => array( 'image' )
                 );
-                $this->imageCount = eZFunctionHandler::execute(
+                $imageCount = eZFunctionHandler::execute(
                     'content',
                     'list_count',
-                    $this->fetchParams
+                    $fetchParams
                 );
             }
     
-            //if ( $this->imageCount == 0 )
-            //{            
-            //    $galleryChildren = eZFunctionHandler::execute(
-            //        'content',
-            //        'list',
-            //        array(
-            //             'parent_node_id' => $this->container->currentNodeId,
-            //             'class_filter_type' => 'include',
-            //             'class_filter_array' => array( 'gallery' ),
-            //             'limit' => 1
-            //        )
-            //    );            
-            //    if ( count( $galleryChildren ) > 0 && $galleryChildren[0] instanceof eZContentObjectTreeNode )
-            //    {
-            //        
-            //        $this->fetchParams = array(
-            //            'parent_node_id' => $galleryChildren[0]->attribute( 'node_id' ),                         
-            //            'class_filter_type' => 'include',
-            //            'class_filter_array' => array( 'image' )
-            //        );
-            //        
-            //        $this->imageCount = eZFunctionHandler::execute(
-            //            'content',
-            //            'list_count',
-            //            $this->fetchParams
-            //        );                
-            //    }
-            //}
+            if ( $imageCount == 0 )
+            {            
+                $galleryChildren = eZFunctionHandler::execute(
+                    'content',
+                    'list',
+                    array(
+                         'parent_node_id' => $this->container->currentNodeId,
+                         'class_filter_type' => 'include',
+                         'class_filter_array' => array( 'gallery' ),
+                         'limit' => 1
+                    )
+                );            
+                if ( count( $galleryChildren ) > 0 && $galleryChildren[0] instanceof eZContentObjectTreeNode )
+                {
+                    
+                    $fetchParams = array(
+                        'parent_node_id' => $galleryChildren[0]->attribute( 'node_id' ),                         
+                        'class_filter_type' => 'include',
+                        'class_filter_array' => array( 'image' )
+                    );
+                    
+                    $imageCount = eZFunctionHandler::execute(
+                        'content',
+                        'list_count',
+                        $fetchParams
+                    );
+                    
+                    $title = $galleryChildren[0]->attribute( 'name' );
+                }
+            }
+            
+            self::$cache[$this->container->currentNodeId] = array(
+                'image_count' => $imageCount,
+                'fetch_params' => $fetchParams,
+                'title' => $title
+            );        
         }
-        return $this->imageCount > 0;
+        return self::$cache[$this->container->currentNodeId]['image_count'] > 0;
+    }
+    
+    function getGalleryTitle()
+    {
+        if ( isset( self::$cache[$this->container->currentNodeId]['title'] ) )
+        {
+            return self::$cache[$this->container->currentNodeId]['title'];
+        }
+        return 'Immagini';
     }
     
     function getImageList()
-    {
-        if ( $this->imageList === null )
-        {
+    {                        
+        if ( !isset( self::$cache[$this->container->currentNodeId]['list'] ) )
+        {            
             if ( $this->getImageListCount() > 0 )
             {
-                $this->imageList = eZFunctionHandler::execute(
+                self::$cache[$this->container->currentNodeId]['list'] = eZFunctionHandler::execute(
                     'content',
                     'list',
-                    $this->fetchParams
-                );
+                    self::$cache[$this->container->currentNodeId]['fetch_params']
+                );                
             }
-        }
-        return $this->imageList;
+            else
+            {
+                self::$cache[$this->container->currentNodeId]['list'] = array();
+            }
+        }        
+        return self::$cache[$this->container->currentNodeId]['list'];
     }
 
 }

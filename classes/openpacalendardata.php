@@ -297,7 +297,8 @@ class OpenPACalendarData
             );
             
             if ( class_exists( 'ezfIndexEventDuration' ) )
-            {
+            {                
+                $sortBy['extra_event_duration_si'] = 'asc';    
                 $sortBy['extra_event_duration_s'] = 'asc';    
             }
             

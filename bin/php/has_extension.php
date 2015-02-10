@@ -1,28 +1,28 @@
 <?php
 require 'autoload.php';
 
-$script = eZScript::instance( array( 'description' => ( "OpenPA Remove Node\n\n" ),
+$script = eZScript::instance( array( 'description' => ( "OpenPA Controllo estensioni attive SEO\n\n" ),
                                      'use-session' => false,
                                      'use-modules' => true,
                                      'use-extensions' => true ) );
 
 $script->startup();
 
-$options = $script->getOptions( '[node_id:]', '', array( 'node_id'  => 'Node id') );
+$options = $script->getOptions( '[name:]',
+                                '',
+                                array( 'name'  => 'Nome estensione')
+);
 $script->initialize();
 $script->setUseDebugAccumulators( true );
 
 OpenPALog::setOutputLevel( OpenPALog::ALL );
 try
 {
-    $user = eZUser::fetchByName( 'admin' );
-    eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
+    $list = eZExtension::activeExtensions();
     
-    if ( $options['node_id'] )
-    {        
-        $nodeId = trim( $options['node_id'] );
-        OpenPALog::notice( "Remove $nodeId" );
-        eZContentObjectTreeNode::removeNode( $nodeId );
+    if ( in_array( $options['name'], $list ) )
+    {
+        OpenPALog::warning( 'ok' );
     }
     
     $script->shutdown();
