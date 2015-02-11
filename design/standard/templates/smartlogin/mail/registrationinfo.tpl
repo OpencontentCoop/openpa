@@ -5,12 +5,13 @@
             <table border='0' cellpadding='0' cellspacing='0' width='100%'>
                 <tr>
                     <td align='center' valign='top'>
-                        <h2>{'Grazie di esserti iscritto!'|i18n('openpa/mail/registration')}</h2>
+                        <h1>{ezini( 'SiteSettings', 'SiteName' )}</h1>
+						<h2>{'Grazie di esserti iscritto!'|i18n('openpa/mail/registration')}</h2>
                     </td>
                 </tr>
                 <tr>
                     <td align='center' valign='top'>
-                        <h4 style='color: #f90f00 !important'>{'Ecco le informazione del tuo account SensorCivico'|i18n('openpa/mail/registration')}</h4>
+                        <h4 style='color: #f90f00 !important'>{'Ecco le informazione del tuo account'|i18n('openpa/mail/registration')}</h4>
                     </td>
                 </tr>
                 <tr>
