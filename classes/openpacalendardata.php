@@ -296,10 +296,10 @@ class OpenPACalendarData
                 'attr_special_b' => 'desc'
             );
             
-            if ( class_exists( 'ezfIndexEventDuration' ) )
+            if ( class_exists( 'ezfIndexEventDuration' ) && OpenPAINI::variable( 'CalendarSettings', 'SortByEventDuration', 'disabled' ) == 'enabled' )
             {                
                 $sortBy['extra_event_duration_si'] = 'asc';    
-                $sortBy['extra_event_duration_s'] = 'asc';    
+                //$sortBy['extra_event_duration_s'] = 'asc';    // bug di ezfIndexEventDuration: _s ordina per stringa!
             }
             
             $sortBy['attr_from_time_dt'] = 'asc';
