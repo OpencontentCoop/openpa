@@ -117,7 +117,7 @@ class OpenPABase
             foreach( $languages as $locale )
             {
                 $languageParts = explode( '-', $locale->attribute( 'locale' ) );
-                $language = array_pop( $languageParts );
+                $language = array_shift( $languageParts );
                 $siteaccess = "{$identifier}_{$language}_{$customName}";
                 if ( file_exists( "settings/siteaccess/$siteaccess" ) )
                 {
