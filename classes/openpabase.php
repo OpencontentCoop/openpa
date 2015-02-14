@@ -93,26 +93,39 @@ class OpenPABase
     
     public static function getFrontendSiteaccessName()
     {
-        $identifier = self::getCurrentSiteaccessIdentifier();
-        return $identifier . '_frontend';
+        return self::getCustomSiteaccessName( 'frontend' );
     }
 
     public static function getDebugSiteaccessName()
     {
-        $identifier = self::getCurrentSiteaccessIdentifier();
-        return $identifier . '_debug';
+        return self::getCustomSiteaccessName( 'debug' );
     }
 
     public static function getBackendSiteaccessName()
     {
-        $identifier = self::getCurrentSiteaccessIdentifier();
-        return $identifier . '_backend';
+        return self::getCustomSiteaccessName( 'backend' );
     }
 
     public static function getCustomSiteaccessName( $customName )
     {
         $identifier = self::getCurrentSiteaccessIdentifier();
-        return $identifier . '_' . strtolower( $customName );
+        $siteaccess = $identifier . '_' . strtolower( $customName );
+        if ( !file_exists( "settings/siteaccess/$siteaccess" ) )
+        {
+            /** @var eZContentLanguage[] $languages */
+            $languages = eZContentLanguage::prioritizedLanguages();
+            foreach( $languages as $locale )
+            {
+                $languageParts = explode( '-', $locale->attribute( 'locale' ) );
+                $language = array_pop( $languageParts );
+                $siteaccess = "{$identifier}_{$language}_{$customName}";
+                if ( file_exists( "settings/siteaccess/$siteaccess" ) )
+                {
+                    break;
+                }
+            }
+        }
+        return $siteaccess;
     }
     
     public static function getDataByURL( $url, $justCheckURL = false, $userAgent = false )
