@@ -94,7 +94,14 @@ class OpenPAAppSectionHelper
             $root = eZContentObject::fetchByRemoteID( self::appsContainerRemoteId() );
             if ( $root instanceof eZContentObject )
             {
-                $this->rootNode = $root->attribute( 'main_node' );
+                if ( $root->attribute( 'main_node' ) instanceof eZContentObjectTreeNode )
+                {
+                    $this->rootNode = $root->attribute( 'main_node' );
+                }
+                else
+                {
+                    throw new Exception( "Problem with object {$root->attribute( 'id' )}: no main node found" );
+                }
             }
             elseif( $createIfNotExists )
             {

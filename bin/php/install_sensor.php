@@ -25,6 +25,9 @@ try
     eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
     
     $siteaccess = eZSiteAccess::current();
+
+    throw new Exception( "Deprecated sensor installer (old version) use 'php extension/openpa_sensor/bin/php/install_openpa_sensor -s{$siteaccess['name']}'" );
+
     if ( stripos( $siteaccess['name'], 'prototipo' ) !== false )
     {
         throw new Exception( 'Script non eseguibile sul prototipo' );        
@@ -32,8 +35,8 @@ try
     if ( stripos( $siteaccess['name'], 'consorzio' ) !== false )
     {
         throw new Exception( 'Script non eseguibile sui siti del consorzio' );        
-    } 
-    
+    }
+
     $classes = array(
         "categoria_sensor",
         "sensor_container",
