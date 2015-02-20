@@ -48,10 +48,10 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                 $this->isInternal = false;
             }
             if ( isset( $this->container->attributesHandlers['internal_location'] )
-                && $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
+                 && $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
             {
                 $content = $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'content' );
-                if ( isset( $content['relation_list'] ) )
+                if ( $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == 'ezobjectrelationlist' )
                 {
                     foreach( $content['relation_list'] as $relation )
                     {
@@ -59,11 +59,15 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                         if ( $object instanceof eZContentObject )
                         {
                             $link = $object->attribute( 'main_node' )->attribute( 'url_alias' );
+                            $this->isInternal = false;
                         }
                     }
-
                 }
-                $this->isInternal = false;
+                elseif ( $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == 'ezobjectrelation' )
+                {
+                    $link = $content->attribute( 'main_node' )->attribute( 'url_alias' );
+                    $this->isInternal = false;
+                }
             }
         }
         return $link;
