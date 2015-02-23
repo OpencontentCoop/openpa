@@ -13,6 +13,7 @@ AllowedTypes[]=4ZonesLayout1
 AllowedTypes[]=3ZonesLayout3
 AllowedTypes[]=4ZonesLayout2
 AllowedTypes[]=5ZonesLayout1
+AllowedTypes[]=5ZonesLayout2
 AllowedTypes[]=1ZonesLayoutFolder
 AllowedTypes[]=0ZonesLayoutFolder
 
@@ -166,6 +167,28 @@ ZoneName[left]=Colonna destra
 ZoneName[bottom]=Zona inferiore
 ZoneThumbnail=5zoneslayout1.jpg
 Template=5zoneslayout1.tpl
+AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
+AvailableForClasses[]=albotelematicotrentino
+
+[5ZonesLayout2]
+ZoneTypeName=5 zone (tipo 2)
+Zones[]=top
+Zones[]=central_left
+Zones[]=centra_middle
+Zones[]=left
+Zones[]=bottom
+ZoneName[top]=Zona superiore
+ZoneName[central_left]=Zona centrale a sinistra
+ZoneName[centra_middle]=Zona centrale a destra
+ZoneName[left]=Colonna destra
+ZoneName[bottom]=Zona inferiore
+ZoneThumbnail=5zoneslayout2.jpg
+Template=5zoneslayout2.tpl
 AvailableForClasses[]=frontpage
 AvailableForClasses[]=area_tematica
 AvailableForClasses[]=progetto

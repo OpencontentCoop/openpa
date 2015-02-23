@@ -9,4 +9,6 @@
   </li>
 {/foreach}
 </ul>
+{else}
+<div class="alert alert-danger">Nessuna applicazione installata</div>
 {/if}

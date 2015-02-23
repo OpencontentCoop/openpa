@@ -31,6 +31,14 @@ $ViewList['classlist'] = array(
     'params' => array(),
     'unordered_params' => array());
 
+$ViewList['classbydatatype'] = array(
+    'functions' => array('class'),
+    'script' => 'classbydatatype.php',
+    'ui_context' => 'edit',
+    'default_navigation_part' => 'ezsetupnavigationpart',
+    'params' => array( 'DataTypeString' ),
+    'unordered_params' => array());    
+
 $ViewList['classdefinition'] = array(
     'functions' => array('classdefinition'),
     'script' => 'classdefinition.php',

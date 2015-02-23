@@ -15,7 +15,7 @@ class ObjectHandlerServiceControlTemplate extends ObjectHandlerServiceBase
     protected function getViewTemplate( $view )
     {
         $currentErrorReporting = error_reporting();
-        //error_reporting( 0 );
+        error_reporting( 0 );
         $defaultTemplateUri = "design:openpa/{$view}/_default.tpl";
         $templateUri = "design:openpa/{$view}/{$this->container->currentClassIdentifier}.tpl";
         $tpl = eZTemplate::factory();

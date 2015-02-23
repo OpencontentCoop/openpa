@@ -85,7 +85,7 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
     
     function getGalleryTitle()
     {
-        if ( isset( self::$cache[$this->container->currentNodeId]['title'] ) )
+        if ( isset( self::$cache[$this->container->currentNodeId]['title'] ) && self::$cache[$this->container->currentNodeId]['title'] )
         {
             return self::$cache[$this->container->currentNodeId]['title'];
         }
