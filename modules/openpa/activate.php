@@ -4,13 +4,8 @@ $Module = $Params['Module'];
 $http = eZHTTPTool::instance();
 
 $hash = trim( $http->hasPostVariable( 'Hash' ) ? $http->postVariable( 'Hash' ) : $Params['Hash'] );
-$mainNodeID = (int)$http->hasPostVariable( 'MainNodeID' ) ? $http->postVariable(
-    'MainNodeID'
-) : $Params['MainNodeID'];
-$redirect = $hash = trim(
-    $http->hasPostVariable( 'RedirectURI' ) ? $http->postVariable(
-        'RedirectURI'
-    ) : $Params['RedirectURI']
+$mainNodeID = (int)$http->hasPostVariable( 'MainNodeID' ) ? $http->postVariable( 'MainNodeID' ) : $Params['MainNodeID'];
+$redirect = trim( $http->hasPostVariable( 'RedirectURI' ) ? $http->postVariable( 'RedirectURI' ) : $Params['RedirectURI']
 );
 $redirect = str_replace( ':', '/', $redirect );
 
@@ -86,7 +81,7 @@ elseif ( $mainNodeID )
 
 // Template handling
 
-if ( $alreadyActive )
+if ( $alreadyActive || $accountActivated )
 {
     $Module->redirectTo( $redirect );
     return;

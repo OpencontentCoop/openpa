@@ -252,8 +252,6 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
                     throw new Exception( "UserSettings not found for user #" . $user->id() );
                 }
 
-                $tpl->setVariable( 'hash', $hash );
-
                 $userSetting = eZUserSetting::fetch( $object->attribute( 'id' ) );
                 if ( $userSetting instanceof eZUserSetting && $user instanceof eZUser )
                 {
@@ -300,7 +298,7 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
         }
     }
 }
-elseif ( !$needCheckMail )
+else
 {
     $Module->redirectTo( $redirect );
     $http->removeSessionVariable( 'RedirectURI' );
@@ -314,8 +312,7 @@ $tpl->setVariable( 'current_user', $currentUser );
 $tpl->setVariable( 'persistent_variable', array() );
 
 $Result['persistent_variable'] = $tpl->variable( 'persistent_variable' );
-if ( !isset( $Result['content'] ) )
-    $Result['content'] = $tpl->fetch( 'design:smartlogin/register.tpl' );
+$Result['content'] = $tpl->fetch( 'design:smartlogin/register.tpl' );
 $Result['node_id'] = 0;
 
 $contentInfoArray = array( 'url_alias' => 'smartlogin/signup', 'class_identifier' => false );

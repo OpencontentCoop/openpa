@@ -16,12 +16,13 @@ $script = eZScript::instance(
 
 
 $options = $script->getOptions(
-    '[check][wiki][regenerate]',
+    '[check][wiki][regenerate][fixvh]',
     '',
     array(
          'check' => 'Confronta i valori live con il file instances.yml',
          'regenerate' => 'Rigenera il file instances.yml',
-         'wiki' => 'Stampa a video i valori in formato wiki table'
+         'wiki' => 'Stampa a video i valori in formato wiki table',
+         'fixvh' => 'Stampa a video i valori per cui è necessario correggere il virtual host'
     )
 );
 $script->initialize();
@@ -110,6 +111,69 @@ if ( $options['check'] )
         catch( Exception $e )
         {
             $errors[$instanceName][] = $e->getMessage();
+        }
+    }
+}
+
+if ( $options['fixvh'] )
+{
+    foreach ( $data as $name => $instance )
+    {        
+        if ( $instance->isLive() )
+        {
+            $cli->output( "Controllo $name ", false );
+            $stagingUrl = $instance->getUrl( OpenPAInstance::STAGING );
+            $prodUrl = $instance->getUrl( OpenPAInstance::PRODUCTION );
+            $stagingUrlParts = explode( '//', $stagingUrl );
+            $checkDomain = 'http://push.opencontent.it/checkdomain.php?domain=' . $stagingUrlParts[1];
+            $tries = 0;
+            $maxTries = 5;
+            while ( $tries < $maxTries )
+            {
+                $data = json_decode( eZHTTPTool::getDataByURL( $checkDomain ) );
+                if ( $data )
+                {
+                    $tries = $maxTries;        
+                }
+                else
+                {
+                    $cli->output( '. ', false );
+                    $tries++;
+                    sleep( 1 );
+                }
+            }
+            
+            if ( $data )
+            {
+                if ( $data->result )
+                {
+                    if ( $data->redirect == false )
+                    {
+                        $message = "Aggiungere redirezione in virtual host da $stagingUrl as $prodUrl";
+                        $errors[$name][] = $message;
+                        $cli->error( $message );
+                    }
+                    else
+                    {
+                        if ( ( rtrim( $data->redirect, '/' ) == $prodUrl ) )
+                            $cli->output( "OK" );
+                        else
+                        {
+                            $message = "Correggere redirezione in virtual host da {$data->redirect} a $prodUrl";
+                            $errors[$name][] = $message;
+                            $cli->error( $message );
+                        }
+                    }
+                }
+                else
+                {
+                    $cli->warning( "Dominio $stagingUrl non raggiungibile da apache.opencontent.it: {$data->error}" );
+                }
+            }
+            else
+            {
+                $cli->error( "Server checkdomain non raggiungibile ($checkDomain)" );                
+            }
         }
     }
 }

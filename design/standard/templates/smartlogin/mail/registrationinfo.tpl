@@ -25,7 +25,7 @@
                             {$user.email|wash()}
                         </p>
                         <h3 style='color: #f90f00 !important'>
-                            <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}/openpa/activate/{$hash}/{$user.contentobject.main_node_id}" style="color: #f90f00 !important">
+                            <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}/openpa/activate/{$hash}/{$user.contentobject.main_node_id}/{$redirect}" style="color: #f90f00 !important">
                                 {'Click the following URL to confirm your account'|i18n('design/standard/user/register')}
                             </a>
                         </h3>
