@@ -178,7 +178,7 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
             eZUserOperationCollection::setSettings( $object->attribute( 'id' ), 0, 0 );
 
             $operationResult = eZOperationHandler::execute( 'content', 'publish', array( 'object_id' => $object->attribute( 'id' ), 'version' => 1 ) );
-            eZUserOperationCollection::setSettings( $objectID, 0, 0 );
+            eZUserOperationCollection::setSettings( $object->attribute( 'id' ), 0, 0 );
             if ( ( array_key_exists( 'status', $operationResult ) && $operationResult['status'] != eZModuleOperationInfo::STATUS_CONTINUE ) )
             {
                 eZDebug::writeDebug( $operationResult, __FILE__ );

@@ -24,15 +24,11 @@
                             <strong>{'Indirizzo email'|i18n('openpa/mail/registration')}:</strong>
                             {$user.email|wash()}
                         </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td align='center' valign='top'>
-                        <h4 style='color: #f90f00 !important'>
-                            <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}/openpa/activate/{$hash}/{$user.contentobject.main_node_id}" style="color: #ffffff !important">
+                        <h3 style='color: #f90f00 !important'>
+                            <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}/openpa/activate/{$hash}/{$user.contentobject.main_node_id}" style="color: #f90f00 !important">
                                 {'Click the following URL to confirm your account'|i18n('design/standard/user/register')}
                             </a>
-                        </h4>
+                        </h3>
                     </td>
                 </tr>
                 <tr>
