@@ -116,7 +116,7 @@ $ViewList['settings'] = array(
 //    'script' =>	'signup.php',
 //    'params' => array(),
 //    'functions' => array( 'signup' )
-);
+//);
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
