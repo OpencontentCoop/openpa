@@ -258,7 +258,7 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
                 if ( $userSetting instanceof eZUserSetting && $user instanceof eZUser )
                 {
                     $hash = md5( mt_rand() . time() . $user->id() );
-                    $accountKey = eZUserAccountKey::createNew( $userID, $hash, time() );
+                    $accountKey = eZUserAccountKey::createNew( $user->id(), $hash, time() );
                     $accountKey->store();
                 }
                 else
@@ -300,7 +300,7 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
         }
     }
 }
-else
+elseif ( !$needCheckMail )
 {
     $Module->redirectTo( $redirect );
     $http->removeSessionVariable( 'RedirectURI' );
