@@ -489,4 +489,25 @@ $FunctionList['recaptcha_html'] = array( 'name' => 'recaptcha_html',
                                          'parameter_type' => 'standard',
                                          'parameters' => array() );
 
-?>
+$FunctionList['map_markers'] = array(
+    'name' => 'map_markers',
+    'operation_types' => array( 'read' ),
+    'call_method' => array(        
+        'class' => 'OpenPaFunctionCollection',
+        'method' => 'fetchMapMarkers' ),
+    'parameter_type' => 'standard',
+    'parameters' => array(
+        array(
+            'name' => 'parent_node_id',
+            'type' =>'mixed',
+            'required' => true,
+            'default' => false
+        ),
+        array(
+            'name' => 'class_identifiers',
+            'type' =>'array',
+            'required' => false,
+            'default' => array()
+        )
+    )
+);

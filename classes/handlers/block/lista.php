@@ -14,7 +14,7 @@ class BlockHandlerLista extends OpenPABlockHandler
 
     protected function run()
     {
-        $this->data['root_node'] = null;
+        $this->data['root_node'] = false;
         $this->data['fetch_parameters'] = $this->getFetchParameters();
         //eZDebug::writeDebug( $this->currentCustomAttributes );
         $content = $this->getContent();

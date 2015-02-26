@@ -111,11 +111,11 @@ $ViewList['settings'] = array(
     'functions' => array('editor_tools'),
     'script' => 'settings.php',
     'params' => array('Action', 'Value'));
-
-$ViewList['signup'] = array(
-    'script' =>	'signup.php',
-    'params' => array(),
-    'functions' => array( 'signup' )
+//
+//$ViewList['signup'] = array(
+//    'script' =>	'signup.php',
+//    'params' => array(),
+//    'functions' => array( 'signup' )
 );
 
 $FunctionList['classdefinition'] = array();

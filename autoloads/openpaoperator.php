@@ -21,7 +21,8 @@ class OpenPAOperator
             'access_style',
             'unique',
             'find_first_parent',
-            'current_object_id'
+            'current_object_id',
+            'fix_dimension'
         );
     }
 
@@ -102,6 +103,12 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'fix_dimension':
+            {
+                $parts = explode( 'px', $operatorValue );                
+                $operatorValue = $parts[0];
+            } break;
+            
             case 'current_object_id':
             {
                 $operatorValue = self::currentObjectId();                
