@@ -13,7 +13,8 @@ $currentUser = eZUser::currentUser();
 $invalidForm = false;
 $errors = array();
 $showCaptcha = false;
-$name = $email = $password = false;
+$name = $email = $password = $needCheckMail = false;
+
 
 $tpl->setVariable( 'name', $name );
 $tpl->setVariable( 'email', $email );
@@ -134,6 +135,7 @@ if ( $http->hasPostVariable( 'RegisterButton' ) )
                 return $Module->handleError(  eZError::KERNEL_ACCESS_DENIED,  false, array(),  array( 'OpenPaErrorCode', 1 ) );
             }
 
+            eZUserOperationCollection::setSettings( $objectID, 0, 0 );
             $http->setSessionVariable( "RegisterUserID", $objectID );
         }
         $db->commit();
@@ -173,7 +175,10 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
         $object = eZContentObject::fetch( $http->sessionVariable( "RegisterUserID" ) );
         if ( $object instanceof eZContentObject )
         {
+            eZUserOperationCollection::setSettings( $object->attribute( 'id' ), 0, 0 );
+
             $operationResult = eZOperationHandler::execute( 'content', 'publish', array( 'object_id' => $object->attribute( 'id' ), 'version' => 1 ) );
+            eZUserOperationCollection::setSettings( $objectID, 0, 0 );
             if ( ( array_key_exists( 'status', $operationResult ) && $operationResult['status'] != eZModuleOperationInfo::STATUS_CONTINUE ) )
             {
                 eZDebug::writeDebug( $operationResult, __FILE__ );
@@ -235,8 +240,34 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
                 if ( $user === null )
                     return $Module->handleError( eZError::KERNEL_NOT_FOUND, 'kernel' );
 
-                $user->loginCurrent();
+                $userSetting = eZUserSetting::fetch( $object->attribute( 'id' ) );
+                if ( $userSetting instanceof eZUserSetting && $user instanceof eZUser )
+                {
+                    $hash = md5( mt_rand() . time() . $user->id() );
+                    $accountKey = eZUserAccountKey::createNew( $user->id(), $hash, time() );
+                    $accountKey->store();
+                }
+                else
+                {
+                    throw new Exception( "UserSettings not found for user #" . $user->id() );
+                }
 
+                $tpl->setVariable( 'hash', $hash );
+
+                $userSetting = eZUserSetting::fetch( $object->attribute( 'id' ) );
+                if ( $userSetting instanceof eZUserSetting && $user instanceof eZUser )
+                {
+                    $hash = md5( mt_rand() . time() . $user->id() );
+                    $accountKey = eZUserAccountKey::createNew( $userID, $hash, time() );
+                    $accountKey->store();
+                }
+                else
+                {
+                    throw new Exception( "UserSettings not found for user #" . $user->id() );
+                }
+
+                $tpl->setVariable( 'redirect', str_replace( '/', ':', $redirect ) );
+                $tpl->setVariable( 'hash', $hash );
                 $tpl->setVariable( 'user', $user );
                 $body = $tpl->fetch( 'design:smartlogin/mail/registrationinfo.tpl' );
 
@@ -264,8 +295,7 @@ elseif ( $http->hasPostVariable( 'CaptchaButton' ) && $http->hasSessionVariable(
                 $mail->setContentType( 'text/html' );
                 $mailResult = eZMailTransport::send( $mail );
 
-                $Module->redirectTo( $redirect );
-                $http->removeSessionVariable( 'RedirectURI' );
+                $needCheckMail = true;
             }
         }
     }
@@ -276,6 +306,7 @@ else
     $http->removeSessionVariable( 'RedirectURI' );
 }
 
+$tpl->setVariable( 'check_mail', $needCheckMail );
 $tpl->setVariable( 'show_captcha', $showCaptcha );
 $tpl->setVariable( 'invalid_form', $invalidForm );
 $tpl->setVariable( 'errors', $errors );

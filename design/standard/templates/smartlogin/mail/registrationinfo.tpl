@@ -25,7 +25,16 @@
                             {$user.email|wash()}
                         </p>
                     </td>
-                </tr>                
+                </tr>
+                <tr>
+                    <td align='center' valign='top'>
+                        <h4 style='color: #f90f00 !important'>
+                            <a href="http://{ezini( 'SiteSettings', 'SiteURL' )}/openpa/activate/{$hash}/{$user.contentobject.main_node_id}" style="color: #ffffff !important">
+                                {'Click the following URL to confirm your account'|i18n('design/standard/user/register')}
+                            </a>
+                        </h4>
+                    </td>
+                </tr>
                 <tr>
                     <td align='center' valign='top'>
                         <p>                            

@@ -111,12 +111,20 @@ $ViewList['settings'] = array(
     'functions' => array('editor_tools'),
     'script' => 'settings.php',
     'params' => array('Action', 'Value'));
-//
-//$ViewList['signup'] = array(
-//    'script' =>	'signup.php',
-//    'params' => array(),
-//    'functions' => array( 'signup' )
-//);
+
+$ViewList['signup'] = array(
+    'script' =>	'signup.php',
+    'params' => array(),
+    'functions' => array( 'signup' )
+);
+
+$ViewList['activate'] = array(
+    'script' =>	'activate.php',
+    'ui_context' => 'authentication',
+    'params' => array( 'Hash', 'MainNodeID', 'RedirectURI' ),
+    'functions' => array( 'signup' )
+);
+
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
