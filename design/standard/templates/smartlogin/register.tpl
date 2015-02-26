@@ -59,8 +59,19 @@
 
                     {/if}
                 </fieldset>
-            {/if}
+
             {undef $bypass_captcha}
+
+        {elseif $check_mail}
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="alert alert-info">
+                        <h3>{'Your account was successfully created. An email will be sent to the specified
+email address. Follow the instructions in that mail to activate
+your account.'|i18n('design/standard/user')}</h3>
+                    </div>
+                </div>
+            </div>
 
         {/if}
     </form>
