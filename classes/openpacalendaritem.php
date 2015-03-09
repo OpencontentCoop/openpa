@@ -148,34 +148,34 @@ class OpenPACalendarItem
                 throw new Exception( "Param 'attr_to_time_dt' is not a valid date" );
             }
             if ( $toDate->getTimestamp() == 0 ) // workarpund in caso di eventi (importati) senza data di termine
-            {
-                /** @var DateTime $toDate */
-                $toDate = clone $this->data['fromDateTime'];
-                $interval = new DateInterval( OpenPAINI::variable( 'Calendar', 'FakeToTimeInterval', 'PT1H' ) );
-                if ( !$interval instanceof DateInterval )
-                {
-                    throw new Exception( OpenPAINI::variable( 'Calendar', 'FakeToTimeInterval', 'PT1H' ) . " is not a valid DateInterval: check openpa.ini[Calendar]/FakeToTimeInterval" );
-                }
-                $toDate->add( $interval );
-                $this->data['fake_to_time'] = true;
+            {                
+                $toDate = $this->fakeToTime( $this->data['fromDateTime'] );
             }
-
-            $this->data['toDateTime'] = $toDate;            
-            $this->data['to'] = $toDate->getTimestamp();
         }
         else
         {
-            //throw new Exception( "Key 'attr_to_time_dt' not found" );
-            /** @var DateTime $toDate */
-            $toDate = clone $this->data['fromDateTime'];
-            $toDate->add( new DateInterval('PT1H') );
-            $this->data['toDateTime'] = $toDate;            
-            $this->data['to'] = $toDate->getTimestamp();
+            $toDate = $this->fakeToTime( $this->data['fromDateTime'] );
         }
+        $this->data['toDateTime'] = $toDate;            
+        $this->data['to'] = $toDate->getTimestamp();
         
         $this->data['duration'] = $this->data['to'] - $this->data['from'];
         
         $this->isValid = $this->isValid();
+    }
+    
+    protected function fakeToTime( DateTime $from )
+    {
+        /** @var DateTime $toDate */
+        $toDate = clone $from;
+        $interval = new DateInterval( OpenPAINI::variable( 'Calendar', 'FakeToTimeInterval', 'PT1H' ) );
+        if ( !$interval instanceof DateInterval )
+        {
+            throw new Exception( OpenPAINI::variable( 'Calendar', 'FakeToTimeInterval', 'PT1H' ) . " is not a valid DateInterval: check openpa.ini[Calendar]/FakeToTimeInterval" );
+        }
+        $toDate->add( $interval );
+        $this->data['fake_to_time'] = true;
+        return $toDate;
     }
     
     protected function getObject()
