@@ -61,11 +61,13 @@ class OpenPACalendarItem
             }
         }
         eZDebug::writeNotice( "Attribute $key does not exist" );
+        return null;
     }
     
     protected function __construct( $data )
     {        
         $this->data = $data;
+        $this->data['fake_to_time'] = false;
     }
     
     protected static function getDateTime( $string )
@@ -147,8 +149,15 @@ class OpenPACalendarItem
             }
             if ( $toDate->getTimestamp() == 0 ) // workarpund in caso di eventi (importati) senza data di termine
             {
+                /** @var DateTime $toDate */
                 $toDate = clone $this->data['fromDateTime'];
-                $toDate->add( new DateInterval('PT1H') );
+                $interval = new DateInterval( OpenPAINI::variable( 'Calendar', 'FakeToTimeInterval', 'PT1H' ) );
+                if ( !$interval instanceof DateInterval )
+                {
+                    throw new Exception( OpenPAINI::variable( 'Calendar', 'FakeToTimeInterval', 'PT1H' ) . " is not a valid DateInterval: check openpa.ini[Calendar]/FakeToTimeInterval" );
+                }
+                $toDate->add( $interval );
+                $this->data['fake_to_time'] = true;
             }
 
             $this->data['toDateTime'] = $toDate;            
@@ -157,6 +166,7 @@ class OpenPACalendarItem
         else
         {
             //throw new Exception( "Key 'attr_to_time_dt' not found" );
+            /** @var DateTime $toDate */
             $toDate = clone $this->data['fromDateTime'];
             $toDate->add( new DateInterval('PT1H') );
             $this->data['toDateTime'] = $toDate;            
