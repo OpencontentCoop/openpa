@@ -106,11 +106,11 @@ class OpenPABase
         return self::getCustomSiteaccessName( 'backend' );
     }
 
-    public static function getCustomSiteaccessName( $customName )
+    public static function getCustomSiteaccessName( $customName, $checkIfExists = true )
     {
         $identifier = self::getCurrentSiteaccessIdentifier();
         $siteaccess = $identifier . '_' . strtolower( $customName );
-        if ( !file_exists( "settings/siteaccess/$siteaccess" ) )
+        if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
         {
             /** @var eZContentLanguage[] $languages */
             $languages = eZContentLanguage::prioritizedLanguages();

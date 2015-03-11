@@ -442,7 +442,7 @@ class OpenPAClassTools
 
         if ( $repository['host'] != $locale['host'] )
         {
-            $original = json_decode( OpenPABase::getDataByURL( $originalRepositoryUrl ) );            
+            $original = json_decode( eZHTTPTool::getDataByURL( $originalRepositoryUrl ) );
             if ( isset( $original->error ) )
             {
                 throw new Exception( $original->error );
