@@ -320,9 +320,14 @@ class OpenPABase
         return $section;
     }
 
-    public static function initRole( $name, $policies )
+    public static function initRole( $name, $policies, $reset = false )
     {
         $role = eZRole::fetchByName( $name );
+        if ( $role instanceof eZRole && $reset )
+        {
+            $role->removeThis();
+            $role = false;
+        }
         if ( !$role instanceof eZRole )
         {
             $role = eZRole::create( $name );
