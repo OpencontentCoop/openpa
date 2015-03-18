@@ -42,12 +42,29 @@ foreach ( $siteaccess as $sa )
 }
 ksort( $data );
 
+function sortInstancesByTypeAndName( $data )
+{
+    $byType = array();
+    $byName = array();
+        
+    foreach( $data as $key => $value )
+    {
+        $byType[$key] = $value->getType();
+        $byName[$key] = $value->getName();
+    }
+    array_multisort( $byType, SORT_ASC, $byName, SORT_ASC, $data );
+    return $data;
+}
+
 // output wiki table
 if ( $options['wiki'] )
 {
-    $output1 = $output2 = array();
-    $index1 = $index2 = 1;
+    $output = array();
+    $index = 1;
     $headers = false;
+    
+    $data = sortInstancesByTypeAndName( $data );
+    
     foreach ( $data as $name => $instance )
     {
         if ( !$headers )
@@ -55,25 +72,12 @@ if ( $options['wiki'] )
             $headers = $instance->toWikiTableRow( '', true );
         }
 
-        if ( strpos( $name, 'Comune' ) === false )
-        {
-            $output1[] = $instance->toWikiTableRow( $index1 );
-            $index1++;
-        }
-        else
-        {
-            $output2[] = $instance->toWikiTableRow( $index2 );
-            $index2++;
-        }
+        $output[] = $instance->toWikiTableRow( $index );
+        $index++;
     }
+    
     eZCLI::instance()->output( $headers );
-    foreach ( $output1 as $item )
-    {
-        eZCLI::instance()->output( $item );
-    }
-
-    eZCLI::instance()->output( $headers );
-    foreach ( $output2 as $item )
+    foreach ( $output as $item )
     {
         eZCLI::instance()->output( $item );
     }

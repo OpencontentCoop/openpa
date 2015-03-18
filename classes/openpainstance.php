@@ -142,6 +142,27 @@ class OpenPAInstance
         array_pop( $parts );
         return implode( '_', $parts );
     }
+        
+    public function getType()
+    {
+        $type = 'altro';
+        $suffix = '_standard';
+        if ( in_array( 'openpa_flight', $this->siteIni->variable( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
+        {
+            $suffix = '_new_design';
+        }
+        
+        if ( in_array( 'fusioni', $this->siteIni->variable( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
+        {
+            $type = 'fusione';
+        }
+        elseif ( strpos( $this->siteIni->variable( 'SiteSettings', 'SiteName' ), 'Comune' ) !== false )
+        {
+            $type = 'comune';
+        }
+        
+        return $type . $suffix;
+    }
 
     /**
      * Ritorna l'istanza in formato wiki table row
@@ -157,6 +178,8 @@ class OpenPAInstance
 
         $data = array(
             '=N='                       => $index,
+            '=Identificatore='          => $this->getSiteAccessBaseName(),
+            '=Tipologia='               => $this->getType(),
             '=Ente='                    => $this->getName(),
             '=Dominio di produzione='   => $this->isLive() ? "'''" . $this->getUrl( self::PRODUCTION ) . "'''" : $this->getUrl( self::PRODUCTION ),
             '=Dominio di staging='      => $this->isLive() ? $this->getUrl( self::STAGING ) : "'''" . $this->getUrl( self::STAGING ) . "'''",
