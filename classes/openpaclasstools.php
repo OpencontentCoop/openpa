@@ -434,8 +434,9 @@ class OpenPAClassTools
     
     protected static function fetchRemoteByIdentifier( $identifier )
     {
+        $remoteUrl = OpenPAINI::variable( 'NetworkSettings', 'PrototypeUrl', self::$remoteUrl );
         $currentUrl = 'http://' . eZINI::instance()->variable( 'SiteSettings', 'SiteURL' );
-        $originalRepositoryUrl = self::$remoteUrl . $identifier;
+        $originalRepositoryUrl = $remoteUrl . $identifier;
 
         $repository = parse_url( $originalRepositoryUrl );
         $locale = parse_url( $currentUrl );
