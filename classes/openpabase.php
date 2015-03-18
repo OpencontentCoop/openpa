@@ -338,6 +338,7 @@ class OpenPABase
                 $role->appendPolicy( $policy['ModuleName'], $policy['FunctionName'], isset( $policy['Limitation'] ) ? $policy['Limitation'] : array() );
             }
         }
+        eZCache::clearByID( array( 'user_info_cache' ) );
         return $role;
     }
 
