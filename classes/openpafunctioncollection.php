@@ -1109,18 +1109,19 @@ class OpenPaFunctionCollection
                 $typeNames = array( 'subattr_tipo_luogo___name____s', 'subattr_tipo_servizio_sul_territorio___name____s' );
                 
                 // imposto i filtri di ricerca
-                $geoFields = $geoFieldsNames = array();
+                $geoFields = $geoFieldsNames = $geoFieldsFilters = array();
                 foreach( $geoAttributes as $geoAttribute )
                 {
                     if ( $geoAttribute instanceof eZContentClassAttribute )
                     {
+                        $geoFieldsFilters[] = "attr_{$geoAttribute->attribute( 'identifier' )}_t:['' TO *]";
                         $geoFields[$geoAttribute->attribute( 'identifier' )] = $geoAttribute->attribute( 'name' );
                         $geoFieldsNames[] = "subattr_{$geoAttribute->attribute( 'identifier' )}___coordinates____gpt";
                     }
                 }
                 $childrenParameters = array(
                     'SearchSubTreeArray'=> array( $parentNode->attribute( 'node_id' ) ),                
-                    'Filter' => array( '-meta_id_si:' . $parentNode->attribute( 'contentobject_id' ) ),
+                    'Filter' => array_merge( array( '-meta_id_si:' . $parentNode->attribute( 'contentobject_id' ) ), $geoFieldsFilters ),
                     'SearchContentClassID' => $classIds,
                     'SearchLimit' => 1000,
                     'AsObjects' => false,
@@ -1160,7 +1161,7 @@ class OpenPaFunctionCollection
                                 eZURI::transformURI( $href, false, 'full' );
                                 
                                 $popup = isset( $item['name'] ) ? $item['name'] : $item['name_t'];
-                                $id = $item['id_si'];
+                                $id = isset( $item['id'] ) ? $item['id'] : $item['id_si'];
                                 
                                 $result[] = array(
                                     'id' => $id,

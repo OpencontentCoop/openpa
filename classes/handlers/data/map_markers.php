@@ -17,8 +17,24 @@ class DataHandlerMapMarkers implements OpenPADataHandlerInterface
             $data = new DataHandlerMapMarkersGeoJsonFeatureCollection();
             if ( $parentNode > 0 )
             {
-                $classIdentifiers = explode( ',', eZHTTPTool::instance()->getVariable( 'classIdentifiers', array() ) );                
-                $result = eZFunctionHandler::execute( 'openpa', 'map_markers', array( 'parent_node_id' => $parentNode, 'class_identifiers' => $classIdentifiers ) );                
+                $result = false;
+                
+                $parentObject = eZContentObject::fetchByNodeID( $parentNode );
+                if ( $parentObject instanceof eZContentObject )
+                {
+                    $openpa = OpenPAObjectHandler::instanceFromObject( $parentObject );
+                    if ( $openpa instanceof OpenPAObjectHandler && $openpa->hasAttribute( 'content_virtual' ) && $openpa->attribute( 'content_virtual' )->attribute( 'folder' ) != false )
+                    {
+                        $values = $openpa->attribute( 'content_virtual' )->attribute( 'folder' );                        
+                        $result = eZFunctionHandler::execute( 'openpa', 'map_markers', array( 'parent_node_id' => $values['subtree'][0], 'class_identifiers' => $values['classes'] ) );                        
+                    }
+                }
+                
+                if ( $result == false )
+                {
+                    $classIdentifiers = explode( ',', eZHTTPTool::instance()->getVariable( 'classIdentifiers', array() ) );                                
+                    $result = eZFunctionHandler::execute( 'openpa', 'map_markers', array( 'parent_node_id' => $parentNode, 'class_identifiers' => $classIdentifiers ) );
+                }
                 foreach( $result as $item )
                 {
                     $properties = array(
