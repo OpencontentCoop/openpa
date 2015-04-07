@@ -9,6 +9,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         $this->data['identifiers'] = array_keys( $list );
         $this->data['has_content'] = count( $this->data['attributes'] ) > 0;
         $this->fnData['children_count'] = 'getChildrenCount';
+        $this->fnData['children'] = 'getChildren';
     }
 
     protected function getChildrenCount()
@@ -24,6 +25,21 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
                 'DepthOperator' => 'eq' ) );
         }
         return $count;
+    }
+
+    protected function getChildren()
+    {
+        $list = array();
+        $node = $this->container->getContentNode();
+        if ( $node instanceof eZContentObjectTreeNode )
+        {
+            $list = $node->subTree( array(
+                'ClassFilterType' => 'include',
+                'ClassFilterArray' => array( 'file_pdf' ),
+                'Depth' => 1,
+                'DepthOperator' => 'eq' ) );
+        }
+        return $list;
     }
 
     protected function getAttributeList()
