@@ -8,6 +8,22 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         $this->data['attributes'] = $list;
         $this->data['identifiers'] = array_keys( $list );
         $this->data['has_content'] = count( $this->data['attributes'] ) > 0;
+        $this->fnData['children_count'] = 'getChildrenCount';
+    }
+
+    protected function getChildrenCount()
+    {
+        $count = 0;
+        $node = $this->container->getContentNode();
+        if ( $node instanceof eZContentObjectTreeNode )
+        {
+            $count = $node->subTreeCount( array(
+                'ClassFilterType' => 'include',
+                'ClassFilterArray' => array( 'file_pdf' ),
+                'Depth' => 1,
+                'DepthOperator' => 'eq' ) );
+        }
+        return $count;
     }
 
     protected function getAttributeList()
