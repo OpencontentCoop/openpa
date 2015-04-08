@@ -58,6 +58,22 @@ class OpenPASubsiteTools
                 return true;
             }
         }
+        
+        try
+        {
+            $appRootNode = OpenPAAppSectionHelper::instance()->rootNode( false );
+            if ( $appRootNode instanceof eZContentObjectTreeNode )
+            {
+                if ( in_array( $appRootNode->attribute( 'node_id' ), $pathArray ) ) {
+                    return true;
+                }
+            }
+        }
+        catch( Exception $e )
+        {
+            eZDebug::writeError( $e->getMessage(), __METHOD__ );    
+        }
+        
         eZDebug::writeError( 'Il nodo ' . $node->attribute( 'name' ) . ' non si trova nel siteaccess ' . $currentSiteaccess['name'] , __METHOD__ );
         return false;
     }

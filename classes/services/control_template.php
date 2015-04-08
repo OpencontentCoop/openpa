@@ -14,6 +14,8 @@ class ObjectHandlerServiceControlTemplate extends ObjectHandlerServiceBase
 
     protected function getViewTemplate( $view )
     {
+        $currentDebugTemplatesUsageStatistics = $GLOBALS['eZTemplateDebugTemplatesUsageStatisticsEnabled'];
+        $GLOBALS['eZTemplateDebugTemplatesUsageStatisticsEnabled'] = false;
         $currentErrorReporting = error_reporting();
         error_reporting( 0 );
         $defaultTemplateUri = "design:openpa/{$view}/_default.tpl";
@@ -21,6 +23,7 @@ class ObjectHandlerServiceControlTemplate extends ObjectHandlerServiceBase
         $tpl = eZTemplate::factory();
         $result = $tpl->loadURIRoot( $templateUri, false, $extraParameters );
         error_reporting( $currentErrorReporting );
+        $GLOBALS['eZTemplateDebugTemplatesUsageStatisticsEnabled'] = $currentDebugTemplatesUsageStatistics;
         return $result ? $templateUri : $defaultTemplateUri;
     }
 }
