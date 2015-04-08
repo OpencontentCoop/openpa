@@ -330,7 +330,7 @@ class OpenPACalendarData
             'SearchResultClustering' => null,
             'ExtendedAttributeFilter' => array()
         );        
-        $solrSearch = new eZSolr();
+        $solrSearch = new OpenPASolr();
         $solrResult = $solrSearch->search( $this->parameters['query'], $solrFetchParams );
         
         //eZDebug::writeNotice( $solrFetchParams, __METHOD__ );
