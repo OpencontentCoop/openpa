@@ -1,9 +1,4 @@
-<?php 
-/*
- 
-[eZJSCore]
-LoadFromCDN=disabled
-LocalScripts[jquery]=jquery.js
+<?php  /*
  
 [ezjscServer]
 FunctionList[]=openpaajax
@@ -19,5 +14,4 @@ Class=OpenPAServerFunctionsAjaxUploader
 AjaxUploadHandler[]
 AjaxUploadHandler[ezobjectrelationlist]=OpenPARelationListAjaxUploader
 
-*/
-?>
+*/ ?>
