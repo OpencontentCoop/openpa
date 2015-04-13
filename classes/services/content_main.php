@@ -3,7 +3,7 @@
 class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
 {
     
-    protected static $attributeList;
+    protected static $attributeList = array();
     
     function run()
     {
@@ -69,19 +69,23 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
 
     protected function getAttributeList()
     {
-        if ( self::$attributeList === null )
-        {
-            self::$attributeList = array();
-            foreach( $this->container->attributesHandlers as $attribute )
+        if ( $this->container->getContentObject() instanceof eZContentObject )
+        {            
+            if ( !isset( self::$attributeList[$this->container->getContentObject()->attribute('id' )] ) )
             {
-                $fullData = $attribute->attribute( 'full' );
-                if ( in_array( $attribute->attribute( 'identifier' ), $this->data['identifiers'] )
-                     && $fullData['has_content'] )
+                self::$attributeList[$this->container->getContentObject()->attribute('id' )] = array();
+                foreach( $this->container->attributesHandlers as $attribute )
                 {
-                    self::$attributeList[$attribute->attribute( 'identifier' )] = $attribute;
+                    $fullData = $attribute->attribute( 'full' );
+                    if ( in_array( $attribute->attribute( 'identifier' ), $this->data['identifiers'] )
+                         && $fullData['has_content'] )
+                    {
+                        self::$attributeList[$this->container->getContentObject()->attribute('id' )][$attribute->attribute( 'identifier' )] = $attribute;
+                    }
                 }
             }
+            return self::$attributeList[$this->container->getContentObject()->attribute('id' )];
         }
-        return self::$attributeList;
+        return array();
     }
 }
