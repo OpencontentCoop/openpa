@@ -1130,7 +1130,7 @@ class OpenPaFunctionCollection
                 );
                 
                 // cerco i figli
-                $solr = new eZSolr();
+                $solr = new OpenPASolr();
                 $children = $solr->search( '', $childrenParameters );                
                 if ( $children['SearchCount'] > 0 )
                 {                    
