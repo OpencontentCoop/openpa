@@ -112,9 +112,10 @@ class OpenPAObjectHandler
             }
             elseif ( $this->contentObject instanceof eZContentObject )
             {
-                if ( $this->contentObject->attribute( 'main_node' ) instanceof eZContentObjectTreeNode )
+                $mainNode = $this->contentObject->attribute( 'main_node' );
+                if ( $mainNode instanceof eZContentObjectTreeNode )
                 {
-                    $this->contentNode = $this->contentObject->attribute( 'main_node' );
+                    $this->contentNode = $mainNode;
                     $this->currentNodeId = $this->contentNode->attribute( 'node_id' );
                     $this->currentMainNodeId = $this->currentNodeId;
                 }
@@ -179,7 +180,7 @@ class OpenPAObjectHandler
             $dataMap = $this->contentObject->attribute( 'data_map' );
             foreach( $dataMap as $identifier => $attribute )
             {
-                $this->attributesHandlers[$identifier] = $this->attributeHandler( $attribute );
+                $this->attributesHandlers[$identifier] = $this->attributeHandler( $attribute, $identifier );
             }
         }
         $availableServices = OpenPAINI::variable( 'ObjectHandlerServices', 'Services', array() );
@@ -292,14 +293,14 @@ class OpenPAObjectHandler
         return new $class( $block, $parameters );
     }
 
-    public function attributeHandler( eZContentObjectAttribute $attribute )
+    public function attributeHandler( eZContentObjectAttribute $attribute, $identifier = false )
     {
         $class = 'OpenPAAttributeHandler';
         $parameters = array();
         $attributeHandlersList = OpenPAINI::variable( 'AttributeHandlers', 'Handlers', array() );
         $currentType = $attribute->attribute( 'data_type_string' );
         $currentClassIdentifier = $this->currentClassIdentifier;
-        $currentAttributeIdentifier = $attribute->attribute( 'contentclass_attribute_identifier' );
+        $currentAttributeIdentifier = $identifier != false ? $identifier : $attribute->attribute( 'contentclass_attribute_identifier' );
         foreach( $attributeHandlersList as $parameters => $className )
         {
             $parameters = explode( '/', $parameters );

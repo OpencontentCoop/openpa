@@ -25,7 +25,8 @@ class OpenPATempletizable
         }
         elseif ( isset( $this->fnData[$key] ) )
         {
-            return $this->{$this->fnData[$key]}();
+            return call_user_func( array( $this, $this->fnData[$key] ) );
+            //return $this->{$this->fnData[$key]}();
         }
         eZDebug::writeNotice( "Attribute $key does not exist", get_called_class() );
         return false;
