@@ -114,6 +114,16 @@ class BlockHandlerLista extends OpenPABlockHandler
                         $filter[] = array( 'or', $defaultFilter, $virtualFilter );
                     }
                 }
+                if ( isset( $this->fetchParameters['state_id'] ) )
+                {
+                    $stateFilter = count( $this->fetchParameters['state_id'] ) > 1 ? array( 'or' ) : array();
+                    foreach( $this->fetchParameters['state_id'] as $stateId )
+                    {
+                        $stateFilter[] = "meta_object_states_si:" . $stateId;
+                    }
+                    $filter[] = $stateFilter;
+                }
+                
                 $data = $filter;
                 break;
 
@@ -265,8 +275,23 @@ class BlockHandlerLista extends OpenPABlockHandler
                             $this->fetchParameters['sort_array'] = $nodeSortArray[0];
                         }
                         break;
-                }
+                } break;
             }
+            
+            case 'state_id':
+                $states = explode( ',', $value );
+                $stateIds = array();
+                foreach( $states as $stateId )
+                {
+                    $stateId = trim( $stateId );
+                    if ( $stateId != '' )
+                    {
+                        $stateIds[] = $stateId;
+                    }
+                }
+                if ( !empty( $stateIds ) )
+                    $this->fetchParameters['state_id'] = $stateIds;
+                break;
         }
     }
 }

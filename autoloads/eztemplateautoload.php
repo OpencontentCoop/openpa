@@ -18,7 +18,8 @@ $eZTemplateOperatorArray[] = array(
         'unique',
         'find_first_parent',
         'current_object_id',
-        'fix_dimension'
+        'fix_dimension',
+        'object_state_list'
     )
 );
 

@@ -22,7 +22,8 @@ class OpenPAOperator
             'unique',
             'find_first_parent',
             'current_object_id',
-            'fix_dimension'
+            'fix_dimension',
+            'object_state_list'
         );
     }
 
@@ -103,6 +104,21 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'object_state_list':
+            {
+                $list = array();
+                foreach( eZContentObjectStateGroup::limitations() as $limitation )
+                {
+                    $groupName = str_replace( 'StateGroup_', '', $limitation['name'] );
+                    $limitationValueList = call_user_func_array( array( $limitation['class'], $limitation['function'] ), $limitation['parameter'] );                    
+                    foreach ( $limitationValueList as $limitationValue )
+                    {                        
+                        $list[$limitationValue['id']] = "({$groupName}) {$limitationValue['name']} ";
+                    }                    
+                }
+                return $operatorValue = $list;
+            } break;
+            
             case 'fix_dimension':
             {
                 $parts = explode( 'px', $operatorValue );                
