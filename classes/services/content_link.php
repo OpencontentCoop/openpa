@@ -58,8 +58,12 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                         $object = eZContentObject::fetch( $relation['contentobject_id'] );
                         if ( $object instanceof eZContentObject )
                         {
-                            $link = $object->attribute( 'main_node' )->attribute( 'url_alias' );
-                            $this->isInternal = false;
+                            $node = $object->attribute( 'main_node' );
+                            if ( $node instanceof eZContentObjectTreeNode )
+                            {
+                                $link = $node->attribute( 'url_alias' );
+                                $this->isInternal = false;
+                            }
                         }
                     }
                 }

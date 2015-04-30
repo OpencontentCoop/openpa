@@ -1109,7 +1109,7 @@ class OpenPaFunctionCollection
                 $typeNames = array( 'subattr_tipo_luogo___name____s', 'subattr_tipo_servizio_sul_territorio___name____s' );
                 
                 // imposto i filtri di ricerca
-                $geoFields = $geoFieldsNames = $geoFieldsFilters = array();
+                $geoFields = $geoFieldsNames = $geoFieldsFilters = array();                
                 foreach( $geoAttributes as $geoAttribute )
                 {
                     if ( $geoAttribute instanceof eZContentClassAttribute )
@@ -1118,6 +1118,11 @@ class OpenPaFunctionCollection
                         $geoFields[$geoAttribute->attribute( 'identifier' )] = $geoAttribute->attribute( 'name' );
                         $geoFieldsNames[] = "subattr_{$geoAttribute->attribute( 'identifier' )}___coordinates____gpt";
                     }
+                }
+                if ( count( $geoFieldsFilters ) > 1 )
+                {
+                    array_unshift( $geoFieldsFilters, 'or' );
+                    $geoFieldsFilters = array( $geoFieldsFilters );
                 }
                 $childrenParameters = array(
                     'SearchSubTreeArray'=> array( $parentNode->attribute( 'node_id' ) ),                
@@ -1131,7 +1136,7 @@ class OpenPaFunctionCollection
                 
                 // cerco i figli
                 $solr = new OpenPASolr();
-                $children = $solr->search( '', $childrenParameters );                
+                $children = $solr->search( '', $childrenParameters );
                 if ( $children['SearchCount'] > 0 )
                 {                    
                     foreach( $children['SearchResult'] as $item )
