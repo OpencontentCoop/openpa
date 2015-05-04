@@ -55,6 +55,8 @@ class OpenPALegacyMenuHandler implements OpenPAMenuHandlerInterface
             OpenPAMenuTool::suAnonymous();
         }
 
+        eZDebug::writeNotice( "Generate menu {$parameters['identifier']} for node {$parameters['root_node_id']}", __METHOD__ );
+
         if ( !isset( $parameters['template'] ) )
             $parameters['template'] = 'menu/cached/' . $parameters['identifier'] . '.tpl';
 

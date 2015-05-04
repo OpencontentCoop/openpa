@@ -61,6 +61,8 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
         if ( isset( $parameters['scope'] ) )
             $settingsScope = $parameters['scope'];
 
+        eZDebug::writeNotice( "Generate menu {$settingsScope} for node {$parameters['root_node_id']}", __METHOD__ );
+
         $handlerObject = OpenPAObjectHandler::instanceFromObject( null );
 
         $classIdentifiers = array();
