@@ -12,7 +12,7 @@ $options = $script->getOptions();
 $script->initialize();
 $script->setUseDebugAccumulators( true );
 
-OpenPALog::setOutputLevel( OpenPALog::ALL );
+OpenPALog::setOutputLevel( $script->isQuiet() ? OpenPALog::ERROR : OpenPALog::ALL );
 
 try
 {

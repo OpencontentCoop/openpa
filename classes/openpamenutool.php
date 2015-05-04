@@ -33,19 +33,36 @@ class OpenPAMenuTool
         throw new Exception( "$menuHandlerIdentifier handler not found" );
     }
 
-    
+    /**
+     * @param array $parameters
+     *
+     * @return string
+     * @throws Exception
+     */
     public static function getLeftMenu( $parameters )
     {        
         $instance = self::instanceMenuHandler( self::LEFTMENU, $parameters );
         return self::getMenu( $instance );
     }
-    
+
+    /**
+     * @param array $parameters
+     *
+     * @return string
+     * @throws Exception
+     */
     public static function getTopMenu( $parameters )
     {
         $instance = self::instanceMenuHandler( self::TOPMENU, $parameters );
         return self::getMenu( $instance );
     }
 
+    /**
+     * @param array $parameters
+     *
+     * @return string
+     * @throws Exception
+     */
     public static function getTreeMenu( $parameters )
     {
         $instance = self::instanceMenuHandler( self::TREEMENU, $parameters );
@@ -64,6 +81,9 @@ class OpenPAMenuTool
         return $cachePath;
     }
 
+    /**
+     * @return string
+     */
     public static function cacheDirectory()
     {
         $siteINI = eZINI::instance();
@@ -151,7 +171,7 @@ class OpenPAMenuTool
         }
     }
     
-    public static function generateAllMenus( $cli = null )
+    public static function generateAllMenus()
     {        
         $designList = (array) eZINI::instance()->variable( 'DesignSettings', 'AdditionalSiteDesignList' );
         if ( in_array( 'admin', $designList ) )
@@ -161,7 +181,8 @@ class OpenPAMenuTool
 
         eZCache::clearByTag( 'template' );
 
-        if ( $cli instanceof eZCLI ) $cli->warning( "Clear all menu" );
+        $siteAccess = $GLOBALS['eZCurrentAccess']['name'];
+        OpenPALog::notice( "Clear all menu for siteaccess $siteAccess" );
         self::refreshMenu();
         
         $menuItems = OpenPaFunctionCollection::fetchTopMenuNodes();
@@ -185,7 +206,7 @@ class OpenPAMenuTool
 
                 $itemNodeId = $itemNode->attribute( 'node_id' );
 
-                if ( $cli instanceof eZCLI ) $cli->warning( "Generate menu for node $itemNodeId" );
+                OpenPALog::notice( "Generate menu for node $itemNodeId" );
 
                 $params = array(
                     'root_node_id' => $itemNodeId,
