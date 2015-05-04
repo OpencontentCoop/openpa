@@ -8,488 +8,312 @@ class OpenPAMenuTool
     const LEFTMENU = 'leftmenu';
     const TREEMENU = 'treemenu';
 
-    protected static $currentUser;
-    
+    /**
+     * @var eZUser
+     */
+    private static $currentUser;
+
+    /**
+     * @param $menuHandlerIdentifier
+     * @param $parameters
+     *
+     * @return OpenPAMenuHandlerInterface
+     * @throws Exception
+     */
+    protected static function instanceMenuHandler( $menuHandlerIdentifier, $parameters )
+    {
+        if ( $menuHandlerIdentifier == self::TOPMENU || $menuHandlerIdentifier == self::LEFTMENU )
+        {
+            return new OpenPALegacyMenuHandler( $menuHandlerIdentifier, $parameters );
+        }
+        elseif( $menuHandlerIdentifier == self::TREEMENU )
+        {
+            return new OpenPATreeMenuHandler( $parameters );
+        }
+        throw new Exception( "$menuHandlerIdentifier handler not found" );
+    }
+
+    /**
+     * @param array $parameters
+     *
+     * @return string
+     * @throws Exception
+     */
     public static function getLeftMenu( $parameters )
     {        
-        return self::getMenu( self::LEFTMENU, $parameters );
+        $instance = self::instanceMenuHandler( self::LEFTMENU, $parameters );
+        return self::getMenu( $instance );
     }
-    
+
+    /**
+     * @param array $parameters
+     *
+     * @return string
+     * @throws Exception
+     */
     public static function getTopMenu( $parameters )
-    {        
-        return self::getMenu( self::TOPMENU, $parameters );
+    {
+        $instance = self::instanceMenuHandler( self::TOPMENU, $parameters );
+        return self::getMenu( $instance );
+    }
+
+    /**
+     * @param array $parameters
+     *
+     * @return string
+     * @throws Exception
+     */
+    public static function getTreeMenu( $parameters )
+    {
+        $instance = self::instanceMenuHandler( self::TREEMENU, $parameters );
+        return self::getMenu( $instance );
+    }
+
+    /**
+     * @param OpenPAMenuHandlerInterface $instance
+     *
+     * @return string
+     */
+    protected static function cacheFilePath( $instance )
+    {
+        $currentSiteAccess = $GLOBALS['eZCurrentAccess']['name'];
+        $cachePath = eZDir::path( array( eZSys::cacheDirectory(), OpenPAMenuTool::cacheDirectory(), $currentSiteAccess, $instance->cacheFileName() ) );
+        return $cachePath;
+    }
+
+    /**
+     * @return string
+     */
+    public static function cacheDirectory()
+    {
+        $siteINI = eZINI::instance();
+        $items = (array) $siteINI->variable( 'Cache', 'CacheItems' );
+        if ( in_array( self::CACHE_IDENTIFIER, $items ) &&  $siteINI->hasGroup( 'Cache_' . self::CACHE_IDENTIFIER ))
+        {
+            $settings = $siteINI->group( 'Cache_' . self::CACHE_IDENTIFIER );
+            if ( isset( $settings['path'] ) )
+            {
+                return $settings['path'];
+            }
+        }
+        return self::CACHE_IDENTIFIER;
+    }
+
+    /**
+     * @param OpenPAMenuHandlerInterface $instance
+     *
+     * @return mixed
+     */
+    protected static function getMenu( $instance )
+    {
+        $parameters = $instance->getParameters();
+        $cacheFilePath = self::cacheFilePath( $instance );
+        $cacheFile = eZClusterFileHandler::instance( $cacheFilePath );
+        return $cacheFile->processCache(
+            array( get_class( $instance ), 'menuRetrieve' ),
+            array( get_class( $instance ), 'menuGenerate' ),
+            null,
+            null,
+            compact( 'parameters' )
+        );
     }
     
-    public static function refreshMenu( $id = null, $siteAccess = null, $file = null )
+    public static function refreshMenu( $id = null, $siteAccess = 'current' )
     {
-        if ( empty( $id ) && empty( $siteAccess ) && empty( $file ) )
+        if ( $id === null && $siteAccess === false )
         {
-            $newList = array();
             eZCache::clearByTag( self::CACHE_IDENTIFIER );
         }
         else
         {
-            $list = self::listCachedItems();
-            $newList = $list;
-            $remove = array();
-            if ( isset( $list[$id] ) )
+            if ( $siteAccess === 'current' )
             {
-                foreach( $list[$id] as $listSitaccess => $items )
+                $siteAccess = $GLOBALS['eZCurrentAccess']['name'];
+            }
+
+            $ini = eZINI::instance();
+            if ( $siteAccess === false )
+            {
+                if ( $ini->hasVariable( 'SiteAccessSettings', 'RelatedSiteAccessList' )
+                     && $relatedSiteAccessList = $ini->variable(
+                        'SiteAccessSettings',
+                        'RelatedSiteAccessList'
+                    )
+                )
                 {
-                    foreach( $items as $index => $item )
-                    {                    
-                        if ( $siteAccess )
-                        {                        
-                            if ( $listSitaccess == $siteAccess )
-                            {                            
-                                if ( $file )
-                                {                                                                
-                                    if ( basename( $item['cache_file'] ) == $file )
-                                    {
-                                        unset( $newList[$id][$siteAccess][$index] );
-                                        $remove[] = $item['cache_file'];
-                                    }
-                                }
-                                else
-                                {
-                                    unset( $newList[$id][$siteAccess][$index] );
-                                    $remove[] = $item['cache_file'];    
-                                }
-                            }                        
-                        }                    
-                        else
-                        {
-                            unset( $newList[$id] );
-                            $remove[] = $item['cache_file'];
-                        }
+                    if ( !is_array( $relatedSiteAccessList ) )
+                    {
+                        $relatedSiteAccessList = array( $relatedSiteAccessList );
                     }
-                }            
-            }        
-            foreach( $remove as $fileToRemove )
-            {
-                $cacheFileHandler = eZClusterFileHandler::instance( $fileToRemove  );
-                if ( $cacheFileHandler->exists() )
+                    $relatedSiteAccessList[] = $GLOBALS['eZCurrentAccess']['name'];
+                    $siteAccesses = array_unique( $relatedSiteAccessList );
+                }
+                else
                 {
-                    $data = $cacheFileHandler->delete();
-                }            
+                    $siteAccesses = $ini->variable(
+                        'SiteAccessSettings',
+                        'AvailableSiteAccessList'
+                    );
+                }
+            }
+            else
+            {
+                $siteAccesses = array( $siteAccess );
+            }
+            if ( !empty( $siteAccesses ) )
+            {
+                $cacheBaseDir = eZDir::path(
+                    array( eZSys::cacheDirectory(), self::cacheDirectory() )
+                );
+                $fileHandler = eZClusterFileHandler::instance();
+                $fileHandler->fileDeleteByDirList( $siteAccesses, $cacheBaseDir, $id );
             }
         }
-        self::listCachedItems( $newList );
     }
     
     public static function generateAllMenus()
     {        
-        eZCache::clearByTag( 'template' );
-        
-        //$cli = eZCLI::instance();
-        //$cli->output( 'Svuoto i topmenu di ' . self::currentSiteaccessName());
-        self::refreshMenu( self::TOPMENU, self::currentSiteaccessName() );
-        
-        //$cli->output( 'Svuoto i leftmenu di ' . self::currentSiteaccessName() );
-        self::refreshMenu( self::LEFTMENU, self::currentSiteaccessName() );
-        
-        $menuItems = OpenPAINI::variable( 'TopMenu', 'NodiCustomMenu');
-        
-        if ( empty( $menuItems ) )
+        $designList = (array) eZINI::instance()->variable( 'DesignSettings', 'AdditionalSiteDesignList' );
+        if ( in_array( 'admin', $designList ) )
         {
-            $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
-            $rootNode = eZContentObjectTreeNode::fetch( $rootNodeId );
-            if ( $rootNode instanceof eZContentObjectTreeNode )
-            {
-                $menuItems = $rootNode->subTree( array( 'ClassFilterType' => 'include',
-                                                   'ClassFilterArray' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu' ),
-                                                   'Limit' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello' ),
-                                                   'SortBy' => $rootNode->attribute( 'sort_array' ),
-                                                   'Depth' => 1,
-                                                   'DepthOperator' => 'eq' ) );
-            }
+            return false;
         }
-        $areeContainers = OpenPAINI::variable( 'TopMenu', 'NodiAreeCustomMenu');
+
+        eZCache::clearByTag( 'template' );
+
+        $siteAccess = $GLOBALS['eZCurrentAccess']['name'];
+        OpenPALog::notice( "Clear all menu for siteaccess $siteAccess" );
+        self::refreshMenu();
+        
+        $menuItems = OpenPaFunctionCollection::fetchTopMenuNodes();
+
         foreach( $menuItems as $index => $item )
         {
             $position = array();
-            if ( $index == 0 )
-            {
-                $position = array( 'firstli' );
-            }
-            if ( $index == count( $menuItems ) - 1 )
-            {
-                $position = array( 'lastli' );
-            }
-            $itemNodeid = $item;
+            if ( $index == 0 ) $position = array( 'firstli' );
+            if ( $index == count( $menuItems ) - 1 ) $position = array( 'lastli' );
+
             if ( $item instanceof eZContentObjectTreeNode )
             {
-                $itemNodeid = $item->attribute( 'node_id' );    
+                $itemNode = $item;
             }
-            
-            $params = array( 'root_node_id' => $itemNodeid,
-                             'position' => $position );
-            
-            if ( in_array( $itemNodeid, $areeContainers ) )
+            else
             {
-                if ( $item instanceof eZContentObjectTreeNode )
+                $itemNode = eZContentObjectTreeNode::fetch( $item );
+            }
+            if ( $itemNode instanceof eZContentObjectTreeNode )
+            {
+
+                $itemNodeId = $itemNode->attribute( 'node_id' );
+
+                OpenPALog::notice( "Generate menu for node $itemNodeId" );
+
+                $params = array(
+                    'root_node_id' => $itemNodeId,
+                    'position' => $position
+                );
+
+                if ( in_array( 'openpa_design_base', $designList ) )
                 {
-                    $itemNode = $item;
+                    self::getTopMenu( $params );
+                    self::getLeftMenu( $params );
                 }
-                else
+
+                $openpa = OpenPAObjectHandler::instanceFromObject( $itemNode );
+                if ( $openpa instanceof OpenPAObjectHandler )
                 {
-                    $itemNode = eZContentObjectTreeNode::fetch( $itemNodeid );
+                    $menuService = $openpa->service( 'control_menu' );
+                    if ( $menuService instanceof ObjectHandlerServiceControlMenu )
+                    {
+                        $topMenuParams = array(
+                            'root_node_id' => $itemNodeId,
+                            'scope' => 'top_menu'
+                        );
+                        self::getTreeMenu( $topMenuParams );
+                        $sideMenuParams = array(
+                            'root_node_id' => $menuService->attribute( 'side_menu' )->attribute( 'root_node' )->attribute( 'node_id' ),
+                            'scope' => 'side_menu',
+                            'user_hash' => $menuService->attribute( 'side_menu' )->attribute( 'user_hash' )
+                        );
+                        if ( in_array( 'ocbootstrap', $designList ) )
+                            self::getTreeMenu( $sideMenuParams );
+                    }
                 }
-                
-                if ( $itemNode instanceof eZContentObjectTreeNode )
+
+
+                if ( in_array(  $itemNodeId,  OpenPAINI::variable( 'TopMenu', 'NodiAreeCustomMenu', array() )  ) )
                 {
                     self::suAnonymous();
-                    
-                    //$cli->output( 'Genero il topmenu del nodo ' . $itemNodeid );
-                    self::getTopMenu( $params );
-                    
-                    $anonymousUserID = eZINI::instance()->variable( 'UserSettings', 'AnonymousUserID' );        
-                    $anonymousUser = eZUser::fetch( $anonymousUserID );
-                    $userHash = implode( ',', $anonymousUser->attribute( 'role_id_list' ) ) . ',' . implode( ',', $anonymousUser->attribute( 'limited_assignment_value_list' ) );
-                    
-                    $aree = $itemNode->subTree( array( 'ClassFilterType' => 'include',
-                                                       'ClassFilterArray' => OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ),
-                                                       'Depth' => 1,
-                                                       'DepthOperator' => 'eq' ) );
-                    foreach( $aree as $area )
+                    /** @var eZUser $anonymousUser */
+                    $anonymousUser = eZUser::fetch( eZUser::anonymousId() );
+                    $userHash = implode(  ',',  $anonymousUser->attribute( 'role_id_list' )  ) . ',';
+                    $userHash .= implode( ',', $anonymousUser->attribute( 'limited_assignment_value_list' ) );
+                    /** @var eZContentObjectTreeNode[] $aree */
+                    $aree = $itemNode->subTree(
+                        array(
+                            'ClassFilterType' => 'include',
+                            'ClassFilterArray' => OpenPAINI::variable(
+                                'AreeTematiche',
+                                'IdentificatoreAreaTematica'
+                            ),
+                            'Depth' => 1,
+                            'DepthOperator' => 'eq'
+                        )
+                    );
+                    foreach ( $aree as $area )
                     {
-                        $areaParams = array( 'root_node_id' => $area->attribute( 'node_id' ), 'user_hash' => $userHash );
-                        //$cli->output( 'Genero il leftmenu anonimo dell\'area tematica ' . $area->attribute( 'node_id' ) );
-                        self::getLeftMenu( $areaParams );  
+                        if ( in_array( 'openpa_design_base', $designList ) )
+                        {
+                            self::getLeftMenu( array(
+                                'root_node_id' => $area->attribute( 'node_id' ),
+                                'user_hash' => $userHash
+                            ));
+                        }
+                        if ( in_array( 'ocbootstrap', $designList ) )
+                        {
+                            $openpa = OpenPAObjectHandler::instanceFromObject( $area );
+                            if ( $openpa instanceof OpenPAObjectHandler )
+                            {
+                                $menuService = $openpa->service( 'control_menu' );
+                                if ( $menuService instanceof ObjectHandlerServiceControlMenu )
+                                {
+                                    $sideMenuParams = array(
+                                        'root_node_id' => $menuService->attribute(
+                                            'side_menu'
+                                        )->attribute( 'root_node' )->attribute( 'node_id' ),
+                                        'scope' => 'side_menu',
+                                        'user_hash' => $menuService->attribute(
+                                            'side_menu'
+                                        )->attribute( 'user_hash' )
+                                    );
+
+                                    self::getTreeMenu( $sideMenuParams );
+                                }
+                            }
+                        }
                     }
-                    
                     self::exitAnonymous();
                 }
             }
-            else
-            {                
-                //$cli->output( 'Genero il topmenu del nodo ' . $itemNodeid );
-                self::getTopMenu( $params );  
-                
-                //$cli->output( 'Genero il leftmenu del nodo ' . $itemNodeid );
-                self::getLeftMenu( $params );  
-            }
-        }        
+        }
+        return true;
     }
-    
-    public static function cacheDirectory()
+
+    public static function suAnonymous()
     {
-        $siteINI = eZINI::instance();
-        $items = $siteINI->variable( 'Cache', 'CacheItems' );
-        if ( in_array( self::CACHE_IDENTIFIER, $items ) &&  $siteINI->hasGroup( 'Cache_' . self::CACHE_IDENTIFIER ))
-        {            
-            $settings = $siteINI->group( 'Cache_' . self::CACHE_IDENTIFIER );
-            if ( isset( $settings['path'] ) )
-            {
-                $path = rtrim( eZSys::cacheDirectory(), '/' ) . '/' . rtrim( $settings['path'], '/' ) . '/';
-                    
-                eZDir::mkdir( $path, false, true );
-                return $path;
-            }
-        }
-        return false;
-    }
-    
-    public static function listCachedItems( $newData = false )
-    {
-        $cacheMenu = self::cacheDirectory() . 'openpamenu.php';
-        $cacheFileHandler = eZClusterFileHandler::instance( $cacheMenu  );
-        if ( $cacheFileHandler->exists() )
-        {
-            $data = $cacheFileHandler->fetchContents();
-        }
-        else
-        {
-            $data = serialize( array() );
-        }
-        
-        $data = unserialize( $data );
-        
-        if ( $newData )
-        {            
-            $cacheFileHandler->storeContents( serialize( $newData ) );
-        }
-        
-        return $data;
-    }    
-    
-    protected static function registerCachedMenu( $id, $siteaccess, $values )
-    {
-        $data = self::listCachedItems();
-        
-        if ( !isset( $data[$id] ) )
-        {
-            $data[$id] = array();
-        }
-        
-        if ( !isset( $data[$id][$siteaccess] ) )
-        {
-            $data[$id][$siteaccess] = array();
-        }
-        
-        foreach( $data[$id][$siteaccess] as $item )
-        {
-            if( $item === $values )
-            {
-                return;  
-            }
-        }
-        $data[$id][$siteaccess][] = $values;
-        
-        self::listCachedItems( $data );
-    }
-    
-    protected static function currentSiteaccessName()
-    {
-        $siteaccess = eZSiteAccess::current();
-        return $siteaccess['name'];
-    }
-    
-    protected static function suAnonymous()
-    {
-        $anonymousUserID = eZINI::instance()->variable( 'UserSettings', 'AnonymousUserID' );
         self::$currentUser = eZUser::currentUser();
-        $anonymousUser = eZUser::fetch( $anonymousUserID );
-        if ( $anonymousUser instanceof eZUser )
+        $anonymousUser = eZUser::fetch( eZUser::anonymousId() );
+        if ( $anonymousUser instanceof eZUser && self::$currentUser->id() != eZUser::anonymousId() )
         {
-            eZUser::setCurrentlyLoggedInUser( $anonymousUser, $anonymousUser->attribute( 'contentobject_id' ) );
+            eZUser::setCurrentlyLoggedInUser( $anonymousUser, $anonymousUser->id() );
         }
     }
-    
-    protected static function exitAnonymous()
+
+    public static function exitAnonymous()
     {
         if ( self::$currentUser instanceof eZUser )
         {
-            eZUser::setCurrentlyLoggedInUser( self::$currentUser, self::$currentUser->attribute( 'contentobject_id' ) );
+            eZUser::setCurrentlyLoggedInUser( self::$currentUser, self::$currentUser->id() );
         }
-    }
-        
-    protected static function notice( $message )
-    {
-        eZCLI::instance()->notice( $message );
-    }
-    
-    protected static function getMenu( $identifier, $parameters )
-    {
-        $cachePath = self::cacheDirectory() . self::currentSiteaccessName() . '/';        
-        if ( $cachePath )
-        {            
-            if ( isset( $parameters['root_node_id'] ) )
-                $rootNodeId = $parameters['root_node_id'];
-            else
-                $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
-            
-            $extraCacheKey = '';
-            if ( isset( $parameters['user_hash'] ) && $parameters['user_hash'] != false )
-            {
-                $extraCacheKey = md5( $parameters['user_hash'] );
-                $parameters['user_hash'] = $extraCacheKey;
-            }
-
-            if ( strpos( $identifier, self::TREEMENU ) !== false )
-            {
-                $cacheFile = $cachePath . $identifier . '_' . $rootNodeId . $extraCacheKey . '.cache';
-            }
-            else
-            {
-                $cacheFile = $cachePath . $identifier . '_' . $rootNodeId . $extraCacheKey . '.html';
-            }
-            $cacheFileHandler = eZClusterFileHandler::instance( $cacheFile );            
-            if ( !$cacheFileHandler->exists() )
-            {            
-                if ( !isset( $parameters['user_hash'] ) || $parameters['user_hash'] == false  ) self::suAnonymous();
-                
-                $contents = self::generateMenu( $identifier, $parameters );
-                
-                if ( !isset( $parameters['user_hash'] ) || $parameters['user_hash'] == false )  self::exitAnonymous();
-                
-                $parameters['cache_file'] = $cacheFile;
-                
-                self::registerCachedMenu( $identifier, self::currentSiteaccessName(), $parameters );
-                
-                $cacheFileHandler->storeContents( $contents );
-            }
-            return $cacheFileHandler->fetchContents();
-        }
-        else
-        {
-            eZDebug::writeWarning( 'Topmenu generated without cache' );
-            return self::generateMenu( $identifier, $parameters );
-        }
-    }
-        
-    protected static function generateMenu( $identifier, &$parameters )
-    {        
-        if ( strpos( $identifier, self::TREEMENU ) !== false )
-        {
-            $settingsScope = $parameters['scope'];
-            $handlerObject = OpenPAObjectHandler::instanceFromObject( null );
-
-            $classIdentifiers = array();
-            $excludeNodes = array();
-            $limits = array();
-            $maxRecursion = 10;
-            $fetchParameters = array();
-            $customMaxRecursion = array();
-            if ( $handlerObject->hasAttribute( 'control_menu' )
-                 && in_array( $settingsScope, $handlerObject->attribute( 'control_menu' )->attribute( 'available_menu' ) ) )
-            {
-                $classIdentifiers = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'classes' );
-                $excludeNodes = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'exclude' );
-                $limits  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'limits' );
-                $maxRecursion  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'max_recursion' );
-                $fetchParameters  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'custom_fetch_parameters' );
-                $customMaxRecursion  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'custom_max_recursion' );
-            }
-
-            $settings = array(
-                'limit' => $limits,
-                'class_identifiers' => $classIdentifiers,
-                'exclude_node_ids' => $excludeNodes,
-                'max_recursion' => $maxRecursion,
-                'custom_fetch_parameters' => $fetchParameters,
-                'custom_max_recursion' => $customMaxRecursion
-            );
-            return serialize( self::treeMenu( $parameters['root_node_id'], $settings ) );
-        }
-        else
-        {
-            if ( !isset( $parameters['root_node_id'] ) )
-                $parameters['root_node_id'] = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
-
-            if ( !isset( $parameters['template'] ) )
-                $parameters['template'] = 'menu/cached/' . $identifier . '.tpl';
-
-            $extraNotice = '';
-            if ( isset( $parameters['user_hash'] ) && $parameters['user_hash'] != false  )
-            {
-                $extraNotice = ' with user_hash key';
-            }
-            eZDebug::writeNotice( 'Generate ' . $identifier . ' on node ' . $parameters['root_node_id'] . $extraNotice );
-
-            $tpl = eZTemplate::factory();
-            foreach( $parameters as $key => $value )
-            {
-                $tpl->setVariable( $key, $value );
-            }
-            return $tpl->fetch( 'design:' . $parameters['template'] );
-        }
-    }
-    
-    public static function printDebugReport( $as_html = true )
-    {
-        if ( !eZTemplate::isTemplatesUsageStatisticsEnabled() )
-            return '';
-
-        $stats = '';
-        if ( $as_html )
-        {
-            $stats .= '<h3>OpenPA Cache menu:</h3>';
-            $stats .= '<table id="openpacachemenu" class="debug_resource_usage" title="Lista dei menu in cache">';
-            $list = self::listCachedItems();                        
-            $stats .= '<tr><th>Siteacces</th><th>Parametri</th><th></th></tr>';
-            foreach( $list as $id => $data )
-            {                
-                $stats .= "<tr><th colspan=\"2\">{$id}</th><th><a href=\"/openpa/refreshmenu/{$id}/\">Svuota</a></th></tr>";
-                foreach( $data as $siteaccess => $items )
-                {
-                    foreach( $items as $item )
-                    {
-                        $values = array();
-                        $file = basename( $item['cache_file'] );
-                        unset( $item['cache_file'] );
-                        foreach( $item as $key => $value )
-                        {
-                            $values[] = is_object( $value ) || is_array( $value ) ? "$key: (" . gettype( $value ) . ")" : "$key: " . $value;
-                        }
-                        $valueString = implode( '; ', $values );
-                        $stats .= "<tr class='data'><td>{$siteaccess}</td><td>{$valueString}</td><td><a href=\"/openpa/refreshmenu/{$id}/{$siteaccess}/{$file}\">Svuota</a></td></tr>";
-                    }
-                }                
-            }
-            $stats .= '</table>';
-        }
-
-        return $stats;
-    }
-
-    public static function getTreeMenu( $parameters )
-    {                
-        // per testare senza cache
-        //return unserialize( self::generateMenu( self::TREEMENU . $parameters['scope'], $parameters ) );
-        return unserialize( self::getMenu( self::TREEMENU . $parameters['scope'], $parameters ) );
-    }
-
-    public static function treeMenu( $rootNodeId, $settings )
-    {
-        $data = array();
-        $rootNode = OpenPABase::fetchNode( $rootNodeId );
-        if ( $rootNode instanceof eZContentObjectTreeNode )
-        {
-            $data = self::treeMenuItem( $rootNode, $settings, 0 );
-        }        
-        return $data;
-    }
-
-    protected static function treeMenuItem( eZContentObjectTreeNode $rootNode, array $settings, $level )
-    {
-        $handlerObject = OpenPAObjectHandler::instanceFromObject( $rootNode );
-
-        if ( isset( $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )] ) )
-        {
-            $settings['max_recursion'] = $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )];
-        }
-
-        $menuItem = array(
-            'item' => array(
-                'node_id' => $rootNode->attribute( 'node_id' ),
-                'name' => $rootNode->attribute( 'name' ),
-                'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ),
-                'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
-                'target' => $handlerObject->attribute( 'content_link' )->attribute( 'target' ),
-            ),
-            'max_recursion' => $settings['max_recursion'],
-            'level' => $level,
-            'children' => array()
-        );
-
-        $fetchChildren = $level < $settings['max_recursion'];
-        if ( $fetchChildren )
-        {
-            $childrenLimit = isset( $settings['limit']['level_' . $level] ) ? $settings['limit']['level_' . $level] : null;
-
-            $childrenFetchParameters = array();
-            if ( isset( $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )] ) )
-            {
-                $childrenFetchParameters = $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )];
-            }
-            $nodes = eZFunctionHandler::execute(
-                in_array( $rootNode->attribute( 'node_id' ), OpenPAINI::variable( 'Menu', 'IgnoraVirtualizzazioneNodi', array() ) ) ? 'content' : 'openpa',
-                'list',
-                array_merge( array(
-                     'parent_node_id' => $rootNode->attribute( 'node_id' ),
-                     'sort_by' => $rootNode->attribute( 'sort_array' ),
-                     'data_map_load' => false,
-                     'limit' => $childrenLimit,
-                     'class_filter_type' => 'include',
-                     'class_filter_array' => $settings['class_identifiers'],
-                ), $childrenFetchParameters )
-            );
-            if ( count( $nodes ) > 0 )
-            {
-                $level++;
-                foreach( $nodes as $node )
-                {                    
-                    if ( !in_array( $node->attribute( 'node_id' ), $settings['exclude_node_ids'] ) )
-                    {                        
-                        $menuItem['children'][] = self::treeMenuItem( $node, $settings, $level );
-                    }
-                }
-            }
-        }
-        $menuItem['has_children'] = count( $menuItem['children'] ) > 0;
-        return $menuItem;
     }
 }
-
-eZDebug::appendBottomReport( 'OpenPAMenuTool', array( 'OpenPAMenuTool', 'printDebugReport' ) );

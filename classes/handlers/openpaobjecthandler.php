@@ -248,7 +248,7 @@ class OpenPAObjectHandler
     {
         if ( isset( $this->services[$key] ) )
         {
-            return $this->services[$key];
+            return $this->services[$key]->data();
         }
         eZDebug::writeNotice( "Service $key does not exist", __METHOD__ );
         return false;
