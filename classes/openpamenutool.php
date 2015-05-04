@@ -219,27 +219,28 @@ class OpenPAMenuTool
                     self::getLeftMenu( $params );
                 }
 
-                $openpa = OpenPAObjectHandler::instanceFromObject( $itemNode );
-                if ( $openpa instanceof OpenPAObjectHandler )
+                if ( in_array( 'ocbootstrap', $designList ) )
                 {
-                    $menuService = $openpa->service( 'control_menu' );
-                    if ( $menuService instanceof ObjectHandlerServiceControlMenu )
+                    $openpa = OpenPAObjectHandler::instanceFromObject( $itemNode );
+                    if ( $openpa instanceof OpenPAObjectHandler )
                     {
-                        $topMenuParams = array(
-                            'root_node_id' => $itemNodeId,
-                            'scope' => 'top_menu'
-                        );
-                        self::getTreeMenu( $topMenuParams );
-                        $sideMenuParams = array(
-                            'root_node_id' => $menuService->attribute( 'side_menu' )->attribute( 'root_node' )->attribute( 'node_id' ),
-                            'scope' => 'side_menu',
-                            'user_hash' => $menuService->attribute( 'side_menu' )->attribute( 'user_hash' )
-                        );
-                        if ( in_array( 'ocbootstrap', $designList ) )
+                        $menuService = $openpa->service( 'control_menu' );
+                        if ( $menuService instanceof ObjectHandlerServiceControlMenu )
+                        {
+                            $topMenuParams = array(
+                                'root_node_id' => $itemNodeId,
+                                'scope' => 'top_menu'
+                            );
+                            self::getTreeMenu( $topMenuParams );
+                            $sideMenuParams = array(
+                                'root_node_id' => $menuService->attribute( 'side_menu' )->attribute( 'root_node' )->attribute( 'node_id' ),
+                                'scope' => 'side_menu',
+                                'user_hash' => $menuService->attribute( 'side_menu' )->attribute( 'user_hash' )
+                            );
                             self::getTreeMenu( $sideMenuParams );
+                        }
                     }
                 }
-
 
                 if ( in_array(  $itemNodeId,  OpenPAINI::variable( 'TopMenu', 'NodiAreeCustomMenu', array() )  ) )
                 {
