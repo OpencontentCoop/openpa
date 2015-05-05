@@ -1,27 +1,4 @@
 <?php
-
-/*
-php extension/openpa/bin/php/openpa_report_classes.php -samblar_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sbosentino_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -scles_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sconsorzio_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sconsorzioinnovazione_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sdrena_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sdro_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sfiave_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sforestale_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -smazzin_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -snave_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -spredazzo_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sprototipo_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -srivadelgarda_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -srovereto_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -ssoraga_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -sstenico_backend;
-php extension/openpa/bin/php/openpa_report_classes.php -stransacqua_backend;
-
-*/
-
 require 'autoload.php';
 
 $cli = eZCLI::instance();
@@ -31,18 +8,23 @@ $script = eZScript::instance( array( 'description' => ( "OpenPA class report" ),
                                      'use-extensions' => true ) );
 
 $script->startup();
-$options = $script->getOptions( "[generate-csv][class:]", "", array( "generate-csv" => "genera i file csv", 'class' => "genera il report solo della classe selezionata" ) );
+$options = $script->getOptions( "[simple][generate-csv][class:]", "",
+                                array( "simple" => "genera il report solo del numero di contenuti per classe",
+                                       "generate-csv" => "genera i file csv",
+                                       'class' => "genera il report solo della classe selezionata" ) );
 $script->initialize();
 try
 {
     $siteaccess = eZSiteAccess::current();
     $SiteName = str_replace( '_backend', '', $siteaccess['name'] );
     
+    $simple = $options['simple'];
+    
     $user = eZUser::fetchByName( 'admin' );
     if ( $user )
     {
         eZUser::setCurrentlyLoggedInUser( $user, $user->attribute( 'contentobject_id' ) );
-        $cli->notice( "Eseguo lo script da utente {$user->attribute( 'contentobject' )->attribute( 'name' )} in $SiteName" );
+        //$cli->notice( "Eseguo lo script da utente {$user->attribute( 'contentobject' )->attribute( 'name' )} in $SiteName" );
     }
     else
     {    
@@ -76,30 +58,27 @@ try
     
     if ( $options['generate-csv'] )
     {
-        foreach ( $classes as $class )
+        if ( $simple )
         {
-            $class = eZContentClass::fetch( $class['id'] );
-            $filename = $class->attribute( 'identifier' ) . '.json';
-            $CSVfilename = $class->attribute( 'identifier' ) . '.csv';
+            $filename = 'all_classes.json';
+            $CSVfilename = 'all_classes.csv';
             $cli->notice( "Creo $CSVfilename" );
             $json = $dir . $filename;
             $jsonData = file_get_contents( $json );
             if ( $jsonData )
             {
                 $data = json_decode( $jsonData, true );
-                $headers = array();            
+                $headers = array( ' ' );            
                 foreach( $data as $sitename => $values )
                 {
                     $headers[] = $sitename;
-                }            
-                $values = array();
-                $identifiers = array();
+                }                
+                $identifiers = array();                
                 foreach( $headers as $header )
                 {                
-                    foreach( $data[$header] as $identifier => $type )
+                    foreach( $data[$header] as $identifier => $count )
                     {
-                        $identifiers[] = $identifier;
-                        $values[$header][$identifier] = "$identifier ($type)";
+                        $identifiers[] = $identifier;                        
                     }                
                 }
                 $identifiers = array_unique( $identifiers );
@@ -108,63 +87,145 @@ try
                 $tocsv = array( $headers );
                 foreach( $identifiers as $identifier )
                 {
-                    $item = array();
+                    $item = array( $identifier );                    
                     foreach( $headers as $header )
-                    {
-                        if ( isset( $values[$header][$identifier] ) )
+                    {                         
+                        if ( $header == ' ' ) continue;                        
+                        if ( isset( $data[$header][$identifier] ) )
                         {
-                            $item[] = $values[$header][$identifier];
+                            $item[] = $data[$header][$identifier];
                         }
                         else
-                        {
-                            $item[] = '';
+                        {                            
+                            $item[] = 0;
                         }
                     }
                     $tocsv[] = $item;
-                }            
+                }                
                 eZFile::create( $CSVfilename, $CSVdir, '' );   
                 $fp = fopen( $CSVdir . $CSVfilename, 'w' );
                 foreach ( $tocsv as $fields )
                 {
                     fputcsv( $fp, $fields );
                 }            
-                fclose($fp);            
+                fclose($fp);
+            }
+        }
+        else
+        {
+            foreach ( $classes as $class )
+            {
+                $class = eZContentClass::fetch( $class['id'] );
+                $filename = $class->attribute( 'identifier' ) . '.json';
+                $CSVfilename = $class->attribute( 'identifier' ) . '.csv';
+                $cli->notice( "Creo $CSVfilename" );
+                $json = $dir . $filename;
+                $jsonData = file_get_contents( $json );
+                if ( $jsonData )
+                {
+                    $data = json_decode( $jsonData, true );
+                    $headers = array();            
+                    foreach( $data as $sitename => $values )
+                    {
+                        $headers[] = $sitename;
+                    }            
+                    $values = array();
+                    $identifiers = array();
+                    foreach( $headers as $header )
+                    {                
+                        foreach( $data[$header] as $identifier => $type )
+                        {
+                            $identifiers[] = $identifier;
+                            $values[$header][$identifier] = "$identifier ($type)";
+                        }                
+                    }
+                    $identifiers = array_unique( $identifiers );
+                    sort( $headers );
+                    sort( $identifiers );
+                    $tocsv = array( $headers );
+                    foreach( $identifiers as $identifier )
+                    {
+                        $item = array();
+                        foreach( $headers as $header )
+                        {
+                            if ( isset( $values[$header][$identifier] ) )
+                            {
+                                $item[] = $values[$header][$identifier];
+                            }
+                            else
+                            {
+                                $item[] = '';
+                            }
+                        }
+                        $tocsv[] = $item;
+                    }            
+                    eZFile::create( $CSVfilename, $CSVdir, '' );   
+                    $fp = fopen( $CSVdir . $CSVfilename, 'w' );
+                    foreach ( $tocsv as $fields )
+                    {
+                        fputcsv( $fp, $fields );
+                    }            
+                    fclose($fp);            
+                }
             }
         }
     }
     else
     {   
-        foreach ( $classes as $class )
+        if ( $simple )
         {
-            $class = eZContentClass::fetch( $class['id'] );
-            $filename = $class->attribute( 'identifier' ) . '.json';
-            $json = $dir . $filename;
-            $jsonData = file_get_contents( $json );
-            if ( $jsonData )
+            foreach ( $classes as $class )
             {
-                $data = json_decode( $jsonData, true );
-            }
-            else
-            {
-                $data = array();
-            }
-            $attributes = $class->fetchAttributes();
-            foreach( $attributes as $attribute )
-            {
-                $contentAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $attribute->attribute( 'id' ), true );
-                $contents = array();
-                foreach( $contentAttributes as $contentAttribute )
+                $class = eZContentClass::fetch( $class['id'] );
+                $filename = 'all_classes.json';
+                $json = $dir . $filename;
+                $jsonData = file_get_contents( $json );
+                if ( $jsonData )
                 {
-                    if ( $contentAttribute->attribute( 'has_content' ) )
-                    {
-                        $contents[$contentAttribute->attribute( 'id' )] = $contentAttribute->attribute( 'contentobject_id' );
-                    }
+                    $data = json_decode( $jsonData, true );
                 }
-                $data[$SiteName][$attribute->attribute( 'identifier' )] = $attribute->attribute( 'data_type_string' ) . ' ' . count( $contents );
+                else
+                {
+                    $data = array();
+                }
+                $data[$SiteName][$class->attribute( 'identifier' )] = $class->objectCount();
+                eZFile::create( $filename, $dir, json_encode( $data ) );
             }
-            $data[$SiteName]['_NumeroOggetti'] = $class->objectCount();
-            
-            eZFile::create( $filename, $dir, json_encode( $data ) );        
+        }
+        else
+        {
+            foreach ( $classes as $class )
+            {
+                $class = eZContentClass::fetch( $class['id'] );
+                $filename = $class->attribute( 'identifier' ) . '.json';
+                $json = $dir . $filename;
+                $jsonData = file_get_contents( $json );
+                if ( $jsonData )
+                {
+                    $data = json_decode( $jsonData, true );
+                }
+                else
+                {
+                    $data = array();
+                }
+                $attributes = $class->fetchAttributes();
+                foreach( $attributes as $attribute )
+                {
+                    $contentAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $attribute->attribute( 'id' ), true );
+                    $contents = array();
+                    foreach( $contentAttributes as $contentAttribute )
+                    {
+                        if ( $contentAttribute->attribute( 'has_content' ) )
+                        {
+                            $contents[$contentAttribute->attribute( 'id' )] = $contentAttribute->attribute( 'contentobject_id' );
+                        }
+                    }
+                    $data[$SiteName][$attribute->attribute( 'identifier' )] = $attribute->attribute( 'data_type_string' ) . ' ' . count( $contents );
+                }
+                $data[$SiteName]['_NumeroOggetti'] = $class->objectCount();
+                
+                eZFile::create( $filename, $dir, json_encode( $data ) );        
+            }
         }
     }
 

@@ -128,7 +128,11 @@ class OpenPABase
         return $siteaccess;
     }
     
-    public static function getDataByURL( $url, $justCheckURL = false, $userAgent = false )
+    public static function getDataByURL( $url,
+                                         $justCheckURL = false,
+                                         $userAgent = false,
+                                         $connectionTimeout = 1,
+                                         $timeout = 2 )
     {
         if ( extension_loaded( 'curl' ) )
         {
@@ -143,15 +147,15 @@ class OpenPABase
             );
             if ( $justCheckURL )
             {
-                curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 1 );
-                curl_setopt( $ch, CURLOPT_TIMEOUT, 2 );
+                curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, $connectionTimeout );
+                curl_setopt( $ch, CURLOPT_TIMEOUT, $timeout );
                 curl_setopt( $ch, CURLOPT_FAILONERROR, 1 );
                 curl_setopt( $ch, CURLOPT_NOBODY, 1 );
             }
             else
             {
-                curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 1 );
-                curl_setopt( $ch, CURLOPT_TIMEOUT, 2 );
+                curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, $connectionTimeout );
+                curl_setopt( $ch, CURLOPT_TIMEOUT, $timeout );
             }
 
             if ( $userAgent )
