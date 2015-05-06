@@ -165,9 +165,24 @@ class OpenPAObjectHandler
         return $this->contentNode;
     }
 
+    public function hasContentNode()
+    {
+        return $this->contentNode instanceof eZContentObjectTreeNode;
+    }
+
     public function getContentObject()
     {
         return $this->contentObject;
+    }
+
+    public function hasContentObject()
+    {
+        return $this->contentObject instanceof eZContentObject;
+    }
+
+    public function hasContent()
+    {
+        return $this->hasContentObject() && $this->hasContentNode();
     }
 
     protected function __construct( $object = null )
@@ -255,7 +270,7 @@ class OpenPAObjectHandler
     }
 
     /**
-     * @param $key
+     * @param string $className
      *
      * @return OpenPATempletizable|OpenPAObjectHandlerServiceInterface
      */
@@ -316,7 +331,6 @@ class OpenPAObjectHandler
         }
         return new $class( $attribute, $parameters );
     }
-
 
     public function flush( $index = true )
     {
