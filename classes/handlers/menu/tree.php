@@ -63,7 +63,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
 
         eZDebug::writeNotice( "Generate menu {$settingsScope} for node {$parameters['root_node_id']}", __METHOD__ );
 
-        $handlerObject = OpenPAObjectHandler::instanceFromObject( null );
+        $handlerObject = OpenPAObjectHandler::instanceFromObject( OpenPABase::fetchNode( $parameters['root_node_id'] ) );
 
         $classIdentifiers = array();
         $excludeNodes = array();
@@ -89,7 +89,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             'max_recursion' => $maxRecursion,
             'custom_fetch_parameters' => $fetchParameters,
             'custom_max_recursion' => $customMaxRecursion
-        );
+        );        
         $result = self::treeMenu( $parameters['root_node_id'], $settings );
         return array( 'content' => $result,
                       'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
@@ -106,8 +106,8 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
         return $data;
     }
 
-    protected static function treeMenuItem( eZContentObjectTreeNode $rootNode, array $settings, $level )
-    {
+    protected static function treeMenuItem( eZContentObjectTreeNode $rootNode, array &$settings, $level )
+    {        
         $handlerObject = OpenPAObjectHandler::instanceFromObject( $rootNode );
 
         if ( isset( $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )] ) )
