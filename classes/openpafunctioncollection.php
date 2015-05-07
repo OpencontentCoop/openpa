@@ -46,7 +46,7 @@ class OpenPaFunctionCollection
     {
         $parentNode = OpenPABase::fetchNode( $parentNodeID );
         $handler = OpenPAObjectHandler::instanceFromObject( $parentNode );
-        if ( $handler instanceof OpenPAObjectHandler )
+        if ( $handler instanceof OpenPAObjectHandler && $handler->hasContent() )
         {            
             $virtualParameters = $handler->attribute( 'content_virtual' )->attribute( 'folder' );
             if ( $virtualParameters )
