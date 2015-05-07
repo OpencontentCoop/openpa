@@ -9,6 +9,7 @@ name=Menu cache
 id=openpamenu
 tags[]=openpamenu
 path=openpamenu
+isClustered=true
 
 [RoleSettings]
 PolicyOmitList[]=openpa/classdefinition
