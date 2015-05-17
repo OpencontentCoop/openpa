@@ -27,13 +27,13 @@ class OpenPAApiNode implements ArrayAccess
         return false;
     }
     
-    public function searchLocal( $useRemote = true, $parentNode = false )
+    public function searchLocal( $useRemote = true, $parentNode = false, $localRemoteIdPrefix = null )
     {
         $object = null;
 
         if ( $useRemote )
         {
-            $object = eZContentObject::fetchByRemoteID( $this->metadata['objectRemoteId'] );
+            $object = eZContentObject::fetchByRemoteID( $localRemoteIdPrefix . $this->metadata['objectRemoteId'] );
         }
         else
         {
