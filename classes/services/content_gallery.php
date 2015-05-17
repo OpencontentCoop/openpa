@@ -3,6 +3,7 @@
 class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
 {
     protected static $cache = array();
+    protected static $flipControlCache = array();
     
     function run()
     {
@@ -11,8 +12,36 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
         $this->fnData['title'] = 'getGalleryTitle';
     }
 
+    function hasFlip()
+    {
+        if ( !isset( self::$flipControlCache[$this->container->currentNodeId] ) )
+        {
+            if ( method_exists( 'ezFlip', 'has_converted' ) )
+            {
+                if ( ezFlip::has_converted( $this->container->currentObjectId ) )
+                {
+                    self::$flipControlCache[$this->container->currentNodeId] = true;
+                }
+                else
+                {
+                    self::$flipControlCache[$this->container->currentNodeId] = false;
+                }
+            }
+            else
+            {
+                self::$flipControlCache[$this->container->currentNodeId] = false;
+            }
+        }
+        return self::$flipControlCache[$this->container->currentNodeId];
+    }
+    
     function getImageListCount()
-    {        
+    {                
+        if ( $this->hasFlip() )
+        {
+            return false;
+        }
+        
         if ( !isset( self::$cache[$this->container->currentNodeId] ) )
         {            
             $imageCount = 0;
@@ -85,6 +114,11 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
     
     function getGalleryTitle()
     {
+        if ( $this->hasFlip() )
+        {
+            return false;
+        }
+        
         if ( isset( self::$cache[$this->container->currentNodeId]['title'] ) && self::$cache[$this->container->currentNodeId]['title'] )
         {
             return self::$cache[$this->container->currentNodeId]['title'];
@@ -94,6 +128,11 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
     
     function getImageList()
     {                        
+        if ( $this->hasFlip() )
+        {
+            return false;
+        }
+        
         if ( !isset( self::$cache[$this->container->currentNodeId]['list'] ) )
         {            
             if ( $this->getImageListCount() > 0 )
