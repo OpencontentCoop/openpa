@@ -23,7 +23,8 @@ class OpenPAOperator
             'find_first_parent',
             'current_object_id',
             'fix_dimension',
-            'object_state_list'
+            'object_state_list',
+            'site_identifier'
         );
     }
 
@@ -104,6 +105,11 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'site_identifier':
+            {
+                return $operatorValue = OpenPABase::getCurrentSiteaccessIdentifier();
+            } break;
+
             case 'object_state_list':
             {
                 $list = array();
