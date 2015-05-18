@@ -50,7 +50,9 @@ if ( $http->hasPostVariable( 'RegisterButton' ) )
             if ( eZUser::fetchByEmail( $email ) )
             {
                 $invalidForm = true;
-                $errors[] = ezpI18n::tr( 'openpa/signup', 'Email già in uso' );
+                $forgotUrl = 'user/forgotpassword';
+                eZURI::transformURI( $forgotUrl );
+                $errors[] = ezpI18n::tr( 'openpa/signup', 'Email già in uso. Hai dimenticato la password? <a href="' . $forgotUrl . '">Clicca qui</a>' );
             }
         }
         $password = false;
