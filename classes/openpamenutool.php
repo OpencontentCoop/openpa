@@ -107,7 +107,7 @@ class OpenPAMenuTool
     protected static function getMenu( $instance )
     {
         $parameters = $instance->getParameters();
-        if ( OpenPAINI::variable( 'CacheSettings', 'Menu' == 'disabled' ) )
+        if ( OpenPAINI::variable( 'CacheSettings', 'Menu' ) == 'disabled' )
         {
             return call_user_func( array( get_class( $instance ), 'getMenu' ), $parameters );
         }

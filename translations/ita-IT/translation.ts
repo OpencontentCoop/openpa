@@ -5,7 +5,7 @@
     <name>design/standard/content/edit</name>
     <message>
         <source>Send for publishing</source>
-        <translation>Pubblica</translation>
+        <translation>Salva</translation>
     </message>
     <message>
         <source>Store draft</source>
