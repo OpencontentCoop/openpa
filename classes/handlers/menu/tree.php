@@ -56,7 +56,13 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
     public static function menuGenerate( $file, $args )
     {
         extract( $args );
+        $result = self::getMenu( $parameters );
+        return array( 'content' => $result,
+                      'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
+    }
 
+    public static function getMenu( $parameters )
+    {
         $settingsScope = false;
         if ( isset( $parameters['scope'] ) )
             $settingsScope = $parameters['scope'];
@@ -89,10 +95,8 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             'max_recursion' => $maxRecursion,
             'custom_fetch_parameters' => $fetchParameters,
             'custom_max_recursion' => $customMaxRecursion
-        );        
-        $result = self::treeMenu( $parameters['root_node_id'], $settings );
-        return array( 'content' => $result,
-                      'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
+        );
+        return self::treeMenu( $parameters['root_node_id'], $settings );
     }
 
     protected static function treeMenu( $rootNodeId, $settings )

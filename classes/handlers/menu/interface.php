@@ -9,4 +9,6 @@ interface OpenPAMenuHandlerInterface
     public static function menuRetrieve( $file, $mtime, $args );
 
     public static function menuGenerate( $file, $args );
+
+    public static function getMenu( $parameters );
 }

@@ -107,15 +107,23 @@ class OpenPAMenuTool
     protected static function getMenu( $instance )
     {
         $parameters = $instance->getParameters();
-        $cacheFilePath = self::cacheFilePath( $instance );
-        $cacheFile = eZClusterFileHandler::instance( $cacheFilePath );
-        return $cacheFile->processCache(
-            array( get_class( $instance ), 'menuRetrieve' ),
-            array( get_class( $instance ), 'menuGenerate' ),
-            null,
-            null,
-            compact( 'parameters' )
-        );
+        if ( OpenPAINI::variable( 'CacheSettings', 'Menu' == 'disabled' ) )
+        {
+            return call_user_func( array( get_class( $instance ), 'getMenu' ), $parameters );
+        }
+        else
+        {
+            $cacheFilePath = self::cacheFilePath( $instance );
+            $cacheFile = eZClusterFileHandler::instance( $cacheFilePath );
+
+            return $cacheFile->processCache(
+                array( get_class( $instance ), 'menuRetrieve' ),
+                array( get_class( $instance ), 'menuGenerate' ),
+                null,
+                null,
+                compact( 'parameters' )
+            );
+        }
     }
     
     public static function refreshMenu( $id = null, $siteAccess = 'current' )

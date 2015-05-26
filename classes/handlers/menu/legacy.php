@@ -49,7 +49,13 @@ class OpenPALegacyMenuHandler implements OpenPAMenuHandlerInterface
     public static function menuGenerate( $file, $args )
     {
         extract( $args );
+        $result = self::getMenu( $parameters );
+        return array( 'content' => $result,
+                      'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
+    }
 
+    public static function getMenu( $parameters )
+    {
         if ( !isset( $parameters['user_hash'] ) || $parameters['user_hash'] == false  )
         {
             OpenPAMenuTool::suAnonymous();
@@ -72,9 +78,7 @@ class OpenPALegacyMenuHandler implements OpenPAMenuHandlerInterface
         {
             OpenPAMenuTool::exitAnonymous();
         }
-
-        return array( 'content' => $result,
-                      'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
+        return $result;
     }
 
     public function getParameters()
