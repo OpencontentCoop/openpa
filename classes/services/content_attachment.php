@@ -49,7 +49,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         {
             if ( $attribute->is( 'attributi_allegati_atti' ) && $attribute->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
             {
-                $list[$attribute->attribute( 'identifier' )] = $attribute;
+                $list[$attribute->attribute( 'identifier' )] = $attribute->attribute( 'contentobject_attribute' );
             }
         }
         return $list;
