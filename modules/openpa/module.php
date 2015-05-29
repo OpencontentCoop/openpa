@@ -125,6 +125,12 @@ $ViewList['activate'] = array(
     'functions' => array( 'signup' )
 );
 
+$ViewList['cookie'] = array(
+    'script' =>	'cookie.php',
+    'params' => array(),
+    'functions' => array( 'cookie' )
+);
+
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
@@ -134,6 +140,7 @@ $FunctionList['calendar'] = array();
 $FunctionList['editor_tools'] = array();
 $FunctionList['object'] = array();
 $FunctionList['signup'] = array();
+$FunctionList['cookie'] = array();
 
 
 
