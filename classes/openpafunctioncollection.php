@@ -950,7 +950,12 @@ class OpenPaFunctionCollection
     {
         if ( self::$home == null )
         {                        
-            self::$home = eZContentObjectTreeNode::fetch( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );            
+            $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
+            if ( eZINI::instance( 'content.ini' )->hasVariable( 'NodeSettings', 'HomepageNode' ) )
+            {
+                $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'HomepageNode' );
+            }
+            self::$home = eZContentObjectTreeNode::fetch( $rootNodeId );            
         }
         return self::$home;
     }
