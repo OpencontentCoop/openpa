@@ -196,6 +196,30 @@ class OpenPASectionTools
         }
     }
 
+    public function test( $currentNode )
+    {
+        if ( is_numeric( $currentNode ) )
+        {
+            $currentNode = eZContentObjectTreeNode::fetch( $currentNode );
+        }
+        if ( $currentNode instanceof eZContentObjectTreeNode )
+        {
+            $this->getCurrentParameters( $currentNode->attribute( 'class_identifier' ) );
+            $this->currentUnPublishDateAttribute = $this->getCurrentUnPublishAttribute( $currentNode );
+            $currentObject = $currentNode->attribute( 'object' );
+            $handler = OpenPAObjectHandler::instanceFromContentObject( $currentObject );            
+            $date = $this->currentUnPublishDateAttribute->content();
+            $attributeRetractDate = $date->attribute( 'timestamp' );
+            $iniRetractDate = $currentObject->attribute( 'published' ) + $this->currentSecondsExpire;
+            $objectRetractDate = $this->getRetractDate( $attributeRetractDate, $iniRetractDate, $this->currentIgnore, $this->currentOverrideValue );
+            $this->cli->warning( "Test 1: " . var_export( $objectRetractDate > 0, 1 ) );
+            $this->cli->warning( "Test 2: " . var_export( $objectRetractDate < $this->now, 1 ) );
+            $this->cli->warning( "Test 3: " . var_export( $currentObject->attribute( 'section_id' ) != $this->currentSectionDestinationId, 1 ) );
+            $this->cli->warning( "Test 4: " . var_export( $this->currentSectionDestinationId !== 0, 1 ) );
+            $this->cli->warning( "Test 4: " . var_export( $handler->filter( 'change_section', 'run' ) == OpenPAObjectHandler::FILTER_CONTINUE, 1 ) );
+        }
+    }
+    
     public function changeSection( $currentNode )
     {
         if ( is_numeric( $currentNode ) )

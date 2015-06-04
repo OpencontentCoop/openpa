@@ -121,8 +121,7 @@ class OpenPAPageData
                         $openpaPathArray[] = $path;
                     }
                 }
-                $data['path_array'] = $openpaPathArray;
-                $data['default_path_array'] = $pathArray;
+                $data['openpa_path_array'] = $openpaPathArray;                
                 
                 $operatorValue = $data;
             }
