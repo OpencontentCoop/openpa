@@ -568,7 +568,7 @@ class OpenPaFunctionCollection
             {
                 foreach( $values as $value )
                 {
-                    $query = "subattr_{$value['attribute_identifier']}___name____s:\"{$object->attribute( 'name' )}\" AND meta_contentclass_id_si:{$value['class_id']}";
+                    $query = "submeta_{$value['attribute_identifier']}___id_si:{$object->attribute( 'id' )} AND meta_contentclass_id_si:{$value['class_id']}";
                     $facetQuery[$query] = $query;
                     $facetQueryData[$query] = $value;
                     //$attributeFilter[] = "submeta_servizio___id_si:" . $object->attribute( 'id' );
