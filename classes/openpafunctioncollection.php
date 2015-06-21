@@ -1138,7 +1138,7 @@ class OpenPaFunctionCollection
                     'SortBy' => $sortBy,
                     'FieldsToReturn' => array_merge( $geoFieldsNames, $typeNames )
                 );
-                
+
                 // cerco i figli
                 $solr = new OpenPASolr();
                 $children = $solr->search( '', $childrenParameters );
@@ -1165,7 +1165,7 @@ class OpenPaFunctionCollection
                         foreach( $geoFieldsNames as $geoFieldsName )
                         {                            
                             @list( $longitude, $latitude ) = explode( ',', $item['fields'][$geoFieldsName][0] );
-                            if ( intval( $latitude ) > 0 && intval( $longitude ) > 0 )
+                            if ( intval( $latitude ) != 0 && intval( $longitude ) != 0 )
                             {
                                 $href = isset( $item['main_url_alias'] ) ? $item['main_url_alias'] : $item['main_url_alias_ms'];
                                 eZURI::transformURI( $href, false, 'full' );

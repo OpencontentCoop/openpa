@@ -21,6 +21,21 @@ try
     {
         throw new Exception( 'Script non eseguibile sul prototipo' );        
     }
+    
+    if ( stripos( $siteaccess['name'], 'consorzioinnovazione' ) !== false )
+    {
+        throw new Exception( 'Script non eseguibile su consorzioinnovazione' );        
+    }
+    
+    if ( stripos( $siteaccess['name'], 'consorzio' ) !== false )
+    {
+        throw new Exception( 'Script non eseguibile su consorzio' );        
+    }
+    
+    if ( stripos( $siteaccess['name'], 'asia' ) !== false )
+    {
+        throw new Exception( 'Script non eseguibile su asia' );        
+    }
         
     // sincronizzazaione classi
     $classiTrasparenza = array(
