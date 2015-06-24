@@ -1119,7 +1119,7 @@ class OpenPaFunctionCollection
                 {
                     if ( $geoAttribute instanceof eZContentClassAttribute )
                     {
-                        $geoFieldsFilters[] = "attr_{$geoAttribute->attribute( 'identifier' )}_t:['' TO *]";
+                        //$geoFieldsFilters[] = "attr_{$geoAttribute->attribute( 'identifier' )}_t:['' TO *]";
                         $geoFields[$geoAttribute->attribute( 'identifier' )] = $geoAttribute->attribute( 'name' );
                         $geoFieldsNames[] = "subattr_{$geoAttribute->attribute( 'identifier' )}___coordinates____gpt";
                     }
