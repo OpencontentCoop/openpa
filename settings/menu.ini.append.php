@@ -17,9 +17,11 @@ LeftMenu=flat_left.cache
 
 [NavigationPart]
 Part[ezappsnavigationpart]=Apps
+Part[eztrasparenzanavigationpart]=Amministrazione Trasparente
 
 [TopAdminMenu]
 Tabs[]=apps
+Tabs[]=trasparenza
 
 [Topmenu_apps]
 NavigationPartIdentifier=ezappsnavigationpart
@@ -35,8 +37,22 @@ Shown[]
 Shown[default]=true
 Shown[navigation]=true
 Shown[browse]=false
-
 # Tabs policy on admin interface in 4.3
 PolicyList[]=apps/dashboard
+
+[Topmenu_trasparenza]
+NavigationPartIdentifier=eztrasparenzanavigationpart
+Name=Amministrazione Trasparente
+Tooltip=Amministrazione Trasparente
+URL[]
+URL[default]=Amministrazione-Trasparente
+Enabled[]
+Enabled[default]=true
+Enabled[browse]=true
+Enabled[edit]=false
+Shown[]
+Shown[default]=true
+Shown[navigation]=true
+Shown[browse]=true
 
 */ ?>
