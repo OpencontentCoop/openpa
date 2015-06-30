@@ -30,18 +30,43 @@ $script->startup();
 
 $errors = array();
 
+$sensorSiteaccess = OpenPABase::getInstances( 'sensor' );
+$dimmiSiteaccess = OpenPABase::getInstances( 'dimmi' );
 $siteaccess = OpenPABase::getInstances();
-ksort( $siteaccess );
+
+foreach( $sensorSiteaccess as $ssa )
+{
+    $frontendName = str_replace( '_sensor', '_frontend', $ssa );
+    if ( !in_array( $frontendName, $siteaccess ) )
+    {
+        $siteaccess[] = $ssa;
+    }
+}
+
+foreach( $dimmiSiteaccess as $ssa )
+{
+    $frontendName = str_replace( '_dimmi', '_frontend', $ssa );
+    if ( !in_array( $frontendName, $siteaccess ) )
+    {
+        $siteaccess[] = $ssa;
+    }
+}
+
+sort( $siteaccess );
 
 /** @var OpenPAInstance[] $data */
 $data = array();
 foreach ( $siteaccess as $sa )
 {
     $openPaInstance = new OpenPAInstance( $sa );
-    $data[$openPaInstance->getName()] = $openPaInstance;
+    $key = $openPaInstance->getName();
+    if ( isset( $data[$key] ) )
+    {
+        $key = $key . '_';
+    }
+    $data[$key] = $openPaInstance;
 }
 ksort( $data );
-
 function sortInstancesByTypeAndName( $data )
 {
     $byType = array();

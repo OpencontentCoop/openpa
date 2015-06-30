@@ -152,14 +152,22 @@ class OpenPAInstance
             $suffix = '_new_design';
         }
         
-        if ( in_array( 'fusioni', $this->siteIni->variable( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
+        if ( strpos( $this->currentSiteAccessName, '_sensor' ) !== false )
+        {
+            $type = 'sensor';
+        }
+        elseif ( strpos( $this->currentSiteAccessName, '_dimmi' ) !== false )
+        {
+            $type = 'dimmi';
+        }
+        elseif ( in_array( 'fusioni', $this->siteIni->variable( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
         {
             $type = 'fusione';
         }
         elseif ( strpos( $this->siteIni->variable( 'SiteSettings', 'SiteName' ), 'Comune' ) !== false )
         {
             $type = 'comune';
-        }
+        }        
         
         return $type . $suffix;
     }
