@@ -157,7 +157,7 @@ class OpenPAOperator
                         }
                     }
                 }                
-            }
+            } break;
             
             case 'unique':
             {
