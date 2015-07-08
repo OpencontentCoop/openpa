@@ -62,7 +62,7 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                             if ( $node instanceof eZContentObjectTreeNode )
                             {
                                 $link = $node->attribute( 'url_alias' );
-                                $this->isInternal = false;
+                                $this->isInternal = true;
                             }
                         }
                     }
@@ -70,7 +70,7 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                 elseif ( $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == 'ezobjectrelation' )
                 {
                     $link = $content->attribute( 'main_node' )->attribute( 'url_alias' );
-                    $this->isInternal = false;
+                    $this->isInternal = true;
                 }
             }
         }
