@@ -21,7 +21,7 @@ try
     $db->setErrorHandling( eZDB::ERROR_HANDLING_EXCEPTIONS );
 
     $test = $db->arrayQuery( 'SELECT data_type FROM information_schema.columns WHERE column_name = \'data_int\' AND table_name = \'ezcontentobject_attribute\';' );
-    if ( $test[0]['data_type'] != 'bigint' )
+    if ( !isset( $test[0]['data_type'] ) || $test[0]['data_type'] != 'bigint' )
     {
         $db->query( 'ALTER TABLE ezcontentobject_attribute ALTER COLUMN data_int TYPE BIGINT;' );
         $db->query( 'ALTER TABLE ezcontentobject_attribute ALTER COLUMN sort_key_int TYPE BIGINT;' );
