@@ -42,21 +42,34 @@ class OpenPAMenuOperator
     
     function modify( &$tpl, &$operatorName, &$operatorParameters, &$rootNamespace, &$currentNamespace, &$operatorValue, &$namedParameters )
     {		
+        $cacheKey = md5( serialize( $namedParameters['parameters'] ) );
         switch ( $operatorName )
-        {
+        {            
             case 'top_menu_cached':
             {
-                return $operatorValue = OpenPAMenuTool::getTopMenu( $namedParameters['parameters'] );
+                if ( !isset( self::$_cache[$cacheKey] ) )
+                {
+                    self::$_cache[$cacheKey] = OpenPAMenuTool::getTopMenu( $namedParameters['parameters'] );
+                }
+                return $operatorValue = self::$_cache[$cacheKey];
             } break;
             
             case 'left_menu_cached':
             {
-                return $operatorValue = OpenPAMenuTool::getLeftMenu( $namedParameters['parameters'] );
+                if ( !isset( self::$_cache[$cacheKey] ) )
+                {
+                    self::$_cache[$cacheKey] = OpenPAMenuTool::getLeftMenu( $namedParameters['parameters'] );
+                }
+                return $operatorValue = self::$_cache[$cacheKey];                
             } break;
 
             case 'tree_menu':
             {
-                return $operatorValue = OpenPAMenuTool::getTreeMenu( $namedParameters['parameters'] );
+                if ( !isset( self::$_cache[$cacheKey] ) )
+                {
+                    self::$_cache[$cacheKey] = OpenPAMenuTool::getTreeMenu( $namedParameters['parameters'] );
+                }
+                return $operatorValue = self::$_cache[$cacheKey];                
             } break;
         }
         return false;

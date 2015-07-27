@@ -34,6 +34,16 @@ class OpenPaFunctionCollection
         'ExtendedAttributeFilter' => array()
     );
     
+    protected static function dipendentiClassIdentifiers()
+    {
+        $returnData = array();
+        $classIdentifiers = array( 'dipendente', 'personale', 'consulente' );
+        foreach( $classIdentifiers as $classIdentifier )
+        if ( eZContentClass::classIDByIdentifier( $classIdentifier ) )
+            $returnData[] = $classIdentifier;
+        return $returnData;
+    }
+    
     public static function search( $params, $query = '' )
     {
         $solrSearch = new eZSolr();
@@ -171,7 +181,7 @@ class OpenPaFunctionCollection
             
             $dipendentiSenzaRuoloIds = array();
             $params = OpenPaFunctionCollection::$params;
-            $params['SearchContentClassID'] = array( 'dipendente' );
+            $params['SearchContentClassID'] = self::dipendentiClassIdentifiers();
             $params['SearchSubTreeArray'] = $subtree;
             if ( count( $subtree ) > 1 )
             {
@@ -213,8 +223,13 @@ class OpenPaFunctionCollection
                                                        eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
             }
             $params['SearchContentClassID'] = array( 'ruolo' );    
+            
             foreach( $subtree as $nodeId )
                 $params['Filter'][] = array( 'submeta_utente___path_si:' . $nodeId );
+            
+            if ( $struttura )
+                $params['Filter'][] = array( 'submeta_struttura_di_riferimento___id_si:' . $struttura );
+            
             $params['AsObjects'] = true;
             $search = OpenPaFunctionCollection::search( $params );
             if ( $search['SearchCount'] > 0 )
@@ -407,7 +422,7 @@ class OpenPaFunctionCollection
         {
             $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );   
         }        
-        $params['SearchContentClassID'] = array( 'dipendente', 'personale' );
+        $params['SearchContentClassID'] = self::dipendentiClassIdentifiers();
         $params['SortBy'] = array( 'name' => 'asc' );
         if ( $struttura instanceof eZContentObjectTreeNode )
         {
