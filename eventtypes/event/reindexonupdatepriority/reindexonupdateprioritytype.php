@@ -31,4 +31,4 @@ class ReindexOnUpdatePriorityType extends eZWorkflowEventType
     }
 }
 
-eZWorkflowEventType::registerEventType( ReindexOnUpdatePriorityType::WORKFLOW_TYPE_STRING, 'reindexonupdatepriority' );
+eZWorkflowEventType::registerEventType( ReindexOnUpdatePriorityType::WORKFLOW_TYPE_STRING, 'ReindexOnUpdatePriorityType' );
