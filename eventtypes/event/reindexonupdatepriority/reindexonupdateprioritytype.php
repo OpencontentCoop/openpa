@@ -19,13 +19,19 @@ class ReindexOnUpdatePriorityType extends eZWorkflowEventType
     public function execute( $process, $event )
     {
         $parameters = $process->attribute( 'parameter_list' );
-        $priorityArray = $parameters['priority'];
+        $nodeIdList = $parameters['priority_id'];
 
         /** @var eZContentObjectTreeNode[] $nodes */
-        $nodes = eZContentObjectTreeNode::fetch( $priorityArray );
+        $nodes = eZContentObjectTreeNode::fetch( $nodeIdList );        
         foreach( $nodes as $node )
         {
             eZSearch::addObject( $node->attribute( 'object' ), true );
+        }
+        
+        $object = eZContentObject::fetchByNodeID( $parameters['node_id'] );
+        if ( $object instanceof eZContentObject )
+        {
+            eZContentCacheManager::clearContentCache( $object->attribute( 'id' ) );
         }
         return eZWorkflowType::STATUS_ACCEPTED;
     }
