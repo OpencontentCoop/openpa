@@ -119,12 +119,16 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             $customContextMenuClasses = OpenPAINI::variable( 'SideMenu', 'SideMenuContextRootClasses', array() );
             if ( !empty( $customContextMenuClasses ) )
             {
-                foreach( $this->container->currentPathNodeIds as $nodeId )
+                $currentPathNodeIds = explode( '/', $this->container->getContentNode()->attribute( 'path_string' ) );
+                foreach( $currentPathNodeIds as $nodeId )
                 {
                     $node = OpenPABase::fetchNode( $nodeId );
-                    if ( in_array( $node->attribute( 'class_identifier' ), $customContextMenuClasses ) )
+                    if ( $node instanceof eZContentObjectTreeNode )
                     {
-                        $rootNode = $node;
+                        if ( in_array( $node->attribute( 'class_identifier' ), $customContextMenuClasses ) )
+                        {
+                            $rootNode = $node;
+                        }
                     }
                 }
             }
