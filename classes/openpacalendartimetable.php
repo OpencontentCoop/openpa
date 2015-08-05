@@ -52,22 +52,36 @@ class OpenPACalendarTimeTable
             $byDayInterval = new DateInterval( 'P1D' );
             /** @var DateTime[] $byDayPeriod */
             $byDayPeriod = new DatePeriod( $startDate, $byDayInterval, $endDate );
+            
+            /** @var eZContentObjectAttribute[] $dataMap */
+            $dataMap = $node->attribute( 'data_map' );
+            $minTimeStamp = isset( $dataMap['timetable_from_time'] ) && $dataMap['timetable_from_time']->hasContent() ? $dataMap['timetable_from_time']->toString() : 0;
+            $maxTimeStamp = isset( $dataMap['timetable_to_time'] ) && $dataMap['timetable_to_time']->hasContent() ? $dataMap['timetable_to_time']->toString() : 0;
+            $minTime = new DateTime( 'now', OpenPACalendarData::timezone() );
+            $minTime->setTimestamp( $minTimeStamp );
+            $minTime->setTime( 0, 0 );
+            $maxTime = new DateTime( 'now', OpenPACalendarData::timezone() );
+            $maxTime->setTimestamp( $maxTimeStamp );
+            $maxTime->setTime( 23, 59 );
 
             $timeTable = self::getTimeTableFromNode( $node, $timetableAttributeIdentifier );
             foreach( $byDayPeriod as $date )
-            {
-                $weekDay = $date->format( 'w' );
-                if ( isset( $timeTable[$weekDay] ) )
+            {                
+                if ( $date >= $minTime && $date <= $maxTime )
                 {
-                    foreach( $timeTable[$weekDay] as $value )
+                    $weekDay = $date->format( 'w' );
+                    if ( isset( $timeTable[$weekDay] ) )
                     {
-                        $newEvent = $base;
-                        $date->setTime( $value['from_time']['hour'], $value['from_time']['minute'] );
-                        $newEvent['fields']['attr_from_time_dt'] = $date->format( 'Y-m-d\TH:i:s\Z' );
-                        $date->setTime( $value['to_time']['hour'], $value['to_time']['minute'] );
-                        $newEvent['fields']['attr_to_time_dt'] = $date->format( 'Y-m-d\TH:i:s\Z' );
-                        $item = OpenPACalendarItem::fromEzfindResultArray( $newEvent );
-                        $events[] = $item;
+                        foreach( $timeTable[$weekDay] as $value )
+                        {
+                            $newEvent = $base;
+                            $date->setTime( $value['from_time']['hour'], $value['from_time']['minute'] );
+                            $newEvent['fields']['attr_from_time_dt'] = $date->format( 'Y-m-d\TH:i:s\Z' );
+                            $date->setTime( $value['to_time']['hour'], $value['to_time']['minute'] );
+                            $newEvent['fields']['attr_to_time_dt'] = $date->format( 'Y-m-d\TH:i:s\Z' );
+                            $item = OpenPACalendarItem::fromEzfindResultArray( $newEvent );
+                            $events[] = $item;
+                        }
                     }
                 }
             }
