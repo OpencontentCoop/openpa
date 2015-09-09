@@ -17,6 +17,7 @@ class BlockHandlerLista extends OpenPABlockHandler
         $this->data['root_node'] = false;
         $this->data['fetch_parameters'] = $this->getFetchParameters();
         //eZDebug::writeDebug( $this->currentCustomAttributes );
+        //eZDebug::writeDebug( $this->fetchParameters );
         $content = $this->getContent();
         $this->data['has_content'] = $content['SearchCount'] > 0;
         $this->data['content'] = $content['SearchResult'];
@@ -256,12 +257,15 @@ class BlockHandlerLista extends OpenPABlockHandler
                 switch( $value )
                 {
                     case 'priority':
+                    case 'priorita':
                         $this->fetchParameters['sort_array'] = array( 'priority', true );
                         break;
                     case 'published':
+                    case 'pubblicato':
                         $this->fetchParameters['sort_array'] = array( 'published', false );
                         break;
                     case 'modified':
+                    case 'modificato':
                         $this->fetchParameters['sort_array'] = array( 'modified', false );
                         break;
                     case 'nome':
