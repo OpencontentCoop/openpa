@@ -92,13 +92,13 @@ class OpenPAApiNode implements ArrayAccess
         $searchEngine = new eZSolr();
         $searchParams = array( 'SearchContentClassID' => $this->metadata['classIdentifier'],
                                'SearchLimit' => 1,
-                               'Filter' => array( 'or', 'meta_name_t:' . $this->metadata['objectName'] ),
+                               'Filter' => array( 'or', 'meta_name_t:"' . $this->metadata['objectName'] . '"'),
                                'SearchSubTreeArray' => array( $parentNodeID ) );
 
         $search = $searchEngine->search( '', $searchParams);
         if ( $search['SearchCount'] > 0 )
         {
-            throw new Exception( "Sembra che esista già un oggetto con nome \"{$this->metadata['objectName']}\" in {$parentNodeID}" );              
+            throw new Exception( "Sembra che esista già un oggetto con nome \"{$this->metadata['objectName']}\" e remote {$this->metadata['objectRemoteId']} in {$parentNodeID} ({$search['SearchResult'][0]->attribute('contentobject_id')})" );
         }        
         
         $params                     = array();        

@@ -73,19 +73,27 @@ try
             $item = new OpenPAApiChildNode( $item );            
             try
             {
-                OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $item );
+                $objectForItem = OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $item );
                 foreach( $item->getChildren() as $child )
                 {
                     if ( $child->classIdentifier == 'pagina_trasparenza' )
                     {
                         OpenPALog::notice( '  |-- ', false );
-                        OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child );
+                        $objectForChild = OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child );
+                        if ( !$objectForChild )
+                        {
+                            $child->getApiNode()->createContentObject( $objectForItem->attribute( 'main_node_id' ) );
+                        }                        
                         foreach( $child->getChildren() as $child2 )
                         {
                             if ( $child2->classIdentifier == 'pagina_trasparenza' )
                             {
-                                OpenPALog::notice( '  |-- ', false );
-                                OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child2 );    
+                                OpenPALog::notice( '    |-- ', false );
+                                $objectForChild2 = OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child2 );
+                                if ( !$objectForChild2 )
+                                {
+                                    $child2->getApiNode()->createContentObject( $objectForChild->attribute( 'main_node_id' ) );
+                                }
                             }
                         }
                     }

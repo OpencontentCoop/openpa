@@ -8,7 +8,7 @@ class OpenPAObjectTools
         {
             throw new Exception( "La classe {$data->classIdentifier} non esiste in questa istanza" );
         }
-        self::syncObjectFormRemoteApiNode( $data->getApiNode() );
+        return self::syncObjectFormRemoteApiNode( $data->getApiNode() );
            
     }
     
@@ -22,7 +22,11 @@ class OpenPAObjectTools
         
         try
         {            
-            $handler = OpenPAObjectHandler::instanceFromContentObject( $object );
+            if ( !$object instanceof eZContentObject )
+            {
+                throw new Exception( "Oggetto {$data->metadata['objectName']} non trovato" );
+            }
+            $handler = OpenPAObjectHandler::instanceFromContentObject( $object );            
             OpenPALog::notice( ' (' . $object->attribute( 'id' ) . ') ', false );
             if ( $data->updateContentObject( $object ) )
             {                    
@@ -35,11 +39,13 @@ class OpenPAObjectTools
                 }
                 $handler->flush();
                 OpenPALog::notice( ' ...sincronizzato' );
-            }            
+            }
+            return $object;
         }
         catch( Exception $e )
         {
-            OpenPALog::error( ' ...non trovato!' );            
+            OpenPALog::error( ' ...non trovato!' );
+            return false;
         }     
     }
     
