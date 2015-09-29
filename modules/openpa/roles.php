@@ -15,31 +15,34 @@ if ( !$ruoloClass instanceof eZContentClass )
 // Automazione delle policies: l'utente anonimo può leggere gli oggetti di tipo ruolo?
 $anonymousRole = eZRole::fetchByName( 'Anonymous' );
 $anonymousHasAccess = false;
-foreach( $anonymousRole->attribute( 'policies' ) as $policy )
+if ( $anonymousRole instanceof eZRole )
 {
-    if ( $policy->attribute( 'module_name' ) == 'content' && $policy->attribute( 'function_name' ) == 'read' )
+    foreach( $anonymousRole->attribute( 'policies' ) as $policy )
     {
-        foreach( $policy->attribute( 'limitations' ) as $limitation )
+        if ( $policy->attribute( 'module_name' ) == 'content' && $policy->attribute( 'function_name' ) == 'read' )
         {
-            if ( $limitation->attribute( 'identifier' ) == 'Class' )
+            foreach( $policy->attribute( 'limitations' ) as $limitation )
             {
-                foreach ( $limitation->attribute( 'values_as_array' ) as $id )
+                if ( $limitation->attribute( 'identifier' ) == 'Class' )
                 {
-                    if ( $id == $ruoloClass->attribute( 'id' ) )
+                    foreach ( $limitation->attribute( 'values_as_array' ) as $id )
                     {
-                        $anonymousHasAccess = true;
-                        break;
+                        if ( $id == $ruoloClass->attribute( 'id' ) )
+                        {
+                            $anonymousHasAccess = true;
+                            break;
+                        }
                     }
                 }
             }
         }
     }
-}
-if ( !$anonymousHasAccess )
-{
-    // assognazione della policy
-    $anonymousRole->appendPolicy( 'content', 'read', array( 'Class' => array( $ruoloClass->attribute( 'id' ) ) ) );
-    $anonymousRole->store();
+    if ( !$anonymousHasAccess )
+    {
+        // assognazione della policy
+        $anonymousRole->appendPolicy( 'content', 'read', array( 'Class' => array( $ruoloClass->attribute( 'id' ) ) ) );
+        $anonymousRole->store();
+    }
 }
 
 if ( $http->hasPostVariable( 'AggiungiRuolo' ) )

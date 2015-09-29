@@ -164,7 +164,8 @@ class OpenPaFunctionCollection
             else
             {
                 $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ),
-                                                       eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ) );
+                                                       eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'MediaRootNode' ),
+                                                       eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'UserRootNode' ) );
             }
             $params['SearchContentClassID'] = array( 'ruolo' );                
             if ( $struttura )
