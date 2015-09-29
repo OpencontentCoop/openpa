@@ -36,6 +36,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
             $list = $node->subTree( array(
                 'ClassFilterType' => 'include',
                 'ClassFilterArray' => array( 'file_pdf' ),
+                'SortBy' => $node->attribute( 'sort_array' ),
                 'Depth' => 1,
                 'DepthOperator' => 'eq' ) );
         }
