@@ -15,7 +15,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
                 'level_2' => OpenPAINI::variable( 'TopMenu', 'LimiteTerzoLivello', 10 )
             ),
             'user_hash' => null,
-            'max_recursion' => 1,
+            'max_recursion' =>  OpenPAINI::variable( 'TopMenu', 'MaxRecursion', 1 ),
             'custom_max_recursion' => $this->getTopMenuCustomRecursions(),
             'custom_fetch_parameters' => $this->getTopMenuCustomFetchParameters()
         ));
