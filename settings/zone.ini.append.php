@@ -14,6 +14,8 @@ AllowedTypes[]=3ZonesLayout3
 AllowedTypes[]=4ZonesLayout2
 AllowedTypes[]=5ZonesLayout1
 AllowedTypes[]=5ZonesLayout2
+AllowedTypes[]=6ZonesLayout1
+AllowedTypes[]=7ZonesLayout1
 AllowedTypes[]=1ZonesLayoutFolder
 AllowedTypes[]=0ZonesLayoutFolder
 
@@ -227,6 +229,55 @@ ZoneThumbnail=nessuna.gif
 Template=emptyfolder.tpl
 AvailableForClasses[]=folder
 AvailableForClasses[]=pagina_sito
+
+[6ZonesLayout1]
+ZoneTypeName=6 zone (tipo 1)
+Zones[]=top
+Zones[]=central_left
+Zones[]=centra_middle
+Zones[]=left
+Zones[]=bottom
+Zones[]=bottom_left
+ZoneName[top]=Colonna sinistra in alto
+ZoneName[central_left]=Al centro a sinistra
+ZoneName[centra_middle]=Al centro a destra
+ZoneName[left]=Colonna destra
+ZoneName[bottom]=Colonna sinistra in basso
+ZoneName[bottom_left]=Zona inferiore
+ZoneThumbnail=6zoneslayout1.jpg
+Template=6zoneslayout1.tpl
+AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
+
+[7ZonesLayout1]
+ZoneTypeName=7 zone (tipo 1)
+Zones[]=top
+Zones[]=central_left
+Zones[]=centra_middle
+Zones[]=left
+Zones[]=bottom
+Zones[]=bottom_left
+Zones[]=bottom_right
+ZoneName[top]=Colonna sinistra in alto
+ZoneName[central_left]=Al centro a sinistra
+ZoneName[centra_middle]=Al centro a destra
+ZoneName[left]=Colonna destra
+ZoneName[bottom]=Colonna sinistra in basso
+ZoneName[bottom_left]=Zona inferiore sinistra
+ZoneName[bottom_right]=Zona inferiore destra
+ZoneThumbnail=7zoneslayout1.jpg
+Template=7zoneslayout1.tpl
+AvailableForClasses[]=frontpage
+AvailableForClasses[]=area_tematica
+AvailableForClasses[]=progetto
+AvailableForClasses[]=homepage
+AvailableForClasses[]=homepage_interna
+AvailableForClasses[]=subsite
+
 
 
 */ ?>
