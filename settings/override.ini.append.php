@@ -1,6 +1,16 @@
 <?php /* #?ini charset="utf-8"?
 
 #####################################################
+################### EZXMLTAGS #######################
+#####################################################
+
+[download_link]
+Source=content/datatype/view/ezxmltags/link.tpl
+MatchFile=datatype/ezxmltags/link_download.tpl
+Subdir=templates
+Match[classification]=download
+
+#####################################################
 ##################### FULL ##########################
 #####################################################
 
