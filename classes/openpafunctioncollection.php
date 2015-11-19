@@ -1140,6 +1140,11 @@ class OpenPaFunctionCollection
                         $geoFieldsNames[] = "subattr_{$geoAttribute->attribute( 'identifier' )}___coordinates____gpt";
                     }
                 }
+                
+                $geoFieldsFilters = array_unique( $geoFieldsFilters );
+                $geoFields = array_unique( $geoFields );
+                $geoFieldsNames = array_unique( $geoFieldsNames );
+                
                 if ( count( $geoFieldsFilters ) > 1 )
                 {
                     array_unshift( $geoFieldsFilters, 'or' );
