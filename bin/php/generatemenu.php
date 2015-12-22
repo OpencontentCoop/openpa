@@ -16,8 +16,11 @@ OpenPALog::setOutputLevel( $script->isQuiet() ? OpenPALog::ERROR : OpenPALog::AL
 
 try
 {
-    OpenPAMenuTool::generateAllMenus();
-    eZCache::clearByTag( 'template' );
+    if ( OpenPAINI::variable( 'CacheSettings', 'Menu' ) == 'enabled' )
+    {
+        OpenPAMenuTool::generateAllMenus();
+        eZCache::clearByTag( 'template' );
+    }
     
     $script->shutdown();
 }
