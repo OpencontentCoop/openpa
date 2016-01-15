@@ -240,12 +240,18 @@ class OpenPAMenuTool
                                 'scope' => 'top_menu'
                             );
                             self::getTreeMenu( $topMenuParams );
-                            $sideMenuParams = array(
-                                'root_node_id' => $menuService->attribute( 'side_menu' )->attribute( 'root_node' )->attribute( 'node_id' ),
-                                'scope' => 'side_menu',
-                                'user_hash' => $menuService->attribute( 'side_menu' )->attribute( 'user_hash' )
-                            );
-                            self::getTreeMenu( $sideMenuParams );
+                            $sideMenuRootNode = $menuService->attribute( 'side_menu' )->attribute( 'root_node' );
+                            if ( $sideMenuRootNode instanceof eZContentObjectTreeNode )
+                            {
+                                $sideMenuParams = array(
+                                    'root_node_id' => $sideMenuRootNode->attribute( 'node_id' ),
+                                    'scope' => 'side_menu',
+                                    'user_hash' => $menuService->attribute(
+                                        'side_menu'
+                                    )->attribute( 'user_hash' )
+                                );
+                                self::getTreeMenu( $sideMenuParams );
+                            }
                         }
                     }
                 }
