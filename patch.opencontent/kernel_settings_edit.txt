@@ -1,4 +1,0 @@
-//$ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true ); @patch @luca
-    $ini = new eZINI( $iniFile . '.append', $path, null, false, null, true, true );
-    
-per evitare sovrascrizoni varie    
