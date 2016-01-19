@@ -1,0 +1,12 @@
+Riga 1165
+
+        //@patch for old relation object start
+        if ( $deletionItem['contentobject_version'] == '' or $deletionItem['contentobject_id'] == '' )
+        {
+            $isDeletionAllowed = false;
+        }
+        //@patch end
+        
+        
+Nel caso in cui il datatype cerchi di elimare versioni non più presenti (a causa del verion history) postgres provoca un fatal error.
+La patch evita la query errata.
