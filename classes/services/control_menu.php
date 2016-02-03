@@ -51,6 +51,19 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         {
             $result = $this->container->attribute( 'content_facets' )->attribute( 'has_data' );
         }
+        $hiddenNodes = OpenPAINI::variable( 'ExtraMenu', 'NascondiNeiNodi', array() );
+        $hiddenClasses = OpenPAINI::variable( 'ExtraMenu', 'NascondiNelleClassi', array() );
+        if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )
+        {
+            if ( in_array( $this->container->getContentNode()->attribute( 'node_id' ), $hiddenNodes ) )
+            {
+                return false;
+            }
+            if ( in_array( $this->container->getContentNode()->attribute( 'class_identifier' ), $hiddenClasses ) )
+            {
+                return false;
+            }
+        }
         return $result;
     }
 
