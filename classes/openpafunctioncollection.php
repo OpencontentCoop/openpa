@@ -1127,7 +1127,7 @@ class OpenPaFunctionCollection
             
             if ( count( $geoAttributes ) )
             {
-                $typeNames = array( 'subattr_tipo_luogo___name____s', 'subattr_tipo_servizio_sul_territorio___name____s' );
+                $typeNames = array( 'subattr_tipo_luogo___name____s', 'subattr_tipo_servizio_sul_territorio___name____s', 'meta_class_identifier_ms' );
                 
                 // imposto i filtri di ricerca
                 $geoFields = $geoFieldsNames = $geoFieldsFilters = array();                
