@@ -1189,7 +1189,7 @@ class OpenPaFunctionCollection
                             if ( intval( $latitude ) != 0 && intval( $longitude ) != 0 )
                             {
                                 $href = isset( $item['main_url_alias'] ) ? $item['main_url_alias'] : $item['main_url_alias_ms'];
-                                $classIdentifier = isset( $item['meta_class_identifier'] ) ? $item['meta_class_identifier'] : $item['meta_class_identifier_ms'];
+                                $classIdentifier = isset( $item['class_identifier'] ) ? $item['class_identifier'] : $item['meta_class_identifier_ms'];
                                 eZURI::transformURI( $href, false, 'full' );
                                 
                                 $popup = isset( $item['name'] ) ? $item['name'] : $item['name_t'];
