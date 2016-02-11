@@ -1127,7 +1127,7 @@ class OpenPaFunctionCollection
             
             if ( count( $geoAttributes ) )
             {
-                $typeNames = array( 'subattr_tipo_luogo___name____s', 'subattr_tipo_servizio_sul_territorio___name____s' );
+                $typeNames = array( 'subattr_tipo_luogo___name____s', 'subattr_tipo_servizio_sul_territorio___name____s', 'meta_class_identifier_ms' );
                 
                 // imposto i filtri di ricerca
                 $geoFields = $geoFieldsNames = $geoFieldsFilters = array();                
@@ -1189,6 +1189,7 @@ class OpenPaFunctionCollection
                             if ( intval( $latitude ) != 0 && intval( $longitude ) != 0 )
                             {
                                 $href = isset( $item['main_url_alias'] ) ? $item['main_url_alias'] : $item['main_url_alias_ms'];
+                                $classIdentifier = isset( $item['class_identifier'] ) ? $item['class_identifier'] : $item['meta_class_identifier_ms'];
                                 eZURI::transformURI( $href, false, 'full' );
                                 
                                 $popup = isset( $item['name'] ) ? $item['name'] : $item['name_t'];
@@ -1197,6 +1198,7 @@ class OpenPaFunctionCollection
                                 $result[] = array(
                                     'id' => $id,
                                     'type' => $type,
+                                    'class' => $classIdentifier,
                                     'lat' => floatval( $latitude ),
                                     'lon' => floatval( $longitude ),
                                     'lng' => floatval( $longitude ),
