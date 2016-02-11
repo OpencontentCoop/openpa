@@ -13,12 +13,14 @@ class DataHandlerPartecipazioni implements OpenPADataHandlerInterface
 
     public function getData()
     {
-        $data = array();
         $enti = array();
         $series = array();
-        //http://openpa.opencontent.it/Amministrazione-Trasparente/Enti-controllati/Societa-partecipate
-        $treeNode = 'http://openpa.opencontent.it/api/opendata/v1/content/node/912'; 
-        $parentObject = OpenPAApiNode::fromLink( $treeNode )->searchLocal();
+        $data = array(
+            'enti' => $enti,
+            'series' => $series,
+        );
+        $remoteId = eZHTTPTool::instance()->getVariable( 'remote' );
+        $parentObject = eZContentObject::fetchByRemoteID( $remoteId );
         
         if ( $parentObject instanceof eZContentObject )
         {

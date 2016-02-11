@@ -1,0 +1,37 @@
+--- ezfezpsolrquerybuilder.php.original -> /extension/ezfind/classes/ezfezpsolrquerybuilder.php
++++ ezfezpsolrquerybuilder.php.patch -> /extension/openpa_base/classes/ezfezpsolrquerybuilder.php
+@@ -980,13 +980,32 @@
+ 
+                     // Get internal field name. Returns a class ID filter if applicable. Add it as an implicit filter if needed.
+                     $baseNameInfo = eZSolr::getFieldName( $baseName, true, 'filter' );
++
+                     if ( is_array( $baseNameInfo ) and isset( $baseNameInfo['contentClassId'] ) )
+                     {
+-                        $filterQueryList[] = '( ' . eZSolr::getMetaFieldName( 'contentclass_id' ) . ':' . $baseNameInfo['contentClassId'] . ' AND ' . $baseNameInfo['fieldName'] . ':' . $this->escapeQuery( $value ) . ' )' ;
++                        //@luca patch per filtrare su data
++                        if ( strpos( $baseNameInfo['fieldName'], 'dt' ) !== false )
++                        {
++                           $filterQueryList[] = '( ' . eZSolr::getMetaFieldName( 'contentclass_id' ) . ':' . $baseNameInfo['contentClassId'] . ' AND ' . $baseNameInfo['fieldName'] . ':' . $value . ' )' ;                   
++                        }
++                        else
++                        {
++                           $filterQueryList[] = '( ' . eZSolr::getMetaFieldName( 'contentclass_id' ) . ':' . $baseNameInfo['contentClassId'] . ' AND ' . $baseNameInfo['fieldName'] . ':' . $this->escapeQuery( $value ) . ' )' ;
++                        }
++                        //@luca fine patch per filtrare su data
+                     }
+                     else
+                     {
+-                        $filterQueryList[] = $baseNameInfo . ':' . $this->escapeQuery( $value );
++                        //@luca patch per filtrare su data
++                        if ( strpos( $baseNameInfo, 'dt' ) !== false )
++                        {
++                            $filterQueryList[] = $baseNameInfo . ':' . $value;
++                        }
++                        else
++                        {
++                            $filterQueryList[] = $baseNameInfo . ':' . $this->escapeQuery( $value );                            
++                        }
++                        //@luca fine patch per filtrare su data
+                     }
+                 }
+             }
