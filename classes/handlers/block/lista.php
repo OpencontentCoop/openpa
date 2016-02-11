@@ -76,6 +76,8 @@ class BlockHandlerLista extends OpenPABlockHandler
                     }
                     if ( count( $classFilter ) > 1 )
                     {
+                        if ( count( $classFilter ) == 2 )
+                            $classFilter = $classFilter[1];
                         $defaultFilter[] = $classFilter;
                     }
                 }
@@ -93,28 +95,38 @@ class BlockHandlerLista extends OpenPABlockHandler
                     $defaultFilter[] = "meta_depth_si:[{$this->fetchParameters['start_depth']} TO {$this->fetchParameters['depth']}]";
                 }
                 
+                $virtualFilter = array();
                 if ( isset( $this->fetchParameters['virtual_subtree_array'] )
                      || isset( $this->fetchParameters['virtual_classes'] ) )
-                {
-                    $virtualFilter = array();
+                {                    
                     if ( isset( $this->fetchParameters['virtual_subtree_array']  ) )
                     {
+                        $pathFilter = array( 'or' );
                         foreach( $this->fetchParameters['virtual_subtree_array'] as $subtree )
                         {
-                            $virtualFilter[] = "meta_path_si:" . intval( $subtree );
+                            $pathFilter[] = "meta_path_si:" . intval( $subtree );
                         }
+                        
+                        if ( count( $pathFilter ) == 2 )
+                            $pathFilter = $pathFilter[1];
+                        
+                        $virtualFilter[] = $pathFilter;
                     }
                     foreach( $this->fetchParameters['virtual_classes'] as $class )
                     {
                         $virtualFilter[] =  "meta_class_identifier_ms:" . $class;
                     }
-                    
-                    $filter = $defaultFilter;
-                    if ( !empty( $virtualFilter ) )
-                    {
-                        $filter[] = array( 'or', $defaultFilter, $virtualFilter );
-                    }
                 }
+                
+                if ( !empty( $virtualFilter ) )
+                {
+                    $filter[] = array( 'or', $defaultFilter, $virtualFilter );
+                }
+                else
+                {
+                    $filter = $defaultFilter;
+                }
+                
                 if ( isset( $this->fetchParameters['state_id'] ) )
                 {
                     $stateFilter = count( $this->fetchParameters['state_id'] ) > 1 ? array( 'or' ) : array();
