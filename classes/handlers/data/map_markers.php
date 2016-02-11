@@ -38,6 +38,7 @@ class DataHandlerMapMarkers implements OpenPADataHandlerInterface
                 foreach( $result as $item )
                 {
                     $properties = array(
+                        'class' => isset( $item['class'] ) ? $item['class'] : '',
                         'type' => isset( $item['type'] ) ? $item['type'] : '',
                         'name' => $item['title'],
                         'url' => $item['urlAlias'],
