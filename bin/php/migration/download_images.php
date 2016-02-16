@@ -25,18 +25,35 @@ try
     foreach( $attributeIds as $attributeId )
     {
         $id = $attributeId['contentobject_attribute_id'];
-        $originals = $db->arrayQuery( "SELECT ezimagefile.filepath FROM ezimagefile WHERE ezimagefile.contentobject_attribute_id = '{$id}' ORDER BY ezimagefile.id;" );
-        if ( !empty( $originals ) )
+        $attributes = eZPersistentObject::fetchObjectList( eZContentObjectAttribute::definition(),
+                                                null,
+                                                array( "id" => $id ),
+                                                array( 'version' => 'desc' ),
+                                                array( 'offset' => 0, 'length' => 1 ) );
+        if ( isset( $attributes[0] ) && $attributes[0] instanceof eZContentObjectAttribute )
         {
-            $temp = array();
-            foreach( $originals as $original )
+            if ( $attributes[0]->content() instanceof eZImageAliasHandler )
             {
-                $temp[] = $original['filepath'];
+                $data = $attributes[0]->content()->attribute( 'original' );
+                if ( isset( $data['full_path'] ) )
+                {
+                    $images[] = $data['full_path'];
+                }
             }
-            sort( $temp );
-            $images[] = $temp[0];
         }
-    }
+        //$originals = $db->arrayQuery( "SELECT * FROM ezimagefile WHERE ezimagefile.contentobject_attribute_id = '{$id}' ORDER BY ezimagefile.filepath DESC;" );
+        //if ( !empty( $originals ) )
+        //{
+        //    $temp = array();
+        //    foreach( $originals as $original )
+        //    {
+        //        $temp[] = $original['filepath'];
+        //    }
+        //    sort( $temp );            
+        //    $images[] = $temp[0];
+        //}        
+    }    
+    sort( $images );
 
     $count = count( $images );
     $cli->warning( "Found $count images" );
@@ -50,6 +67,10 @@ try
             $url = rtrim( $options['url'] ) . '/';
             $data = eZHTTPTool::getDataByURL( $url . $image );
             eZFile::create( $name, $dir, $data );
+        }
+        else
+        {
+            $cli->notice( "$image" );
         }
     }
 
