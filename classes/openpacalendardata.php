@@ -14,10 +14,7 @@ class OpenPACalendarData
     const VIEW_PROGRAM = 'program';
     
     static $CUSTOM_PARAMETERS_KEYS = array( 'custom_interval', 'custom_filter' );
-    static $CUSTOM_FILTERS = array(
-        'MANIFESTAZIONE' => 'subattr_tipo_evento___name____s:"Manifestazione"',
-        'SPECIAL' => 'attr_special_b:true'
-    );
+    static $CUSTOM_FILTERS = array();
     const CUSTOM_TAG_TODAY = 'TODAY';
     const CUSTOM_TAG_TOMORROW = 'TOMORROW';
     
@@ -36,6 +33,11 @@ class OpenPACalendarData
     function __construct( eZContentObjectTreeNode $calendar )
     {
         $this->calendar = $calendar;
+
+        self::$CUSTOM_FILTERS = array(
+            'MANIFESTAZIONE' => OpenPASolr::generateSolrSubField('tipo_evento', 'name', 'string') . ':"Manifestazione"',
+            'SPECIAL' => OpenPASolr::generateSolrField('special', 'boolean') . ':true'
+        );
     }
     
     public function setParameter( $key, $value )
@@ -240,12 +242,12 @@ class OpenPACalendarData
         // filter        
         $this->filters[] = array(
             'or',
-            'attr_from_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
-            'attr_to_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
+            OpenPASolr::generateSolrField('from_time','date') . ':[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
+            OpenPASolr::generateSolrField('to_time','date') . ':[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
             array(
                 'and',
-                'attr_from_time_dt:[* TO ' . $this->parameters['search_from_solr'] . ']',
-                'attr_to_time_dt:[' . $this->parameters['search_to_solr'] . ' TO *]'
+                OpenPASolr::generateSolrField('from_time','date').':[* TO ' . $this->parameters['search_from_solr'] . ']',
+                OpenPASolr::generateSolrField('to_time','date').':[' . $this->parameters['search_to_solr'] . ' TO *]'
             )
         );
         
@@ -261,24 +263,24 @@ class OpenPACalendarData
                     foreach( $this->parameters[$fieldName] as $value )
                     {
                         $filterValue = addcslashes( $value, '"' );
-                        $orFilter[] = "subattr_{$fieldIdentifier}___name____s:\"{$filterValue}\"";
+                        $orFilter[] = OpenPASolr::generateSolrSubField($fieldIdentifier, 'name', 'string').":\"{$filterValue}\"";
                     }
                     $this->filters[] = $orFilter;
                 }
                 else
                 {
                     $filterValue = addcslashes( $this->parameters[$fieldName], '"' );
-                    $this->filters[] = "subattr_{$fieldIdentifier}___name____s:\"{$filterValue}\"";
+                    $this->filters[] = OpenPASolr::generateSolrSubField($fieldIdentifier, 'name', 'string').":\"{$filterValue}\"";
                 }
             }
             
-            $facets[] = array( 'field' => "subattr_{$fieldIdentifier}___name____s",
+            $facets[] = array( 'field' => OpenPASolr::generateSolrSubField($fieldIdentifier, 'name', 'string'),
                                'name'  => $fieldName,
                                'limit' => 100,
                                'sort' => 'alpha' );
         }
         
-        $this->filters[] = '-subattr_tipo_eventi_manifestazioni___name____s:"Manifestazione"';
+        $this->filters[] = '-' . OpenPASolr::generateSolrSubField('tipo_eventi_manifestazioni', 'name', 'string').':"Manifestazione"';
         
         if ( is_array( $this->parameters['filter'] ) )
         {
@@ -291,9 +293,9 @@ class OpenPACalendarData
         }
         else
         {
-            $sortBy = array(            
-                'attr_priority_si' => 'desc',
-                'attr_special_b' => 'desc'
+            $sortBy = array(
+                eZSolr::getMetaFieldName('priority') => 'desc',
+                OpenPASolr::generateSolrField('special', 'boolean') => 'desc'
             );
             
             if ( class_exists( 'ezfIndexEventDuration' ) && OpenPAINI::variable( 'CalendarSettings', 'SortByEventDuration', 'disabled' ) == 'enabled' )
@@ -302,10 +304,10 @@ class OpenPACalendarData
                 //$sortBy['extra_event_duration_s'] = 'asc';    // bug di ezfIndexEventDuration: _s ordina per stringa!
             }
             
-            $sortBy['attr_from_time_dt'] = 'asc';
+            $sortBy[OpenPASolr::generateSolrField('from_time','date')] = 'asc';
         }
                 
-        $this->parameters['fields_to_return'] = array_unique( array_merge( $this->parameters['fields_to_return'], array( 'attr_from_time_dt', 'attr_to_time_dt', 'meta_node_id_si', 'meta_url_alias_ms', 'meta_main_url_alias_ms' ) ) );
+        $this->parameters['fields_to_return'] = array_unique( array_merge( $this->parameters['fields_to_return'], array( OpenPASolr::generateSolrField('from_time','date'), OpenPASolr::generateSolrField('to_time','date'), eZSolr::getMetaFieldName('node_id'), eZSolr::getMetaFieldName('url_alias'), eZSolr::getMetaFieldName('main_url_alias') ) ) );
         
         $solrFetchParams = array(
             'SearchOffset' => 0,
@@ -455,12 +457,12 @@ class OpenPACalendarData
 
         $filters = array(
             'or',
-            'attr_timetable_from_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
-            'attr_timetable_to_time_dt:[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
+            OpenPASolr::generateSolrField('timetable_from_time','date').':[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
+            OpenPASolr::generateSolrField('timetable_to_time','date').':[' . $this->parameters['search_from_solr'] . ' TO ' . $this->parameters['search_to_solr'] . ']',
             array(
                 'and',
-                'attr_timetable_from_time_dt:[* TO ' . $this->parameters['search_from_solr'] . ']',
-                'attr_timetable_to_time_dt:[' . $this->parameters['search_to_solr'] . ' TO *]'
+                OpenPASolr::generateSolrField('timetable_from_time','date').':[* TO ' . $this->parameters['search_from_solr'] . ']',
+                OpenPASolr::generateSolrField('timetable_to_time','date').':[' . $this->parameters['search_to_solr'] . ' TO *]'
             )
         );
 
@@ -499,7 +501,7 @@ class OpenPACalendarData
                 $filter = array( 'or' );
                 foreach( $values as $value )
                 {
-                    $filter[] = "attr_titolo_s:\"{$value}\"";
+                    $filter[] = OpenPASolr::generateSolrField('titolo','string').":\"{$value}\"";
                 }
                 $solrFetchParams = array(
                     'SearchOffset' => 0,
@@ -591,8 +593,8 @@ class OpenPACalendarData
             'offset' => 0,            
             'filter' => false,
             'fields_to_return' => array(
-                'attr_from_time_dt',
-                'attr_to_time_dt',                
+                OpenPASolr::generateSolrField('from_time','date'),
+                OpenPASolr::generateSolrField('to_time','date')
             )
         );
         $related = array_fill_keys( self::relatedParameters(), false );
