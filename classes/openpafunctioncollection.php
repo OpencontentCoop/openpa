@@ -153,6 +153,7 @@ class OpenPaFunctionCollection
     public static function fetchRuoli( $struttura, $dipendente, $subtree, $roleNameType, $roleNamesArray )
     {
         $result = array();
+        $dipendentiIdPriority = array();
         if ( empty( $subtree) )
         {
             $params = self::$params;        
@@ -169,9 +170,9 @@ class OpenPaFunctionCollection
             }
             $params['SearchContentClassID'] = array( 'ruolo' );                
             if ( $struttura )
-                $params['Filter'][] = array( 'submeta_struttura_di_riferimento___id_si:' . $struttura );
+                $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('struttura_di_riferimento', 'id') . ':' . $struttura );
             elseif( $dipendente )
-                $params['Filter'][] = array( 'submeta_utente___id_si:' . $dipendente );
+                $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('utente', 'id') . ':' . $dipendente );
                     
             $search = self::search( $params );
             $result = $search['SearchResult'];
@@ -196,6 +197,7 @@ class OpenPaFunctionCollection
             $search = OpenPaFunctionCollection::search( $params );
             if ( $search['SearchCount'] > 0 )
             {                
+                /** @var array|eZFindResultNode $item */
                 foreach( $search['SearchResult'] as $item )
                 {                                        
                     if ( count( $subtree ) > 1 )
@@ -226,10 +228,10 @@ class OpenPaFunctionCollection
             $params['SearchContentClassID'] = array( 'ruolo' );    
             
             foreach( $subtree as $nodeId )
-                $params['Filter'][] = array( 'submeta_utente___path_si:' . $nodeId );
+                $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('utente', 'path') . ':' . $nodeId );
             
             if ( $struttura )
-                $params['Filter'][] = array( 'submeta_struttura_di_riferimento___id_si:' . $struttura );
+                $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('struttura_di_riferimento', 'id') . ':' . $struttura );
             
             $params['AsObjects'] = true;
             $search = OpenPaFunctionCollection::search( $params );
@@ -239,7 +241,8 @@ class OpenPaFunctionCollection
                 foreach( $search['SearchResult'] as $item )
                 {
                     $users = array();
-                    $dataMap = $item->attribute( 'data_map' );                
+                    /** @var eZContentObjectAttribute[] $dataMap */
+                    $dataMap = $item->attribute( 'data_map' );
                     if ( isset( $dataMap['utente'] ) && $dataMap['utente'] instanceof eZContentObjectAttribute )
                     {
                         $users = explode( '-', $dataMap['utente']->toString() );
@@ -288,6 +291,10 @@ class OpenPaFunctionCollection
                     $filterData = array();
                     if ( $roleNameType == 'include' )
                     {
+                        /**
+                         * @var string $name
+                         * @var eZContentObject[] $objects
+                         */
                         foreach( $data as $name => $objects )
                         {
                             if ( in_array( $name, $roleNamesArray ) )
@@ -301,6 +308,10 @@ class OpenPaFunctionCollection
                     }
                     elseif ( $roleNameType == 'exclude' )
                     {
+                        /**
+                         * @var string $name
+                         * @var eZContentObject[] $objects
+                         */
                         foreach( $data as $name => $objects )
                         {
                             if ( !in_array( $name, $roleNamesArray ) )
@@ -313,8 +324,10 @@ class OpenPaFunctionCollection
                         }
                     }                   
                     
-                    $data = $filterData;                    
+                    $data = $filterData;
                     uasort( $data, function( $a, $b ) use ( $dipendentiIdPriority ) {
+                        /** @var eZContentObject $a */
+                        /** @var eZContentObject $b */
                         $aPriority = isset( $dipendentiIdPriority[$a->attribute( 'id' )] ) ? $dipendentiIdPriority[$a->attribute( 'id' )] : 0;
                         $bPriority = isset( $dipendentiIdPriority[$b->attribute( 'id' )] ) ? $dipendentiIdPriority[$b->attribute( 'id' )] : 0;
                         if ( $aPriority == $bPriority ) {
@@ -353,7 +366,7 @@ class OpenPaFunctionCollection
             $filterNomi = array( 'or' );
             foreach( $nomi['result'] as $nome )
             {                
-                $filterNomi[] = array( 'attr_titolo_s:"' . $nome . '"');
+                $filterNomi[] = array( OpenPASolr::generateSolrField( 'titolo', 'string' ) . ':"' . $nome . '"');
             }
             $params['Filter'][] = $filterNomi;
             $params['AsObjects'] = false;
@@ -361,9 +374,10 @@ class OpenPaFunctionCollection
             $nodes = array();            
             foreach( $search['SearchResult'] as $item )
             {
-                if ( isset( $item['fields']['submeta_utente___main_node_id_si'][0] ) )
+                $submetaUtenteMainNodeField = OpenPASolr::generateSolrSubMetaField('utente', 'main_node_id');
+                if ( isset( $item['fields'][$submetaUtenteMainNodeField][0] ) )
                 {
-                    $nodes[] = $item['fields']['submeta_utente___main_node_id_si'][0];
+                    $nodes[] = $item['fields'][$submetaUtenteMainNodeField][0];
                 }
             }            
             $result = eZContentObjectTreeNode::fetch( $nodes );
@@ -429,12 +443,12 @@ class OpenPaFunctionCollection
         {
             if ( $struttura->attribute( 'class_identifier' ) == 'struttura' )
             {
-                $params['Filter'][] = array( "submeta_struttura___id_si:" . $struttura->attribute( 'contentobject_id' ) );
-                $params['Filter'][] = array( "submeta_altra_struttura___id_si:" . $struttura->attribute( 'contentobject_id' ) );
+                $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('struttura', 'id') . ":" . $struttura->attribute( 'contentobject_id' ) );
+                $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('altra_struttura', 'id') . ":" . $struttura->attribute( 'contentobject_id' ) );
             }
             else
             {
-                $params['Filter'][] = array( "submeta_" . $struttura->attribute( 'class_identifier' ) . "___id_si:" . $struttura->attribute( 'contentobject_id' ) );
+                $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField($struttura->attribute( 'class_identifier' ), 'id') . ":" . $struttura->attribute( 'contentobject_id' ) );
             }
         }
         $search = self::search( $params );        
@@ -459,6 +473,7 @@ class OpenPaFunctionCollection
         if ( $homePage instanceof eZContentObjectTreeNode
              && $homePage->attribute( 'class_identifier' ) == 'homepage' )
         {
+            /** @var eZContentObjectAttribute[] $dataMap */
             $dataMap = $homePage->attribute( 'data_map' );
             if ( isset( $dataMap['note_footer'] ) && $dataMap['note_footer'] instanceof eZContentObjectAttribute && $dataMap['note_footer']->attribute( 'has_content' ) )
             {
@@ -475,8 +490,12 @@ class OpenPaFunctionCollection
         if ( $homePage instanceof eZContentObjectTreeNode
              && $homePage->attribute( 'class_identifier' ) == 'homepage' )
         {
+            /** @var eZContentObjectAttribute[] $dataMap */
             $dataMap = $homePage->attribute( 'data_map' );
-            if ( isset( $dataMap['link_nel_footer'] ) && $dataMap['link_nel_footer'] instanceof eZContentObjectAttribute && $dataMap['link_nel_footer']->attribute( 'has_content' ) )
+            if ( isset( $dataMap['link_nel_footer'] )
+                 && $dataMap['link_nel_footer'] instanceof eZContentObjectAttribute
+                 && $dataMap['link_nel_footer']->attribute( 'has_content' )
+                 && $dataMap['link_nel_footer']->attribute( 'data_type_string' ) == 'ezobjectrelationlist' )
             {
                 $content = $dataMap['link_nel_footer']->attribute( 'content' );                
                 foreach( $content['relation_list'] as $item )
@@ -516,8 +535,11 @@ class OpenPaFunctionCollection
             $headerObject = $homePage->attribute( 'object' );
             if ( $headerObject instanceof eZContentObject )
             {
+                /** @var eZContentObjectAttribute[] $dataMap */
                 $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['logo'] ) && $dataMap['logo'] instanceof eZContentObjectAttribute && $dataMap['logo']->attribute( 'has_content' ) )
+                if ( isset( $dataMap['logo'] )
+                     && $dataMap['logo'] instanceof eZContentObjectAttribute
+                     && $dataMap['logo']->attribute( 'has_content' ) )
                 {
                     $result = self::getLogoCssStyle( $dataMap['logo'], 'header_logo' );
                 }
@@ -528,8 +550,11 @@ class OpenPaFunctionCollection
             $headerObject = eZContentObject::fetchByRemoteID( self::$remoteLogo );
             if ( $headerObject instanceof eZContentObject )
             {
+                /** @var eZContentObjectAttribute[] $dataMap */
                 $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['image'] ) && $dataMap['image'] instanceof eZContentObjectAttribute && $dataMap['image']->attribute( 'has_content' ) )
+                if ( isset( $dataMap['image'] )
+                     && $dataMap['image'] instanceof eZContentObjectAttribute
+                     && $dataMap['image']->attribute( 'has_content' ) )
                 {
                     $result = self::getLogoCssStyle( $dataMap['image'], 'header_logo' );                    
                 }
@@ -543,6 +568,7 @@ class OpenPaFunctionCollection
         $resultData = array();
         if ( $object instanceof eZContentObject )
         {
+            /** @var eZContentObjectAttribute[] $ezobjectrelationlist */
             $ezobjectrelationlist = eZContentClassAttribute::fetchFilteredList( array( 'data_type_string' => 'ezobjectrelationlist') );
             $attributes = array();
             foreach( $ezobjectrelationlist as $attribute )
@@ -584,7 +610,7 @@ class OpenPaFunctionCollection
             {
                 foreach( $values as $value )
                 {
-                    $query = ezfSolrDocumentFieldBase::SUBMETA_FIELD_PREFIX . $value['attribute_identifier'] . ezfSolrDocumentFieldBase::SUBATTR_FIELD_SEPARATOR . "id" . ezfSolrDocumentFieldBase::SUBATTR_FIELD_SEPARATOR . "si:{$object->attribute( 'id' )} AND " . eZSolr::getMetaFieldName( 'contentclass_id' ) . ":{$value['class_id']}";
+                    $query = OpenPASolr::generateSolrSubMetaField($value['attribute_identifier'], 'id') .":{$object->attribute( 'id' )} AND " . eZSolr::getMetaFieldName( 'contentclass_id' ) . ":{$value['class_id']}";
                     $facetQuery[$query] = $query;
                     $facetQueryData[$query] = $value;
                     //$attributeFilter[] = "submeta_servizio___id_si:" . $object->attribute( 'id' );
@@ -659,7 +685,9 @@ class OpenPaFunctionCollection
             
                         case 'Group':
                         {
-                            foreach ( eZUser::currentUser()->attribute( 'contentobject' )->attribute( 'parent_nodes' ) as $groupID )
+                            /** @var eZContentObject $userObject */
+                            $userObject = eZUser::currentUser()->attribute( 'contentobject' );
+                            foreach ( $userObject->attribute( 'parent_nodes' ) as $groupID )
                             {
                                 $filterQueryPolicyLimitationParts[] = $limitationHash[$limitationType] . ':' . $groupID;
                             }
@@ -725,24 +753,21 @@ class OpenPaFunctionCollection
             
             if ( !$subTree )
             {
-                $fq[] = "meta_path_si:" . $contentINI->variable( 'NodeSettings', 'RootNode' );    
+                $fq[] = eZSolr::getMetaFieldName( 'path' ) . ":" . $contentINI->variable( 'NodeSettings', 'RootNode' );
             }
             else
             {
                 $subTreeFilter = array( 'or' );
                 foreach( $subTree as $subTreeNodeId )
                 {
-                    $subTreeFilter[] = "meta_path_si:" . $subTreeNodeId;
+                    $subTreeFilter[] = eZSolr::getMetaFieldName( 'path' ) . ":" . $subTreeNodeId;
                 }
                 $fq[] = $subTreeFilter;
             }
             
             $fq[] = '(' . eZSolr::getMetaFieldName( 'installation_id' ) . ':' . eZSolr::installationID() . ' AND ' . eZSolr::getMetaFieldName( 'is_invisible' ) . ':false)';
             //$fq[] = eZSolr::getMetaFieldName( 'language_code' ) . ':' . $currentLanguage;
-            
-            $result = array();        
-            $limit = 100;
-            
+
             $params = array( 'q' => '*:*',
                              'rows' => 0,
                              'json.nl' => 'arrarr',
@@ -765,7 +790,7 @@ class OpenPaFunctionCollection
                 // Autocomplete search should be done in current language and fallback languages
                 $validLanguages = array_unique(
                     array_merge(
-                        $siteINI->variable( 'RegionalSettings', 'SiteLanguageList' ),
+                        (array)$siteINI->variable( 'RegionalSettings', 'SiteLanguageList' ),
                         array( $currentLanguage )
                     )
                 );
@@ -817,7 +842,13 @@ class OpenPaFunctionCollection
         }
         return array( 'result' => $resultData );
     }
-    
+
+    /**
+     * @param OpenPATempletizable[] $a
+     * @param OpenPATempletizable[] $b
+     *
+     * @return int
+     */
     protected static function sortHashByValue( $a, $b )
     {
         $aValue = 0;
@@ -848,7 +879,9 @@ class OpenPaFunctionCollection
             $search = self::search( $params );        
             if ( $search['SearchCount'] > 0 )
             {
-                return $search['SearchResult'][0]->attribute( 'node_id' );
+                /** @var eZFindResultNode[] $searchResults */
+                $searchResults = $search['SearchResult'];
+                return $searchResults[0]->attribute( 'node_id' );
             }
         }
         return false;
@@ -864,10 +897,15 @@ class OpenPaFunctionCollection
             $headerObject = $homePage->attribute( 'object' );
             if ( $headerObject instanceof eZContentObject )
             {
+                /** @var eZContentObjectAttribute[] $dataMap */
                 $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['image'] ) && $dataMap['image'] instanceof eZContentObjectAttribute && $dataMap['image']->attribute( 'has_content' ) )
+                if ( isset( $dataMap['image'] )
+                     && $dataMap['image'] instanceof eZContentObjectAttribute
+                     && $dataMap['image']->attribute( 'has_content' ) )
                 {
-                    $result = $dataMap['image']->attribute( 'content' )->attribute( 'header_banner' );                
+                    /** @var eZImageAliasHandler $content */
+                    $content = $dataMap['image']->attribute( 'content' );
+                    $result = $content->attribute( 'header_banner' );
                 }
             }
         }
@@ -876,10 +914,15 @@ class OpenPaFunctionCollection
             $headerObject = eZContentObject::fetchByRemoteID( self::$remoteHeader );
             if ( $headerObject instanceof eZContentObject )
             {
+                /** @var eZContentObjectAttribute[] $dataMap */
                 $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['image'] ) && $dataMap['image'] instanceof eZContentObjectAttribute && $dataMap['image']->attribute( 'has_content' ) )
+                if ( isset( $dataMap['image'] )
+                     && $dataMap['image'] instanceof eZContentObjectAttribute
+                     && $dataMap['image']->attribute( 'has_content' ) )
                 {
-                    $result = $dataMap['image']->attribute( 'content' )->attribute( 'header_banner' );                    
+                    /** @var eZImageAliasHandler $content */
+                    $content = $dataMap['image']->attribute( 'content' );
+                    $result = $content->attribute( 'header_banner' );
                 }
             }
         }
@@ -895,10 +938,15 @@ class OpenPaFunctionCollection
             $headerObject = $homePage->attribute( 'object' );
             if ( $headerObject instanceof eZContentObject )
             {
+                /** @var eZContentObjectAttribute[] $dataMap */
                 $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['logo'] ) && $dataMap['logo'] instanceof eZContentObjectAttribute && $dataMap['logo']->attribute( 'has_content' ) )
+                if ( isset( $dataMap['logo'] )
+                     && $dataMap['logo'] instanceof eZContentObjectAttribute
+                     && $dataMap['logo']->attribute( 'has_content' ) )
                 {
-                    $result = $dataMap['logo']->attribute( 'content' )->attribute( 'header_logo' );
+                    /** @var eZImageAliasHandler $content */
+                    $content = $dataMap['logo']->attribute( 'content' );
+                    $result = $content->attribute( 'header_logo' );
                 }
             }
         }
@@ -907,10 +955,15 @@ class OpenPaFunctionCollection
             $headerObject = eZContentObject::fetchByRemoteID( self::$remoteLogo );
             if ( $headerObject instanceof eZContentObject )
             {
+                /** @var eZContentObjectAttribute[] $dataMap */
                 $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['image'] ) && $dataMap['image'] instanceof eZContentObjectAttribute && $dataMap['image']->attribute( 'has_content' ) )
+                if ( isset( $dataMap['image'] )
+                     && $dataMap['image'] instanceof eZContentObjectAttribute
+                     && $dataMap['image']->attribute( 'has_content' ) )
                 {
-                    $result = $dataMap['image']->attribute( 'content' )->attribute( 'header_logo' );
+                    /** @var eZImageAliasHandler $content */
+                    $content = $dataMap['image']->attribute( 'content' );
+                    $result = $content->attribute( 'header_logo' );
                 }
             }
         }
@@ -919,10 +972,12 @@ class OpenPaFunctionCollection
     
     protected static function getLogoCssStyle( eZContentObjectAttribute $attribute, $alias )
     {
-        $image = $attribute->attribute( 'content' )->attribute( $alias );
+        /** @var eZImageAliasHandler $content */
+        $content = $attribute->attribute( 'content' );
+        $image = $content->attribute( $alias );
         $width = $image['width']  . 'px';
         $height = $image['height'] . 'px';
-        $additionaStyle = 'padding:0;';
+        $additionalStyle = 'padding:0;';
         $headerImage = self::fetchHeaderImage();
         if ( is_array( $headerImage ) )
         {
@@ -933,12 +988,12 @@ class OpenPaFunctionCollection
             }
             else
             {
-                $additionaStyle .= "margin-top: " . ( $headerImage['height'] - $image['height'] ) / 2 . "px;";
+                $additionalStyle .= "margin-top: " . ( $headerImage['height'] - $image['height'] ) / 2 . "px;";
             }
             
             if ( $image['width'] >= $headerImage['width'] || $image['width'] == '1000' )
             {
-                $additionaStyle .= "margin-left:0;";
+                $additionalStyle .= "margin-left:0;";
             }
             
         }
@@ -946,14 +1001,14 @@ class OpenPaFunctionCollection
         {
             if( $image['height'] == '200' )
             {
-                $additionaStyle .= "margin-top:0;";
+                $additionalStyle .= "margin-top:0;";
             }
             if ( $image['width'] == '1000' )
             {
-                $additionaStyle .= "margin-left:0;";
+                $additionalStyle .= "margin-left:0;";
             }
         }
-        return "display: block;text-indent: -9999px;background:url(/{$image['full_path']}) no-repeat center center; width:{$width}; height:{$height};{$additionaStyle}"; 
+        return "display: block;text-indent: -9999px;background:url(/{$image['full_path']}) no-repeat center center; width:{$width}; height:{$height};{$additionalStyle}";
     }
 
     
@@ -983,8 +1038,10 @@ class OpenPaFunctionCollection
             $homePage = self::fetchHome();
             if ( $homePage instanceof eZContentObjectTreeNode && $homePage->attribute( 'class_identifier' ) == 'homepage' )
             {
+                /** @var eZContentObjectAttribute[] $dataMap */
                 $dataMap = $homePage->attribute( 'data_map' );
-                if ( isset( $dataMap['link_al_menu_orizzontale'] ) && $dataMap['link_al_menu_orizzontale'] instanceof eZContentObjectAttribute
+                if ( isset( $dataMap['link_al_menu_orizzontale'] )
+                     && $dataMap['link_al_menu_orizzontale'] instanceof eZContentObjectAttribute
                      && $dataMap['link_al_menu_orizzontale']->attribute( 'has_content' ) )
                 {
                     self::$topmenu = array();
@@ -1010,6 +1067,7 @@ class OpenPaFunctionCollection
             }
             if ( empty( self::$topmenu ) && $homePage instanceof eZContentObjectTreeNode )
             {                
+                /** @var eZContentObjectTreeNode[] $nodes */
                 $nodes = eZFunctionHandler::execute(
                     'content',
                     'list',
@@ -1067,17 +1125,23 @@ class OpenPaFunctionCollection
             $childrenClassesParamers = array(
                 'SearchSubTreeArray'=> array( $parentNode->attribute( 'node_id' ) ),
                 'SearchLimit' => 1,
-                'Filter' => array( '-meta_id_si:' . $parentNode->attribute( 'contentobject_id' ) ),
+                'Filter' => array( '-' . eZSolr::getMetaFieldName( 'id', 'filter' ) . ':' . $parentNode->attribute( 'contentobject_id' ) ),
                 'AsObjects' => false,
                 'Facet' => array(
-                    array( 'field' => 'meta_class_identifier_ms', 'name' => 'class_identifier', 'limit' => 200 )
+                    array(
+                        'field' => eZSolr::getMetaFieldName( 'class_identifier', 'facet' ),
+                        'name' => 'class_identifier',
+                        'limit' => 200
+                    )
                 )
             );
             $solr = new eZSolr();
             $search = $solr->search( '', $childrenClassesParamers );
             if ( $search['SearchCount'] > 0 )
             {
-                $facets = $search['SearchExtras']->attribute( 'facet_fields' );
+                /** @var ezfSearchResultInfo $searchExtras */
+                $searchExtras = $search['SearchExtras'];
+                $facets = $searchExtras->attribute( 'facet_fields' );
                 $childrenClassTypes = $facets[0]['nameList'];
             }
             if ( !empty( $childrenClassTypes ) )
@@ -1127,7 +1191,11 @@ class OpenPaFunctionCollection
             
             if ( count( $geoAttributes ) )
             {
-                $typeNames = array( 'subattr_tipo_luogo___name____s', 'subattr_tipo_servizio_sul_territorio___name____s', 'meta_class_identifier_ms' );
+                $typeNames = array(
+                    OpenPASolr::generateSolrSubField( 'tipo_luogo', 'name', 'string'),
+                    OpenPASolr::generateSolrSubField( 'tipo_servizio_sul_territorio', 'name', 'string'),
+                    eZSolr::getMetaFieldName( 'class_identifier' )
+                );
                 
                 // imposto i filtri di ricerca
                 $geoFields = $geoFieldsNames = $geoFieldsFilters = array();                
@@ -1137,7 +1205,7 @@ class OpenPaFunctionCollection
                     {
                         //$geoFieldsFilters[] = "attr_{$geoAttribute->attribute( 'identifier' )}_t:['' TO *]";
                         $geoFields[$geoAttribute->attribute( 'identifier' )] = $geoAttribute->attribute( 'name' );
-                        $geoFieldsNames[] = "subattr_{$geoAttribute->attribute( 'identifier' )}___coordinates____gpt";
+                        $geoFieldsNames[] = OpenPASolr::generateSolrSubField( $geoAttribute->attribute( 'identifier' ), 'coordinates', 'geopoint');
                     }
                 }
                 
@@ -1152,7 +1220,7 @@ class OpenPaFunctionCollection
                 }
                 $childrenParameters = array(
                     'SearchSubTreeArray'=> array( $parentNode->attribute( 'node_id' ) ),                
-                    'Filter' => array_merge( array( '-meta_id_si:' . $parentNode->attribute( 'contentobject_id' ) ), $geoFieldsFilters ),
+                    'Filter' => array_merge( array( '-' . eZSolr::getMetaFieldName( 'id', 'filter' ) . ':' . $parentNode->attribute( 'contentobject_id' ) ), $geoFieldsFilters ),
                     'SearchContentClassID' => $classIds,
                     'SearchLimit' => 1000,
                     'AsObjects' => false,

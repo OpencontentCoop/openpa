@@ -32,7 +32,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'custom_fetch_parameters' => array()
         ));
         
-        $this->data['show_extra_menu'] = $this->hasExtraMenu();
+        $this->fnData['show_extra_menu'] = 'hasExtraMenu';
     }
     
     //@todo
