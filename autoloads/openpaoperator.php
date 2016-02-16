@@ -24,7 +24,11 @@ class OpenPAOperator
             'current_object_id',
             'fix_dimension',
             'object_state_list',
-            'site_identifier'
+            'site_identifier',
+            'solr_field',
+            'solr_meta_field',
+            'solr_subfield',
+            'solr_meta_subfield'
         );
     }
 
@@ -41,45 +45,64 @@ class OpenPAOperator
     function namedParameterList()
     {
         return array(
-            'openpaini' => array
-            (
-                'block' 	    => array( 'type' => 'string', 'required' => true ),
-                'setting' 	    => array( 'type' => 'string', 'required' => true ),
-                'default' 	    => array( 'type' => 'mixed', 'required' => false, 'default' => false )
+            'openpaini' => array(
+                'block' => array('type' => 'string', 'required' => true),
+                'setting' => array('type' => 'string', 'required' => true),
+                'default' => array('type' => 'mixed', 'required' => false, 'default' => false)
             ),
-            'has_main_style' => array
-            (
-                'node'          => array( 'type' => 'mixed', 'required' => true )
+            'has_main_style' => array(
+                'node' => array('type' => 'mixed', 'required' => true)
             ),
-            'openpa_shorten' => array
-            (
-                'chars_to_keep' => array( "type" => "integer", "required" => false, "default" => 80 ),
-                'str_to_append' => array( "type" => "string", "required" => false, "default" => "..." ),
-                'trim_type'     => array( "type" => "string", "required" => false, "default" => "right" )
+            'openpa_shorten' => array(
+                'chars_to_keep' => array("type" => "integer", "required" => false, "default" => 80),
+                'str_to_append' => array("type" => "string", "required" => false, "default" => "..."),
+                'trim_type' => array("type" => "string", "required" => false, "default" => "right")
             ),
-            'has_abstract' => array
-            (
-                'node' => array( "type" => "integer", "required" => false, "default" => false )
+            'has_abstract' => array(
+                'node' => array("type" => "integer", "required" => false, "default" => false)
             ),
-            'abstract' => array
-            (
-                'node' => array( "type" => "integer", "required" => false, "default" => false )
+            'abstract' => array(
+                'node' => array("type" => "integer", "required" => false, "default" => false)
             ),
-            'rss_list' => array
-            (
-                'fetchList' => array( "type" => "string", "required" => true, "default" => 'export' )
+            'rss_list' => array(
+                'fetchList' => array("type" => "string", "required" => true, "default" => 'export')
             ),
-            'materia_make_tree' => array
-            (
-                'relation_list' => array( "type"  => "array", "required" => true, "default" => array() )
+            'materia_make_tree' => array(
+                'relation_list' => array("type" => "array", "required" => true, "default" => array())
             ),
-            'find_first_parent' => array
-            (
-                'class' => array( "type"  => "mixed", "required" => true, "default" => null )
+            'find_first_parent' => array(
+                'class' => array("type" => "mixed", "required" => true, "default" => null)
+            ),
+            'solr_field' => array(
+                'identifier' => array("type" => "string", "required" => true),
+                'type' => array("type" => "string", "required" => true)
+            ),
+            'solr_meta_field' => array(
+                'identifier' => array("type" => "string", "required" => true)
+            ),
+            'solr_subfield' => array(
+                'identifier' => array("type" => "string", "required" => true),
+                'sub_identifier' => array("type" => "string", "required" => true),
+                'type' => array("type" => "string", "required" => true)
+            ),
+            'solr_meta_subfield' => array(
+                'identifier' => array("type" => "string", "required" => true),
+                'sub_identifier' => array("type" => "string", "required" => true)
             )
         );
     }
-    
+
+    /**
+     * @param eZTemplate $tpl
+     * @param $operatorName
+     * @param $operatorParameters
+     * @param $rootNamespace
+     * @param $currentNamespace
+     * @param $operatorValue
+     * @param $namedParameters
+     *
+     * @return array|bool|mixed|string
+     */
     function modify( &$tpl, &$operatorName, &$operatorParameters, &$rootNamespace, &$currentNamespace, &$operatorValue, &$namedParameters )
     {		
         $ini = eZINI::instance( 'openpa.ini' );
@@ -105,6 +128,26 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'solr_field':
+            {
+                return $operatorValue = OpenPASolr::generateSolrField( $namedParameters['identifier'], $namedParameters['type'] );
+            } break;
+
+            case 'solr_meta_field':
+            {
+                return $operatorValue = eZSolr::getMetaFieldName( $namedParameters['identifier'] );
+            } break;
+
+            case 'solr_subfield':
+            {
+                return $operatorValue = OpenPASolr::generateSolrSubField( $namedParameters['identifier'], $namedParameters['sub_identifier'], $namedParameters['type'] );
+            } break;
+
+            case 'solr_meta_subfield':
+            {
+                return $operatorValue = OpenPASolr::generateSolrSubMetaField( $namedParameters['identifier'], $namedParameters['sub_identifier'] );
+            } break;
+
             case 'site_identifier':
             {
                 return $operatorValue = OpenPABase::getCurrentSiteaccessIdentifier();
