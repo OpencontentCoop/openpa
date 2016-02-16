@@ -584,7 +584,7 @@ class OpenPaFunctionCollection
             {
                 foreach( $values as $value )
                 {
-                    $query = "submeta_{$value['attribute_identifier']}___id_si:{$object->attribute( 'id' )} AND meta_contentclass_id_si:{$value['class_id']}";
+                    $query = ezfSolrDocumentFieldBase::SUBMETA_FIELD_PREFIX . $value['attribute_identifier'] . ezfSolrDocumentFieldBase::SUBATTR_FIELD_SEPARATOR . "id" . ezfSolrDocumentFieldBase::SUBATTR_FIELD_SEPARATOR . "si:{$object->attribute( 'id' )} AND " . eZSolr::getMetaFieldName( 'contentclass_id' ) . ":{$value['class_id']}";
                     $facetQuery[$query] = $query;
                     $facetQueryData[$query] = $value;
                     //$attributeFilter[] = "submeta_servizio___id_si:" . $object->attribute( 'id' );
@@ -747,7 +747,7 @@ class OpenPaFunctionCollection
                              'rows' => 0,
                              'json.nl' => 'arrarr',
                              'facet' => 'true',
-                             'facet.field' => array( 'meta_class_identifier_ms', 'meta_class_name_ms' ),
+                             'facet.field' => array( eZSolr::getMetaFieldName( 'class_identifier' ), eZSolr::getMetaFieldName( 'class_name' ) ),
                              'facet.query' => array_values( $facetQuery ),
                              'facet.limit' => 1000,
                              'facet.method' => 'fc',
