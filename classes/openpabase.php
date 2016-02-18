@@ -79,45 +79,56 @@ class OpenPABase
     public static function getCurrentSiteaccessIdentifier()
     {
         $currentSiteaccess = eZSiteAccess::current();
-        $parts = explode( '_', $currentSiteaccess['name'] );
+        return self::getSiteaccessIdentifier( $currentSiteaccess['name'] );
+    }
+
+    public static function getSubSiteaccessIdentifierList()
+    {
+        $list = eZLocale::languageList();
+        $list[] = 'intranet';
+        return $list;
+    }
+
+    public static function getSiteaccessIdentifier( $siteaccessName )
+    {
+        $parts = explode( '_', $siteaccessName );
         array_pop( $parts );
         if ( count( $parts ) > 1 )
         {
-            if ( in_array( $parts[1], eZLocale::languageList() ) )
+            if ( in_array( $parts[1], self::getSubSiteaccessIdentifierList() ) )
             {
-                unset( $parts[1] );       
+                unset( $parts[1] );
             }
         }
         return implode( '_', $parts );
     }
     
-    public static function getFrontendSiteaccessName()
+    public static function getFrontendSiteaccessName( $identifier = null )
     {
-        return self::getCustomSiteaccessName( 'frontend' );
+        return self::getCustomSiteaccessName( 'frontend', false, $identifier );
     }
 
-    public static function getDebugSiteaccessName()
+    public static function getDebugSiteaccessName( $identifier = null )
     {
-        return self::getCustomSiteaccessName( 'debug' );
+        return self::getCustomSiteaccessName( 'debug', false, $identifier );
     }
 
-    public static function getBackendSiteaccessName()
+    public static function getBackendSiteaccessName( $identifier = null )
     {
-        return self::getCustomSiteaccessName( 'backend' );
+        return self::getCustomSiteaccessName( 'backend', false, $identifier );
     }
 
-    public static function getCustomSiteaccessName( $customName, $checkIfExists = true )
+    public static function getCustomSiteaccessName( $customName, $checkIfExists = true, $identifier = null )
     {
-        $identifier = self::getCurrentSiteaccessIdentifier();
+        if ( !$identifier )
+            $identifier = self::getCurrentSiteaccessIdentifier();
         $siteaccess = $identifier . '_' . strtolower( $customName );
         if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
         {
             /** @var eZContentLanguage[] $languages */
-            $languages = eZContentLanguage::prioritizedLanguages();
-            foreach( $languages as $locale )
+            $languages = eZLocale::languageList();
+            foreach( $languages as $language )
             {
-                $languageParts = explode( '-', $locale->attribute( 'locale' ) );
-                $language = array_shift( $languageParts );
                 $siteaccess = "{$identifier}_{$language}_{$customName}";
                 if ( file_exists( "settings/siteaccess/$siteaccess" ) )
                 {

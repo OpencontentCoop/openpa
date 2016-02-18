@@ -30,28 +30,59 @@ class OpenPAInstance
      */
     protected $openpaIni;
 
+    protected $solrIni;
+
     /**
      * Il nome del siteAccess interrogato
      * @var $currentSiteAccessName
      */
     protected $currentSiteAccessName;
 
-    /**
-     * @var $inputFile
-     */
-    protected $siteIniFile;
-
     public function __construct( $siteAccessName )
     {
+        if ( empty( $siteAccessName ) )
+            throw new Exception( "SiteAccess name not found" );
         $this->currentSiteAccessName = $siteAccessName;
-        $this->siteIni = new eZINI( 'site.ini.append.php', 'settings/siteaccess/' . $this->currentSiteAccessName );
-        $this->openpaIni = new eZINI( 'openpa.ini.append.php', 'settings/siteaccess/' . $this->currentSiteAccessName );
-        $this->siteIniFile = 'settings/siteaccess/' . $this->currentSiteAccessName . '/site.ini.append.php';
+    }
+
+    protected function getSiteIni( $block, $value = null )
+    {
+        if ( !$this->siteIni instanceof eZINI )
+            $this->siteIni = eZSiteAccess::getIni( $this->currentSiteAccessName );
+        if ( $value )
+            return $this->siteIni->hasVariable( $block, $value ) ? $this->siteIni->variable( $block, $value ) : null;
+        else
+            return $this->siteIni->hasGroup( $block ) ? $this->siteIni->group( $block ) : array();
+    }
+
+    protected function getOpenpaIni( $block, $value )
+    {
+        if ( !$this->openpaIni instanceof eZINI )
+            $this->openpaIni = eZSiteAccess::getIni( $this->currentSiteAccessName, 'openpa.ini' );
+        return $this->openpaIni->hasVariable( $block, $value ) ? $this->openpaIni->variable( $block, $value ) : null;
+    }
+
+    protected function getSolrIni( $block, $value )
+    {
+        if ( !$this->solrIni instanceof eZINI )
+            $this->solrIni = eZSiteAccess::getIni( $this->currentSiteAccessName, 'solr.ini' );
+        return $this->solrIni->hasVariable( $block, $value ) ? $this->solrIni->variable( $block, $value ) : null;
     }
 
     public static function current()
     {
-        return new self( OpenPABase::getCurrentSiteaccessIdentifier() );
+        $currentSiteaccess = eZSiteAccess::current();
+        return new self( $currentSiteaccess['name'] );
+    }
+
+    public function getIdentifier()
+    {
+        return OpenPABase::getSiteaccessIdentifier( $this->currentSiteAccessName );
+    }
+
+    public function getSiteAccessName()
+    {
+        return $this->currentSiteAccessName;
     }
 
     private static function getIP( $url )
@@ -68,6 +99,7 @@ class OpenPAInstance
                 return self::getIP( $dnsItem['target'] );
             }
         }
+        return false;
     }
 
     /**
@@ -93,7 +125,7 @@ class OpenPAInstance
      */
     public function getName()
     {
-        return $this->siteIni->variable( 'SiteSettings', 'SiteName' );
+        return $this->getSiteIni( 'SiteSettings', 'SiteName' );
     }
 
     /**
@@ -107,7 +139,7 @@ class OpenPAInstance
         switch( $type )
         {
             case self::PRODUCTION:
-                return 'http://' .  $this->siteIni->variable( 'SiteSettings', 'SiteURL' );
+                return 'http://' .  $this->getSiteIni( 'SiteSettings', 'SiteURL' );
         }
         return 'http://' . $this->getSiteAccessBaseName() . '.opencontent.it';
     }
@@ -120,7 +152,7 @@ class OpenPAInstance
      */
     public function getProductionDate( $format = 'd/m/Y' )
     {
-        return date( $format, filemtime( $this->siteIniFile ) );
+        return date( $format, filemtime( 'settings/siteaccess/' . $this->currentSiteAccessName . '/site.ini.append.php' ) );
     }
 
     /**
@@ -129,7 +161,7 @@ class OpenPAInstance
      */
     public function getGoogleId()
     {
-        return $this->openpaIni->variable( 'Seo', 'GoogleAnalyticsAccountID' );
+        return $this->getOpenpaIni( 'Seo', 'GoogleAnalyticsAccountID' );
     }
 
     /**
@@ -138,16 +170,14 @@ class OpenPAInstance
      */
     public function getSiteAccessBaseName()
     {
-        $parts = explode( '_', $this->currentSiteAccessName );
-        array_pop( $parts );
-        return implode( '_', $parts );
+        return $this->getIdentifier();
     }
         
     public function getType()
     {
         $type = 'altro';
         $suffix = '_standard';
-        if ( in_array( 'openpa_flight', $this->siteIni->variable( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
+        if ( in_array( 'openpa_flight', $this->getSiteIni( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
         {
             $suffix = '_new_design';
         }
@@ -160,11 +190,11 @@ class OpenPAInstance
         {
             $type = 'dimmi';
         }
-        elseif ( in_array( 'fusioni', $this->siteIni->variable( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
+        elseif ( in_array( 'fusioni', $this->getSiteIni( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
         {
             $type = 'fusione';
         }
-        elseif ( strpos( $this->siteIni->variable( 'SiteSettings', 'SiteName' ), 'Comune' ) !== false )
+        elseif ( strpos( $this->getSiteIni( 'SiteSettings', 'SiteName' ), 'Comune' ) !== false )
         {
             $type = 'comune';
         }        
@@ -261,6 +291,52 @@ class OpenPAInstance
         {
             throw new Exception( "Attenzione valore GoogleId vuoto" );
         }
+    }
+
+    public function isMain()
+    {
+        return $this->currentSiteAccessName == OpenPABase::getFrontendSiteaccessName( $this->getIdentifier() );
+    }
+
+    public function isBackend()
+    {
+        return $this->currentSiteAccessName == OpenPABase::getBackendSiteaccessName( $this->getIdentifier() );
+    }
+
+    public function getCacheDirectory()
+    {
+        $cacheDir = $this->getSiteIni( 'FileSettings', 'CacheDir' );
+
+        if ( $cacheDir[0] == "/" )
+        {
+            return eZDir::path( array( $cacheDir ) );
+        }
+        else
+        {
+            return eZDir::path( array( $this->getVarDirectory(), $cacheDir ) );
+        }
+    }
+
+    public function getVarDirectory()
+    {
+        return eZDir::path( array( $this->getSiteIni( 'FileSettings', 'VarDir' ) ) );
+    }
+
+    public function getStorageDirectory()
+    {
+        $varDir = $this->getVarDirectory();
+        $storageDir = $this->getSiteIni( 'FileSettings', 'StorageDir' );
+        return eZDir::path( array( $varDir, $storageDir ) );
+    }
+
+    public function getDatabaseSettings()
+    {
+        return $this->getSiteIni( 'DatabaseSettings' );
+    }
+
+    public function getSolrHost()
+    {
+        return $this->getSolrIni( 'SolrBase', 'SearchServerURI' );
     }
 
 }
