@@ -114,7 +114,6 @@ class OpenPAInstanceGenerator
             'main_siteaccess' => null,
             'script_siteaccess' => null,
             'site_access' => array(),
-            'cache_dirs' => array(),
             'db_host' => null,
             'db_port' => null,
             'db_type' => null,
