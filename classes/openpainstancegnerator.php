@@ -125,40 +125,47 @@ class OpenPAInstanceGenerator
 
         $dbNames = array();
         $error = false;
-        foreach ($instanceList as $instance) {
-            $databaseSettings = $instance->getDatabaseSettings();
-            $dbNames[$instance->getSiteAccessName()] = $databaseSettings['DatabaseImplementation'] . $databaseSettings['Server'] . $databaseSettings['Port'] . $databaseSettings['Database'] . $databaseSettings['User'] . $databaseSettings['Password'];
-            if ($instance->isMain()) {
-                $groupData['name'] = $instance->getName();
-                $groupData['url'] = $instance->getUrl(OpenPAInstance::PRODUCTION);
-                $groupData['url_staging'] = $instance->getUrl(OpenPAInstance::STAGING);
-                $groupData['production_date'] = $instance->getProductionDate();
-                $groupData['google_id'] = $instance->getGoogleId();
-                $groupData['cache_dir'] = $instance->getCacheDirectory();
-                $groupData['var_dir'] = $instance->getVarDirectory();
-                $groupData['storage_dir'] = $instance->getStorageDirectory();
-                $groupData['main_siteaccess'] = $instance->getSiteAccessName();
-                $groupData['db_host'] = $databaseSettings['Server'];
-                $groupData['db_port'] = $databaseSettings['Port'];
-                $groupData['db_type'] = $databaseSettings['DatabaseImplementation'];
-                $groupData['db_name'] = $databaseSettings['Database'];
-                $groupData['db_user'] = $databaseSettings['User'];
-                $groupData['db_password'] = $databaseSettings['Password'];
-                $groupData['solr_host'] = $instance->getSolrHost();
-            }
-            if ($instance->isBackend()) {
-                $groupData['script_siteaccess'] = $instance->getSiteAccessName();
-            }
-            $groupData['site_access'][] = $instance->getSiteAccessName();
-        }
 
-        $checkDbUnique = array_unique($dbNames);
-        if (count($checkDbUnique) > 1) {
-            $error = $dbNames;
+        try {
+            $instance = $this->findMain($instanceList);
+            $groupData['name'] = $instance->getName();
+            $groupData['url'] = $instance->getUrl(OpenPAInstance::PRODUCTION);
+            $groupData['url_staging'] = $instance->getUrl(OpenPAInstance::STAGING);
+            $groupData['production_date'] = $instance->getProductionDate();
+            $groupData['google_id'] = $instance->getGoogleId();
+            $groupData['cache_dir'] = $instance->getCacheDirectory();
+            $groupData['var_dir'] = $instance->getVarDirectory();
+            $groupData['storage_dir'] = $instance->getStorageDirectory();
+            $groupData['main_siteaccess'] = $instance->getSiteAccessName();
+            $databaseSettings = $instance->getDatabaseSettings();
+            $groupData['db_host'] = $databaseSettings['Server'];
+            $groupData['db_port'] = $databaseSettings['Port'];
+            $groupData['db_type'] = $databaseSettings['DatabaseImplementation'];
+            $groupData['db_name'] = $databaseSettings['Database'];
+            $groupData['db_user'] = $databaseSettings['User'];
+            $groupData['db_password'] = $databaseSettings['Password'];
+            $groupData['solr_host'] = $instance->getSolrHost();
+
+            $instance = $this->findBackend($instanceList);
+            $groupData['script_siteaccess'] = $instance->getSiteAccessName();
+
+
+            foreach ($instanceList as $instance) {
+                $databaseSettings = $instance->getDatabaseSettings();
+                $dbNames[$instance->getSiteAccessName()] = $databaseSettings['DatabaseImplementation'] . $databaseSettings['Server'] . $databaseSettings['Port'] . $databaseSettings['Database'] . $databaseSettings['User'] . $databaseSettings['Password'];
+                $groupData['site_access'][] = $instance->getSiteAccessName();
+            }
+
+            $checkDbUnique = array_unique($dbNames);
+            if (count($checkDbUnique) > 1) {
+                $error = $dbNames;
+            }
+        }catch( Exception $e ) {
+            $error = $e->getMessage();
         }
 
         if ($error) {
-            eZCLI::instance()->error(var_export($error, 1));
+            eZCLI::instance()->error($id . ': ' . var_export($error, 1));
         } else {
             if ($this->log) {
                 eZCLI::instance()->output($id);
@@ -169,8 +176,43 @@ class OpenPAInstanceGenerator
     }
 
     /**
-     * @param OpenPAInstance[] $groupedInstances
+     * @param OpenPAInstance[] $instanceList
      *
+     * @return OpenPAInstance
+     * @throws Exception
+     */
+    protected function findMain($instanceList)
+    {
+        foreach ($instanceList as $instance) {
+            if ($instance->isMain()) {
+                return $instance;
+            }
+        }
+        foreach ($instanceList as $instance) {
+            if ($instance->isBackend()) {
+                return $instance;
+            }
+        }
+        throw new Exception("Main instance not found");
+    }
+
+    /**
+     * @param OpenPAInstance[] $instanceList
+     *
+     * @return OpenPAInstance
+     * @throws Exception
+     */
+    protected function findBackend($instanceList)
+    {
+        foreach ($instanceList as $instance) {
+            if ($instance->isBackend()) {
+                return $instance;
+            }
+        }
+        throw new Exception("Script instance not found");
+    }
+
+    /**
      * @return array
      */
     protected function generateInstances()
