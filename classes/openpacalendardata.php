@@ -294,7 +294,7 @@ class OpenPACalendarData
         else
         {
             $sortBy = array(
-                eZSolr::getMetaFieldName('priority') => 'desc',
+                ObjectHandlerServiceContentVirtual::SORT_FIELD_PRIORITY => 'desc',
                 OpenPASolr::generateSolrField('special', 'boolean') => 'desc'
             );
             
