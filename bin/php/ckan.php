@@ -87,7 +87,9 @@ try
             "412da8d0286fcbb6ee9fc6f0f1ae8b7a",
             "b97fa9701b9f1436f80475be0176e4e5",
             "1e0e3d70e38a0cf789473b51aa7b63df",
-            "acf1cd37c7e7c442656f6230a96ac27c"
+            "acf1cd37c7e7c442656f6230a96ac27c",
+
+            "74c52b1af7b47536ee0200c27563b842"
         );
 
         foreach( $datasetRemoteIdList as $remoteId ){
@@ -106,7 +108,6 @@ try
     if ( $options['fix_area_remote_ids'] ){
         $matches = array(
             'c62f589eb338057627de6f62d08b48ac' => 'opendata_area',
-            '74c52b1af7b47536ee0200c27563b842' => 'opendata_presentazione',
             '8aa799d9883f6ab7d1d1f35346d670cf' => 'opendata_datasetcontainer',
             '03298100280d2e69bffa279ae3ecef54' => 'opendata_amministrazione',
             'fe4b6d6e7aa51736573ec77adc69593c' => 'opendata_iniziativa',
