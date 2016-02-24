@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][sync_areatematica]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -22,24 +22,165 @@ $script->setUseDebugAccumulators(true);
 
 OpenPALog::setOutputLevel($script->isQuiet() ? OpenPALog::ERROR : OpenPALog::ALL);
 
+$user = eZUser::fetchByName( 'admin' );
+eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
+
+$db = eZDB::instance();
+
 try {
 
     $footerRemoteId = 'opendata_footer_link';
 
     if ($options['sync_areatematica']) {
-        $remotes = array(
-            'opendata_area',
-            'opendata_global_info',
-            'opendata_link',
-            'opendata_datasetcontainer',
-            'opendata_amministrazione',
-            'opendata_iniziativa',
-            'opendata_normativa',
-            'opendata_info',
-        );
+
+        $footerObject = eZContentObject::fetchByRemoteID($footerRemoteId);
+
+        if ( $footerObject ) {
+            $remotes = array(
+                'opendata_link',
+                'opendata_datasetcontainer',
+                'opendata_amministrazione',
+                'opendata_iniziativa',
+                'opendata_normativa',
+                'opendata_info',
+                'opendata_global_info',
+                'opendata_area'
+            );
+
+            $areaObject = eZContentObject::fetchByRemoteID('opendata_area');
+            if ( !$areaObject ) {
+                $apiNode = OpenPAApiNode::fromLink('http://openpa.opencontent.it/api/opendata/v1/content/object/opendata_area');
+                OpenPALog::warning("Create area");
+                $areaObject = $apiNode->createContentObject($footerObject->attribute('main_node')->attribute('parent_node_id'));
+            }
+
+            $globalObject = eZContentObject::fetchByRemoteID('opendata_global_info');
+            if ( !$globalObject ) {
+                $apiNode = OpenPAApiNode::fromLink('http://openpa.opencontent.it/api/opendata/v1/content/object/opendata_global_info');
+                OpenPALog::warning("Create global");
+                $apiNode->createContentObject($areaObject->attribute('main_node_id'));
+            }
+
+
+            foreach ($remotes as $remote) {
+                $link = 'http://openpa.opencontent.it/api/opendata/v1/content/object/' . $remote;
+                $apiNode = OpenPAApiNode::fromLink($link);
+                if ( !OpenPAObjectTools::syncObjectFormRemoteApiNode($apiNode) )
+                {
+                    OpenPALog::warning("Create $remote");
+                    $apiNode->createContentObject($areaObject->attribute('main_node_id'));
+                }
+
+                $data = json_decode(OpenPABase::getDataByURL('http://openpa.opencontent.it/api/opendata/v2/content/read/' . $remote), true);
+                if (isset( $data['data']['ita-IT']['layout'] )||isset( $data['data']['ita-IT']['page'] )) {
+                    $object = eZContentObject::fetchByRemoteID($remote);
+                    $dataMap = $object->dataMap();
+                    $layoutAttribute = isset( $data['data']['ita-IT']['layout'] ) ? $dataMap['layout'] : $dataMap['page'];
+
+                    $zones = isset( $data['data']['ita-IT']['layout'] ) ? $data['data']['ita-IT']['layout'] : $data['data']['ita-IT']['page'];
+                    $page = new eZPage();
+                    $pools = array();
+
+                    if ( isset($zones['zone_layout']) ) {
+
+                        $page->setAttribute('zone_layout', $zones['zone_layout']);
+                        unset( $zones['zone_layout'] );
+
+                        foreach ($zones as $zoneIdentifier => $zone) {
+                            $newZone = $page->addZone(new eZPageZone());
+                            $newZone->setAttribute('id', $zone['zone_id']);
+                            $newZone->setAttribute('zone_identifier', $zoneIdentifier);
+
+                            $zoneBlocksIds = array();
+                            foreach ($zone['blocks'] as $block) {
+                                $zoneBlocksIds[] = $block['block_id'];
+                            }
+
+                            $db->query("DELETE from ezm_block WHERE zone_id = '" . $db->escapeString($zone['zone_id']) . "' AND id NOT IN ('" . implode("', '",
+                                    $zoneBlocksIds) . "')");
+
+                            foreach ($zone['blocks'] as $block) {
+
+                                $dbBlock = new eZFlowBlock(array(
+                                    'id' => $block['block_id'],
+                                    'zone_id' => $newZone->attribute('id'),
+                                    'name' => $block['name'],
+                                    'node_id' => $object->attribute('main_node_id'),
+                                    'block_type' => $block['type']
+                                ));
+                                $dbBlock->store();
+
+                                $newBlock = $newZone->addBlock(new eZPageBlock($block['name']));
+                                $newBlock->setAttribute('action', 'add');
+                                $newBlock->setAttribute('id', $block['block_id']);
+                                $newBlock->setAttribute('zone_id', $newZone->attribute('id'));
+                                $newBlock->setAttribute('type', $block['type']);
+                                $newBlock->setAttribute('view', $block['view']);
+                                if (is_array($block['custom_attributes'])) {
+                                    $newBlock->setAttribute('custom_attributes', $block['custom_attributes']);
+                                }
+                                foreach ($block['valid_items'] as $index => $item) {
+                                    $itemObject = eZContentObject::fetchByRemoteID($item);
+                                    if ($itemObject instanceof eZContentObject) {
+
+                                        $timestamp = time();
+
+                                        $db->query("DELETE from ezm_pool WHERE block_id = '" . $db->escapeString($block['block_id']) . "'");
+                                        $pools[] = array(
+                                            'blockID' => $block['block_id'],
+                                            'objectID' => $itemObject->attribute('id'),
+                                            'nodeID' => $itemObject->attribute('main_node_id'),
+                                            'priority' => ++$index,
+                                            'timestamp' => $timestamp
+                                        );
+
+                                        $newItem = $newBlock->addItem(new eZPageBlockItem());
+                                        $newItem->setAttribute('object_id', $itemObject->attribute('id'));
+                                        $newItem->setAttribute('node_id', $itemObject->attribute('main_node_id'));
+                                        $newItem->setAttribute('priority', $index);
+                                        $newItem->setAttribute('ts_publication', $timestamp);
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        $page->setAttribute('zone_layout', '0ZonesLayoutFolder');
+                        $newZone = $page->addZone(new eZPageZone());
+                        $newZone->setAttribute('id', 'nessuna');
+                        $newZone->setAttribute('zone_identifier', 'nessuna');
+                    }
+                    if (count($pools) > 0) {
+                        $db->lock( 'ezm_pool' );
+
+                        foreach ( $pools as $item )
+                        {
+                            $escapedBlockID = $db->escapeString( $item['blockID'] );
+
+                            $itemCount = $db->arrayQuery(
+                                "SELECT COUNT( * ) as count " .
+                                "FROM ezm_pool " .
+                                "WHERE block_id='$escapedBlockID' AND object_id=" . (int)$item['objectID'] );
+
+                            if ( $itemCount[0]['count'] == 0 )
+                            {
+                                $db->query( "INSERT INTO ezm_pool ( block_id, object_id, node_id, priority, ts_publication, ts_visible ) " .
+                                            "VALUES ( '$escapedBlockID', " . (int)$item['objectID'] . ", " . (int)$item['nodeID'] . ", " . (int)$item['priority'] . ", " . (int)$item['timestamp'] . ", 1 )" );
+                            }
+                        }
+
+                        $db->unlock();
+
+                    }
+                    $layoutAttribute->setContent($page);
+                    $layoutAttribute->store();
+                    eZFlowOperations::update( array($object->attribute('main_node_id')) );
+                }
+            }
+
+            OpenPAMenuTool::generateAllMenus();
+            eZCache::clearByTag( 'template' );
+        }
     }
-
-
 
     if ($options['fix_footer_link_remote_id']) {
         $footerObject = eZContentObject::fetchByRemoteID($footerRemoteId);
