@@ -9,11 +9,12 @@ $script = eZScript::instance( array( 'description' => ( "OpenPA Controllo Ckan t
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori',
-        'remove_old_dataset'  => 'Rimuove i dataset preinstallati nel prototipo (secondo una lista hardcoded)'
+        'remove_old_dataset'  => 'Rimuove i dataset preinstallati nel prototipo (secondo una lista hardcoded)',
+        'fix_area_remote_ids' => 'Rende leggibili i remote ids dell\'area opendata e quindi aggiornabili'
     )
 );
 $script->initialize();
@@ -94,11 +95,40 @@ try
             if ($object instanceof eZContentObject){
                 OpenPALog::warning( "Remove " . $object->attribute( 'name' ) );
                 if ( !$options['dry-run'] ){
-                    //eZContentObjectOperations::remove( $object->attribute('id') );
+                    eZContentObjectOperations::remove( $object->attribute('id') );
                 }
             }
         }
     }
+
+    if ( $options['fix_area_remote_ids'] ){
+        $matches = array(
+            'c62f589eb338057627de6f62d08b48ac' => 'opendata_area',
+            '74c52b1af7b47536ee0200c27563b842' => 'opendata_presentazione',
+            '8aa799d9883f6ab7d1d1f35346d670cf' => 'opendata_datasetcontainer',
+            '03298100280d2e69bffa279ae3ecef54' => 'opendata_amministrazione',
+            'fe4b6d6e7aa51736573ec77adc69593c' => 'opendata_iniziativa',
+            'a7a7c676012d54d87b5bc6b7551c0df6' => 'opendata_normativa',
+            'e62e8239a4b7bfa44c9336822a2e8622' => 'opendata_info',
+        );
+
+        foreach( $matches as $old => $new ){
+            $object = eZContentObject::fetchByRemoteID($old);
+            if ($object instanceof eZContentObject){
+                if ( ! eZContentObject::fetchByRemoteID($new) ){
+                    OpenPALog::warning( "Fix remote " . $new );
+                    if ( !$options['dry-run'] ) {
+                        $object->setAttribute('remote_id', $new);
+                        $object->store();
+                    }
+                }else{
+                    OpenPALog::error( "Remote $new already exists: can not fix $old" );
+                }
+            }
+        }
+    }
+
+
     $script->shutdown();
 }
 catch( Exception $e )
