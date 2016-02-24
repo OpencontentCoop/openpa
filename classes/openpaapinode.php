@@ -146,11 +146,11 @@ class OpenPAApiNode implements ArrayAccess
             switch( $fieldArray['type'] )
             {
                 case 'ezxmltext':
-                    $attributeList[$identifier] = SQLIContentUtils::getRichContent( $fieldArray['value'] );
+                    $attributeList[$identifier] = SQLIContentUtils::getRichContent( str_replace( '&amp;nbsp;', '&nbsp;', $fieldArray['value'] ) );
                     break;
                 case 'ezbinaryfile':
                 case 'ezimage':
-                    $attributeList[$identifier] = SQLIContentUtils::getRemoteFile( $fieldArray['value'] );
+                    $attributeList[$identifier] = $fieldArray['value'] ? SQLIContentUtils::getRemoteFile( $fieldArray['value'] ) : null;
                     break;
                 default:
                     $attributeList[$identifier] = $fieldArray['string_value'];
