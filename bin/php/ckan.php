@@ -25,7 +25,7 @@ OpenPALog::setOutputLevel($script->isQuiet() ? OpenPALog::ERROR : OpenPALog::ALL
 try {
 
     if ($options['search_footer_link']) {
-        $footerLink = '2d2cb247ff71140e26db4858eec90462';
+        $remoteId = '2d2cb247ff71140e26db4858eec90462';
         $object = eZContentObject::fetchByRemoteID($remoteId);
         if ($object instanceof eZContentObject) {
             OpenPALog::warning("Found " . $object->attribute('name'));
