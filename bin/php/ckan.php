@@ -11,12 +11,10 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][search_footer_link]',
     '',
     array(
-        'dry-run' => 'Non esegue azioni e mostra eventuali errori',
-        'remove_old_dataset' => 'Rimuove i dataset preinstallati nel prototipo (secondo una lista hardcoded)',
-        'fix_area_remote_ids' => 'Rende leggibili i remote ids dell\'area opendata e quindi aggiornabili'
+        'dry-run' => 'Non esegue azioni e mostra eventuali errori'
     )
 );
 $script->initialize();
@@ -25,6 +23,15 @@ $script->setUseDebugAccumulators(true);
 OpenPALog::setOutputLevel($script->isQuiet() ? OpenPALog::ERROR : OpenPALog::ALL);
 
 try {
+
+    if ($options['search_footer_link']) {
+        $footerLink = '2d2cb247ff71140e26db4858eec90462';
+        $object = eZContentObject::fetchByRemoteID($remoteId);
+        if ($object instanceof eZContentObject) {
+            OpenPALog::warning("Found " . $object->attribute('name'));
+        }
+    }
+
     if ($options['remove_old_dataset']) {
         $datasetRemoteIdList = array(
             "ckan_eb74838a-d480-4a76-83b8-946c60b5279f",
