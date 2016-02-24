@@ -95,7 +95,9 @@ try
             if ($object instanceof eZContentObject){
                 OpenPALog::warning( "Remove " . $object->attribute( 'name' ) );
                 if ( !$options['dry-run'] ){
-                    eZContentObjectOperations::remove( $object->attribute('id') );
+                    if (!eZContentObjectOperations::remove( $object->attribute('id'), false )){
+                        OpenPALog::error( "Problem deleting object #" . $object->attribute('id'));
+                    }
                 }
             }
         }
