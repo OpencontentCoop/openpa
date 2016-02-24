@@ -1,14 +1,16 @@
 {default attribute_base=ContentObjectAttribute}
 
 {def $contactsForm = array(
-  "Telefono",
-  "Fax",
-  "Email",
-  "PEC",
-  "Indirizzo",
-  "Facebook",
-  "Twitter",
-  "Web"
+    "Telefono",
+    "Fax",
+    "Email",
+    "PEC",
+    "Indirizzo",
+    "Facebook",
+    "Twitter",
+    "Web",
+    "Codice fiscale",
+    "Partita IVA"
 )}
 {set $attribute = fill_contacts_matrix( $attribute, $contactsForm )}
 
