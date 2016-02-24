@@ -45,7 +45,7 @@ try {
             {
                 OpenPALog::warning( 'Sincronizzo classe ' . $identifier );
                 $tools = new OpenPAClassTools( $identifier, true ); // creo se non esiste
-                $tools->sync( true, true ); // forzo e rimuovo attributi in più
+                $tools->sync( true, false ); // forzo e rimuovo attributi in più
             }
 
 
