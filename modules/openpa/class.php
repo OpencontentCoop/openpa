@@ -52,14 +52,14 @@ try
     $missingLocale = array();
     foreach( $tools->getData()->missingAttributes as $item )
     {
-        $missingLocale[] = new Item( $item );
+        $missingLocale[] = new OpenPAClassDataItem( $item );
     }
     $tpl->setVariable( 'missing_in_locale', $missingLocale );
     
     $missingRemote = array();
     foreach( $tools->getData()->extraAttributes as $item )
     {
-        $obj = new Item( $item );
+        $obj = new OpenPAClassDataItem( $item );
         $missingRemote[] = $obj;        
     }
     $tpl->setVariable( 'missing_in_remote', $missingRemote );
@@ -110,7 +110,7 @@ else
 }
 
 
-class Item
+class OpenPAClassDataItem
 {    
     protected $item;
     public $attributes;

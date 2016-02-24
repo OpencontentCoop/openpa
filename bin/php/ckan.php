@@ -109,6 +109,8 @@ try {
     if ($options['fix_area_remote_ids']) {
         $matches = array(
             'c62f589eb338057627de6f62d08b48ac' => 'opendata_area',
+            '0a79408f805dcc52bc402411b34bb95e' => 'opendata_global_info',
+            'e419816bf6a5fb323931fade9eb44a8b' => 'opendata_link',
             '8aa799d9883f6ab7d1d1f35346d670cf' => 'opendata_datasetcontainer',
             '03298100280d2e69bffa279ae3ecef54' => 'opendata_amministrazione',
             'fe4b6d6e7aa51736573ec77adc69593c' => 'opendata_iniziativa',
