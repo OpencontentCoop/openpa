@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][sync_areatematica]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -31,7 +31,7 @@ try {
 
     $footerRemoteId = 'opendata_footer_link';
 
-    if ($options['sync_areatematica']) {
+    if ($options['areatematica_sync']) {
 
         $footerObject = eZContentObject::fetchByRemoteID($footerRemoteId);
 
