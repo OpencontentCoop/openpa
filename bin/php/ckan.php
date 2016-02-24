@@ -121,6 +121,7 @@ try
                     OpenPALog::warning( "Fix remote " . $new );
                     if ( !$options['dry-run'] ) {
                         $object->setAttribute('remote_id', $new);
+                        $object->setAttribute('modified', time());
                         $object->store();
                     }
                 }else{
