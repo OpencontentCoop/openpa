@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][search_footer_link]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -24,11 +24,54 @@ OpenPALog::setOutputLevel($script->isQuiet() ? OpenPALog::ERROR : OpenPALog::ALL
 
 try {
 
-    if ($options['search_footer_link']) {
-        $remoteId = '2d2cb247ff71140e26db4858eec90462';
-        $object = eZContentObject::fetchByRemoteID($remoteId);
-        if ($object instanceof eZContentObject) {
-            OpenPALog::warning("Found " . $object->attribute('name'));
+    $footerRemoteId = 'opendata_footer_link';
+
+    if ($options['sync_areatematica']) {
+        $remotes = array(
+            'opendata_area',
+            'opendata_global_info',
+            'opendata_link',
+            'opendata_datasetcontainer',
+            'opendata_amministrazione',
+            'opendata_iniziativa',
+            'opendata_normativa',
+            'opendata_info',
+        );
+    }
+
+
+
+    if ($options['fix_footer_link_remote_id']) {
+        $footerObject = eZContentObject::fetchByRemoteID($footerRemoteId);
+        if ( !$footerObject instanceof eZContentObject){
+            $remoteId = '2d2cb247ff71140e26db4858eec90462';
+            $object = eZContentObject::fetchByRemoteID($remoteId);
+            if (!$object instanceof eZContentObject) {
+                $solr = new eZSolr();
+                $searchResults = $solr->search( '', array(
+                    'Filter' => array(
+                        'meta_class_identifier_ms:pagina_sito',
+                        'attr_name_t:"linked open data"'
+                    ),
+                    'SearchLimit' => 1
+                ) );
+                if( $searchResults['SearchCount'] > 0 ){
+                    $object = eZContentObject::fetch( $searchResults['SearchResult'][0]->attribute( 'contentobject_id' ) );
+                }
+            }
+
+            if ($object instanceof eZContentObject) {
+                OpenPALog::warning("Fix " . $object->attribute('name'));
+                if (!$options['dry-run']) {
+                    $object->setAttribute('remote_id', $footerRemoteId);
+                    $object->setAttribute('modified', time());
+                    $object->store();
+                }
+            }
+        }
+        else
+        {
+            OpenPALog::warning("Found " . $footerObject->attribute('name'));
         }
     }
 
@@ -1308,8 +1351,10 @@ try {
                 foreach( $attributes as $identifier => $description ){
                     if ( isset( $dataMap[$identifier] ) ){
                         OpenPALog::warning( ' - ' . $identifier);
-                        $dataMap[$identifier]->setDescription( $description );
-                        $dataMap[$identifier]->store();
+                        if (!$options['dry-run']) {
+                            $dataMap[$identifier]->setDescription( $description );
+                            $dataMap[$identifier]->store();
+                        }
                     }
                 }
             }
