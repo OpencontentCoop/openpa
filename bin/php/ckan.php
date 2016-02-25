@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -30,6 +30,66 @@ $db = eZDB::instance();
 try {
 
     $footerRemoteId = 'opendata_footer_link';
+
+
+    if ($options['parse_indicepa']){
+        $sourceTextFilePath = eZSys::rootDir() . '/extension/openpa/data/amministrazioni.txt';
+        if ( file_exists( $sourceTextFilePath ) ) {
+            $textContent = file_get_contents( $sourceTextFilePath );
+            $rows = explode("\n", $textContent);
+            $data = array();
+            foreach ($rows as $index => $row) {
+                if ($index == 0) {
+                    $headers = explode("\t", $row);
+                } elseif ($index > 1) {
+                    $data[$index] = explode("\t", $row);
+                }
+            }
+            array_walk($headers, function (&$value, $key) {
+                $value = trim($value);
+            });
+            $result = array();
+            foreach ($data as $d) {
+                array_walk($d, function (&$value, $key) {
+                    $value = trim($value);
+                });
+                $addToResult = false;
+                if (is_array($d) && count($d) == count($headers)) {
+                    $addToResult = array_combine($headers, $d);
+                }
+                if ( $addToResult && $addToResult['Provincia'] == 'TN' ){
+                    $result[] = $addToResult;
+                }
+            }
+            if ( count( $result ) > 0 ){
+                eZFile::create('amministrazioni.php', eZSys::rootDir() . '/extension/openpa/data/', '<?php $data=' . var_export($result,1) . ';' );
+            }
+        }else{
+            OpenPALog::error( "File $sourceTextFilePath non trovato" );
+        }
+    }
+
+    if ($options['find_codiceipa']){
+        include eZSys::rootDir() . '/extension/openpa/data/amministrazioni.php';
+        $siteName = eZINI::instance()->variable( 'SiteSettings', 'SiteName' );
+        if ( strpos( strtolower( $siteName ), 'comune di' ) === false ){
+            $siteName = false;
+        }
+
+        if ( $siteName ){
+            $found = false;
+            OpenPALog::notice("Ricerca di $siteName");
+            foreach( $data as $item ){
+                if ( strpos( strtolower( $siteName ), strtolower( $item['des_amm'] ) ) !== false ){
+                    $found = $item;
+                    break;
+                }
+            }
+            if ( $found ){
+                print_r($item);
+            }
+        }
+    }
 
     if ($options['check_org']){
 
