@@ -67,7 +67,12 @@ try {
         if ($generator instanceof OcOpendataDatasetGeneratorInterface) {
             foreach( $classes as $class ) {
                 try {
-                    $object = $generator->createFromClassIdentifier($class, $options['dry-run'] !== null);
+                    $parameters = array();
+                    $object = $generator->createFromClassIdentifier(
+                        $class,
+                        $parameters,
+                        $options['dry-run'] !== null
+                    );
                     $count++;
                     if (!$options['dry-run']) {
                         OpenPALog::output("Generato/aggiornato oggetto " . $object->attribute('id'));
