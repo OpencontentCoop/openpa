@@ -78,15 +78,80 @@ try {
 
         if ( $siteName ){
             $found = false;
-            OpenPALog::notice("Ricerca di $siteName");
+            $siteNameMatch = str_replace( '-', ' ', $siteName );
+            $siteNameMatch = str_replace( array( 'é', 'è' ), 'e\'', $siteNameMatch );
+            $siteNameMatch = str_replace( array( 'ò' ), 'o\'', $siteNameMatch );
+            OpenPALog::notice("Ricerca di $siteName ($siteNameMatch)");
             foreach( $data as $item ){
-                if ( strpos( strtolower( $siteName ), strtolower( $item['des_amm'] ) ) !== false ){
+                if ( strpos( strtolower( $siteNameMatch ), strtolower( $item['des_amm'] ) ) !== false ){
                     $found = $item;
                     break;
                 }
             }
+
             if ( $found ){
-                print_r($item);
+                $homePage = OpenPaFunctionCollection::fetchHome();
+                $homeObject = $homePage->attribute( 'object' );
+                if ( $homeObject instanceof eZContentObject )
+                {
+                    /** @var eZContentObjectAttribute[] $dataMap */
+                    $dataMap = $homeObject->attribute( 'data_map' );
+                    if ( isset( $dataMap['contacts'] )
+                         && $dataMap['contacts'] instanceof eZContentObjectAttribute
+                         && $dataMap['contacts']->attribute( 'data_type_string' ) == 'ezmatrix' )
+                    {
+                        $contacts = $dataMap['contacts'];
+                        $fullContacts = array();
+                        if ( $dataMap['contacts']->attribute( 'has_content' ) ){
+                            $trans = eZCharTransform::instance();
+                            $matrix = $dataMap['contacts']->attribute( 'content' )->attribute( 'matrix' );
+                            foreach( $matrix['rows']['sequential'] as $row )
+                            {
+                                $columns = $row['columns'];
+                                $name = $columns[0];
+                                if ( !empty( $columns[1] ) )
+                                {
+                                    $fullContacts[$name] = $columns[1];
+                                }
+                            }
+                        }
+
+                        //print_r($fullContacts);
+
+                        //print_r($found);
+
+                        $fullContacts["Codice iPA"] = $found['cod_amm'];
+
+                        if ( !isset($fullContacts["Codice fiscale"] ) && $found['Cf'] != 'null' ){
+                            if ( $found['cf_validato'] == 'S' ){
+                                $fullContacts["Codice fiscale"] = $found['Cf'];
+                            }
+                        }
+
+                        //@todo riempire tutti?
+
+                        $storeContacts = array();
+                        foreach( OpenPAPageData::$contactsMatrixFields as $id ){
+                            if ( !isset($fullContacts[$id]) ){
+                                $storeContacts[$id] = '';
+                            }else{
+                                $storeContacts[$id] = $fullContacts[$id];
+                            }
+                        }
+
+                        //print_r($storeContacts);
+
+                        $stringArray = array();
+                        foreach($storeContacts as $key => $value){
+                            $stringArray[] = $key . '|' . $value;
+                        }
+                        $string = implode('&', $stringArray);
+                        OpenPALog::warning("Salvo codice Ipa ({$storeContacts['Codice iPA']}) nei contatti");
+                        $contacts->fromString($string);
+                        $contacts->store();
+
+                    }
+                }
             }
         }
     }
@@ -126,7 +191,6 @@ try {
                     {
                         $columns = $row['columns'];
                         $name = $columns[0];
-                        $identifier = $trans->transformByGroup( $name, 'identifier' );
                         if ( !empty( $columns[1] ) )
                         {
                             $fullContacts[$name] = $columns[1];
