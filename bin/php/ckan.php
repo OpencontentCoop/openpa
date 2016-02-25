@@ -62,7 +62,7 @@ try {
             'servizio_sul_territorio',
             'statuto'
         );
-
+        $tools = new OCOpenDataTools();
         $generator = $tools->getDatasetGenerator();
         if ($generator instanceof OcOpendataDatasetGeneratorInterface) {
             foreach( $classes as $class ) {
