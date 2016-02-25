@@ -76,18 +76,18 @@ try {
                     );
                     $count++;
                     if (!$options['dry-run']) {
-                        $log[] = '#' . $object->attribute('id');
+                        $logs[] = '#' . $object->attribute('id');
                         OpenPALog::output("Generato/aggiornato oggetto " . $object->attribute('id'));
                         try {
                             $tools->pushObject($object);
-                            $log[] = 'ok';
+                            $logs[] = 'ok';
                         }catch( Exception $e ){
-                            $log[] =  $e->getMessage();
+                            $logs[] =  $e->getMessage();
                             OpenPALog::error( $e->getMessage() );
                         }
                     }
                 }catch( Exception $e ){
-                    $log[] =  $e->getMessage();
+                    $logs[] =  $e->getMessage();
                     OpenPALog::error( $e->getMessage() );
                 }
                 eZLog::write( implode( ' ', $logs ), 'ckan_generate.log' );
