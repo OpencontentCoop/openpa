@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -31,6 +31,56 @@ try {
 
     $footerRemoteId = 'opendata_footer_link';
 
+    if ($options['generate_from_classes']){
+
+        $count = 0;
+
+        $classes = array(
+            'albo_elenco',
+            'avviso',
+            'bando',
+            'bilancio_di_previsione',
+            'concorso',
+            'conferimento_incarico',
+            'consulenza',
+            'decreto_sindacale',
+            'dipendente',
+            'disciplinare',
+            'documento',
+            'gruppo_consiliare',
+            'modulo',
+            'organo_politico',
+            'piano_progetto',
+            'politico',
+            'pubblicazione',
+            'luogo',
+            'regolamento',
+            'rendiconto',
+            'sala_pubblica',
+            'servizio',
+            'ufficio',
+            'servizio_sul_territorio',
+            'statuto'
+        );
+
+        $generator = $tools->getDatasetGenerator();
+        if ($generator instanceof OcOpendataDatasetGeneratorInterface) {
+            foreach( $classes as $class ) {
+                try {
+                    $object = $generator->createFromClassIdentifier($class, $options['dry-run'] !== null);
+                    $count++;
+                    if (!$options['dry-run']) {
+                        OpenPALog::output("Generato/aggiornato oggetto " . $object->attribute('id'));
+                    }
+                }catch( Exception $e ){
+                    OpenPALog::error( $e->getMessage() );
+                }
+            }
+            OpenPALog::warning( "Totale: " . $count );
+        } else {
+            throw new Exception('Generator not found');
+        }
+    }
 
     if ($options['parse_indicepa']){
         $sourceTextFilePath = eZSys::rootDir() . '/extension/openpa/data/amministrazioni.txt';
