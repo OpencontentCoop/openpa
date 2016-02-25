@@ -30,25 +30,25 @@ $eZTemplateOperatorArray[] = array(
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/openpamenuoperator.php',
     'class' => 'OpenPAMenuOperator',
-    'operator_names' => array('top_menu_cached', 'left_menu_cached', 'tree_menu')
+    'operator_names' => array( 'top_menu_cached', 'left_menu_cached', 'tree_menu' )
 );
 
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/slugizeoperator.php',
     'class' => 'SlugizeOperator',
-    'operator_names' => array('slugize')
+    'operator_names' => array( 'slugize' )
 );
 
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/cookieoperator.php',
     'class' => 'CookieOperator',
-    'operator_names' => array('cookieset', 'cookieget', 'check_and_set_cookies')
+    'operator_names' => array( 'cookieset', 'cookieget', 'check_and_set_cookies' )
 );
 
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/checkbrowseroperator.php',
     'class' => 'CheckbrowserOperator',
-    'operator_names' => array('checkbrowser', 'is_deprecated_browser')
+    'operator_names' => array( 'checkbrowser', 'is_deprecated_browser' )
 );
 
 $eZTemplateOperatorArray[] = array(
@@ -69,29 +69,29 @@ $eZTemplateOperatorArray[] = array(
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/findgloballayout.php',
     'class' => 'FindGlobalLayoutOperator',
-    'operator_names' => array('find_global_layout')
+    'operator_names' => array( 'find_global_layout' )
 );
 
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/printtools.php',
     'class' => 'PrintToolsOperator',
-    'operator_names' => array('query_string')
+    'operator_names' => array( 'query_string' )
 );
 
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/openpapagedata.php',
     'class' => 'OpenPAPageData',
-    'operator_names' => array('openpapagedata', 'fill_contacts_matrix')
+    'operator_names' => array( 'openpapagedata', 'fill_contacts_matrix', 'contacts_matrix_fields' )
 );
 
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/openpahandlersoperator.php',
     'class' => 'OpenPAHandlerOperators',
-    'operator_names' => array('object_handler')
+    'operator_names' => array( 'object_handler' )
 );
 
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/appsoperator.php',
     'class' => 'AppsOperators',
-    'operator_names' => array('apps_root')
+    'operator_names' => array( 'apps_root' )
 );

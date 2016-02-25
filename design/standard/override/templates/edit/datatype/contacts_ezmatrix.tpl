@@ -1,18 +1,6 @@
 {default attribute_base=ContentObjectAttribute}
 
-{def $contactsForm = array(
-    "Telefono",
-    "Fax",
-    "Email",
-    "PEC",
-    "Indirizzo",
-    "Facebook",
-    "Twitter",
-    "Web",
-    "Codice fiscale",
-    "Partita IVA"
-)}
-{set $attribute = fill_contacts_matrix( $attribute, $contactsForm )}
+{set $attribute = fill_contacts_matrix( $attribute )}
 
 {let matrix=$attribute.content}
 
@@ -20,7 +8,7 @@
 
 <table cellspacing="0" class="list">
 <tbody>
-  {foreach $contactsForm as $index => $name}
+  {foreach contacts_matrix_fields() as $index => $name}
   <tr>
 	<td>
 	  <input type="hidden" value="{$name}" name="{$attribute_base}_ezmatrix_cell_{$attribute.id}[]" />
