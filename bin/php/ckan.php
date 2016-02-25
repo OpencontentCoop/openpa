@@ -63,6 +63,7 @@ try {
             'statuto'
         );
         $tools = new OCOpenDataTools();
+        $tools->pushOrganization();
         $generator = $tools->getDatasetGenerator();
         if ($generator instanceof OcOpendataDatasetGeneratorInterface) {
             foreach( $classes as $class ) {
