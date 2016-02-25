@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][sync_areatematica]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -31,7 +31,182 @@ try {
 
     $footerRemoteId = 'opendata_footer_link';
 
-    if ($options['sync_areatematica']) {
+    if ($options['check_org']){
+
+        $dict = array(
+            '_telefono' => "Telefono",
+            '_fax' => "Fax",
+            '_email' => "Email",
+            '_pec' => "PEC",
+            '_indirizzo' => "Indirizzo",
+            '_facebook' => "Facebook",
+            '_twitter' => "Twitter",
+            '_web' => "Web",
+            '_cf' => "Codice fiscale",
+            '_pi' => "Partita IVA"
+        );
+
+        $fullContacts = array();
+        $homePage = OpenPaFunctionCollection::fetchHome();
+        $homeObject = $homePage->attribute( 'object' );
+        $contacts = false;
+        if ( $homeObject instanceof eZContentObject )
+        {
+            /** @var eZContentObjectAttribute[] $dataMap */
+            $dataMap = $homeObject->attribute( 'data_map' );
+            if ( isset( $dataMap['contacts'] )
+                 && $dataMap['contacts'] instanceof eZContentObjectAttribute
+                 && $dataMap['contacts']->attribute( 'data_type_string' ) == 'ezmatrix' )
+            {
+                $contacts = $dataMap['contacts'];
+                if ( $dataMap['contacts']->attribute( 'has_content' ) ){
+                    $trans = eZCharTransform::instance();
+                    $matrix = $dataMap['contacts']->attribute( 'content' )->attribute( 'matrix' );
+                    foreach( $matrix['rows']['sequential'] as $row )
+                    {
+                        $columns = $row['columns'];
+                        $name = $columns[0];
+                        $identifier = $trans->transformByGroup( $name, 'identifier' );
+                        if ( !empty( $columns[1] ) )
+                        {
+                            $fullContacts[$name] = $columns[1];
+                        }
+                    }
+                }
+            }
+        }
+
+        if ( count( $fullContacts ) < 3)
+        {
+            $data = array();
+            $parts = array();
+            $notes = OpenPaFunctionCollection::fetchFooterNotes();
+            $attribute = $notes['result'];
+            if ( $attribute instanceof eZContentObjectAttribute ){
+                $string = $attribute->toString();
+                $dom = new DOMDocument( '1.0', 'utf-8' );
+                $string = preg_replace( array('/\s{2,}/', '/[\t\n]/'), ' ', $string );
+                $string = preg_replace("/>s+</", "><", $string );
+                $string = str_replace("> <", "><", $string );
+                $string = str_replace( array( '&amp;nbsp;', "\xC2\xA0" ), ' ', $string ); // from ezxhtmlxmloutput.php
+                $success = $dom->loadXML( $string );
+                if ( $success )
+                {
+                    $xpath = new DOMXPath( $dom );
+                    foreach( $xpath->query( '//paragraph' ) as $element ){
+                        $parts[] = $element->nodeValue;
+                    }
+                }
+
+                foreach( $parts as $part ){
+                    $subParts = explode( ' - ', $part );
+                    foreach( $subParts as $subPart ){
+
+                        if ( !isset( $data['_indirizzo'] ) ){
+                            if ( strpos( strtolower( $subPart ), 'piazza' ) !== false
+                                 || strpos( strtolower( $subPart ), 'via' ) !== false
+                                 || strpos( strtolower( $subPart ), 'strada' ) !== false
+                                 || strpos( strtolower( $subPart ), 'corso' ) !== false
+                                 || strpos( strtolower( $subPart ), 'frazione' ) !== false
+                                 || strpos( strtolower( $subPart ), 'località' ) !== false
+                                 || strpos( strtolower( $subPart ), 'strèda' ) !== false ){
+                                $siteName = eZINI::instance()->variable( 'SiteSettings', 'SiteName' );
+                                if ( strpos( strtolower( $siteName ), 'comune di' ) !== false ){
+                                    $siteName = trim( str_ireplace( 'comune di', '', $siteName ) );
+                                }else{
+                                    $siteName = false;
+                                }
+                                $indirizzo = trim( $subPart );
+                                $siteNameMatch = str_replace( array( 'é', 'è' ), 'e', $siteName );
+                                $indirizzoMatch = str_replace( array( 'é', 'è' ), 'e', $indirizzo );
+                                if ( strpos( strtolower( $indirizzoMatch ), strtolower( $siteNameMatch ) ) === false ){
+                                    $indirizzo .= ' ' . $siteName;
+                                }
+                                $data['_indirizzo'] = $indirizzo;
+                            }
+                        }
+
+                        if ( !isset( $data['_telefono'] ) ){
+                            if ( strpos( strtolower( $subPart ), 'telefono' ) !== false ){
+                                $data['_telefono'] = trim( str_replace( ':', '', str_ireplace( 'telefono', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), ' tel ' ) !== false ){
+                                $data['_telefono'] = trim( str_replace( ':', '', str_ireplace( 'tel', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), ' tel:' ) !== false ){
+                                $data['_telefono'] = trim( str_replace( ':', '', str_ireplace( 'tel', '', $subPart ) ) );
+                            }elseif ( strpos( $subPart, 'Tel ' ) !== false ){
+                                $data['_telefono'] = trim( str_replace( ':', '', str_ireplace( 'tel', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), 'centralino' ) !== false ){
+                                $data['_telefono'] = trim( str_replace( ':', '', str_ireplace( 'centralino', '', $subPart ) ) );
+                            }
+                        }
+
+                        if ( !isset( $data['_fax'] ) ){
+                            if ( strpos( strtolower( $subPart ), 'fax' ) !== false ){
+                                $data['_fax'] = trim( str_replace( ':', '', str_ireplace( 'fax', '', $subPart ) ) );
+                            }
+                        }
+
+                        if ( !isset( $data['_email'] ) ){
+                            if ( strpos( strtolower( $subPart ), 'email:' ) !== false ){
+                                $data['_email'] = trim( str_replace( ':', '', str_ireplace( 'email:', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), 'e-mail:' ) !== false ){
+                                $data['_email'] = trim( str_replace( ':', '', str_ireplace( 'e-mail:', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), 'e-mail' ) !== false ){
+                                $data['_email'] = trim( str_replace( ':', '', str_ireplace( 'e-mail', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), 'posta elettronica' ) !== false ){
+                                $data['_email'] = trim( str_replace( ':', '', str_ireplace( 'posta elettronica', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), 'mail:' ) !== false ){
+                                $data['_email'] = trim( str_replace( ':', '', str_ireplace( 'mail:', '', $subPart ) ) );
+                            }
+                        }
+
+                        if ( !isset( $data['_pec'] ) ){
+                            if ( strpos( strtolower( $subPart ), 'pec:' ) !== false ){
+                                $data['_pec'] = trim( str_replace( ':', '', str_ireplace( 'pec:', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), 'pec ' ) !== false ){
+                                $data['_pec'] = trim( str_replace( ':', '', str_ireplace( 'pec ', '', $subPart ) ) );
+                            }elseif ( strpos( strtolower( $subPart ), 'posta elettronica certificata' ) !== false ){
+                                $data['_pec'] = trim( str_replace( ':', '', str_ireplace( 'posta elettronica certificata', '', $subPart ) ) );
+                            }
+                        }
+                    }
+                }
+
+
+
+                foreach( $data as $identifier => $value ){
+                    $id = $dict[$identifier];
+                    if ( !isset( $fullContacts[$id] ) ){
+                        $fullContacts[$id] = $value;
+                    }
+                }
+            }
+        }
+
+        $storeContacts = array();
+        foreach( $dict as $key => $id ){
+            if ( !isset($fullContacts[$id]) ){
+                $storeContacts[$id] = '';
+            }else{
+                $storeContacts[$id] = $fullContacts[$id];
+            }
+        }
+
+        if( !empty($fullContacts) && $contacts){
+            $stringArray = array();
+            foreach($storeContacts as $key => $value){
+                $stringArray[] = $key . '|' . $value;
+            }
+            $string = implode('&', $stringArray);
+            OpenPALog::warning("Salvo contatti");
+            $contacts->fromString($string);
+            $contacts->store();
+        }
+
+
+    }
+
+    if ($options['areatematica_sync']) {
 
         $footerObject = eZContentObject::fetchByRemoteID($footerRemoteId);
 
@@ -45,7 +220,7 @@ try {
             {
                 OpenPALog::warning( 'Sincronizzo classe ' . $identifier );
                 $tools = new OpenPAClassTools( $identifier, true ); // creo se non esiste
-                $tools->sync( true, true ); // forzo e rimuovo attributi in più
+                $tools->sync( true, false ); // forzo e rimuovo attributi in più
             }
 
 
