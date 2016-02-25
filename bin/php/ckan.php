@@ -67,6 +67,7 @@ try {
         $generator = $tools->getDatasetGenerator();
         if ($generator instanceof OcOpendataDatasetGeneratorInterface) {
             foreach( $classes as $class ) {
+                $logs = array( OpenPAInstance::current()->getIdentifier(), $class);
                 try {
                     $object = $generator->createFromClassIdentifier(
                         $class,
@@ -75,12 +76,21 @@ try {
                     );
                     $count++;
                     if (!$options['dry-run']) {
+                        $log[] = '#' . $object->attribute('id');
                         OpenPALog::output("Generato/aggiornato oggetto " . $object->attribute('id'));
-                        $tools->pushObject($object);
+                        try {
+                            $tools->pushObject($object);
+                            $log[] = 'ok';
+                        }catch( Exception $e ){
+                            $log[] =  $e->getMessage();
+                            OpenPALog::error( $e->getMessage() );
+                        }
                     }
                 }catch( Exception $e ){
+                    $log[] =  $e->getMessage();
                     OpenPALog::error( $e->getMessage() );
                 }
+                eZLog::write( implode( ' ', $logs ), 'ckan_generate.log' );
             }
             OpenPALog::warning( "Totale: " . $count );
         } else {
