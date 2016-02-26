@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes][fix_section]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -30,6 +30,21 @@ $db = eZDB::instance();
 try {
 
     $footerRemoteId = 'opendata_footer_link';
+
+    if ($options['fix_section']){
+        $container = eZContentObject::fetchByRemoteID('opendata_datasetcontainer');
+        if ( $container instanceof eZContentObject){
+            $section = eZSection::fetchByIdentifier('standard', false);
+            if ( isset( $section['id'] ) ){
+                eZContentObjectTreeNode::assignSectionToSubTree( $container->attribute('main_node_id'), $section['id'] );
+                OpenPALog::warning('OK');
+            }else{
+                OpenPALog::error('Section not found');
+            }
+        }else{
+            OpenPALog::error('Container not found');
+        }
+    }
 
     if ($options['generate_from_classes']){
 
