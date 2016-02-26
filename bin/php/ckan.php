@@ -36,6 +36,22 @@ try {
         $count = 0;
 
         $classes = array(
+            'accordo',
+            'convenzione',
+            'concessioni',
+            'event',
+            'procedimento',
+            'tasso_assenza',
+            'area_tematica',
+            'associazione',
+            'ente',
+            'ente_controllato',
+            'interpellanza',
+            'interrogazione',
+            'mozione',
+            'sovvenzione_contributo',
+            'seduta_consiglio',
+            'rapporto',
             'albo_elenco',
             'avviso',
             'bando',
