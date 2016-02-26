@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][repush_all]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -30,6 +30,245 @@ $db = eZDB::instance();
 try {
 
     $footerRemoteId = 'opendata_footer_link';
+
+    if ($options['repush_all']) {
+        $tools = new OCOpenDataTools();
+        foreach( $tools->getDatasetObjects() as $object ){
+            OpenPALog::notice($object->attribute('name') . ' ',false);
+            if (!$options['dry-run']) {
+                try{
+                    $tools->pushObject($object);
+                    OpenPALog::warning('OK');
+                }catch(Exception $e){
+                    OpenPALog::error('KO ' . $e->getMessage());
+                }
+            }else{
+                OpenPALog::notice();
+            }
+        }
+    }
+
+    if ($options['fix_section']){
+        $container = eZContentObject::fetchByRemoteID('opendata_datasetcontainer');
+        if ( $container instanceof eZContentObject){
+            $section = eZSection::fetchByIdentifier('standard', false);
+            if ( isset( $section['id'] ) ){
+                eZContentObjectTreeNode::assignSectionToSubTree( $container->attribute('main_node_id'), $section['id'] );
+                OpenPALog::warning('OK');
+            }else{
+                OpenPALog::error('Section not found');
+            }
+        }else{
+            OpenPALog::error('Container not found');
+        }
+    }
+
+    if ($options['generate_from_classes']){
+
+        $count = 0;
+
+        $classes = array(
+            'accordo',
+            'convenzione',
+            'concessioni',
+            'event',
+            'procedimento',
+            'tasso_assenza',
+            'area_tematica',
+            'associazione',
+            'ente',
+            'ente_controllato',
+            'interpellanza',
+            'interrogazione',
+            'mozione',
+            'sovvenzione_contributo',
+            'seduta_consiglio',
+            'rapporto',
+            'albo_elenco',
+            'avviso',
+            'bando',
+            'bilancio_di_previsione',
+            'concorso',
+            'conferimento_incarico',
+            'consulenza',
+            'decreto_sindacale',
+            'dipendente',
+            'disciplinare',
+            'documento',
+            'gruppo_consiliare',
+            'modulo',
+            'organo_politico',
+            'piano_progetto',
+            'politico',
+            'pubblicazione',
+            'luogo',
+            'regolamento',
+            'rendiconto',
+            'sala_pubblica',
+            'servizio',
+            'ufficio',
+            'servizio_sul_territorio',
+            'statuto'
+        );
+        $tools = new OCOpenDataTools();
+        $tools->pushOrganization();
+        $generator = $tools->getDatasetGenerator();
+        if ($generator instanceof OcOpendataDatasetGeneratorInterface) {
+            foreach( $classes as $class ) {
+                $logs = array( OpenPAInstance::current()->getIdentifier(), $class);
+                try {
+                    $object = $generator->createFromClassIdentifier(
+                        $class,
+                        array(),
+                        $options['dry-run'] !== null
+                    );
+                    $count++;
+                    if (!$options['dry-run']) {
+                        $logs[] = '#' . $object->attribute('id');
+                        OpenPALog::output("Generato/aggiornato oggetto " . $object->attribute('id'));
+                        try {
+                            $tools->pushObject($object);
+                            $logs[] = 'ok';
+                        }catch( Exception $e ){
+                            $logs[] =  $e->getMessage();
+                            OpenPALog::error( $e->getMessage() );
+                        }
+                    }
+                }catch( Exception $e ){
+                    $logs[] =  $e->getMessage();
+                    OpenPALog::error( $e->getMessage() );
+                }
+                eZLog::write( implode( ' ', $logs ), 'ckan_generate.log' );
+            }
+            OpenPALog::warning( "Totale: " . $count );
+        } else {
+            throw new Exception('Generator not found');
+        }
+    }
+
+    if ($options['parse_indicepa']){
+        $sourceTextFilePath = eZSys::rootDir() . '/extension/openpa/data/amministrazioni.txt';
+        if ( file_exists( $sourceTextFilePath ) ) {
+            $textContent = file_get_contents( $sourceTextFilePath );
+            $rows = explode("\n", $textContent);
+            $data = array();
+            foreach ($rows as $index => $row) {
+                if ($index == 0) {
+                    $headers = explode("\t", $row);
+                } elseif ($index > 1) {
+                    $data[$index] = explode("\t", $row);
+                }
+            }
+            array_walk($headers, function (&$value, $key) {
+                $value = trim($value);
+            });
+            $result = array();
+            foreach ($data as $d) {
+                array_walk($d, function (&$value, $key) {
+                    $value = trim($value);
+                });
+                $addToResult = false;
+                if (is_array($d) && count($d) == count($headers)) {
+                    $addToResult = array_combine($headers, $d);
+                }
+                if ( $addToResult && $addToResult['Provincia'] == 'TN' ){
+                    $result[] = $addToResult;
+                }
+            }
+            if ( count( $result ) > 0 ){
+                eZFile::create('amministrazioni.php', eZSys::rootDir() . '/extension/openpa/data/', '<?php $data=' . var_export($result,1) . ';' );
+            }
+        }else{
+            OpenPALog::error( "File $sourceTextFilePath non trovato" );
+        }
+    }
+
+    if ($options['find_codiceipa']){
+        include eZSys::rootDir() . '/extension/openpa/data/amministrazioni.php';
+        $siteName = eZINI::instance()->variable( 'SiteSettings', 'SiteName' );
+        if ( strpos( strtolower( $siteName ), 'comune di' ) === false ){
+            $siteName = false;
+        }
+
+        if ( $siteName ){
+            $found = false;
+            $siteNameMatch = str_replace( '-', ' ', $siteName );
+            $siteNameMatch = str_replace( array( 'é', 'è' ), 'e\'', $siteNameMatch );
+            $siteNameMatch = str_replace( array( 'ò' ), 'o\'', $siteNameMatch );
+            OpenPALog::notice("Ricerca di $siteName ($siteNameMatch)");
+            foreach( $data as $item ){
+                if ( strpos( strtolower( $siteNameMatch ), strtolower( $item['des_amm'] ) ) !== false ){
+                    $found = $item;
+                    break;
+                }
+            }
+
+            if ( $found ){
+                $homePage = OpenPaFunctionCollection::fetchHome();
+                $homeObject = $homePage->attribute( 'object' );
+                if ( $homeObject instanceof eZContentObject )
+                {
+                    /** @var eZContentObjectAttribute[] $dataMap */
+                    $dataMap = $homeObject->attribute( 'data_map' );
+                    if ( isset( $dataMap['contacts'] )
+                         && $dataMap['contacts'] instanceof eZContentObjectAttribute
+                         && $dataMap['contacts']->attribute( 'data_type_string' ) == 'ezmatrix' )
+                    {
+                        $contacts = $dataMap['contacts'];
+                        $fullContacts = array();
+                        if ( $dataMap['contacts']->attribute( 'has_content' ) ){
+                            $trans = eZCharTransform::instance();
+                            $matrix = $dataMap['contacts']->attribute( 'content' )->attribute( 'matrix' );
+                            foreach( $matrix['rows']['sequential'] as $row )
+                            {
+                                $columns = $row['columns'];
+                                $name = $columns[0];
+                                if ( !empty( $columns[1] ) )
+                                {
+                                    $fullContacts[$name] = $columns[1];
+                                }
+                            }
+                        }
+
+                        //print_r($fullContacts);
+
+                        //print_r($found);
+
+                        $fullContacts["Codice iPA"] = $found['cod_amm'];
+
+                        if ( !isset($fullContacts["Codice fiscale"] ) && $found['Cf'] != 'null' ){
+                            if ( $found['cf_validato'] == 'S' ){
+                                $fullContacts["Codice fiscale"] = $found['Cf'];
+                            }
+                        }
+
+                        //@todo riempire tutti?
+
+                        $storeContacts = array();
+                        foreach( OpenPAPageData::$contactsMatrixFields as $id ){
+                            if ( !isset($fullContacts[$id]) ){
+                                $storeContacts[$id] = '';
+                            }else{
+                                $storeContacts[$id] = $fullContacts[$id];
+                            }
+                        }
+
+                        //print_r($storeContacts);
+
+                        $stringArray = array();
+                        foreach($storeContacts as $key => $value){
+                            $stringArray[] = $key . '|' . $value;
+                        }
+                        $string = implode('&', $stringArray);
+                        OpenPALog::warning("Salvo codice Ipa ({$storeContacts['Codice iPA']}) nei contatti");
+                        $contacts->fromString($string);
+                        $contacts->store();
+
+                    }
+                }
+            }
+        }
+    }
 
     if ($options['check_org']){
 
@@ -66,7 +305,6 @@ try {
                     {
                         $columns = $row['columns'];
                         $name = $columns[0];
-                        $identifier = $trans->transformByGroup( $name, 'identifier' );
                         if ( !empty( $columns[1] ) )
                         {
                             $fullContacts[$name] = $columns[1];
