@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes][fix_section]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][repush_all]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -30,6 +30,23 @@ $db = eZDB::instance();
 try {
 
     $footerRemoteId = 'opendata_footer_link';
+
+    if ($options['repush_all']) {
+        $tools = new OCOpenDataTools();
+        foreach( $tools->getDatasetObjects() as $object ){
+            OpenPALog::notice($object->attribute('name') . ' ',false);
+            if (!$options['dry-run']) {
+                try{
+                    $tools->pushObject($object);
+                    OpenPALog::warning('OK');
+                }catch(Exception $e){
+                    OpenPALog::error('KO ' . $e->getMessage());
+                }
+            }else{
+                OpenPALog::notice();
+            }
+        }
+    }
 
     if ($options['fix_section']){
         $container = eZContentObject::fetchByRemoteID('opendata_datasetcontainer');
