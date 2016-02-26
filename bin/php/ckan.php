@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][checkgeoname]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes][fix_section]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -30,16 +30,6 @@ $db = eZDB::instance();
 try {
 
     $footerRemoteId = 'opendata_footer_link';
-
-    if ($options['checkgeoname']){
-        $tools = new OCOpenDataTools();
-        $objects = OCOpenDataTools::getDatasetObjects();
-        foreach( $objects as $object ){
-            $converter = new \Opencontent\Ckan\DatiTrentinoIt\Converter\OpenPA();
-            $converter::$debug = true;
-            $dataset = $tools->getDatasetFromObject($object);
-        }
-    }
 
     if ($options['fix_section']){
         $container = eZContentObject::fetchByRemoteID('opendata_datasetcontainer');
