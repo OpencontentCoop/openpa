@@ -275,10 +275,10 @@
                     },
                     "reset": function(){
                         if ($container.find('.ezgml_hidden_latitude').val().length) {
+                            this.text = $container.find('.ezgml_hidden_address').val();
                             this.moveIn(
                                 $container.find('.ezgml_hidden_latitude').val(),
-                                $container.find('.ezgml_hidden_longitude').val(),
-                                $container.find('.ezgml_hidden_address').val()
+                                $container.find('.ezgml_hidden_longitude').val()
                             );
                         }
                     },
@@ -295,12 +295,9 @@
                         this.map.fitBounds(this.markers.getBounds());
                         return this;
                     },
-                    "moveIn": function (lat, lng, text) {
+                    "moveIn": function (lat, lng) {
                         this.lat = lat || 0;
                         this.lng = lng || 0;
-                        if(this.text == null) {
-                            this.text = text || null;
-                        }
                         var latLng = new L.latLng(this.lat, this.lng);
                         this.marker.setLatLng(latLng);
                         this.resetMakers().addMarker(this.marker,true);
