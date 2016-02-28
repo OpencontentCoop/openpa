@@ -307,14 +307,15 @@
                         this.geocoder().reverse(latLng, 0, function (result) {
                             console.log(result);
                             that.map.loadingControl.removeLoader('sc');
+                            $container.find('.ezgml-form-fields p').remove();
                             $container.find('.ezgml-form input').val('');
                             if(result[0].properties) {
-                                that.address = $.extend( {}, that.address, result[0].properties.address );
+                                that.address = result[0].properties.address;
                                 $.each(that.address, function (index, value) {
                                     if ( $container.find("[name='" + index + "']").length > 0) {
                                         $container.find("[name='" + index + "']").val(value);
                                     }else {
-                                        $container.find('.ezgml-form-fields').append('<div class="block"><small style="display: block; line-height: 0.5;font-style: italic">' + index + '</small> <input type="text" readonly disabled="disabled" name="' + index + '" placeholder="' + index + '" size="20" value="' + value + '"/> </div>');
+                                        $container.find('.ezgml-form-fields').append('<p class="block"><small style="display: block; line-height: 0.5;font-style: italic">' + index + '</small><small>' + value + '</small></p>');
                                     }
                                 });
                                 if(that.text == null){
