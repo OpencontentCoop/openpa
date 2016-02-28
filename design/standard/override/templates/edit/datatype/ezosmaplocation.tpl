@@ -49,7 +49,7 @@
 
     </div>
 
-    <div class="element ezgml-form">
+    <div class="element square-box-soft-gray ezgml-form">
 
         <div class="ezgml-form-fields">
             <div class="block">
@@ -357,6 +357,7 @@
                     userMarker.search(query, function (results) {
                         userMarker.text = query;
                         userMarker.resetMakers();
+                        $container.find('.ezgml-form-fields p').remove();
                         if(results.length) {
                             var markers = {};
                             var list = $('<ol/>');
