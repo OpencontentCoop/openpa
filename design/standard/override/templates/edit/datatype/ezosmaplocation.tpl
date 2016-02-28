@@ -365,6 +365,10 @@
                                     var number = index + 1;
                                     var latLng = new L.latLng(result.center.lat, result.center.lng);
                                     var marker = new L.marker(latLng, {icon: new L.NumberedDivIcon({number: number})});
+                                    marker.on('click', function(e){
+                                        userMarker.moveIn(e.latlng.lat,e.latlng.lng);
+                                        $container.find('.ezgml-search-results').empty().hide();
+                                    });
                                     markers[index] = marker;
                                     userMarker.addMarker(marker, false);
                                     list.append(
@@ -373,9 +377,9 @@
                                                     .css({"cursor": 'pointer'})
                                                     .bind('click', function () {
                                                         userMarker.markers.zoomToShowLayer(marker,
-                                                                function () {
-                                                                    marker.fire('click');
-                                                                }
+                                                            function () {
+                                                                marker.fire('click');
+                                                            }
                                                         );
                                                     })
                                     );
