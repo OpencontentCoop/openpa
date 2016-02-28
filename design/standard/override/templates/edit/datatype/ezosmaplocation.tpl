@@ -97,7 +97,7 @@
         <button class="button" name="Reset">Annulla</button>
     </div>
 
-    <div class="element ezgml-search-results" style="display: none">
+    <div class="element square-box-soft-gray ezgml-search-results" style="display: none;max-width: 400px;width: 400px">
 
     </div>
 </div>
@@ -220,8 +220,15 @@
 //                            console.log(results);
                             if (results.length > 0)
                                 cb.call(context, results);
-                            else
-                                $container.find('.ezgml-search-results').empty().html("Nessun risultato, Prova a ridurre i parametri di ricerca");
+                            else {
+                                var close = $('<a href="#">Chiudi risultati</a>');
+                                close.bind('click',function(e){
+                                    $container.find('.ezgml-search-results').empty().hide();
+                                    $container.find('.ezgml-form').show();
+                                    e.preventDefault();
+                                });
+                                $container.find('.ezgml-search-results').empty().append("<p>Nessun risultato, Prova a ridurre i parametri di ricerca<p>").append(close);
+                            }
 
                             that.map.loadingControl.removeLoader('sc');
 
@@ -369,6 +376,7 @@
                                     marker.on('click', function(e){
                                         userMarker.moveIn(e.latlng.lat,e.latlng.lng);
                                         $container.find('.ezgml-search-results').empty().hide();
+                                        $container.find('.ezgml-form').show();
                                     });
                                     markers[index] = marker;
                                     userMarker.addMarker(marker, false);
@@ -385,15 +393,23 @@
                                                     })
                                     );
                                 });
-                                $container.find('.ezgml-search-results').empty().append(list);
+                                var close = $('<a href="#">Chiudi risultati</a>');
+                                close.bind('click',function(e){
+                                    $container.find('.ezgml-search-results').empty().hide();
+                                    $container.find('.ezgml-form').show();
+                                    e.preventDefault();
+                                });
+                                $container.find('.ezgml-search-results').empty().append(list).append(close);
                             }else{
                                 userMarker.moveIn(results[0].center.lat,results[0].center.lng);
                                 $container.find('.ezgml-search-results').empty().hide();
+                                $container.find('.ezgml-form').show();
                             }
                             userMarker.fitBounds();
                         }
                     });
-                    $container.find('.ezgml-search-results').show();
+                    $container.find('.ezgml-form').hide();
+                    $container.find('.ezgml-search-results').show().append('<p>Attendere caricamento ...</p>');
                     e.preventDefault();
                 });
 
@@ -401,6 +417,7 @@
                 map.on('click', function (e) {
                     userMarker.moveIn(e.latlng.lat,e.latlng.lng);
                     $container.find('.ezgml-search-results').empty().hide();
+                    $container.find('.ezgml-form').show();
                 });
 
                 // intercetta il MyLocation
