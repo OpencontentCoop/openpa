@@ -57,47 +57,37 @@
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">road</small>
-                <input type="text" name="road" placeholder="Indirizzo" value=""/>
+                <small style="display: block; line-height: 0.5;font-weight: bold">Indirizzo</small>
+                <input type="text" class="box" name="street" placeholder="Indirizzo" value=""/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">house_number</small>
-                 <input type="text" name="house_number" placeholder="Numero" size="5" value=""/>
+                <small style="display: block; line-height: 0.5;font-weight: bold">Numero</small>
+                 <input type="text" class="box" name="house_number" placeholder="Numero" size="5" value=""/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">postcode</small>
+                <small style="display: block; line-height: 0.5;font-weight: bold">CAP</small>
                  <input type="text" name="postcode" placeholder="CAP" size="10" value=""/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">village</small>
-                 <input type="text" name="village" placeholder="Località" size="20" value=""/>
-            </div>
-
-            <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">town</small>
-                 <input type="text" name="town" placeholder="Town" size="20" value=""/>
-            </div>
-
-            <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">city</small>
+                <small style="display: block; line-height: 0.5;font-weight: bold">Città</small>
                  <input type="text" name="city" placeholder="City" size="20" value=""/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">county</small>
+                <small style="display: block; line-height: 0.5;font-weight: bold">Provincia</small>
                  <input type="text" name="county" placeholder="Provincia" size="20" value="Provincia Autonoma di Trento"/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">state</small>
+                <small style="display: block; line-height: 0.5;font-weight: bold">Regione</small>
                  <input type="text" name="state" placeholder="Regione" size="20" value="Trentino-Alto Adige"/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">country</small>
+                <small style="display: block; line-height: 0.5;font-weight: bold">Stato</small>
                  <input type="text" name="country" placeholder="Stato" size="20" value="Italia"/>
             </div>
         </div>
@@ -119,7 +109,7 @@
 'leaflet/MarkerCluster.Default.css'
 ))}
 {ezscript_require(array(
-'leaflet/leaflet/leaflet-src.js',
+'leaflet/leaflet.0.7.2.js',
 'ezjsc::jquery',
 'leaflet/leaflet.activearea.js',
 'leaflet/leaflet.markercluster.js',
@@ -216,12 +206,10 @@
                         return new L.Control.Geocoder.Nominatim();
                     },
                     "address": {
-                        "road": null,
+                        "street": null,
                         "house_number": null,
                         "postcode": null,
                         "state": null,
-                        "village": null,
-                        "town": null,
                         "country": null,
                         "county": null
                     },
@@ -229,7 +217,7 @@
                         this.map.loadingControl.addLoader('sc');
                         var that = this;
                         this.geocoder().geocode(query, function (results) {
-                            console.log(results);
+//                            console.log(results);
                             if (results.length > 0)
                                 cb.call(context, results);
                             else
@@ -242,10 +230,9 @@
                     "text": null,
                     "toQuery": function () {
                         var parts = [];
-                        if (this.address.road) parts.push(this.address.road);
+                        if (this.address.street) parts.push(this.address.street);
                         if (this.address.house_number) parts.push(this.address.house_number);
-                        if (this.address.village) parts.push(this.address.village);
-                        if (this.address.town) parts.push(this.address.town);
+                        if (this.address.city) parts.push(this.address.city);
                         if (this.address.state) parts.push(this.address.state);
                         if (this.address.postcode) parts.push(this.address.postcode);
                         if (this.address.country) parts.push(this.address.country);
@@ -304,7 +291,7 @@
                         this.map.loadingControl.addLoader('sc');
                         var that = this;
                         this.geocoder().reverse(latLng, 0, function (result) {
-                            console.log(result);
+//                            console.log(result);
                             that.map.loadingControl.removeLoader('sc');
                             $container.find('.ezgml-form-fields p').remove();
                             $container.find('.ezgml-form input').val('');
