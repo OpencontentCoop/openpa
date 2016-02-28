@@ -352,8 +352,8 @@
                 $container.find('.ezgml-form input').bind('keypress', function(e) {
                     if(e.which == 13){
                         $container.find("[name='GeoSearch']").trigger('click');
+                        e.preventDefault();
                     }
-                    e.preventDefault();
                 });
 
                 // esegue il form di ricerca
