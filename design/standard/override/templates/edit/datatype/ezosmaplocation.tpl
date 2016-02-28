@@ -388,6 +388,7 @@
                                 $container.find('.ezgml-search-results').empty().append(list);
                             }else{
                                 userMarker.moveIn(results[0].center.lat,results[0].center.lng);
+                                $container.find('.ezgml-search-results').empty().hide();
                             }
                             userMarker.fitBounds();
                         }
