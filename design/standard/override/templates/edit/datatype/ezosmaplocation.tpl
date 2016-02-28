@@ -395,7 +395,7 @@
                                 });
                                 $container.find('.ezgml-search-results').empty().append(list);
                             }else{
-                                userMarker.moveIn(results[0].center.lat,results[0].center.lng,userMarker.text);
+                                userMarker.moveIn(results[0].center.lat,results[0].center.lng);
                             }
                             userMarker.fitBounds();
                         }
@@ -416,6 +416,7 @@
                     map.locate({setView: true, watch: false})
                             .on('locationfound', function (e) {
                                 map.loadingControl.removeLoader('lc');
+                                userMarker.text = null;
                                 userMarker.moveIn(e.latitude, e.longitude);
                             })
                             .on('locationerror', function (e) {
