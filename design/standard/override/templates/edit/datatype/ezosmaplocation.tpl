@@ -301,7 +301,7 @@
                                     if ( $container.find("[name='" + index + "']").length > 0) {
                                         $container.find("[name='" + index + "']").val(value);
                                     }else {
-                                        $container.find('.ezgml-form-fields').append('<p class="block"><small style="display: block; line-height: 0.5;font-style: italic">' + index + '</small><small>' + value + '</small></p>');
+                                        $container.find('.ezgml-form-fields').append('<p class="block"><small style="font-style: italic">' + index + ':</small><small>' + value + '</small></p>');
                                     }
                                 });
                                 if(that.text == null){
