@@ -349,6 +349,13 @@
                 // popola il marker in base alle coordinate esistenti
                 userMarker.reset();
 
+                $container.find('.ezgml-form input').bind('keypress', function(e) {
+                    if(e.which == 13){
+                        $container.find("[name='GeoSearch']").trigger('click');
+                    }
+                    e.preventDefault();
+                });
+
                 // esegue il form di ricerca
                 $container.find("[name='GeoSearch']").bind('click', function (e) {
                     var query = null;
