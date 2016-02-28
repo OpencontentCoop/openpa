@@ -296,7 +296,7 @@
                             $container.find('.ezgml-form-fields p').remove();
                             $container.find('.ezgml-form input').val('');
                             if(result[0].properties) {
-                                that.address = result[0].properties.address;
+                                that.address = $.extend({}, {street:that.address.street}, result[0].properties.address );
                                 $.each(that.address, function (index, value) {
                                     if ( $container.find("[name='" + index + "']").length > 0) {
                                         $container.find("[name='" + index + "']").val(value);
