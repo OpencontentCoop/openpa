@@ -134,10 +134,6 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                 iconSize: new L.Point(25, 41),
                 iconAnchor: new L.Point(13, 41),
                 popupAnchor: new L.Point(0, -33),
-                /*
-                 iconAnchor: (Point)
-                 popupAnchor: (Point)
-                 */
                 className: 'leaflet-div-icon'
             },
 
@@ -281,7 +277,7 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
 
                 // popola il marker in base alle coordinate esistenti
                 if ($container.find('.ezgml_new_latitude').val().length) {
-                    //userMarker.moveIn($container.find('.ezgml_new_latitude').val(), $container.find('.ezgml_new_longitude').val());
+                    userMarker.moveIn($container.find('.ezgml_new_latitude').val(), $container.find('.ezgml_new_longitude').val());
                 }
 
                 // esegue il form di ricerca
@@ -332,6 +328,7 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                     $container.find('.ezgml-search-results').empty().hide();
                 });
 
+                // intercetta il MyLocation
                 $container.find("[name='MyLocation']").bind('click', function (e) {
                     map.loadingControl.addLoader('lc');
                     map.locate({setView: true, watch: false})
