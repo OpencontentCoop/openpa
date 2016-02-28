@@ -2,15 +2,15 @@
     {def $attribute_base = 'ContentObjectAttribute'}
 {/if}
 {def $latitude  = $attribute.content.latitude|explode(',')|implode('.')
-$longitude = $attribute.content.longitude|explode(',')|implode('.')}
-
+     $longitude = $attribute.content.longitude|explode(',')|implode('.')}
 
 <div class="block float-break" data-gmap-attribute="{$attribute.id}">
     <div class="element ezgml-data">
         <div id="map-{$attribute.id}" style="width: 500px; height: 280px; margin-top: 2px;"></div>
 
-        <div class="element address">
-            <input class="ezgml_new_address"
+        <div class="block address">
+            <label>Indirizzo</label>
+            <input class="ezgml_new_address box"
                    type="text"
                    name="{$attribute_base}_data_gmaplocation_address_{$attribute.id}"
                    value="{$attribute.content.address}"/>
@@ -22,7 +22,8 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
         </div>
 
         <div class="element latitude">
-            <input class="ezgml_new_latitude"
+            <label>Latitudine</label>
+            <input class="ezgml_new_latitude box"
                    type="text"
                    name="{$attribute_base}_data_gmaplocation_latitude_{$attribute.id}"
                    value="{$latitude}"/>
@@ -34,7 +35,8 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
         </div>
 
         <div class="element longitude">
-            <input class="ezgml_new_longitude"
+            <label>Longitudine</label>
+            <input class="ezgml_new_longitude box"
                    type="text"
                    name="{$attribute_base}_data_gmaplocation_longitude_{$attribute.id}"
                    value="{$longitude}"/>
@@ -48,41 +50,56 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
     </div>
 
     <div class="element ezgml-form">
-        <div class="block">
-            <input class="box" type="text" name="query" placeholder="Ricerca libera" value=""/>
-        </div>
 
-        <div class="block">
-            <input type="text" name="road" placeholder="Indirizzo" value=""/>
-            <input type="text" name="house_number" placeholder="Numero" size="5" value=""/>
-        </div>
+        <div class="ezgml-form-fields">
+            <div class="block">
+                <input class="box" type="hidden" name="query" placeholder="Query" value=""/>
+            </div>
 
-        <div class="block">
-            <input type="text" name="postcode" placeholder="CAP" size="10" value=""/>
-        </div>
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">road</small>
+                <input type="text" name="road" placeholder="Indirizzo" value=""/>
+            </div>
 
-        <div class="block">
-            <input type="text" name="village" placeholder="Località" size="20" value=""/>
-        </div>
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">house_number</small>
+                 <input type="text" name="house_number" placeholder="Numero" size="5" value=""/>
+            </div>
 
-        <div class="block">
-            <input type="text" name="town" placeholder="Town" size="20" value=""/>
-        </div>
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">postcode</small>
+                 <input type="text" name="postcode" placeholder="CAP" size="10" value=""/>
+            </div>
 
-        <div class="block">
-            <input type="text" name="city" placeholder="City" size="20" value=""/>
-        </div>
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">village</small>
+                 <input type="text" name="village" placeholder="Località" size="20" value=""/>
+            </div>
 
-        <div class="block">
-            <input type="text" name="county" placeholder="Provincia" size="20" value="Provincia Autonoma di Trento"/>
-        </div>
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">town</small>
+                 <input type="text" name="town" placeholder="Town" size="20" value=""/>
+            </div>
 
-        <div class="block">
-            <input type="text" name="state" placeholder="Regione" size="20" value="Trentino-Alto Adige"/>
-        </div>
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">city</small>
+                 <input type="text" name="city" placeholder="City" size="20" value=""/>
+            </div>
 
-        <div class="block">
-            <input type="text" name="country" placeholder="Stato" size="20" value="Italia"/>
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">county</small>
+                 <input type="text" name="county" placeholder="Provincia" size="20" value="Provincia Autonoma di Trento"/>
+            </div>
+
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">state</small>
+                 <input type="text" name="state" placeholder="Regione" size="20" value="Trentino-Alto Adige"/>
+            </div>
+
+            <div class="block">
+                <small style="display: block; line-height: 0.5;font-weight: bold">country</small>
+                 <input type="text" name="country" placeholder="Stato" size="20" value="Italia"/>
+            </div>
         </div>
 
         <button class="defaultbutton" name="GeoSearch">Cerca indirizzo</button>
@@ -222,7 +239,8 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
 
                         });
                     },
-                    "toString": function () {
+                    "text": null,
+                    "toQuery": function () {
                         var parts = [];
                         if (this.address.road) parts.push(this.address.road);
                         if (this.address.house_number) parts.push(this.address.house_number);
@@ -257,7 +275,11 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                     },
                     "reset": function(){
                         if ($container.find('.ezgml_hidden_latitude').val().length) {
-                            this.moveIn($container.find('.ezgml_hidden_latitude').val(), $container.find('.ezgml_hidden_longitude').val());
+                            this.moveIn(
+                                $container.find('.ezgml_hidden_latitude').val(),
+                                $container.find('.ezgml_hidden_longitude').val(),
+                                $container.find('.ezgml_hidden_address').val()
+                            );
                         }
                     },
                     "resetMakers": function () {
@@ -273,9 +295,10 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                         this.map.fitBounds(this.markers.getBounds());
                         return this;
                     },
-                    "moveIn": function (lat, lng) {
+                    "moveIn": function (lat, lng, text) {
                         this.lat = lat || 0;
                         this.lng = lng || 0;
+                        this.text = text || null;
                         var latLng = new L.latLng(this.lat, this.lng);
                         this.marker.setLatLng(latLng);
                         this.resetMakers().addMarker(this.marker,true);
@@ -286,12 +309,19 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                             that.map.loadingControl.removeLoader('sc');
                             $container.find('.ezgml-form input').val('');
                             if(result[0].properties) {
-                                that.address = result[0].properties.address;
+                                that.address = $.extend( {}, that.address, result[0].properties.address );
                                 $.each(that.address, function (index, value) {
-                                    $container.find("[name='" + index + "']").val(value);
+                                    if ( $container.find("[name='" + index + "']").length > 0) {
+                                        $container.find("[name='" + index + "']").val(value);
+                                    }else {
+                                        $container.find('.ezgml-form-fields').append('<div class="block"><small style="display: block; line-height: 0.5;font-style: italic">' + index + '</small> <input type="text" readonly disabled="disabled" name="' + index + '" placeholder="' + index + '" size="20" value="' + value + '"/> </div>');
+                                    }
                                 });
+                                if(that.text == null){
+                                    that.text = result[0].name;
+                                }
                             }
-                            $container.find('.ezgml_new_address').val(that.toString());
+                            $container.find('.ezgml_new_address').val(that.text);
                             $container.find('.ezgml_new_latitude').val(that.lat);
                             $container.find('.ezgml_new_longitude').val(that.lng);
 
@@ -335,33 +365,38 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                         else
                             userMarker.address[input.attr('name')] = input.val();
                     });
-                    query = query || userMarker.toString();
+                    query = userMarker.toQuery();
                     $container.find("[name='query']").val(query);
-                    userMarker.search(query.toString(), function (results) {
+                    userMarker.search(query, function (results) {
+                        userMarker.text = query;
                         userMarker.resetMakers();
                         if(results.length) {
                             var markers = {};
                             var list = $('<ol/>');
-                            $.each(results, function (index, result) {
-                                var number = index + 1;
-                                var latLng = new L.latLng(result.center.lat, result.center.lng);
-                                var marker = new L.marker(latLng, {icon: new L.NumberedDivIcon({number: number})});
-                                markers[index] = marker;
-                                userMarker.addMarker(marker, false);
-                                list.append(
-                                        $('<li/>')
-                                                .html(result.name)
-                                                .css({"cursor": 'pointer'})
-                                                .bind('click', function () {
-                                                    userMarker.markers.zoomToShowLayer(marker,
-                                                            function () {
-                                                                marker.fire('click');
-                                                            }
-                                                    );
-                                                })
-                                );
-                            });
-                            $container.find('.ezgml-search-results').empty().append(list);
+                            if(results.length > 1) {
+                                $.each(results, function (index, result) {
+                                    var number = index + 1;
+                                    var latLng = new L.latLng(result.center.lat, result.center.lng);
+                                    var marker = new L.marker(latLng, {icon: new L.NumberedDivIcon({number: number})});
+                                    markers[index] = marker;
+                                    userMarker.addMarker(marker, false);
+                                    list.append(
+                                            $('<li/>')
+                                                    .html(result.name)
+                                                    .css({"cursor": 'pointer'})
+                                                    .bind('click', function () {
+                                                        userMarker.markers.zoomToShowLayer(marker,
+                                                                function () {
+                                                                    marker.fire('click');
+                                                                }
+                                                        );
+                                                    })
+                                    );
+                                });
+                                $container.find('.ezgml-search-results').empty().append(list);
+                            }else{
+                                userMarker.moveIn(results[0].center.lat,results[0].center.lng,userMarker.text);
+                            }
                             userMarker.fitBounds();
                         }
                     });
