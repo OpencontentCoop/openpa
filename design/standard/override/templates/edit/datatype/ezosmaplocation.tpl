@@ -298,7 +298,7 @@
                     "moveIn": function (lat, lng, text) {
                         this.lat = lat || 0;
                         this.lng = lng || 0;
-                        if(that.text == null) {
+                        if(this.text == null) {
                             this.text = text || null;
                         }
                         var latLng = new L.latLng(this.lat, this.lng);
