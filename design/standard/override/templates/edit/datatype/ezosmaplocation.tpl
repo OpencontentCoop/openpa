@@ -409,6 +409,7 @@
                     map.locate({setView: true, watch: false})
                             .on('locationfound', function (e) {
                                 map.loadingControl.removeLoader('lc');
+                                userMarker.address.street = null;
                                 userMarker.text = null;
                                 userMarker.moveIn(e.latitude, e.longitude);
                             })
@@ -421,6 +422,7 @@
 
                 // intercetta il Reset
                 $container.find("[name='Reset']").bind('click', function (e) {
+                    userMarker.address.street = null;
                     userMarker.reset();
                     e.preventDefault();
                 });
