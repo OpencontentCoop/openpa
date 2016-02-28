@@ -298,7 +298,9 @@
                     "moveIn": function (lat, lng, text) {
                         this.lat = lat || 0;
                         this.lng = lng || 0;
-                        this.text = text || null;
+                        if(that.text == null) {
+                            this.text = text || null;
+                        }
                         var latLng = new L.latLng(this.lat, this.lng);
                         this.marker.setLatLng(latLng);
                         this.resetMakers().addMarker(this.marker,true);
@@ -428,7 +430,7 @@
 
                 // intercetta il Reset
                 $container.find("[name='Reset']").bind('click', function (e) {
-                    userMarker.reset()
+                    userMarker.reset();
                     e.preventDefault();
                 });
 
