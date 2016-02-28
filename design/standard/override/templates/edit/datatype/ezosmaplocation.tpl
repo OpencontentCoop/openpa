@@ -61,10 +61,10 @@
                 <input type="text" class="box" name="street" placeholder="Indirizzo" value=""/>
             </div>
 
-            <div class="block">
+            {*<div class="block">
                 <small style="display: block; line-height: 0.5;font-weight: bold">Numero</small>
                  <input type="text" class="box" name="house_number" placeholder="Numero" size="5" value=""/>
-            </div>
+            </div>*}
 
             <div class="block">
                 <small style="display: block; line-height: 0.5;font-weight: bold">CAP</small>
@@ -207,7 +207,7 @@
                     },
                     "address": {
                         "street": null,
-                        "house_number": null,
+//                        "house_number": null,
                         "postcode": null,
                         "state": null,
                         "country": null,
@@ -231,7 +231,7 @@
                     "toQuery": function () {
                         var parts = [];
                         if (this.address.street) parts.push(this.address.street);
-                        if (this.address.house_number) parts.push(this.address.house_number);
+//                        if (this.address.house_number) parts.push(this.address.house_number);
                         if (this.address.city) parts.push(this.address.city);
                         if (this.address.state) parts.push(this.address.state);
                         if (this.address.postcode) parts.push(this.address.postcode);
