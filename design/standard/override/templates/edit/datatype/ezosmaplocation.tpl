@@ -66,11 +66,19 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
         </div>
 
         <div class="block">
-            <input type="text" name="city" placeholder="Città" size="20" value=""/>
+            <input type="text" name="town" placeholder="Town" size="20" value=""/>
         </div>
 
         <div class="block">
-            <input type="text" name="state" placeholder="Regione" size="20" value=""/>
+            <input type="text" name="city" placeholder="City" size="20" value=""/>
+        </div>
+
+        <div class="block">
+            <input type="text" name="county" placeholder="Provincia" size="20" value="Provincia Autonoma di Trento"/>
+        </div>
+
+        <div class="block">
+            <input type="text" name="state" placeholder="Regione" size="20" value="Trentino-Alto Adige"/>
         </div>
 
         <div class="block">
@@ -79,6 +87,7 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
 
         <button class="defaultbutton" name="GeoSearch">Cerca indirizzo</button>
         <button class="button" name="MyLocation">Rileva posizione</button>
+        <button class="button" name="Reset">Annulla</button>
     </div>
 
     <div class="element ezgml-search-results" style="display: none">
@@ -93,7 +102,7 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
 'leaflet/MarkerCluster.Default.css'
 ))}
 {ezscript_require(array(
-'leaflet/leaflet.0.7.2.js',
+'leaflet/leaflet/leaflet-src.js',
 'ezjsc::jquery',
 'leaflet/leaflet.activearea.js',
 'leaflet/leaflet.markercluster.js',
@@ -126,6 +135,23 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
         }
     </style>
     <script type="text/javascript">
+
+        (function(){
+            // Your base, I'm in it!
+            var originalAddClassMethod = jQuery.fn.addClass;
+
+            jQuery.fn.addClass = function(){
+                // Execute the original method.
+                var result = originalAddClassMethod.apply( this, arguments );
+
+                // trigger a custom event
+                jQuery(this).trigger('cssClassChanged');
+
+                // return the original result
+                return result;
+            }
+        })();
+
         L.NumberedDivIcon = L.Icon.extend({
             options: {
                 iconUrl: 'http://cdn.leafletjs.com/leaflet/v0.7.7/images/marker-icon.png',
@@ -169,7 +195,8 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                     "marker": null,
                     "markers": null,
                     "geocoder": function () {
-                        return new L.Control.Geocoder.Nominatim({geocodingQueryParams: this.address});
+                        //return new L.Control.Geocoder.Nominatim({geocodingQueryParams: this.address});
+                        return new L.Control.Geocoder.Nominatim();
                     },
                     "address": {
                         "road": null,
@@ -177,13 +204,15 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                         "postcode": null,
                         "state": null,
                         "village": null,
-                        "city": null,
-                        "country": null
+                        "town": null,
+                        "country": null,
+                        "county": null
                     },
                     "search": function (query, cb, context) {
                         this.map.loadingControl.addLoader('sc');
                         var that = this;
                         this.geocoder().geocode(query, function (results) {
+                            console.log(results);
                             if (results.length > 0)
                                 cb.call(context, results);
                             else
@@ -197,11 +226,12 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                         var parts = [];
                         if (this.address.road) parts.push(this.address.road);
                         if (this.address.house_number) parts.push(this.address.house_number);
-                        if (this.address.postcode) parts.push(this.address.postcode);
                         if (this.address.village) parts.push(this.address.village);
-                        if (this.address.city) parts.push(this.address.city);
+                        if (this.address.town) parts.push(this.address.town);
                         if (this.address.state) parts.push(this.address.state);
-                        return parts.join(' ');
+                        if (this.address.postcode) parts.push(this.address.postcode);
+                        if (this.address.country) parts.push(this.address.country);
+                        return parts.join(', ');
                     },
                     "init": function (map, lat, lng) {
                         this.lat = lat || 0;
@@ -225,7 +255,12 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                         this.markers = new L.markerClusterGroup();
                         return this;
                     },
-                    "reset": function () {
+                    "reset": function(){
+                        if ($container.find('.ezgml_hidden_latitude').val().length) {
+                            this.moveIn($container.find('.ezgml_hidden_latitude').val(), $container.find('.ezgml_hidden_longitude').val());
+                        }
+                    },
+                    "resetMakers": function () {
                         this.markers.clearLayers();
                         return this;
                     },
@@ -243,10 +278,11 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                         this.lng = lng || 0;
                         var latLng = new L.latLng(this.lat, this.lng);
                         this.marker.setLatLng(latLng);
-                        this.reset().addMarker(this.marker,true);
+                        this.resetMakers().addMarker(this.marker,true);
                         this.map.loadingControl.addLoader('sc');
                         var that = this;
                         this.geocoder().reverse(latLng, 0, function (result) {
+                            console.log(result);
                             that.map.loadingControl.removeLoader('sc');
                             $container.find('.ezgml-form input').val('');
                             if(result[0].properties) {
@@ -272,17 +308,26 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                 }).addTo(map);
                 map.setView(new L.latLng(0, 0), 1);
 
+                if ( $('a[data-toggle="tab"').length > 0) {
+                    $('a[data-toggle="tab"]').bind('shown.bs.tab', function (e) {
+                        map.invalidateSize(false);
+                    });
+                }
+                else if ( $(".ui-tabs .ui-tabs-nav").length > 0) {
+                    $(".ui-tabs .ui-tabs-panel").bind("cssClassChanged", function (event, ui) {
+                        map.invalidateSize(false);
+                    });
+                }
+
                 // init userMarker
                 userMarker.init(map);
 
                 // popola il marker in base alle coordinate esistenti
-                if ($container.find('.ezgml_new_latitude').val().length) {
-                    userMarker.moveIn($container.find('.ezgml_new_latitude').val(), $container.find('.ezgml_new_longitude').val());
-                }
+                userMarker.reset();
 
                 // esegue il form di ricerca
                 $container.find("[name='GeoSearch']").bind('click', function (e) {
-                    var query;
+                    var query = null;
                     $container.find('.ezgml-form input').each(function (i, v) {
                         var input = $(v);
                         if(input.attr('name') == 'query')
@@ -290,8 +335,10 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                         else
                             userMarker.address[input.attr('name')] = input.val();
                     });
-                    userMarker.search(query || userMarker.toString(), function (results) {
-                        userMarker.reset();
+                    query = query || userMarker.toString();
+                    $container.find("[name='query']").val(query);
+                    userMarker.search(query.toString(), function (results) {
+                        userMarker.resetMakers();
                         if(results.length) {
                             var markers = {};
                             var list = $('<ol/>');
@@ -340,6 +387,12 @@ $longitude = $attribute.content.longitude|explode(',')|implode('.')}
                                 map.loadingControl.removeLoader('lc');
                                 alert(e.message);
                             });
+                    e.preventDefault();
+                });
+
+                // intercetta il Reset
+                $container.find("[name='Reset']").bind('click', function (e) {
+                    userMarker.reset()
                     e.preventDefault();
                 });
 
