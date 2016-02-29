@@ -350,12 +350,6 @@
 		},
 
 		geocode: function(query, cb, context) {
-			console.log(L.extend({
-				q: query,
-				limit: 5,
-				format: 'json',
-				addressdetails: 1
-			}, this.options.geocodingQueryParams));
 			L.Control.Geocoder.jsonp(this.options.serviceUrl + 'search/', L.extend({
 				q: query,
 				limit: 5,

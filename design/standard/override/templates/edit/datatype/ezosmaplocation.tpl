@@ -52,42 +52,43 @@
     <div class="element square-box-soft-gray ezgml-form">
 
         <div class="ezgml-form-fields">
+            <h4>Cerca un punto sulla mappa</h4>
             <div class="block">
                 <input class="box" type="hidden" name="query" placeholder="Query" value=""/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">Indirizzo</small>
+                <label>Indirizzo</label>
                 <input type="text" class="box" name="street" placeholder="Indirizzo" value=""/>
             </div>
 
             {*<div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">Numero</small>
+                <label>Numero</small>
                  <input type="text" class="box" name="house_number" placeholder="Numero" size="5" value=""/>
             </div>*}
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">CAP</small>
+                <label>CAP</label>
                  <input type="text" name="postcode" placeholder="CAP" size="10" value=""/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">Città</small>
+                <label>Città</label>
                  <input type="text" name="city" placeholder="City" size="20" value=""/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">Provincia</small>
+                <label>Provincia</label>
                  <input type="text" name="county" placeholder="Provincia" size="20" value="Provincia Autonoma di Trento"/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">Regione</small>
+                <label>Regione</label>
                  <input type="text" name="state" placeholder="Regione" size="20" value="Trentino-Alto Adige"/>
             </div>
 
             <div class="block">
-                <small style="display: block; line-height: 0.5;font-weight: bold">Stato</small>
+                <label>Stato</label>
                  <input type="text" name="country" placeholder="Stato" size="20" value="Italia"/>
             </div>
         </div>
@@ -97,7 +98,7 @@
         <button class="button" name="Reset">Annulla</button>
     </div>
 
-    <div class="element square-box-soft-gray ezgml-search-results" style="display: none;max-width: 400px;width: 400px">
+    <div class="element square-box-soft-gray ezgml-search-results" style="display: none;">
 
     </div>
 </div>
@@ -121,9 +122,57 @@
 {run-once}
 {literal}
     <style>
+
         .leaflet-div-icon {
             background: transparent;
             border: none;
+        }
+        p .leaflet-div-icon{
+
+        }
+
+        .ezgml-data input{
+            border: none;
+        }
+
+        .ezgml-form-fields p{
+            margin:0
+        }
+
+        .ezgml-form-fields label{
+            display: block;
+            line-height: 0.5;
+            font-weight: bold;
+        }
+
+        .ezgml-form-fields p small.key{
+            font-style: italic;
+            padding-right: 5px;
+        }
+
+        .ezgml-form-fields small.key{
+            margin:0
+        }
+
+        .ezgml-search-results {
+            position: relative;
+            max-width: 400px;
+            width: 400px;
+        }
+
+        .ezgml-search-results .leaflet-marker-icon{
+            position: relative;
+            float: left;
+            padding-right: 10px;
+            height: 41px;
+        }
+
+        .ezgml-search-results a.close {
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            font-family: sans-serif;
+            font-weight: bold;
         }
 
         .leaflet-marker-icon .number {
@@ -221,13 +270,13 @@
                             if (results.length > 0)
                                 cb.call(context, results);
                             else {
-                                var close = $('<a href="#">Chiudi risultati</a>');
+                                var close = $('<a href="#">Riprova</a>');
                                 close.bind('click',function(e){
                                     $container.find('.ezgml-search-results').empty().hide();
                                     $container.find('.ezgml-form').show();
                                     e.preventDefault();
                                 });
-                                $container.find('.ezgml-search-results').empty().append("<p>Nessun risultato, Prova a ridurre i parametri di ricerca<p>").append(close);
+                                $container.find('.ezgml-search-results').empty().append("<h4>Nessun risultato</h4><p>Riprova riducendo i parametri di ricerca oppure scrivendo l'indirizzo completo (ad esempio \"Corso Antonio Rosmini\, \"Via Giovanni Segantini\", ...)<p>").append(close);
                             }
 
                             that.map.loadingControl.removeLoader('sc');
@@ -308,7 +357,7 @@
                                     if ( $container.find("[name='" + index + "']").length > 0) {
                                         $container.find("[name='" + index + "']").val(value);
                                     }else {
-                                        $container.find('.ezgml-form-fields').append('<p style="margin:0"><small style="font-style: italic">' + index + ':</small><small>' + value + '</small></p>');
+                                        $container.find('.ezgml-form-fields').append('<p><small class="key">' + index + ':</small><small>' + value + '</small></p>');
                                     }
                                 });
                                 if(that.text == null){
@@ -374,22 +423,36 @@
                         $container.find('.ezgml-form-fields p').remove();
                         if(results.length) {
                             var markers = {};
-                            var list = $('<ol/>');
+                            var list = $('<div/>');
+
+                            var close = $('<a class="close" href="#" title="Chiudi risultati e torna al form di ricerca">X</a>');
+                            close.bind('click',function(e){
+                                $container.find('.ezgml-search-results').empty().hide();
+                                $container.find('.ezgml-form').show();
+                                e.preventDefault();
+                            });
+                            list.append(close);
+
+                            list.append('<h4>Risultati della ricerca:</h4>');
                             if(results.length > 1) {
                                 $.each(results, function (index, result) {
                                     var number = index + 1;
                                     var latLng = new L.latLng(result.center.lat, result.center.lng);
                                     var marker = new L.marker(latLng, {icon: new L.NumberedDivIcon({number: number})});
                                     marker.on('click', function(e){
-                                        userMarker.moveIn(e.latlng.lat,e.latlng.lng);
-                                        $container.find('.ezgml-search-results').empty().hide();
-                                        $container.find('.ezgml-form').show();
+                                        if (e.latlng !== undefined) {
+                                            userMarker.moveIn(e.latlng.lat, e.latlng.lng);
+                                            $container.find('.ezgml-search-results').empty().hide();
+                                            $container.find('.ezgml-form').show();
+                                        }
                                     });
                                     markers[index] = marker;
                                     userMarker.addMarker(marker, false);
+                                    var icon = $('<div class="leaflet-marker-icon"><img src="http://cdn.leafletjs.com/leaflet/v0.7.7/images/marker-icon.png"><div class="number">'+number+'</div></div>');
                                     list.append(
-                                            $('<li/>')
-                                                    .html(result.name)
+                                            $('<p class="float-break"/>')
+                                                    .append(icon)
+                                                    .append(result.name)
                                                     .css({"cursor": 'pointer'})
                                                     .bind('click', function () {
                                                         userMarker.markers.zoomToShowLayer(marker,
@@ -400,13 +463,7 @@
                                                     })
                                     );
                                 });
-                                var close = $('<a href="#">Chiudi risultati</a>');
-                                close.bind('click',function(e){
-                                    $container.find('.ezgml-search-results').empty().hide();
-                                    $container.find('.ezgml-form').show();
-                                    e.preventDefault();
-                                });
-                                $container.find('.ezgml-search-results').empty().append(list).append(close);
+                                $container.find('.ezgml-search-results').empty().append(list);
                             }else{
                                 userMarker.moveIn(results[0].center.lat,results[0].center.lng);
                                 $container.find('.ezgml-search-results').empty().hide();
