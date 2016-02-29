@@ -7,13 +7,17 @@ class OpenPAPageData
         "Fax",
         "Email",
         "PEC",
-        "Indirizzo",
+        "Indirizzo",        
         "Facebook",
         "Twitter",
         "Web",
         "Codice fiscale",
         "Partita IVA",
-        "Codice iPA"
+        "Codice iPA",
+        "Via",
+        "Numero Civico",
+        "CAP",
+        "Comune",
     );
 
     function operatorList()
