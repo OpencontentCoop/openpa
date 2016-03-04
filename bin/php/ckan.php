@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][repush_all]',
+    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][refresh_org_internal_id][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][repush_all][delete_all][repush_org][delete_org][archive_current_ckan_ids][remove_current_ckan_ids]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -30,14 +30,196 @@ $db = eZDB::instance();
 try {
 
     $footerRemoteId = 'opendata_footer_link';
-
+        
+    if ($options['archive_current_ckan_ids'] ){
+        $data = array();
+        $tools = new OCOpenDataTools();
+        
+        $tools->getOrganizationBuilder()->build();
+        
+        $currentSettingsId = $tools->getCurrentEndpointIdentifier();
+        foreach( $tools->getDatasetObjects() as $object ){
+            OpenPALog::notice($object->attribute('name') . ' ',false);
+            if (!$options['dry-run']) {
+                try{
+                    $datasetId = $tools->getConverter()->getDatasetId($object);
+                    $data[$object->attribute('id')] = $datasetId;
+                    OpenPALog::warning($datasetId);
+                }catch(Exception $e){
+                    OpenPALog::error('Not found!' . $e->getMessage());
+                }
+            }else{
+                OpenPALog::notice();
+            }
+        }
+        
+        $organizationId = $tools->getOrganizationBuilder()->getStoresOrganizationId();
+        
+        $store = array(
+            $organizationId => $data
+        );
+        
+        $cacheDir = eZSys::storageDirectory();
+        $phpCache = new eZPHPCreator(
+            $cacheDir,
+            'dataset_' . $currentSettingsId . '.php',
+            '',
+            array( 'clustering' => 'ocopendata' )
+        );
+        $phpCache->addVariable( 'dataSetList', $store );
+        $phpCache->store();        
+    }
+    
+    if ($options['remove_current_ckan_ids']){
+        
+        //$instanceId = OpenPAInstance::current()->getIdentifier();
+        //if ( $instanceId == 'ala' ){
+        //    $data = array(
+        //        "Avvisi del Comune di Ala" => "9397669f-57ff-4ef0-816c-19c8132bf563", 
+        //        "Albi ed elenchi del Comune di Ala" => "f9ed017a-8fdc-45d8-bc3a-3597cc815d64", 
+        //        "Bandi di gara del Comune di Ala" => "157ac3da-4153-4787-9728-179289d8e7a1", 
+        //        "Bilanci di previsione del Comune di Ala" => "8dcb06ca-2c6c-495c-a781-0973182b5ead", 
+        //        "Concorsi del Comune di Ala" => "a47f02a9-073c-42d9-97f7-86646c4f4baf", 
+        //        "Dipendenti del Comune di Ala" => "c0b36684-94ac-42cc-8258-1c7eb9f22036", 
+        //        "Disciplinari del Comune di Ala" => "b4cb9f89-d8bf-4390-931c-0c5c85ed8564", 
+        //        "Documenti del Comune di Ala" => "8e7e0e8f-0255-4250-8de9-35e88b7e7658", 
+        //        "Gruppi consiliari del Comune di Ala" => "9db5864e-44ed-40c0-a8f6-2c3ae49abac9", 
+        //        "Moduli del Comune di Ala" => "c7178e2c-1f6c-4c5a-abf2-dd6c0cdc49e6", 
+        //        "Organi politici del Comune di Ala" => "ec3bd8dd-1ed4-4ff3-bd5f-d0d800ef4a37", 
+        //        "Piani e progetti del Comune di Ala" => "151cc87e-b486-49fa-9d4d-7dbc8fe03cec", 
+        //        "Politici del Comune di Ala" => "05769eac-7df5-4ae5-9024-e7ca4ce79388", 
+        //        "Pubblicazioni del Comune di Ala" => "f999a65f-3c7d-4f19-bb87-7083278ffefe", 
+        //        "Regolamenti del Comune di Ala" => "5c1076f3-c37f-4536-ac7b-dc249a12428a", 
+        //        "Rendiconti del Comune di Ala" => "a7c2158c-0d73-4de5-9fab-9fb9b3d70e76", 
+        //        "Servizi del Comune di Ala" => "54538543-3e6b-4b0f-9c1e-8a151638524c", 
+        //        "Uffici del Comune di Ala" => "e6eaf925-8fa9-4d60-8402-83af25c91e0c", 
+        //        "Servizi sul territorio del Comune di Ala" => "d7251b01-49a3-4d99-8f34-4b526e014eeb", 
+        //        "Statuti del Comune di Ala" => "76ba5521-88ce-4146-b752-01039390b0b3", 
+        //        "Concessioni del Comune di Ala" => "53e647a1-63fc-4fb4-a56c-2dc08ffac1d4", 
+        //        "Eventi del Comune di Ala" => "d3a2421b-4bce-412b-9314-7506e56a1a8e", 
+        //        "Procedimenti del Comune di Ala" => "54e34dab-25c5-49d8-8f81-ff608593eb36", 
+        //        "Aree tematiche del Comune di Ala" => "24105993-406a-4547-b51f-bfae117bd884", 
+        //        "Associazioni del Comune di Ala" => "6d8299bb-1e11-4d29-888b-82f6ea8e1d09", 
+        //        "Enti controllati del Comune di Ala" => "c0ccc0be-849a-4267-a087-494a22ef309f", 
+        //        "Interpellanze del Comune di Ala" => "d4db1543-c7b1-4a6b-a983-f9a58723cd7c", 
+        //        "Interrogazioni del Comune di Ala" => "617cbda8-fbc3-446c-9fed-b54ddd8a6908", 
+        //        "Mozioni del Comune di Ala" => "14cb93ab-55c9-439b-873b-8bd4163de8d0", 
+        //        "Sedute di consiglio del Comune di Ala" => "a9f9db78-9c3d-41a4-ab11-78768343d841"
+        //    );
+        //    
+        //    $tools = new OCOpenDataTools();        
+        //    foreach( $tools->getDatasetObjects() as $object ){
+        //        if ( isset( $data[$object->attribute('name')] ) ){
+        //            OpenPALog::warning($object->attribute('name'));
+        //            $object->setAttribute( 'remote_id', 'ckan_' . $data[$object->attribute('name')]  );
+        //            $object->store();
+        //        }
+        //        else{
+        //            OpenPALog::error($object->attribute('name'));
+        //        }
+        //    }
+        //
+        //}
+        
+        $instanceId = OpenPAInstance::current()->getIdentifier();
+        
+        //if ( $instanceId == 'ala' || $instanceId == 'albiano' ){
+        //    throw new Exception('(non serve)');
+        //}
+        
+        $tools = new OCOpenDataTools();
+        
+        $tools->getOrganizationBuilder()->build();
+        
+        $builder = $tools->getOrganizationBuilder();
+        $organizationId = $builder->getStoresOrganizationId();
+        $converter = $tools->getConverter();
+        
+        $currentSettingsId = $tools->getCurrentEndpointIdentifier();
+        foreach( $tools->getDatasetObjects() as $object ){
+            OpenPALog::notice($object->attribute('name') . ' ',false);
+                try{
+                    $tools->validateObject($object);
+                    $datasetId = $tools->getConverter()->getDatasetId($object);
+                    if ( $options['remove_current_ckan_ids'] ){
+                        if (!$options['dry-run']) $converter->markObjectDeleted( $object, null );
+                        OpenPALog::warning(' Rimosso link con ' . $datasetId );
+                    }
+                }catch(Exception $e){
+                    OpenPALog::error('Not found!' . $e->getMessage());
+                }
+        }
+        
+        if ( $options['remove_current_ckan_ids'] ){
+            //if (!$options['dry-run']) $builder->removeStoresOrganizationId();
+            //OpenPALog::warning('Rimosso link organiz: ' . $datasetId );
+        }
+    }
+    
+    if ($options['repush_org']) {
+        try
+        {
+            $tools = new OCOpenDataTools();
+            $tools->pushOrganization();
+            OpenPALog::warning('OK');
+        }catch(Exception $e){
+            OpenPALog::error($e->getMessage());
+        }
+    }
+    
+    if ($options['refresh_org_internal_id']) {
+        try
+        {
+            $tools = new OCOpenDataTools();
+            $data = $tools->getOrganizationBuilder()->build();
+            $remote = $tools->getClient()->getOrganization($data->name);
+            $tools->getOrganizationBuilder()->storeOrganizationPushedId( $remote );
+            OpenPALog::warning('OK');
+        }catch(Exception $e){
+            OpenPALog::error($e->getMessage());
+        }
+    }
+    
+    if ($options['delete_org']) {
+        $tools = new OCOpenDataTools();
+        try
+        {            
+            $tools->deleteOrganization(true);
+            OpenPALog::warning('OK');
+        }catch(Exception $e){
+            $builder = $tools->getOrganizationBuilder();
+            $organizationId = $builder->getStoresOrganizationId();
+            OpenPALog::error( $organizationId . ' ' . $e->getMessage());
+        }
+    }
+    
     if ($options['repush_all']) {
+        $tools = new OCOpenDataTools();
+        $tools->getOrganizationBuilder()->build();
+        foreach( $tools->getDatasetObjects() as $object ){
+            OpenPALog::notice($object->attribute('name') . ' ',false);
+            if (!$options['dry-run']) {
+                try{
+                    $tools->validateObject($object);
+                    $tools->pushObject($object);
+                    OpenPALog::warning('OK');
+                }catch(Exception $e){
+                    OpenPALog::error('KO ' . $e->getMessage());
+                    eZLog::write( OpenPAInstance::current()->getIdentifier() . ' ' . $object->attribute( 'id' ) . ' ' . $e->getMessage(), 'ckan_republish_errors.log' );
+                }
+            }else{
+                OpenPALog::notice();
+            }
+        }
+    }
+    
+    if ($options['delete_all']) {
         $tools = new OCOpenDataTools();
         foreach( $tools->getDatasetObjects() as $object ){
             OpenPALog::notice($object->attribute('name') . ' ',false);
             if (!$options['dry-run']) {
                 try{
-                    $tools->pushObject($object);
+                    $tools->deleteObject($object);
                     OpenPALog::warning('OK');
                 }catch(Exception $e){
                     OpenPALog::error('KO ' . $e->getMessage());
@@ -47,7 +229,7 @@ try {
             }
         }
     }
-
+    
     if ($options['fix_section']){
         $container = eZContentObject::fetchByRemoteID('opendata_datasetcontainer');
         if ( $container instanceof eZContentObject){
