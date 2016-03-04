@@ -917,6 +917,25 @@ class OpenPaFunctionCollection
         return $result;
     }
     
+    public static function fetchStemma()
+    {
+        $result = false;
+        $homePage = self::fetchHome();
+        if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
+        {
+            $headerObject = $homePage->attribute( 'object' );
+            if ( $headerObject instanceof eZContentObject )
+            {
+                $dataMap = $headerObject->attribute( 'data_map' );
+                if ( isset( $dataMap['stemma'] ) && $dataMap['stemma'] instanceof eZContentObjectAttribute && $dataMap['stemma']->attribute( 'has_content' ) )
+                {
+                    $result = $dataMap['stemma']->attribute( 'content' )->attribute( 'original' );
+                }
+            }
+        }       
+        return $result;
+    }
+    
     protected static function getLogoCssStyle( eZContentObjectAttribute $attribute, $alias )
     {
         $image = $attribute->attribute( 'content' )->attribute( $alias );
