@@ -32,9 +32,10 @@ class OpenPATempletizable
         return false;
     }
     
-    public function __construct( $data )
+    public function __construct( $data = null )
     {
-        $this->data = $data;
+        if ( is_array( $data ) )
+            $this->data = $data;
     }
     
 }

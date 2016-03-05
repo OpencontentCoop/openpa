@@ -51,6 +51,18 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         {
             $result = $this->container->attribute( 'content_facets' )->attribute( 'has_data' );
         }
+        if ( !$result && $this->container->hasAttribute( 'content_virtual' ) )
+        {
+            $result = $this->container->attribute( 'content_virtual' )->attribute( 'folder' );
+        }
+        if ( !$result && $this->container->getContentNode() instanceof eZContentObjectTreeNode) {
+            $parent = $this->container->getContentNode()->attribute('parent');
+            $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
+            if ( $parent->hasAttribute('content_virtual')) {
+                $result = $parent->attribute('content_virtual')->attribute('folder');
+            }
+        }
+
         $hiddenNodes = OpenPAINI::variable( 'ExtraMenu', 'NascondiNeiNodi', array() );
         $hiddenClasses = OpenPAINI::variable( 'ExtraMenu', 'NascondiNelleClassi', array() );
         if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )

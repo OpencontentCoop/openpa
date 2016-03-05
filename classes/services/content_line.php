@@ -1,9 +1,9 @@
 <?php
 
-class ObjectHandlerServiceContentDetail extends ObjectHandlerServiceBase
+class ObjectHandlerServiceContentLine extends ObjectHandlerServiceBase
 {
     protected $attributeList;
-    
+
     function run()
     {
         $list = $this->getAttributeList();
@@ -17,21 +17,21 @@ class ObjectHandlerServiceContentDetail extends ObjectHandlerServiceBase
         if ( $this->attributeList === null )
         {
             $this->attributeList = array();
-            $mainContent = $this->container->attribute( 'content_main' );
+            $infoCollectors = $this->container->attribute( 'content_infocollection' )->attribute( 'identifiers' );
             $extraInfoCollectors = $this->container->attribute( 'content_infocollection' )->attribute( 'extra_identifiers' );
             foreach( $this->container->attributesHandlers as $attribute )
             {
-                $fullData = $attribute->attribute( 'full' );
-                if ( ( $fullData['has_content'] || $fullData['show_empty'] )
-                     && !$fullData['exclude']
-                     && !$fullData['contatti']
-                     && !in_array( $attribute->attribute( 'identifier' ), $mainContent->attribute( 'identifiers' ) )
+                $lineData = $attribute->attribute( 'line' );
+                if ( $lineData ['has_content']
+                     && !$lineData ['exclude']
+                     && !in_array( $attribute->attribute( 'identifier' ), $infoCollectors )
                      && !in_array( $attribute->attribute( 'identifier' ), $extraInfoCollectors ) )
                 {
                     $this->attributeList[$attribute->attribute( 'identifier' )] = $attribute;
                 }
             }
         }
+
         return $this->attributeList;
     }
 }

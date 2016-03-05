@@ -13,9 +13,10 @@ class OpenPAAttributeHandler extends OpenPATempletizable
         $this->data['is_information_collector'] = $attribute->attribute( 'is_information_collector' );
 
         $this->data['full_identifier'] = $this->data['contentclass']->attribute( 'identifier' ) . '/' . $this->data['contentclass_attribute']->attribute( 'identifier' );
-        $this->data['full'] = $this->fullData();
-        $this->data['line'] = $this->lineData();
+        $this->fnData['full'] = 'fullData';
+        $this->fnData['line'] = 'lineData';
         $this->data['has_content'] = $this->hasContent();
+        parent::__construct();
     }
 
     public function is( $settingValue, $defaults = array() )
@@ -35,7 +36,9 @@ class OpenPAAttributeHandler extends OpenPATempletizable
             'exclude' => $this->is( 'attributi_da_escludere' ) || $this->data['is_information_collector'] || $this->is( 'attributi_da_escludere' ),
             'highlight' => $this->is( 'attributi_da_evidenziare' ),
             'has_content' => $this->hasContent(),
-            'show_link' => !$this->is( 'attributi_senza_link' )
+            'show_link' => !$this->is( 'attributi_senza_link' ),
+            'show_empty' => $this->is( 'zero_is_content' ),
+            'contatti' => $this->is( 'attributi_contatti' )
         );
     }
 
@@ -61,11 +64,11 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     protected function lineData()
     {
         return array(
-            'show_label' => !$this->is( 'attributes_with_title' ),
+            'show_label' => $this->is( 'attributes_with_title' ),
             'exclude' => !$this->is( 'attributes_to_show' ) || $this->data['is_information_collector'],
-            'highlight' => $this->is( 'line_attributi_da_evidenziare' ),
+            //'highlight' => $this->is( 'line_attributi_da_evidenziare' ),
             'has_content' => $this->hasContent(),
-            'show_link' => !$this->is( 'line_attributi_senza_link' )
+            'show_link' => !$this->is( 'attributi_senza_link' )
         );
     }
 }
