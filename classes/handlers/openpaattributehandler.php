@@ -38,7 +38,8 @@ class OpenPAAttributeHandler extends OpenPATempletizable
             'has_content' => $this->hasContent(),
             'show_link' => !$this->is( 'attributi_senza_link' ),
             'show_empty' => $this->is( 'zero_is_content' ),
-            'contatti' => $this->is( 'attributi_contatti' )
+            'contatti' => $this->is( 'attributi_contatti' ),
+            'collapse_label' => false
         );
     }
 

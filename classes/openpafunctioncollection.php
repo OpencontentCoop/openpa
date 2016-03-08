@@ -1213,7 +1213,8 @@ class OpenPaFunctionCollection
                 $typeNames = array(
                     OpenPASolr::generateSolrSubField( 'tipo_luogo', 'name', 'string'),
                     OpenPASolr::generateSolrSubField( 'tipo_servizio_sul_territorio', 'name', 'string'),
-                    eZSolr::getMetaFieldName( 'class_identifier' )
+                    eZSolr::getMetaFieldName( 'class_identifier' ),
+                    eZSolr::getMetaFieldName( 'class_name' ),                    
                 );
                 
                 // imposto i filtri di ricerca
@@ -1277,6 +1278,7 @@ class OpenPaFunctionCollection
                             {
                                 $href = isset( $item['main_url_alias'] ) ? $item['main_url_alias'] : $item['main_url_alias_ms'];
                                 $classIdentifier = isset( $item['class_identifier'] ) ? $item['class_identifier'] : $item['meta_class_identifier_ms'];
+                                $className = isset( $item['class_name'] ) ? $item['class_name'] : $item['meta_class_name_ms'];                                
                                 eZURI::transformURI( $href, false, 'full' );
                                 
                                 $popup = isset( $item['name'] ) ? $item['name'] : $item['name_t'];
@@ -1286,6 +1288,7 @@ class OpenPaFunctionCollection
                                     'id' => $id,
                                     'type' => $type,
                                     'class' => $classIdentifier,
+                                    'className' => $className,
                                     'lat' => floatval( $latitude ),
                                     'lon' => floatval( $longitude ),
                                     'lng' => floatval( $longitude ),

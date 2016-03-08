@@ -15,13 +15,28 @@ $options = $script->getOptions( '[class:]',
 $script->initialize();
 $script->setUseDebugAccumulators( true );
 
+//$classRepository = new \Opencontent\Opendata\Api\ClassRepository();
+//$classes = $classRepository->listAll();
+//foreach( $classes as $class ){
+//    $class = $classRepository->load( $class['identifier'] );
+//    foreach( $class->fields as $field ){
+//        
+//    }
+//}
+
+//$db = eZDB::instance();
+//$db->arrayQuery( "TRUNCATE TABLE occlassextraparameters" );
+//die();
+
 
 try
 {
     OpenPAINI::$useDynamicIni = false;
     $map = OpenPAINI::$dynamicIniMap;
 
+    
     function storeValue($classIdentifier,$attributeIdentifier,$paramId,$key,$value){
+        
         $cli = eZCLI::instance();
         $cli->output( $classIdentifier . ' ', false );
         $cli->output( $attributeIdentifier . ' ', false );
@@ -46,6 +61,7 @@ try
             'key' => $key,
             'value' => $value
         );
+        
         $parameter = new OCClassExtraParameters( $row );
         $parameter->store();
     }
@@ -67,7 +83,8 @@ try
         $identifiers = array_keys($dataMap);
         foreach( $identifiers as $attributeIdentifier ){
             storeValue($class->attribute('identifier'), $attributeIdentifier, 'table_view', 'show', 1);
-            storeValue($class->attribute('identifier'), $attributeIdentifier, 'table_view', 'show_link', 1);
+            storeValue($class->attribute('identifier'), $attributeIdentifier, 'table_view', 'show_label', 1);
+            storeValue($class->attribute('identifier'), $attributeIdentifier, 'search_form', 'show', 1);
         }
     }
     foreach( $map as $block => $data ){
@@ -134,6 +151,8 @@ try
             }
         }
     }
+    
+    OCClassExtraParameters::removeObject( OCClassExtraParameters::definition(), array( 'value' => '0' ) );
 
     $script->shutdown();
 }

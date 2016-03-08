@@ -34,7 +34,7 @@
 <td>
 <div class="checkbox">
     <label>
-        <input type="checkbox" name="extra_handler_{$handler.identifier}[class_attribute][{$class.identifier}][{$attribute.identifier}][show_link]" value="0" {if $handler.show_link|contains($attribute.identifier)}checked="checked"{/if} /> Mostra link (oggetto correlato)
+        <input type="checkbox" name="extra_handler_{$handler.identifier}[class_attribute][{$class.identifier}][{$attribute.identifier}][show_link]" value="1" {if $handler.show_link|contains($attribute.identifier)}checked="checked"{/if} /> Mostra link (oggetto correlato)
     </label>
 </div>
 </td>

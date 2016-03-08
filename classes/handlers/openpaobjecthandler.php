@@ -63,6 +63,11 @@ class OpenPAObjectHandler
      * @var string
      */
     public $currentUserHashString;
+    
+    /**
+     * @var OCClassExtraParametersManager
+     */
+    public $extraParametersManager;
 
     public static function instanceFromObject( $object = null )
     {
@@ -196,6 +201,10 @@ class OpenPAObjectHandler
             foreach( $dataMap as $identifier => $attribute )
             {
                 $this->attributesHandlers[$identifier] = $this->attributeHandler( $attribute, $identifier );
+            }
+            if ( class_exists( 'OCClassExtraParametersManager' ) )
+            {
+                $this->extraParametersManager = OCClassExtraParametersManager::instance( $this->contentObject->attribute( 'content_class' ) );
             }
         }
         $availableServices = OpenPAINI::variable( 'ObjectHandlerServices', 'Services', array() );

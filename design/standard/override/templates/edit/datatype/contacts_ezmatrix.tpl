@@ -21,7 +21,7 @@
   {/foreach}  
 </tbody>
 </table>
-{undef $rows $contactsForm}
+{undef $rows}
 {/let}
 {/default}
 

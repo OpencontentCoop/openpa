@@ -2,6 +2,7 @@
 
 [General]
 #Default eZFlow
+AllowedTypes[]
 AllowedTypes[]=GlobalZoneLayout
 AllowedTypes[]=2ZonesLayout1
 AllowedTypes[]=2ZonesLayout2
@@ -21,7 +22,9 @@ AllowedTypes[]=0ZonesLayoutFolder
 
 [GlobalZoneLayout]
 ZoneTypeName=Layout globale
+Zones[]
 Zones[]=main
+ZoneName[]
 ZoneName[main]=Zona unica
 ZoneThumbnail=globalzone_layout.gif
 Template=globalzonelayout.tpl
@@ -30,6 +33,8 @@ AvailableForClasses[]=area
 
 
 [2ZonesLayout1]
+Zones[]
+ZoneName[]
 ZoneTypeName=2 zone (tipo 1)
 Zones[]=left
 Zones[]=right
@@ -46,6 +51,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [2ZonesLayout2]
+Zones[]
+ZoneName[]
 ZoneTypeName=2 zone (tipo 2)
 Zones[]=left
 Zones[]=right
@@ -62,6 +69,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [3ZonesLayout1]
+Zones[]
+ZoneName[]
 ZoneTypeName=3 zone (tipo 1)
 Zones[]=left
 Zones[]=right
@@ -80,6 +89,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [3ZonesLayout2]
+Zones[]
+ZoneName[]
 ZoneTypeName=3 zone (tipo 2)
 Zones[]=left
 Zones[]=right
@@ -98,6 +109,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [4ZonesLayout1]
+Zones[]
+ZoneName[]
 ZoneTypeName=4 zone (tipo 1)
 Zones[]=left
 Zones[]=right
@@ -118,6 +131,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [3ZonesLayout3]
+Zones[]
+ZoneName[]
 ZoneTypeName=3 zone (tipo 3)
 Zones[]=left
 Zones[]=center
@@ -136,6 +151,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [4ZonesLayout2]
+Zones[]
+ZoneName[]
 ZoneTypeName=4 zone (tipo 2)
 Zones[]=left
 Zones[]=right
@@ -156,6 +173,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [5ZonesLayout1]
+Zones[]
+ZoneName[]
 ZoneTypeName=5 zone (tipo 1)
 Zones[]=top
 Zones[]=central_left
@@ -178,6 +197,8 @@ AvailableForClasses[]=subsite
 AvailableForClasses[]=albotelematicotrentino
 
 [5ZonesLayout2]
+Zones[]
+ZoneName[]
 ZoneTypeName=5 zone (tipo 2)
 Zones[]=top
 Zones[]=central_left
@@ -202,6 +223,8 @@ AvailableForClasses[]=albotelematicotrentino
 
 #usato nel folder
 [1ZonesLayoutFolder]
+Zones[]
+ZoneName[]
 ZoneTypeName=Colonna destra del Folder
 Zones[]=right
 ZoneName[right]=Colonna destra
@@ -211,6 +234,8 @@ AvailableForClasses[]=folder
 AvailableForClasses[]=pagina_sito
 
 [2ZonesLayoutFolder]
+Zones[]
+ZoneName[]
 ZoneTypeName=Due colonne del Folder
 Zones[]=left
 Zones[]=right
@@ -222,6 +247,8 @@ AvailableForClasses[]=folder
 AvailableForClasses[]=pagina_sito
 
 [0ZonesLayoutFolder]
+Zones[]
+ZoneName[]
 ZoneTypeName=Nessuna colonna nel Folder
 Zones[]=nessuna
 ZoneName[nessuna]=Gestione automatica dei contenuti
@@ -231,6 +258,8 @@ AvailableForClasses[]=folder
 AvailableForClasses[]=pagina_sito
 
 [6ZonesLayout1]
+Zones[]
+ZoneName[]
 ZoneTypeName=6 zone (tipo 1)
 Zones[]=top
 Zones[]=central_left
@@ -254,6 +283,8 @@ AvailableForClasses[]=homepage_interna
 AvailableForClasses[]=subsite
 
 [7ZonesLayout1]
+Zones[]
+ZoneName[]
 ZoneTypeName=7 zone (tipo 1)
 Zones[]=top
 Zones[]=central_left

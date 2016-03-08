@@ -16,6 +16,7 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
     function run()
     {
         $this->getCurrentView();
+        $this->data['current_view'] = $this->currentView;
         $this->data['views'] = array();
         foreach( $this->availableViews as $view )
         {            
@@ -93,6 +94,8 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
                 $this->currentView = 'empty';
             }
         }
+        if ( $this->currentView === null )
+            $this->currentView = false;
     }
 
     

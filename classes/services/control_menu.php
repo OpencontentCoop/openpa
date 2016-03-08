@@ -2,6 +2,8 @@
 
 class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
 {
+    protected $hasExtraMenu;
+    
     function run()
     {
         $this->data['available_menu'] = array( 'top_menu', 'side_menu' );
@@ -38,45 +40,79 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
     //@todo
     protected function hasExtraMenu()
     {
-        $result = false;
-        if ( !$result && $this->container->hasAttribute( 'content_gallery' ) )
+        if ( $this->hasExtraMenu === null )
         {
-            $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
-        }
-        if ( !$result && $this->container->hasAttribute( 'content_related' ) )
-        {
-            $result = $this->container->attribute( 'content_related' )->attribute( 'has_data' );
-        }
-        if ( !$result && $this->container->hasAttribute( 'content_facets' ) )
-        {
-            $result = $this->container->attribute( 'content_facets' )->attribute( 'has_data' );
-        }
-        if ( !$result && $this->container->hasAttribute( 'content_virtual' ) )
-        {
-            $result = $this->container->attribute( 'content_virtual' )->attribute( 'folder' );
-        }
-        if ( !$result && $this->container->getContentNode() instanceof eZContentObjectTreeNode) {
-            $parent = $this->container->getContentNode()->attribute('parent');
-            $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
-            if ( $parent->hasAttribute('content_virtual')) {
-                $result = $parent->attribute('content_virtual')->attribute('folder');
-            }
-        }
-
-        $hiddenNodes = OpenPAINI::variable( 'ExtraMenu', 'NascondiNeiNodi', array() );
-        $hiddenClasses = OpenPAINI::variable( 'ExtraMenu', 'NascondiNelleClassi', array() );
-        if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )
-        {
-            if ( in_array( $this->container->getContentNode()->attribute( 'node_id' ), $hiddenNodes ) )
+            $debug = array();
+            $result = false;
+            if ( !$result && $this->container->hasAttribute( 'content_gallery' ) )
             {
-                return false;
+                $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
+                if ( $result ) $debug[] = 'content_gallery';
             }
-            if ( in_array( $this->container->getContentNode()->attribute( 'class_identifier' ), $hiddenClasses ) )
+            if ( !$result && $this->container->hasAttribute( 'content_related' ) )
             {
-                return false;
+                $result = $this->container->attribute( 'content_related' )->attribute( 'has_data' );
+                if ( $result ) $debug[] = 'content_related';
             }
+            if ( !$result && $this->container->hasAttribute( 'content_reverse_related' ) )
+            {
+                $result = $this->container->attribute( 'content_reverse_related' )->attribute( 'has_data' );
+                if ( $result ) $debug[] = 'content_reverse_related';
+            }
+            if ( !$result && $this->container->hasAttribute( 'control_children' ) )
+            {
+                $result = $this->container->attribute( 'control_children' )->attribute( 'current_view' ) == 'filters';
+                if ( $result ) $debug[] = 'control_children';
+            }
+            if ( !$result && $this->container->hasAttribute( 'content_facets' ) )
+            {
+                $result = $this->container->attribute( 'content_facets' )->attribute( 'has_data' );
+                if ( $result ) $debug[] = 'content_facets';
+            }
+            if ( !$result && $this->container->hasAttribute( 'content_virtual' ) )
+            {
+                $result = $this->container->attribute( 'content_virtual' )->attribute( 'folder' );
+                if ( $result ) $debug[] = 'content_virtual';
+            }
+            if ( !$result && $this->container->getContentNode() instanceof eZContentObjectTreeNode) {
+                $parent = $this->container->getContentNode()->attribute('parent');
+                $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
+                if ( $parent->hasAttribute('content_virtual')) {
+                    $result = $parent->attribute('content_virtual')->attribute('folder');
+                    if ( $result ) $debug[] = 'content_virtual';
+                }
+            }
+            if ( !$result && $this->container->hasAttribute( 'content_globalinfo' ) )
+            {
+                $result = $this->container->attribute( 'content_globalinfo' )->attribute( 'has_content' );
+                if ( $result ) $debug[] = 'content_globalinfo';
+                if ( !$result ){
+                    $parent = $this->container->getContentNode()->attribute('parent');
+                    $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
+                    if ( $parent->hasAttribute('content_globalinfo')) {
+                        $result = $parent->attribute('content_globalinfo')->attribute('has_content');
+                        if ( $result ) $debug[] = 'content_globalinfo_parent';
+                    }
+                }
+            }
+    
+            $hiddenNodes = OpenPAINI::variable( 'ExtraMenu', 'NascondiNeiNodi', array() );
+            $hiddenClasses = OpenPAINI::variable( 'ExtraMenu', 'NascondiNelleClassi', array() );
+            if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )
+            {
+                if ( in_array( $this->container->getContentNode()->attribute( 'node_id' ), $hiddenNodes ) )
+                {
+                    return false;
+                }
+                if ( in_array( $this->container->getContentNode()->attribute( 'class_identifier' ), $hiddenClasses ) )
+                {
+                    return false;
+                }
+            }
+            $this->hasExtraMenu = $result;
+            eZDebug::writeDebug( implode( ', ', $debug ), __METHOD__ );            
         }
-        return $result;
+        return $this->hasExtraMenu;
     }
 
     protected function getTopMenuCustomFetchParameters()
