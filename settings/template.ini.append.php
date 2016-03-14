@@ -9,6 +9,5 @@ PHPOperatorList[rawurldecode]=rawurldecode
 PHPOperatorList[array_flip]=array_flip
 PHPOperatorList[array_reverse]=array_reverse
 PHPOperatorList[file_exists]=file_exists
-PHPOperatorList[asort]=asort
 
 */ ?>

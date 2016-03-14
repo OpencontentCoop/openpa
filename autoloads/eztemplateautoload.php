@@ -23,7 +23,11 @@ $eZTemplateOperatorArray[] = array(
         'solr_field',
         'solr_meta_field',
         'solr_subfield',
-        'solr_meta_subfield'
+        'solr_meta_subfield',
+        'search_exclude_class_facets',
+        'search_exclude_classes',
+        'search_query',
+        'strReplace'
     )
 );
 

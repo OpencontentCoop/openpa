@@ -1,5 +1,8 @@
 <?php
 
+use Opencontent\Opendata\Api\QueryLanguage\EzFind\QueryBuilder as EzFindQueryBuilder;
+use Opencontent\Opendata\Api\ClassRepository;
+
 class OpenPAOperator
 {
     
@@ -28,7 +31,11 @@ class OpenPAOperator
             'solr_field',
             'solr_meta_field',
             'solr_subfield',
-            'solr_meta_subfield'
+            'solr_meta_subfield',
+            'search_exclude_class_facets',
+            'search_exclude_classes',
+            'search_query',
+            'strReplace'
         );
     }
 
@@ -88,7 +95,14 @@ class OpenPAOperator
             'solr_meta_subfield' => array(
                 'identifier' => array("type" => "string", "required" => true),
                 'sub_identifier' => array("type" => "string", "required" => true)
-            )
+            ),
+            'strReplace' => array(
+                'var' => array ( 'type' => 'string', 'required' => true, 'default' => ''),
+				'value' => array ( 'type' => 'array', 'required' => true,'default' => '' )
+			),            
+            'search_query' => array(
+                'override' => array ( 'type' => 'mixed', 'required' => false, 'default' => array())
+			)
         );
     }
 
@@ -128,6 +142,240 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'strReplace':
+			{				
+				$variable = $namedParameters['var'];
+                $value = @$namedParameters['value'];
+                $operatorValue = str_replace($value[0],$value[1],$variable);
+				break;
+			}
+            
+            case 'search_exclude_class_facets':
+            case 'search_exclude_classes':
+            {
+                $excludeFacets = array();
+                $excludeClasses = array();
+                
+                $iniNotAvailableFacets 	= OpenPAINI::variable( 'MotoreRicerca', 'faccette_non_disponibili', array() );
+                $iniNotAvailableFacetsGroups = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_faccette_non_disponibili', array() );            
+                $classesNotAvailable 	= OpenPAINI::variable( 'MotoreRicerca', 'classi_non_disponibili', array() );
+                $classGroupNotAvailable = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_classi_non_disponibili', array() );
+                                
+                $classes = eZPersistentObject::fetchObjectList( eZContentClass::definition(), null, array( "version" => eZContentClass::VERSION_STATUS_DEFINED ) );
+                foreach ( $classes as $class )
+                {                    
+                    if ( in_array( $class->attribute('id'), $iniNotAvailableFacets )
+                         || strpos( $class->attribute( 'identifier' ), 'tipo' ) === 0
+                         || count( array_intersect( $iniNotAvailableFacetsGroups, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
+                    {
+                        $excludeFacets[$class->attribute('id')] = $class->attribute('identifier');
+                    }
+                    
+                    if ( in_array( $class->attribute('id'), $classesNotAvailable )                         
+                         || count( array_intersect( $classGroupNotAvailable, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
+                    {
+                        $excludeClasses[$class->attribute('id')] = $class->attribute('identifier');
+                    }
+                    
+                }                
+                if ( $operatorName == 'search_exclude_class_facets' )
+                {
+                    $operatorValue = array(
+                      'ids' => array_keys( $excludeFacets ),
+                      'identifiers' => array_values( $excludeFacets )
+                    );
+                }
+                if ( $operatorName == 'search_exclude_classes' )
+                {
+                    $operatorValue = array(
+                      'ids' => array_keys( $excludeClasses ),
+                      'identifiers' => array_values( $excludeClasses )
+                    );
+                }
+                
+            } break;
+            
+            case 'search_query':
+            {
+                $operatorValue = null; 
+                $http = eZHTTPTool::instance();                
+                
+                $queryArray = array();                
+                
+                $sort = null;
+                $order = 'desc';
+                if ( $http->hasGetVariable( 'Sort' ) )
+                {
+                    $sort = $http->getVariable( 'Sort' );
+                    if ( !empty( $sort ) )
+                    {
+                        $order = $http->hasGetVariable( 'Order' ) ? $http->getVariable( 'Order' ) : 'desc';                        
+                    }
+                }
+                if ( !$sort && $http->hasGetVariable( 'SearchText' ) && !empty( $http->getVariable( 'SearchText' ) ) )
+                {
+                    $sort = 'score';
+                }
+                if ( !$sort )
+                {
+                    $sort = 'published';
+                }                
+                
+                if ( $http->hasGetVariable( 'SearchText' ) && !empty( $http->getVariable( 'SearchText' ) ) )
+                {
+                    $searchText = $http->getVariable( 'SearchText' );
+                    if ( $http->hasGetVariable( 'Logic' ) && $http->getVariable( 'Logic' ) == 'OR' )
+                    {
+                        $searchText = implode( ' OR ', explode( ' ', $searchText ) );
+                    }
+                    $queryArray[] = "q = '$searchText'";
+                }            
+                
+                $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
+                if ( $http->hasGetVariable( 'SubTreeArray' ) && !empty( $http->getVariable( 'SubTreeArray' ) ) )
+                {
+                    $subtree = (array)$http->getVariable( 'SubTreeArray' );                    
+                }
+                $queryArray[] = 'subtree [' . implode( ',', $subtree ) . ']';
+                
+                $classList = array();                
+                if ( $http->hasGetVariable( 'ClassArray' ) && !empty( $http->getVariable( 'ClassArray' ) ) )
+                {
+                    $classIDList = $http->getVariable( 'ClassArray' );
+                    $classList = array();
+                    foreach( $classIDList as $id )
+                    {
+                        $identifier = eZContentClass::classIdentifierByID( $id );
+                        if ( $identifier )
+                        {
+                            $classList[] = $identifier;
+                        }
+                    }
+                    if ( !empty( $classList ) )
+                    {
+                        $queryArray[] = 'classes [' . implode( ',', $classList ) . ']';
+                    }
+                }
+                
+                if ( count( $classList ) == 1 && $http->hasGetVariable( 'Data' ) && !empty( $http->getVariable( 'Data' ) ) )
+                {
+                    try
+                    {
+                        $_GET['Sort'] = $sort;
+                        
+                        $classRepository = new ClassRepository();
+                        $class = (array) $classRepository->load( $classList[0] );
+                        $fields = array();
+                        foreach ( $class['fields'] as $field ){
+                            $fields[$field['identifier']] = $field;
+                        }
+                        
+                        $data = $http->getVariable( 'Data' );
+                        foreach( $data as $key => $values )
+                        {
+                            if ( $key == 'published' ){                                
+                                $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
+                                $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
+                                if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
+                                {
+                                    $queryArray[] = "published range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
+                                }                                
+                            }
+                            
+                            if ( isset($fields[$key] ) ){
+                                if ( in_array( $fields[$key]['dataType'], array( 'ezdate', 'ezdatetime' ) ) )
+                                {
+                                    $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
+                                    $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
+                                    if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
+                                    {
+                                        $queryArray[] = "$key range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
+                                    }                                
+                                }
+                                elseif ( in_array( $fields[$key]['dataType'], array( 'ezobjectrelationlist' ) ) )
+                                {                                    
+                                    $stringValue = trim( implode(',', $values) );
+                                    if ( !empty($stringValue) )
+                                    {
+                                        $queryArray[] = "{$key}.id in [{$stringValue}]";
+                                    }
+                                }
+                                else
+                                {
+                                    if ( !empty( $values ) )
+                                        $queryArray[] = "{$key} = [{$values}]";
+                                }
+                            }
+                        }
+                    }
+                    catch( Exception $e )
+                    {
+                        eZDebug::writeError( $e->getMessage(), __METHOD__ );                                
+                    }
+                }
+                
+                if ( $http->hasGetVariable( 'Anno' ) && !empty( $http->getVariable( 'Anno' ) ) )
+                {
+                    $start = $http->getVariable( 'Anno' ) . '-01-01';
+                    $end = $http->getVariable( 'Anno' ) . '-12-31';
+                    $_GET['Data']['published'] = array( '01-01-'.$http->getVariable( 'Anno' ), '31-12-'.$http->getVariable( 'Anno' ) );
+                    $queryArray[] = "published range [$start,$end]";                    
+                }
+
+                $queryArray[] = "sort [{$sort}=>{$order}]";
+                
+                if ( !empty( $queryArray ) )
+                {
+                    $queryString = implode( ' and ', $queryArray );
+                    eZDebug::writeNotice( $queryString, __METHOD__ );
+                }
+                
+                $builder = new EzFindQueryBuilder();  
+                
+                try
+                {
+                    if ( is_array( $namedParameters['override'] ) )
+                    {
+                        $override = $namedParameters['override'];
+                    }
+                    elseif( is_string( $namedParameters['override'] ) )
+                    {
+                        $queryObject = $builder->instanceQuery( $namedParameters['override'] );
+                        eZDebug::writeNotice( $namedParameters['override'], __METHOD__ );
+                        $ezFindQueryObject = $queryObject->convert();
+                        if ( $ezFindQueryObject instanceof ArrayObject )
+                        {
+                            $override = $ezFindQueryObject->getArrayCopy();
+                        }
+                    }
+                                        
+                    $queryObject = $builder->instanceQuery( $queryString );
+                    $ezFindQueryObject = $queryObject->convert();
+                    if ( $ezFindQueryObject instanceof ArrayObject )
+                    {
+                        $queryArray = $ezFindQueryObject->getArrayCopy();
+                    }
+                    
+                    $queryArray = array_merge( $queryArray, $override );
+                    eZDebug::writeNotice( $queryArray, __METHOD__ );
+                    $solr = new eZSolr();
+                    $results = @$solr->search(
+                        $queryArray['_query'],
+                        $queryArray
+                    );
+                    
+                    
+                    $results['UriSuffix'] = '?' . http_build_query( $_GET );
+                }
+                catch( Exception $e )
+                {
+                    eZDebug::writeError( $e->getMessage(), __METHOD__ );
+                    $results = null;
+                }
+                
+                return $operatorValue = $results;
+            } break;
+            
             case 'solr_field':
             {
                 return $operatorValue = OpenPASolr::generateSolrField( $namedParameters['identifier'], $namedParameters['type'] );
@@ -340,6 +588,19 @@ class OpenPAOperator
                 }
 
                 $areaStyle = array();
+                
+                if ( OpenPAINI::variable( 'AreeTematiche', 'UsaStileInMotoreRicerca', false ) == 'enabled' )
+                {                    
+                    $http = eZHTTPTool::instance();
+                    if ( $http->hasGetVariable( 'SubTreeArray' ) )
+                    {
+                        $subTreeArray = $http->getVariable( 'SubTreeArray' );
+                        if ( count( $subTreeArray ) == 1 )
+                        {
+                            $path[] = array( 'node_id' => $subTreeArray[0] );
+                        }
+                    }
+                }
 
                 foreach( $path as $p )
                 {
