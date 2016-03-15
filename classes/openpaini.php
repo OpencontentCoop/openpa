@@ -80,6 +80,7 @@ class OpenPAINI
     protected static $filters = array(
         'TopMenu::NodiCustomMenu',
         'GestioneSezioni::sezioni_per_tutti',
+        'Attributi::EscludiDaRicerca',
         //'SideMenu::EsponiLink'
     );
     
@@ -153,6 +154,10 @@ class OpenPAINI
         
             case 'GestioneSezioni::sezioni_per_tutti':
                 return self::filterSezioniPerTutti();              
+            break;
+        
+            case 'Attributi::EscludiDaRicerca':
+                return self::variable( 'GestioneAttributi', 'attributi_da_escludere_dalla_ricerca', $default );
             break;
         }
 

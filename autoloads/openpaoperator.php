@@ -310,7 +310,7 @@ class OpenPAOperator
                     }
                     catch( Exception $e )
                     {
-                        eZDebug::writeError( $e->getMessage(), __METHOD__ );                                
+                        eZDebug::writeError( $e->getMessage(), __METHOD__ . ':' . $operatorName );                                
                     }
                 }
                 
@@ -327,7 +327,7 @@ class OpenPAOperator
                 if ( !empty( $queryArray ) )
                 {
                     $queryString = implode( ' and ', $queryArray );
-                    eZDebug::writeNotice( $queryString, __METHOD__ );
+                    eZDebugSetting::writeNotice( 'openpa-operators', $queryString, __METHOD__ );
                 }
                 
                 $builder = new EzFindQueryBuilder();  
@@ -341,7 +341,7 @@ class OpenPAOperator
                     elseif( is_string( $namedParameters['override'] ) )
                     {
                         $queryObject = $builder->instanceQuery( $namedParameters['override'] );
-                        eZDebug::writeNotice( $namedParameters['override'], __METHOD__ );
+                        eZDebugSetting::writeNotice( 'openpa-operators', $namedParameters['override'], __METHOD__ );
                         $ezFindQueryObject = $queryObject->convert();
                         if ( $ezFindQueryObject instanceof ArrayObject )
                         {
@@ -357,7 +357,7 @@ class OpenPAOperator
                     }
                     
                     $queryArray = array_merge( $queryArray, $override );
-                    eZDebug::writeNotice( $queryArray, __METHOD__ );
+                    eZDebugSetting::writeNotice( 'openpa-operators', $queryArray, __METHOD__ );
                     $solr = new eZSolr();
                     $results = @$solr->search(
                         $queryArray['_query'],
@@ -369,7 +369,7 @@ class OpenPAOperator
                 }
                 catch( Exception $e )
                 {
-                    eZDebug::writeError( $e->getMessage(), __METHOD__ );
+                    eZDebug::writeError( $e->getMessage(), __METHOD__ . ':' . $operatorName );
                     $results = null;
                 }
                 
