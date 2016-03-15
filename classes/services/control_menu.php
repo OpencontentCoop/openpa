@@ -95,6 +95,12 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
                     }
                 }
             }
+            
+            if ( !$result && $this->container->hasAttribute( 'layout' ) )
+            {
+                $result = $this->container->attribute( 'layout' )->attribute( 'has_content' );
+                if ( $result ) $debug[] = 'layout';
+            }
     
             $hiddenNodes = OpenPAINI::variable( 'ExtraMenu', 'NascondiNeiNodi', array() );
             $hiddenClasses = OpenPAINI::variable( 'ExtraMenu', 'NascondiNelleClassi', array() );
