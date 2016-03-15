@@ -502,7 +502,11 @@ class OpenPaFunctionCollection
                 {
                     if ( isset( $item['node_id'] ) )
                     {
-                        $nodes[] = eZContentObjectTreeNode::fetch( $item['node_id'] );
+                        $node = eZContentObjectTreeNode::fetch( (int)$item['node_id'] );
+                        if ( $node instanceof eZContentObjectTreeNode )
+                        {
+                            $nodes[] = $node;
+                        }
                     }
                 }
             }

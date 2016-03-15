@@ -147,9 +147,20 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             {
                 $childrenFetchParameters = $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )];
             }
+            
+            $module = 'openpa';
+            if ( OpenPAINI::variable( 'Menu', 'IgnoraVirtualizzazione', 'disabled' ) == 'enabled' )
+            {
+                $module = 'content';
+            }
+            elseif ( in_array( $rootNode->attribute( 'node_id' ), OpenPAINI::variable( 'Menu', 'IgnoraVirtualizzazioneNodi', array() ) ) )
+            {
+                $module = 'content';
+            }
+            
             /** @var eZContentObjectTreeNode[] $nodes */
             $nodes = eZFunctionHandler::execute(
-                in_array( $rootNode->attribute( 'node_id' ), OpenPAINI::variable( 'Menu', 'IgnoraVirtualizzazioneNodi', array() ) ) ? 'content' : 'openpa',
+                $module,
                 'list',
                 array_merge( array(
                     'parent_node_id' => $rootNode->attribute( 'node_id' ),
