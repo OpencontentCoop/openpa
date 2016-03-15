@@ -16,13 +16,20 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
     {
         if ( !isset( self::$flipControlCache[$this->container->currentNodeId] ) )
         {
-            if ( method_exists( 'ezFlip', 'has_converted' ) )
+            if ( $this->container->hasAttribute( 'file' ) && method_exists( 'eZFlip', 'instance' ) )
             {
-                if ( ezFlip::has_converted( $this->container->currentObjectId ) )
+                try
                 {
-                    self::$flipControlCache[$this->container->currentNodeId] = true;
+                    if ( eZFlip::instance( $this->container->attribute( 'file' )->attribute( 'contentobject_attribute' ) )->isConverted() )
+                    {
+                        self::$flipControlCache[$this->container->currentNodeId] = true;
+                    }
+                    else
+                    {
+                        self::$flipControlCache[$this->container->currentNodeId] = false;
+                    }
                 }
-                else
+                catch( Exception $e )
                 {
                     self::$flipControlCache[$this->container->currentNodeId] = false;
                 }
@@ -31,7 +38,7 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
             {
                 self::$flipControlCache[$this->container->currentNodeId] = false;
             }
-        }
+        }        
         return self::$flipControlCache[$this->container->currentNodeId];
     }
     
