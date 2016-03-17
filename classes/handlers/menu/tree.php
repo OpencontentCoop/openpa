@@ -63,6 +63,11 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
 
     public static function getMenu( $parameters )
     {
+        if ( !isset( $parameters['user_hash'] ) || $parameters['user_hash'] == false  )
+        {
+            OpenPAMenuTool::suAnonymous();
+        }
+
         $settingsScope = false;
         if ( isset( $parameters['scope'] ) )
             $settingsScope = $parameters['scope'];
@@ -101,7 +106,12 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             'custom_fetch_parameters' => $fetchParameters,
             'custom_max_recursion' => $customMaxRecursion
         );
-        return self::treeMenu( $parameters['root_node_id'], $settings );
+        $result = self::treeMenu( $parameters['root_node_id'], $settings );
+        if ( !isset( $parameters['user_hash'] ) || $parameters['user_hash'] == false  )
+        {
+            OpenPAMenuTool::exitAnonymous();
+        }
+        return $result;
     }
 
     protected static function treeMenu( $rootNodeId, $settings )
@@ -116,7 +126,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
     }
 
     protected static function treeMenuItem( eZContentObjectTreeNode $rootNode, array &$settings, $level )
-    {        
+    {
         $handlerObject = OpenPAObjectHandler::instanceFromObject( $rootNode );
 
         if ( isset( $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )] ) )
@@ -147,7 +157,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             {
                 $childrenFetchParameters = $settings['custom_fetch_parameters'][$rootNode->attribute( 'node_id' )];
             }
-            
+
             $module = 'openpa';
             if ( OpenPAINI::variable( 'Menu', 'IgnoraVirtualizzazione', 'disabled' ) == 'enabled' )
             {
@@ -157,7 +167,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             {
                 $module = 'content';
             }
-            
+
             /** @var eZContentObjectTreeNode[] $nodes */
             $nodes = eZFunctionHandler::execute(
                 $module,
