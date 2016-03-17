@@ -71,21 +71,9 @@ class OpenPACalendarItem
     }
     
     protected static function getDateTime( $string )
-    {        
+    {
         // '%Y-%m-%dT%H:%M:%SZ' -> Y-m-d\TH:i:s\Z
-        $timestamp = mktime( 11, 30, 0, 12, 5, 1977 );
-        $gmstrftimeTimestamp = '1977-12-05T10:30:00Z';
-        if( ezfSolrDocumentFieldBase::convertTimestampToDate( $timestamp ) == $gmstrftimeTimestamp )
-        {
-            $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, new DateTimeZone( 'UTC' ) );
-            $date->setTimeZone( OpenPACalendarData::timezone() );    
-        }
-        else
-        {
-            $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, OpenPACalendarData::timezone() );
-        }
-        
-        
+        $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, OpenPACalendarData::timezone() );
         return $date;
     }
     
