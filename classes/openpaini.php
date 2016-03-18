@@ -3,7 +3,7 @@
 class OpenPAINI
 {
 
-    public static $useDynamicIni = true;
+    public static $useDynamicIni;
 
     public static $dynamicIniMap = array(
         'GestioneAttributi' => array(
@@ -110,7 +110,22 @@ class OpenPAINI
         }
         return $result;
     }
-    
+
+    public static function useDynamicIni()
+    {
+        if ( self::$useDynamicIni === null )
+        {
+            self::$useDynamicIni = true;
+            $ini = eZINI::instance('openpa.ini');
+            if ($ini->hasVariable('GeneralSettings', 'UseDynamicIni'))
+            {
+                self::$useDynamicIni = $ini->variable('GeneralSettings', 'UseDynamicIni') == 'enabled';
+
+            }
+        }
+        return self::$useDynamicIni;
+    }
+
     protected static function hasFilter( $block, $value, $default )
     {
         if ( in_array( $block . '::' . $value, self::$filters )
@@ -119,7 +134,7 @@ class OpenPAINI
             return true;
         }
 
-        if ( self::$useDynamicIni && isset( self::$dynamicIniMap[$block][$value] ) )
+        if ( self::useDynamicIni() && isset( self::$dynamicIniMap[$block][$value] ) )
         {
             return true;
         }
