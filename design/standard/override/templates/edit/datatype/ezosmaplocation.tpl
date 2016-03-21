@@ -2,11 +2,12 @@
     {def $attribute_base = 'ContentObjectAttribute'}
 {/if}
 {def $latitude  = $attribute.content.latitude|explode(',')|implode('.')
-     $longitude = $attribute.content.longitude|explode(',')|implode('.')}
+$longitude = $attribute.content.longitude|explode(',')|implode('.')
+$contacts = openpapagedata().contacts}
 
-<div class="block float-break" data-gmap-attribute="{$attribute.id}">
-    <div class="element ezgml-data">
-        <div id="map-{$attribute.id}" style="width: 500px; height: 280px; margin-top: 2px;"></div>
+<div class="block float-break row" data-gmap-attribute="{$attribute.id}">
+    <div class="element ezgml-data col-sm-7">
+        <div id="map-{$attribute.id}" style="width: 500px; max-width:100%; height: 280px; margin-top: 2px;"></div>
 
         <div class="block address">
             <label>Indirizzo</label>
@@ -49,17 +50,17 @@
 
     </div>
 
-    <div class="element square-box-soft-gray ezgml-form">
+    <div class="element square-box-soft-gray ezgml-form col-sm-5">
 
         <div class="ezgml-form-fields">
             <h4>Cerca un punto sulla mappa</h4>
-            <div class="block">
+            <div class="block form-group">
                 <input class="box" type="hidden" name="query" placeholder="Query" value=""/>
             </div>
 
-            <div class="block">
+            <div class="block form-group">
                 <label>Indirizzo</label>
-                <input type="text" class="box" name="street" placeholder="Indirizzo" value=""/>
+                <input type="text" class="box form-control input-sm" name="street" placeholder="Indirizzo" value=""/>
             </div>
 
             {*<div class="block">
@@ -67,38 +68,38 @@
                  <input type="text" class="box" name="house_number" placeholder="Numero" size="5" value=""/>
             </div>*}
 
-            <div class="block">
+            <div class="block form-group">
                 <label>CAP</label>
-                 <input type="text" name="postcode" placeholder="CAP" size="10" value=""/>
+                <input type="text" name="postcode" class="form-control input-sm" placeholder="CAP" size="10" value="{if is_set($contacts.cap)}{$contacts.cap|wash()}{/if}"/>
             </div>
 
-            <div class="block">
+            <div class="block form-group">
                 <label>Città</label>
-                 <input type="text" name="city" placeholder="City" size="20" value=""/>
+                <input type="text" name="city" placeholder="City" class="form-control input-sm" size="20" value="{if is_set($contacts.comune)}{$contacts.comune|wash()}{/if}"/>
             </div>
 
-            <div class="block">
+            <div class="block form-group">
                 <label>Provincia</label>
-                 <input type="text" name="county" placeholder="Provincia" size="20" value="Provincia Autonoma di Trento"/>
+                <input type="text" name="county" placeholder="Provincia" class="form-control input-sm" size="20" value="Provincia Autonoma di Trento"/>
             </div>
 
-            <div class="block">
+            <div class="block form-group">
                 <label>Regione</label>
-                 <input type="text" name="state" placeholder="Regione" size="20" value="Trentino-Alto Adige"/>
+                <input type="text" name="state" placeholder="Regione" class="form-control input-sm" size="20" value="Trentino-Alto Adige"/>
             </div>
 
-            <div class="block">
+            <div class="block form-group">
                 <label>Stato</label>
-                 <input type="text" name="country" placeholder="Stato" size="20" value="Italia"/>
+                <input type="text" name="country" placeholder="Stato" class="form-control input-sm" size="20" value="Italia"/>
             </div>
         </div>
 
-        <button class="defaultbutton" name="GeoSearch">Cerca indirizzo</button>
-        <button class="button" name="MyLocation">Rileva posizione</button>
-        <button class="button" name="Reset">Annulla</button>
+        <button class="defaultbutton btn-sm" name="GeoSearch">Cerca indirizzo</button>
+        <button class="button btn-sm" name="MyLocation">Rileva posizione</button>
+        <button class="button btn-sm" name="Reset">Annulla</button>
     </div>
 
-    <div class="element square-box-soft-gray ezgml-search-results" style="display: none;">
+    <div class="element square-box-soft-gray ezgml-search-results col-sm-5" style="display: none;">
 
     </div>
 </div>
@@ -133,6 +134,7 @@
 
         .ezgml-data input{
             border: none;
+            background: inherit;
         }
 
         .ezgml-form-fields p{
@@ -157,7 +159,6 @@
         .ezgml-search-results {
             position: relative;
             max-width: 400px;
-            width: 400px;
         }
 
         .ezgml-search-results .leaflet-marker-icon{
@@ -238,6 +239,7 @@
         });
 
         $(document).ready(function () {
+
             $("[data-gmap-attribute]").each(function () {
 
                 // variables
@@ -320,8 +322,8 @@
                         if ($container.find('.ezgml_hidden_latitude').val().length) {
                             this.text = $container.find('.ezgml_hidden_address').val();
                             this.moveIn(
-                                $container.find('.ezgml_hidden_latitude').val(),
-                                $container.find('.ezgml_hidden_longitude').val()
+                                    $container.find('.ezgml_hidden_latitude').val(),
+                                    $container.find('.ezgml_hidden_longitude').val()
                             );
                         }
                     },
@@ -380,6 +382,10 @@
                     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
                 map.setView(new L.latLng(0, 0), 1);
+
+                $('.ui-tabs .border-content').bind('tabsshow', function(event, ui) {
+                    map.invalidateSize();
+                });
 
                 if ( $('a[data-toggle="tab"').length > 0) {
                     $('a[data-toggle="tab"]').bind('shown.bs.tab', function (e) {
@@ -456,9 +462,9 @@
                                                     .css({"cursor": 'pointer'})
                                                     .bind('click', function () {
                                                         userMarker.markers.zoomToShowLayer(marker,
-                                                            function () {
-                                                                marker.fire('click');
-                                                            }
+                                                                function () {
+                                                                    marker.fire('click');
+                                                                }
                                                         );
                                                     })
                                     );
