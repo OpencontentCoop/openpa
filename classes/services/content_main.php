@@ -15,8 +15,6 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
             'oggetto',
             'abstract',
             'short_description',
-            'data_iniziopubblicazione',
-            'data_archiviazione',
             'description',
             'descrizione'
         );
