@@ -52,6 +52,58 @@ class OpenPAStateTools
         $this->cli = eZCLI::instance();
     }
 
+    public function changeAll()
+    {
+        $classIdentifiers = array_keys( $this->rules );
+        foreach( $classIdentifiers as $classIdentifier )
+        {
+            $this->changeByClassIdentifier( $classIdentifier );
+        }
+    }
+
+    public function changeByClassIdentifier( $classIdentifier )
+    {
+        if ( $this->log )
+        {
+            $this->cli->output( "ChangeState for class: {$classIdentifier}" );
+        }
+
+        if ( isset( $this->rules[$classIdentifier] ) )
+        {
+            /** @var eZContentObjectTreeNode[] $nodeArray */
+            $nodeArray = eZContentObjectTreeNode::subTreeByNodeID( array(
+                'ClassFilterType' => 'include',
+                'ClassFilterArray' => array( $classIdentifier ),
+                'LoadDataMap' => false,
+                'Limitation' => array()
+            ), 1
+            );
+
+            $count = count( $nodeArray );
+            if ( $count > 0 )
+            {
+                $index = 0;
+                foreach ( $nodeArray as $currentNode )
+                {
+                    $index++;
+                    if ( $this->log ) $this->cli->output( "$index/$count ", false);
+                    $this->changeState( $currentNode->object() );
+                }
+
+                if ( $this->log )
+                {
+                    $memoryMax = memory_get_peak_usage(); // Result is in bytes
+                    $memoryMax = round( $memoryMax / 1024 / 1024, 2 ); // Convert in Megabytes
+                    $this->cli->output( ' Memory: '.$memoryMax.'M' );
+                }
+            }
+        }
+        elseif ( $this->log )
+        {
+            $this->cli->error( "No rules found for class {$classIdentifier}" );
+        }
+    }
+
     public function changeState( $currentObject )
     {
         if ( is_numeric( $currentObject ) )
@@ -95,7 +147,7 @@ class OpenPAStateTools
 
     protected function changeCurrentObjectState()
     {
-        if ( $this->log ) $this->cli->notice( "Oggetto {$this->currentObject->attribute( 'id' )} - {$this->currentObject->attribute( 'name' )}" );
+        if ( $this->log ) $this->cli->notice( "{$this->currentObject->attribute( 'class_identifier' )} {$this->currentObject->attribute( 'id' )} - {$this->currentObject->attribute( 'name' )}" );
         if ( isset( $this->rules[$this->currentObject->attribute( 'class_identifier' )] ) )
         {
             foreach( $this->rules[$this->currentObject->attribute( 'class_identifier' )] as $ruleIdentifier => $ruleSettings )
@@ -108,6 +160,7 @@ class OpenPAStateTools
     protected function runCurrentChangeObjectStateRule( $ruleIdentifier, $ruleSettings )
     {
         // stato corrente
+        $isInRuleCurrentState = true;
         $currentStateIdentifier = $ruleSettings['CurrentState'];
         try {
             $currentState = $this->getState($currentStateIdentifier);
@@ -117,11 +170,12 @@ class OpenPAStateTools
         }
         if ( !in_array( $currentState->attribute( 'id' ), $this->currentObject->attribute( 'state_id_array' ) ) )
         {
-            if ( $this->log ) $this->cli->warning( "[$ruleIdentifier] L'oggetto non è in stato corrente corretto" );
-            return false;
+            if ( $this->log ) $this->cli->warning( "[$ruleIdentifier] L'oggetto non è in stato corrente $currentStateIdentifier" );
+            $isInRuleCurrentState = false;
         }
 
         // stato futuro
+        $isInRuleDestinationState = false;
         $destinationStateIdentifier = $ruleSettings['DestinationState'];
         try {
             $destinationState = $this->getState($destinationStateIdentifier);
@@ -131,23 +185,36 @@ class OpenPAStateTools
         }
         if ( in_array( $destinationState->attribute( 'id' ), $this->currentObject->attribute( 'state_id_array' ) ) )
         {
-            if ( $this->log ) $this->cli->warning( "[$ruleIdentifier] L'oggetto è già in stato destinatione corretto" );
-            return false;
+            if ( $this->log ) $this->cli->warning( "[$ruleIdentifier] L'oggetto è già in stato destinazione $destinationStateIdentifier" );
+            $isInRuleDestinationState = true;
         }
 
         // condizioni
-        $mustChange = true;
+        $passValidations = true;
         foreach( $ruleSettings['Conditions'] as $condition ){
-            if ( !$this->verifyConditionForCurrentObject( $condition ) ){
-                if ( $this->log ) $this->cli->warning( "[$ruleIdentifier] Condizione $condition non superata" );
-                $mustChange = false;
+            if ( $this->log ) $this->cli->warning( "[$ruleIdentifier] $condition ", false );
+            $pass = $this->verifyConditionForCurrentObject( $condition );
+            if ( $this->log ) $this->cli->warning( var_export( $pass, 1 ) );
+            if ( !$pass ){
+                $passValidations = false;
             }
         }
-        if( $mustChange )
+
+        $toState = null;
+        if ( $passValidations && $isInRuleCurrentState && !$isInRuleDestinationState )
         {
-            $this->currentObject->assignState( $destinationState );
+            $toState = $destinationState;
+        }
+        elseif ( !$passValidations && !$isInRuleCurrentState && $isInRuleDestinationState )
+        {
+            $toState = $currentState;
+        }
+
+        if( $toState instanceof eZContentObjectState )
+        {
+            $this->currentObject->assignState( $toState );
             $this->flushCurrentObject();
-            if ( $this->log ) $this->cli->notice( "[$ruleIdentifier] Aggiornamento stato" );
+            if ( $this->log ) $this->cli->notice( "[$ruleIdentifier] Aggiornamento stato a {$toState->attribute('identifier')}" );
             return true;
         }
         return false;
@@ -202,7 +269,12 @@ class OpenPAStateTools
         /** @var eZContentObjectAttribute[] $dataMap */
         $dataMap = $this->currentObject->attribute( 'data_map' );
         if ( isset( $dataMap[$attribute] ) && $dataMap[$attribute]->toString() !== '' ){
-            return $this->compare( $dataMap[$attribute]->toString(), $operator, $value );
+            $string = $dataMap[$attribute]->toString();
+            if ( $dataMap[$attribute]->attribute( 'data_type_string' ) == 'ezdate' )
+            {
+                $string = mktime( 23, 59, 59, date("n", $string ), date( "j", $string ), date( "Y", $string ) );
+            }
+            return $this->compare( $string, $operator, $value );
         }
 
         return false;
@@ -218,6 +290,8 @@ class OpenPAStateTools
         elseif ( $value == 'TODAY' ){
             $value = mktime( 23, 59, 59, date("n", $now ), date( "j", $now ), date( "Y", $now ) );
         }
+
+        if ( $this->log ) $this->cli->notice( " ($string $operator $value) ", false );
 
         switch( $operator ){
             case 'eq':

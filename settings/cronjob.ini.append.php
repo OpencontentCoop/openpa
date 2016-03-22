@@ -18,6 +18,10 @@ Scripts[]=clear_frontpages_cache.php
 
 [CronjobPart-changesection]
 Scripts[]=change_section.php
+Scripts[]=change_state.php
+
+[CronjobPart-changestate]
+Scripts[]=change_state.php
 
 [CronjobPart-generatemenu]
 Scripts[]=generate_menu.php
