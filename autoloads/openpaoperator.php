@@ -300,6 +300,11 @@ class OpenPAOperator
                                         $queryArray[] = "{$key}.id in [{$stringValue}]";
                                     }
                                 }
+                                elseif ( in_array( $fields[$key]['dataType'], array( 'ezstring' ) ) )
+                                {                                    
+                                    if ( !empty( $values ) )
+                                        $queryArray[] = "{$key} = [\"{$values}\"]";
+                                }
                                 else
                                 {
                                     if ( !empty( $values ) )
