@@ -212,7 +212,7 @@ class OpenPAOperator
                         $order = $http->hasGetVariable( 'Order' ) ? $http->getVariable( 'Order' ) : 'desc';                        
                     }
                 }
-                if ( !$sort && $http->hasGetVariable( 'SearchText' ) && !empty( $http->getVariable( 'SearchText' ) ) )
+                if ( !$sort && $http->hasGetVariable( 'SearchText' ) && !( $http->getVariable( 'SearchText' ) == false ) )
                 {
                     $sort = 'score';
                 }
@@ -221,7 +221,7 @@ class OpenPAOperator
                     $sort = 'published';
                 }                
                 
-                if ( $http->hasGetVariable( 'SearchText' ) && !empty( $http->getVariable( 'SearchText' ) ) )
+                if ( $http->hasGetVariable( 'SearchText' ) && !( $http->getVariable( 'SearchText' ) == false ) )
                 {
                     $searchText = $http->getVariable( 'SearchText' );
                     if ( $http->hasGetVariable( 'Logic' ) && $http->getVariable( 'Logic' ) == 'OR' )
@@ -232,14 +232,14 @@ class OpenPAOperator
                 }            
                 
                 $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
-                if ( $http->hasGetVariable( 'SubTreeArray' ) && !empty( $http->getVariable( 'SubTreeArray' ) ) )
+                if ( $http->hasGetVariable( 'SubTreeArray' ) && !( $http->getVariable( 'SubTreeArray' ) == false ) )
                 {
                     $subtree = (array)$http->getVariable( 'SubTreeArray' );                    
                 }
                 $queryArray[] = 'subtree [' . implode( ',', $subtree ) . ']';
                 
                 $classList = array();                
-                if ( $http->hasGetVariable( 'ClassArray' ) && !empty( $http->getVariable( 'ClassArray' ) ) )
+                if ( $http->hasGetVariable( 'ClassArray' ) && !( $http->getVariable( 'ClassArray' ) == false ) )
                 {
                     $classIDList = $http->getVariable( 'ClassArray' );
                     $classList = array();
@@ -257,7 +257,7 @@ class OpenPAOperator
                     }
                 }
                 
-                if ( count( $classList ) == 1 && $http->hasGetVariable( 'Data' ) && !empty( $http->getVariable( 'Data' ) ) )
+                if ( count( $classList ) == 1 && $http->hasGetVariable( 'Data' ) && !( $http->getVariable( 'Data' ) == false ) )
                 {
                     try
                     {
@@ -319,7 +319,7 @@ class OpenPAOperator
                     }
                 }
                 
-                if ( $http->hasGetVariable( 'Anno' ) && !empty( $http->getVariable( 'Anno' ) ) )
+                if ( $http->hasGetVariable( 'Anno' ) && !( $http->getVariable( 'Anno' ) == false ) )
                 {
                     $start = $http->getVariable( 'Anno' ) . '-01-01';
                     $end = $http->getVariable( 'Anno' ) . '-12-31';
