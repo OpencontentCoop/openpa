@@ -212,119 +212,143 @@ class OpenPAOperator
                         $order = $http->hasGetVariable( 'Order' ) ? $http->getVariable( 'Order' ) : 'desc';                        
                     }
                 }
-                if ( !$sort && $http->hasGetVariable( 'SearchText' ) && !( $http->getVariable( 'SearchText' ) == false ) )
+                if ( !$sort && $http->hasGetVariable( 'SearchText' ) )
                 {
-                    $sort = 'score';
+                    $_searchText = $http->getVariable( 'SearchText' );
+                    if( !empty( $_searchText ) )
+                    {
+                        $sort = 'score';
+                    }
                 }
                 if ( !$sort )
                 {
                     $sort = 'published';
                 }                
                 
-                if ( $http->hasGetVariable( 'SearchText' ) && !( $http->getVariable( 'SearchText' ) == false ) )
+                if ( $http->hasGetVariable( 'SearchText' ) )
                 {
-                    $searchText = $http->getVariable( 'SearchText' );
-                    if ( $http->hasGetVariable( 'Logic' ) && $http->getVariable( 'Logic' ) == 'OR' )
+                    $_searchText = $http->hasGetVariable( 'SearchText' );
+                    if( !empty( $_searchText ) )
                     {
-                        $searchText = implode( ' OR ', explode( ' ', $searchText ) );
-                    }
-                    $queryArray[] = "q = '$searchText'";
-                }            
+                        $searchText = $http->getVariable( 'SearchText' );
+                        if ( $http->hasGetVariable( 'Logic' ) && $http->getVariable( 'Logic' ) == 'OR' )
+                        {
+                            $searchText = implode( ' OR ', explode( ' ', $searchText ) );
+                        }
+                        $queryArray[] = "q = '$searchText'";
+                    } 
+                }
                 
                 $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
-                if ( $http->hasGetVariable( 'SubTreeArray' ) && !( $http->getVariable( 'SubTreeArray' ) == false ) )
+                if ( $http->hasGetVariable( 'SubTreeArray' ) )
                 {
-                    $subtree = (array)$http->getVariable( 'SubTreeArray' );                    
+                    $_subTreeArray = $http->getVariable( 'SubTreeArray' );
+                    if( !empty( $_subTreeArray ) )
+                    {
+                        $subtree = (array)$http->getVariable( 'SubTreeArray' );                    
+                    }
                 }
                 $queryArray[] = 'subtree [' . implode( ',', $subtree ) . ']';
                 
                 $classList = array();                
-                if ( $http->hasGetVariable( 'ClassArray' ) && !( $http->getVariable( 'ClassArray' ) == false ) )
+                if ( $http->hasGetVariable( 'ClassArray' ) )
                 {
-                    $classIDList = $http->getVariable( 'ClassArray' );
-                    $classList = array();
-                    foreach( $classIDList as $id )
+                    $_classArray = $http->getVariable( 'ClassArray' );
+                    if( !empty( $_classArray ) )
                     {
-                        $identifier = eZContentClass::classIdentifierByID( $id );
-                        if ( $identifier )
+                        $classIDList = $http->getVariable( 'ClassArray' );
+                        $classList = array();
+                        foreach( $classIDList as $id )
                         {
-                            $classList[] = $identifier;
+                            $identifier = eZContentClass::classIdentifierByID( $id );
+                            if ( $identifier )
+                            {
+                                $classList[] = $identifier;
+                            }
                         }
-                    }
-                    if ( !empty( $classList ) )
-                    {
-                        $queryArray[] = 'classes [' . implode( ',', $classList ) . ']';
+                        if ( !empty( $classList ) )
+                        {
+                            $queryArray[] = 'classes [' . implode( ',', $classList ) . ']';
+                        }
                     }
                 }
                 
-                if ( count( $classList ) == 1 && $http->hasGetVariable( 'Data' ) && !( $http->getVariable( 'Data' ) == false ) )
+                if ( count( $classList ) == 1 && $http->hasGetVariable( 'Data' ))
                 {
-                    try
+                    $_data = $http->getVariable( 'Data' );
+                    if( !empty( $_data ) )
                     {
-                        $_GET['Sort'] = $sort;
-                        
-                        $classRepository = new ClassRepository();
-                        $class = (array) $classRepository->load( $classList[0] );
-                        $fields = array();
-                        foreach ( $class['fields'] as $field ){
-                            $fields[$field['identifier']] = $field;
-                        }
-                        
-                        $data = $http->getVariable( 'Data' );
-                        foreach( $data as $key => $values )
+                        try
                         {
-                            if ( $key == 'published' ){                                
-                                $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
-                                $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
-                                if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
-                                {
-                                    $queryArray[] = "published range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
-                                }                                
+                            $_GET['Sort'] = $sort;
+
+                            $classRepository = new ClassRepository();
+                            $class = (array) $classRepository->load( $classList[0] );
+                            $fields = array();
+                            foreach ( $class['fields'] as $field ){
+                                $fields[$field['identifier']] = $field;
                             }
-                            
-                            if ( isset($fields[$key] ) ){
-                                if ( in_array( $fields[$key]['dataType'], array( 'ezdate', 'ezdatetime' ) ) )
-                                {
+
+                            $data = $http->getVariable( 'Data' );
+                            foreach( $data as $key => $values )
+                            {
+                                if ( $key == 'published' ){                                
                                     $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
                                     $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
                                     if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
                                     {
-                                        $queryArray[] = "$key range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
+                                        $queryArray[] = "published range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
                                     }                                
                                 }
-                                elseif ( in_array( $fields[$key]['dataType'], array( 'ezobjectrelationlist' ) ) )
-                                {                                    
-                                    $stringValue = trim( implode(',', $values) );
-                                    if ( !empty($stringValue) )
+
+                                if ( isset($fields[$key] ) ){
+                                    if ( in_array( $fields[$key]['dataType'], array( 'ezdate', 'ezdatetime' ) ) )
                                     {
-                                        $queryArray[] = "{$key}.id in [{$stringValue}]";
+                                        $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
+                                        $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
+                                        if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
+                                        {
+                                            $queryArray[] = "$key range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
+                                        }                                
                                     }
-                                }
-                                elseif ( in_array( $fields[$key]['dataType'], array( 'ezstring' ) ) )
-                                {                                    
-                                    if ( !empty( $values ) )
-                                        $queryArray[] = "{$key} = [\"{$values}\"]";
-                                }
-                                else
-                                {
-                                    if ( !empty( $values ) )
-                                        $queryArray[] = "{$key} = [{$values}]";
+                                    elseif ( in_array( $fields[$key]['dataType'], array( 'ezobjectrelationlist' ) ) )
+                                    {                                    
+                                        $stringValue = trim( implode(',', $values) );
+                                        if ( !empty($stringValue) )
+                                        {
+                                            $queryArray[] = "{$key}.id in [{$stringValue}]";
+                                        }
+                                    }
+                                    elseif ( in_array( $fields[$key]['dataType'], array( 'ezstring' ) ) )
+                                    {                                    
+                                        if ( !empty( $values ) )
+                                            $queryArray[] = "{$key} = [\"{$values}\"]";
+                                    }
+                                    else
+                                    {
+                                        if ( !empty( $values ) )
+                                            $queryArray[] = "{$key} = [{$values}]";
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch( Exception $e )
-                    {
-                        eZDebug::writeError( $e->getMessage(), __METHOD__ . ':' . $operatorName );                                
+                        catch( Exception $e )
+                        {
+                            eZDebug::writeError( $e->getMessage(), __METHOD__ . ':' . $operatorName );                                
+                        }
                     }
                 }
                 
-                if ( $http->hasGetVariable( 'Anno' ) && !( $http->getVariable( 'Anno' ) == false ) )
+                if ( $http->hasGetVariable( 'Anno' ) )
                 {
-                    $start = $http->getVariable( 'Anno' ) . '-01-01';
-                    $end = $http->getVariable( 'Anno' ) . '-12-31';
-                    $_GET['Data']['published'] = array( '01-01-'.$http->getVariable( 'Anno' ), '31-12-'.$http->getVariable( 'Anno' ) );
-                    $queryArray[] = "published range [$start,$end]";                    
+                    $_anno = $http->getVariable( 'Anno' );
+                    if( !empty( $_anno ) )
+                    {
+                        $start = $http->getVariable( 'Anno' ) . '-01-01';
+                        $end = $http->getVariable( 'Anno' ) . '-12-31';
+                        $_GET['Data']['published'] = array( '01-01-'.$http->getVariable( 'Anno' ), '31-12-'.$http->getVariable( 'Anno' ) );
+                        $queryArray[] = "published range [$start,$end]";                    
+                    }
                 }
 
                 $queryArray[] = "sort [{$sort}=>{$order}]";
