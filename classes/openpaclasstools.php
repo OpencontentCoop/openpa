@@ -7,9 +7,9 @@ class OpenPAClassTools
     const ERROR = 2;
 
     public static $remoteUrl = 'http://openpa.opencontent.it/openpa/classdefinition/';
-    
+
     public $EditLanguage = 'ita-IT';
-    
+
     protected $id, $identifier;
     protected $currentClass;
     protected $options;
@@ -18,23 +18,23 @@ class OpenPAClassTools
     protected $data;
     protected $extraContentObjectAttributes = array();
     protected $extraContentObjectAttributesDetails = array();
-    
-    
+
+
     protected $properties = array(
         'contentobject_name'            => 'ContentObjectName',
         'serialized_name_list'          => 'SerializedNameList',
         'serialized_description_list'   => 'SerializedDescriptionList',
-        'url_alias_name'                => 'URLAliasName',        
+        'url_alias_name'                => 'URLAliasName',
         'always_available'              => 'AlwaysAvailable',
         'sort_field'                    => 'SortField',
         'sort_order'                    => 'SortOrder',
         'is_container'                  => 'IsContainer'
     );
-    
+
     protected $fields = array(
         'serialized_description_list'   => 'SerializedDescriptionList',
         'serialized_name_list'          => 'SerializedNameList',
-        'data_type_string'              => 'DataTypeString',        
+        'data_type_string'              => 'DataTypeString',
         'placement'                     => 'Position',
         'is_searchable'                 => 'IsSearchable',
         'is_required'                   => 'IsRequired',
@@ -52,10 +52,10 @@ class OpenPAClassTools
         'data_text2'                    => 'DataText2',
         'data_text3'                    => 'DataText3',
         'data_text4'                    => 'DataText4',
-        'data_text5'                    => 'DataText5',                
-        'category'                      => 'Category'                
+        'data_text5'                    => 'DataText5',
+        'category'                      => 'Category'
     );
-    
+
     protected $notificationLevel = array(
         'serialized_name_list'          => self::WARNING,
         'serialized_description_list'   => self::WARNING,
@@ -77,12 +77,12 @@ class OpenPAClassTools
         'data_text2'                    => self::WARNING,
         'data_text3'                    => self::WARNING,
         'data_text4'                    => self::WARNING,
-        'data_text5'                    => self::WARNING,                
-        'category'                      => self::WARNING                
+        'data_text5'                    => self::WARNING,
+        'category'                      => self::WARNING
     );
-    
+
     function __construct( $id, $createIfNotExists = false, $options = array() )
-    {        
+    {
         $this->notifications = array( self::ERROR => array(),
                                       self::WARNING => array(),
                                       self::NOTICE => array() );
@@ -91,8 +91,8 @@ class OpenPAClassTools
         $this->data = new stdClass();
         if ( !$class instanceof eZContentClass )
         {
-            $class = eZContentClass::fetchByIdentifier( $id );    
-        }        
+            $class = eZContentClass::fetchByIdentifier( $id );
+        }
         if ( !$class instanceof eZContentClass )
         {
             if ( !$createIfNotExists )
@@ -108,19 +108,19 @@ class OpenPAClassTools
                     if ( !$class instanceof eZContentClass )
                     {
                         throw new Exception( "Fallita la creazione della classe $id" );
-                    }                    
+                    }
                 }
                 else
                 {
                     throw new Exception( "Per creare automaticamente una nuova classe è necessario fornire l'identificativo e non l'id numerico" );
                 }
-            }            
+            }
         }
         $this->currentClass = $class;
-        $this->id = $this->currentClass->attribute( 'id' );        
-        $this->identifier = $this->currentClass->attribute( 'identifier' );        
+        $this->id = $this->currentClass->attribute( 'id' );
+        $this->identifier = $this->currentClass->attribute( 'identifier' );
     }
-    
+
     public function isValid()
     {
         $this->compare();
@@ -134,7 +134,7 @@ class OpenPAClassTools
         }
         return true;
     }
-    
+
     public function getData()
     {
         $this->data->hasError = false;
@@ -180,16 +180,16 @@ class OpenPAClassTools
             $this->data->hasExtraAttributes = true;
             $this->data->extraDetails = $this->extraContentObjectAttributesDetails;
         }
-        
+
         return $this->data;
     }
-    
+
     public function compare()
     {
         $this->compareProperties();
         $this->compareAttributes();
     }
-        
+
     public function getRemote()
     {
         if ( $this->remoteClass == null )
@@ -198,27 +198,27 @@ class OpenPAClassTools
         }
         return $this->remoteClass;
     }
-    
+
     public function getLocale()
-    {                
+    {
         return $this->currentClass;
     }
 
     public function sync( $force = false, $removeExtras = false )
-    {                        
+    {
         $modified = eZContentClass::fetch( $this->id, true, eZContentClass::VERSION_STATUS_MODIFIED );
         if ( is_object( $modified ) )
         {
             throw new Exception( "Classe bloccata in modifica" );
         }
-        $this->compare();        
+        $this->compare();
         if ( $this->getData()->hasError && !$force )
         {
             throw new Exception( "La classe contiene campi che ne impediscono la sincronizzazione automatica" );
         }
 
         $temporary = eZContentClass::fetch( $this->id, true, eZContentClass::VERSION_STATUS_TEMPORARY );
-        
+
         if ( !is_object( $temporary ) or $temporary->attribute( 'id' ) == null )
         {
             $temporary = eZContentClass::fetch( $this->id, true, eZContentClass::VERSION_STATUS_DEFINED );
@@ -245,35 +245,35 @@ class OpenPAClassTools
             $user = eZUser::currentUser();
             $contentIni = eZINI::instance( 'content.ini' );
             $timeOut = $contentIni->variable( 'ClassSettings', 'DraftTimeout' );
-    
+
             $groupList = $temporary->fetchGroupList();
             if ( count( $groupList ) > 0 )
             {
                 $mainGroupID = $groupList[0]->attribute( 'group_id' );
                 $mainGroupName = $groupList[0]->attribute( 'group_name' );
             }
-    
+
             if ( $temporary->attribute( 'modifier_id' ) != $user->attribute( 'contentobject_id' ) &&
                  $temporary->attribute( 'modified' ) + $timeOut > time() )
             {
                 throw new Exception( "Modifica alla classe non permessa" );
             }
         }
-        
+
         $localeAttributes = array();
         foreach( $this->currentClass->fetchAttributes() as $attribute )
         {
             $attribute->setAttribute( 'version', eZContentClass::VERSION_STATUS_TEMPORARY );
             $localeAttributes[$attribute->attribute('identifier')] = $attribute;
         }
-        $this->currentClass->setAttribute( 'version', eZContentClass::VERSION_STATUS_TEMPORARY );        
-        
+        $this->currentClass->setAttribute( 'version', eZContentClass::VERSION_STATUS_TEMPORARY );
+
         $remote = $this->getRemote();
         if ( $remote === null )
         {
             throw new Exception( "Classe remota non trovata" );
         }
-        
+
         if ( $force && $this->getData()->hasError )
         {
             foreach( $this->getData()->errors as $identifier => $value )
@@ -285,7 +285,7 @@ class OpenPAClassTools
                 foreach( $remote->DataMap[0] as $originalAttribute )
                 {
                     if ( $originalAttribute->Identifier == $identifier )
-                    {                        
+                    {
                         ezpEvent::getInstance()->notify( 'openpa/switch_class_attribute', array( $localeAttributes[$identifier], $originalAttribute ) );
                         if ( $value == 'data_type_string' )
                         {
@@ -299,25 +299,25 @@ class OpenPAClassTools
                             $this->data->missingAttributes[] = $originalAttribute;
                             $this->currentClass->removeAttributes( array( $localeAttributes[$identifier] ) );
                             unset( $localeAttributes[$identifier] );
-                        }                        
+                        }
                         break;
                     }
-                }                
+                }
             }
         }
-        
+
         $attributes = array();
-                   
+
         foreach( $this->properties as $identifier => $remoteProperty )
         {
             if ( $remote->{ $remoteProperty } != $this->currentClass->attribute( $identifier ) )
-            {                
+            {
                 $this->currentClass->setAttribute( $identifier,  $remote->{ $remoteProperty } );
                 if ( $identifier == 'serialized_name_list' )
                 {
                     $nameList = new eZContentClassNameList();
                     $nameList->initFromSerializedList( $remote->{ $remoteProperty } );
-                    $this->currentClass->NameList = $nameList;                    
+                    $this->currentClass->NameList = $nameList;
                 }
                 elseif ( $identifier == 'serialized_description_list' )
                 {
@@ -327,7 +327,7 @@ class OpenPAClassTools
                 }
             }
         }
-        
+
         foreach( $this->getData()->missingAttributes as $originalAttribute )
         {
             $add = $this->addAttribute( $originalAttribute );
@@ -355,7 +355,7 @@ class OpenPAClassTools
                 $attributes[] = $extra;
             }
         }
-                
+
         $this->currentClass->store( $attributes );
         $db = eZDB::instance();
         $db->begin();
@@ -365,34 +365,34 @@ class OpenPAClassTools
             eZExtension::getHandlerClass( new ezpExtensionOptions( array( 'iniFile' => 'site.ini',
                                                                           'iniSection'   => 'ContentSettings',
                                                                           'iniVariable'  => 'ContentClassEditHandler' ) ) )
-                    ->store( $this->currentClass, $attributes, $unorderedParameters );
+                       ->store( $this->currentClass, $attributes, $unorderedParameters );
         }
         else
         {
             $unorderedParameters['ScheduledScriptID'] = 0;
             $this->currentClass->storeVersioned( $attributes, eZContentClass::VERSION_STATUS_DEFINED );
         }
-        
+
         $db->commit();
-        
+
         $this->syncGroups();
     }
-    
+
     protected function createNew( $identifier )
     {
-        $remote = self::fetchRemoteByIdentifier( $identifier );        
+        $remote = self::fetchRemoteByIdentifier( $identifier );
         if ( $remote === null )
         {
             throw new Exception( "Classe remota non trovata" );
         }
         $this->syncAllGroups( $remote );
-        
+
         $classGroup = false;
         foreach ( $remote->InGroups as $group )
         {
             $classGroup = eZContentClassGroup::fetchByName( $group->GroupName );
             if ( $classGroup instanceof eZContentClassGroup )
-            {                
+            {
                 break;
             }
         }
@@ -405,33 +405,33 @@ class OpenPAClassTools
         $options = array(
             'serialized_name_list' => $remote->SerializedNameList,
             'serialized_description_list' => $remote->SerializedDescriptionList
-        );        
+        );
         $user = eZUser::currentUser();
         $userID = $user->attribute( 'contentobject_id' );
         $class = eZContentClass::create( $userID, $options, $this->EditLanguage );
         $class->setName( 'New automatic', $this->EditLanguage );
         $class->store();
-        
+
         $editLanguageID = eZContentLanguage::idByLocale( $this->EditLanguage );
         $class->setAlwaysAvailableLanguageID( $editLanguageID );
         $ClassID = $class->attribute( 'id' );
         $ClassVersion = $class->attribute( 'version' );
-        
+
         $ingroup = eZContentClassClassGroup::create( $ClassID,
-                                                     $ClassVersion,
-                                                     $classGroup->attribute( 'id' ),
-                                                     $classGroup->attribute( 'name' ) );
+            $ClassVersion,
+            $classGroup->attribute( 'id' ),
+            $classGroup->attribute( 'name' ) );
         $ingroup->store();
-        $class->setAttribute( 'identifier',  $identifier );  
+        $class->setAttribute( 'identifier',  $identifier );
         foreach( $this->properties as $identifier => $remoteProperty )
         {
-            $class->setAttribute( $identifier,  $remote->{ $remoteProperty } );            
+            $class->setAttribute( $identifier,  $remote->{ $remoteProperty } );
         }
         $class->storeVersioned( array(), eZContentClass::VERSION_STATUS_DEFINED );
         $db->commit();
         return $class;
     }
-    
+
     protected static function fetchRemoteByIdentifier( $identifier )
     {
         $remoteUrl = OpenPAINI::variable( 'NetworkSettings', 'PrototypeUrl', self::$remoteUrl );
@@ -448,11 +448,11 @@ class OpenPAClassTools
             {
                 throw new Exception( $original->error );
             }
-            return $original;             
+            return $original;
         }
         throw new Exception( "Server remoto e server locale coincidono" );
     }
-    
+
     protected function compareProperties( $remote = null )
     {
         if ( $remote === null )
@@ -465,7 +465,7 @@ class OpenPAClassTools
         }
         $locale = $this->currentClass;
         $this->data->diffProperties = array();
-        
+
         foreach ( $this->properties as $localeIdentifier => $remoteProperty )
         {
             if ( $remote->{ $remoteProperty } != $locale->attribute( $localeIdentifier ) )
@@ -477,7 +477,7 @@ class OpenPAClassTools
                 );
             }
         }
-        
+
         $localGroups = $locale->fetchGroupList();
         $localGroupsNames = array();
         $remoteGroupsNames = array();
@@ -488,7 +488,7 @@ class OpenPAClassTools
         foreach ( $remote->InGroups as $group )
         {
             $remoteGroupsNames[] = $group->GroupName;
-        }        
+        }
         $diff = array_diff( $remoteGroupsNames, $localGroupsNames );
         if ( !empty( $diff ) )
         {
@@ -496,12 +496,12 @@ class OpenPAClassTools
                 'field_name' => 'Gruppi di classi',
                 'locale_value' => implode( ', ', $localGroupsNames ),
                 'remote_value' => implode( ', ', $remoteGroupsNames )
-            ); 
-        }        
+            );
+        }
     }
-    
+
     protected function compareAttributes( $remote = null )
-    {        
+    {
         $missingInLocale = array();
         if ( $remote === null )
         {
@@ -520,9 +520,9 @@ class OpenPAClassTools
                 $missingInLocale[$originalAttribute->Identifier] = $originalAttribute;
             }
         }
-        
+
         $existInOriginal = array();
-        $missingInOriginal = array();        
+        $missingInOriginal = array();
         $this->data->diffAttributes = array();
         if ( !empty( $localeDataMap ) )
         {
@@ -543,8 +543,8 @@ class OpenPAClassTools
                 if ( !in_array( $identifier, $existInOriginal ) )
                 {
                     $missingInOriginal[] = json_decode( json_encode( $attribute ) );
-                    $this->extraContentObjectAttributes[] = $attribute;                    
-                    $contentAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $attribute->attribute( 'id' ), true );
+                    $this->extraContentObjectAttributes[] = $attribute;
+                    $contentAttributes = array(); //eZContentObjectAttribute::fetchSameClassAttributeIDList( $attribute->attribute( 'id' ), true );
                     $contents = array();
                     foreach( $contentAttributes as $contentAttribute )
                     {
@@ -555,32 +555,32 @@ class OpenPAClassTools
                     }
                     $this->extraContentObjectAttributesDetails[$identifier] = array( 'count' => count( $contents ),
                                                                                      'objects' => $contents );
-                    
+
                 }
             }
         }
-        
+
         $this->data->missingAttributes = $missingInLocale;
-        $this->data->extraAttributes = $missingInOriginal;        
+        $this->data->extraAttributes = $missingInOriginal;
     }
-    
+
     protected function compareAttribute( $originalAttribute )
     {
         $class = $this->currentClass;
-        $localeAttribute = $class->fetchAttributeByIdentifier( $originalAttribute->Identifier );        
+        $localeAttribute = $class->fetchAttributeByIdentifier( $originalAttribute->Identifier );
         if( $localeAttribute instanceof eZContentClassAttribute )
-        {            
+        {
             $id = $localeAttribute->attribute( 'identifier' );
             $this->data->diffAttributes[$id] = array();
             ezpEvent::getInstance()->notify( 'openpa/pre_compare_class_attribute', array( $localeAttribute, $originalAttribute ) );
 
             foreach( $this->fields as $localeIdentifier => $remoteProperty )
-            {                
+            {
                 if ( $localeAttribute->attribute( $localeIdentifier ) != $originalAttribute->{ $remoteProperty } )
                 {
                     $this->notifications[$this->notificationLevel[$localeIdentifier]][$id] = $localeIdentifier;
                     $detail = false;
-                    $contentAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $localeAttribute->attribute( 'id' ), true );
+                    $contentAttributes = array(); //eZContentObjectAttribute::fetchSameClassAttributeIDList( $localeAttribute->attribute( 'id' ), true );
                     $contents = array();
                     foreach( $contentAttributes as $contentAttribute )
                     {
@@ -596,20 +596,20 @@ class OpenPAClassTools
                         'locale_value' =>  htmlentities( $localeAttribute->attribute( $localeIdentifier ) ),
                         'remote_value' =>  htmlentities( $originalAttribute->{ $remoteProperty } ),
                         'detail' => $detail
-                    );                    
+                    );
                 }
             }
             if ( empty( $this->data->diffAttributes[$id] ) )
             {
                 unset( $this->data->diffAttributes[$id] );
             }
-            
+
             ezpEvent::getInstance()->notify( 'openpa/post_compare_class_attribute', array( $localeAttribute, $originalAttribute ) );
-        }        
+        }
     }
-    
+
     protected function syncAttribute( $originalAttribute, $localeAttribute )
-    {        
+    {
         if( $localeAttribute instanceof eZContentClassAttribute )
         {
             if ( array_key_exists( $originalAttribute->Identifier, $this->notifications[self::ERROR] ) )
@@ -641,27 +641,27 @@ class OpenPAClassTools
             }
 
             $localeAttribute->store();
-            
+
             ezpEvent::getInstance()->notify( 'openpa/post_sync_class_attribute', array( $localeAttribute, $originalAttribute ) );
-            
+
             return $localeAttribute;
         }
         return false;
     }
-    
+
     protected function addAttribute( $originalAttribute )
     {
         $class = $this->currentClass;
-        $ClassID = $class->ID;        
+        $ClassID = $class->ID;
         $localeAttributes = $class->fetchAttributes();
         $placement = count( $localeAttributes );
-                 
+
         if( !$class->fetchAttributeByIdentifier( $originalAttribute->Identifier ) )
         {
             $localeAttribute = eZContentClassAttribute::create(
                 $class->attribute( 'id' ),
                 $originalAttribute->DataTypeString,
-                array(  'version' => eZContentClass::VERSION_STATUS_TEMPORARY,                        
+                array(  'version' => eZContentClass::VERSION_STATUS_TEMPORARY,
                         'identifier' => $originalAttribute->Identifier,
                         'serialized_name_list' => $originalAttribute->SerializedNameList,
                         'serialized_description_list' => $originalAttribute->SerializedDescriptionList,
@@ -673,7 +673,7 @@ class OpenPAClassTools
                         'can_translate' => $originalAttribute->CanTranslate,
                         'placement' => ++$placement ),
                 $this->EditLanguage
-            );            
+            );
             foreach( $this->fields as $localeIdentifier => $remoteProperty )
             {
                 $localeAttribute->setAttribute( $localeIdentifier, $originalAttribute->{ $remoteProperty } );
@@ -683,7 +683,7 @@ class OpenPAClassTools
         }
         return false;
     }
-    
+
     protected function syncAllGroups( $remote = null)
     {
         if ( $remote === null )
@@ -693,7 +693,7 @@ class OpenPAClassTools
         $remoteGroups = $remote->AllGroups;
         foreach( $remoteGroups as $group )
         {
-            $name = $group->Name;            
+            $name = $group->Name;
             if ( eZContentClassGroup::fetchByName( $name ) == null )
             {
                 $user = eZUser::currentUser();
@@ -704,15 +704,15 @@ class OpenPAClassTools
             }
         }
     }
-    
+
     protected function syncGroups()
-    {        
+    {
         $remote = $this->getRemote();
         if ( $remote === null )
         {
             throw new Exception( "Classe remota non trovata" );
         }
-        $this->syncAllGroups( $remote );        
+        $this->syncAllGroups( $remote );
         $locale = $this->currentClass;
         $localGroups = $locale->fetchGroupList();
         $localGroupsNames = array();
@@ -723,8 +723,8 @@ class OpenPAClassTools
             if ( $classGroup )
             {
                 eZContentClassClassGroup::removeGroup( $this->currentClass->attribute( 'id' ),
-                                                       $this->currentClass->attribute( 'version' ),
-                                                       $classGroup->attribute( 'id' ) );
+                    $this->currentClass->attribute( 'version' ),
+                    $classGroup->attribute( 'id' ) );
             }
         }
         foreach ( $remote->InGroups as $group )
@@ -733,9 +733,9 @@ class OpenPAClassTools
             if ( $classGroup )
             {
                 $ingroup = eZContentClassClassGroup::create( $this->currentClass->attribute( 'id' ),
-                                                             $this->currentClass->attribute( 'version' ),
-                                                             $classGroup->attribute( 'id' ),
-                                                             $classGroup->attribute( 'name' ) );
+                    $this->currentClass->attribute( 'version' ),
+                    $classGroup->attribute( 'id' ),
+                    $classGroup->attribute( 'name' ) );
                 $ingroup->store();
             }
         }
@@ -745,7 +745,7 @@ class OpenPAClassTools
         //    //@todo
         //}
     }
-    
+
     protected function changeContentObjectAttributeDataTypeString( $localeAttribute, $newDataTypeString )
     {
         $contentAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $localeAttribute->attribute( 'id' ), true );
@@ -781,5 +781,5 @@ class OpenPAClassTools
             }
         }
     }
-    
+
 }
