@@ -8,7 +8,7 @@ $script = eZScript::instance( array( 'description' => ( "OpenPA linkcheck defend
                                      'use-extensions' => true ) );
 
 $script->startup();
-$options = $script->getOptions( "[simple][generate-csv][class:]", "",
+$options = $script->getOptions( "[link_id:]", "",
     array( "link_id" => "Id del link" )
 );
 $script->initialize();
