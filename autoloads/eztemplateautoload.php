@@ -27,7 +27,8 @@ $eZTemplateOperatorArray[] = array(
         'search_exclude_class_facets',
         'search_exclude_classes',
         'search_query',
-        'strReplace'
+        'strReplace',
+        'organigramma'
     )
 );
 

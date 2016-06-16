@@ -35,7 +35,8 @@ class OpenPAOperator
             'search_exclude_class_facets',
             'search_exclude_classes',
             'search_query',
-            'strReplace'
+            'strReplace',
+            'organigramma'
         );
     }
 
@@ -102,7 +103,10 @@ class OpenPAOperator
 			),            
             'search_query' => array(
                 'override' => array ( 'type' => 'mixed', 'required' => false, 'default' => array())
-			)
+			),
+            'organigramma' => array(
+                'root_object_id' => array ( 'type' => 'integer', 'required' => false, 'default' => null)
+            )
         );
     }
 
@@ -142,6 +146,13 @@ class OpenPAOperator
         
         switch ( $operatorName )
         {
+            case 'organigramma':
+            {
+                $data = OpenPAOrganigrammaTools::instance()->tree($namedParameters['root_object_id']);
+                $operatorValue = json_decode( json_encode( $data ), 1 );
+                break;
+            }
+
             case 'strReplace':
 			{				
 				$variable = $namedParameters['var'];
