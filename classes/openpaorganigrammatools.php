@@ -20,29 +20,27 @@ class OpenPAOrganigrammaTools
     public static function instance()
     {
         if (self::$_instance === null) {
+            $language = eZLocale::currentLocaleCode();
+            $cacheFilePath = eZSys::cacheDirectory() . "/openpaorganigramma/$language.php";
+            $cacheFile = eZClusterFileHandler::instance($cacheFilePath);
 
-            $tree = new OpenPAOrganigrammaItem();
-
-            $areeNode = eZContentObjectTreeNode::fetch(OpenPAINI::variable('Nodi', 'Aree', 0), false, false);
-            if($areeNode) {
-
-                $language = eZLocale::currentLocaleCode();
-                $cacheFilePath = eZSys::cacheDirectory() . "/openpaorganigramma/$language.php";
-                $cacheFile = eZClusterFileHandler::instance($cacheFilePath);
-
-                $tree = $cacheFile->processCache(
-                    array('OpenPAOrganigrammaTools', 'cacheRetrieve'),
-                    array('OpenPAOrganigrammaTools', 'cacheGenerate'),
-                    null,
-                    $areeNode['modified']
-                );
-            }
+            $tree = $cacheFile->processCache(
+                array('OpenPAOrganigrammaTools', 'cacheRetrieve'),
+                array('OpenPAOrganigrammaTools', 'cacheGenerate'),
+                null,
+                self::cacheExpiry()
+            );
 
             self::$_instance = new OpenPAOrganigrammaTools();
             self::$_instance->tree = $tree;
         }
 
         return self::$_instance;
+    }
+
+    public static function cacheExpiry()
+    {
+        return null; //@todo
     }
 
     public static function clearCache()
@@ -271,9 +269,9 @@ class OpenPAOrganigrammaItem
     {
         $item = new OpenPAOrganigrammaItem();
         $item->setSettings($settings);
-        $item->id = $node->attribute('contentobject_id');
+        $item->id = (int)$node->attribute('contentobject_id');
         $item->class_identifier = $node->attribute('class_identifier');
-        $item->node_id = $node->attribute('node_id');
+        $item->node_id = (int)$node->attribute('node_id');
         $item->name = $node->attribute('name');
         $item->url_alias = $node->attribute('url_alias');
         $item->collectIdList($item->id);
@@ -295,9 +293,9 @@ class OpenPAOrganigrammaItem
 
         $item = new OpenPAOrganigrammaItem();
         $item->setSettings($settings);
-        $item->id = $data['id'];
+        $item->id = (int)$data['id'];
         $item->class_identifier = $data['class_identifier'];
-        $item->node_id = $data['node_id'];
+        $item->node_id = (int)$data['node_id'];
         $item->name = $data['name'];
         $item->url_alias = $data['url_alias'];
         $item->collectIdList($item->id);
@@ -309,9 +307,9 @@ class OpenPAOrganigrammaItem
     public static function __set_state(array $data)
     {
         $item = new OpenPAOrganigrammaItem();
-        $item->id = $data['id'];
+        $item->id = (int)$data['id'];
         $item->class_identifier = $data['class_identifier'];
-        $item->node_id = $data['node_id'];
+        $item->node_id = (int)$data['node_id'];
         $item->name = $data['name'];
         $item->url_alias = $data['url_alias'];
         $item->itemIdList = $data['itemIdList'];

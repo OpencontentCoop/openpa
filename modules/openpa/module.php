@@ -131,6 +131,11 @@ $ViewList['cookie'] = array(
     'functions' => array( 'cookie' )
 );
 
+$ViewList['refreshorganigramma'] = array(
+    'functions' => array('editor_tools'),
+    'script' => 'refreshorganigramma.php',
+    'params' => array());
+
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
