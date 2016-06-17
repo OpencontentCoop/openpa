@@ -443,6 +443,7 @@ class OpenPaFunctionCollection
         {
             if ( $struttura->attribute( 'class_identifier' ) == 'struttura' )
             {
+                $params['Filter'] = array('or');
                 $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('struttura', 'id') . ":" . $struttura->attribute( 'contentobject_id' ) );
                 $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('altra_struttura', 'id') . ":" . $struttura->attribute( 'contentobject_id' ) );
             }
