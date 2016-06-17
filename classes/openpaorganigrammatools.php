@@ -17,6 +17,8 @@ class OpenPAOrganigrammaTools
      */
     protected $subItemCollection;
 
+    public static $preventRepetitions = array();
+
     public static function instance()
     {
         if (self::$_instance === null) {
@@ -86,6 +88,7 @@ class OpenPAOrganigrammaTools
 
     public function run()
     {
+        self::$preventRepetitions = array();
         $this->tree = OpenPAOrganigrammaItem::instanceFromNode(
             OpenPaFunctionCollection::fetchHome(),
             array('build' => false));
@@ -618,7 +621,11 @@ class OpenPAOrganigrammaSubItemCollection
 
     public function append(OpenPAOrganigrammaItem $item)
     {
-        $this->items[] = $item;
+        if (!in_array($item->id, OpenPAOrganigrammaTools::$preventRepetitions)){
+            $this->items[] = $item;
+            OpenPAOrganigrammaTools::$preventRepetitions[] = $item->id;
+        }
+
     }
 
     public function hasContent()

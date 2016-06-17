@@ -6,7 +6,7 @@ class DataHandlerOrganigramma implements OpenPADataHandlerInterface
 
     public function __construct( array $Params )
     {
-        $this->root = (int)eZHTTPTool::instance()->getVariable( 'parent', null );
+        $this->root = (int)eZHTTPTool::instance()->getVariable( 'root', null );
     }
 
     public function getData()
