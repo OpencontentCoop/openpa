@@ -14,18 +14,23 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
     protected $currentView;
 
     function run()
+    {        
+        $this->fnData['current_view'] = 'getCurrentView';
+        $this->fnData['views'] = 'getViews';        
+    }
+    
+    function getViews()
     {
-        $this->getCurrentView();
-        $this->data['current_view'] = $this->currentView;
-        $this->data['views'] = array();
+        $data = array();
         foreach( $this->availableViews as $view )
         {            
-            $this->data['views'][$view] = array(
-                'current_view' => $this->currentView,
+            $data[$view] = array(
+                'current_view' => $this->getCurrentView(),
                 'identifier' => $view,
                 'template' => $this->templatePath( $view )
             );
         }
+        return $data;
     }
     
     function template()

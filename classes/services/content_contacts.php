@@ -5,13 +5,12 @@ class ObjectHandlerServiceContentContacts extends ObjectHandlerServiceBase
     protected $attributeList;
     
     function run()
-    {
-        $list = $this->getAttributeList();
+    {        
         $this->data['show_label'] = true; //@todo
         $this->data['label'] = 'Contatti'; //@todo
-        $this->data['attributes'] = $list;
-        $this->data['identifiers'] = array_keys( $list );
-        $this->data['has_content'] = count( $this->data['attributes'] ) > 0;
+        $this->fnData['attributes'] = 'getAttributeList';
+        $this->fnData['identifiers'] = 'getAttributeListIdentifiers';
+        $this->fnData['has_content'] = 'getAttributeListCount';
     }
 
     function getAttributeList()
@@ -35,4 +34,15 @@ class ObjectHandlerServiceContentContacts extends ObjectHandlerServiceBase
         }
         return $this->attributeList;
     }
+    
+    protected function getAttributeListIdentifiers()
+    {
+        return array_keys( $this->getAttributeList() );
+    }
+    
+    protected function getAttributeListCount()
+    {
+        return count( $this->getAttributeList() ) > 0;
+    }
+    
 }

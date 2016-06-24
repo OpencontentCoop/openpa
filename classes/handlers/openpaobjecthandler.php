@@ -27,7 +27,12 @@ class OpenPAObjectHandler
     /**
      * @var OpenPAAttributeHandler[]
      */
-    public $attributesHandlers = array();
+    protected $attributesHandlers;
+    
+    /**
+     * @var string[]
+     */
+    protected $attributesIdentifiers;
 
     /**
      * @var array
@@ -87,7 +92,7 @@ class OpenPAObjectHandler
     }
 
     public static function instanceFromContentObject( eZContentObject $object = null, eZContentObjectTreeNode $node = null )
-    {
+    {        
         //@todo caricare la classe estesa specifica per l'oggetto di riferimento
         if ( $object instanceof eZContentObject )
         {
@@ -189,6 +194,63 @@ class OpenPAObjectHandler
     {
         return $this->hasContentObject() && $this->hasContentNode();
     }
+    
+    public function __get($var)
+    {
+        if ($var == 'attributesHandlers')
+        {
+            return $this->getAttributesHandlers();
+        }
+    }
+    
+    protected function getAttributesHandlers( $key = null )
+    {
+        if ($this->attributesHandlers === null)
+        {
+            $dataMap = $this->contentObject->attribute( 'data_map' );            
+            foreach( $dataMap as $identifier => $attribute )
+            {
+                $this->attributesHandlers[$identifier] = $this->attributeHandler( $attribute, $identifier );                
+            }            
+        }        
+        if ( $key )
+            return isset( $this->attributesHandlers[$key] ) ? $this->attributesHandlers[$key] : null;
+        return $this->attributesHandlers;
+    }
+    
+    function contentObjectAttributeIdentifiers()
+    {
+        if ($this->attributesIdentifiers === null && $this->contentObject instanceof eZContentObject)
+        {
+            $db = eZDB::instance();
+            $version = $this->contentObject->CurrentVersion;
+            $language = $this->contentObject->CurrentLanguage;
+    
+            $versionText = "AND ezcontentobject_attribute.version = '$version'";
+            $languageText = "AND  ezcontentobject_attribute.language_code = '$language'";        
+            
+            
+            $query = "SELECT ezcontentclass_attribute.identifier as identifier FROM
+                        ezcontentobject_attribute, ezcontentclass_attribute, ezcontentobject_version
+                      WHERE
+                        ezcontentclass_attribute.version = '0' AND
+                        ezcontentclass_attribute.id = ezcontentobject_attribute.contentclassattribute_id AND
+                        ezcontentobject_version.contentobject_id = '{$this->contentObject->ID}' AND
+                        ezcontentobject_version.version = '$version' AND
+                        ezcontentobject_attribute.contentobject_id = '{$this->contentObject->ID}' $versionText $languageText                  
+                      ORDER BY
+                        ezcontentclass_attribute.placement ASC,
+                        ezcontentobject_attribute.language_code ASC";
+    
+            $this->attributesIdentifiers = array();
+            $attributeArray = $db->arrayQuery( $query );
+            foreach($attributeArray as $row)
+            {
+                $this->attributesIdentifiers[] = $row['identifier'];
+            }
+        }
+        return $this->attributesIdentifiers;
+    }
 
     protected function __construct( $object = null )
     {
@@ -196,17 +258,12 @@ class OpenPAObjectHandler
         {
             $this->contentObject = $object;
             $this->currentObjectId = $this->contentObject->attribute( 'id' );
-            $this->currentClassIdentifier = $this->contentObject->attribute( 'class_identifier' );
-            $dataMap = $this->contentObject->attribute( 'data_map' );
-            foreach( $dataMap as $identifier => $attribute )
-            {
-                $this->attributesHandlers[$identifier] = $this->attributeHandler( $attribute, $identifier );
-            }
+            $this->currentClassIdentifier = $this->contentObject->attribute( 'class_identifier' );                     
             if ( class_exists( 'OCClassExtraParametersManager' ) )
             {
                 $this->extraParametersManager = OCClassExtraParametersManager::instance( $this->contentObject->attribute( 'content_class' ) );
-            }
-        }
+            }            
+        }        
         $availableServices = OpenPAINI::variable( 'ObjectHandlerServices', 'Services', array() );
         foreach( $availableServices as $serviceId => $className )
         {
@@ -236,12 +293,12 @@ class OpenPAObjectHandler
 
     public function attributes()
     {
-        return array_merge( array_keys( $this->services ), array_keys( $this->attributesHandlers ) );
+        return array_merge( array_keys( $this->services ), (array)$this->contentObjectAttributeIdentifiers() );
     }
 
     public function hasAttribute( $key )
     {
-        return in_array( $key, array_merge( array_keys( $this->services ), array_keys( $this->attributesHandlers ) ) );
+        return in_array( $key, array_merge( array_keys( $this->services ), (array)$this->contentObjectAttributeIdentifiers() ) );
     }
 
     /**
@@ -255,9 +312,9 @@ class OpenPAObjectHandler
         {
             return $this->services[$key]->data();
         }
-        elseif ( isset( $this->attributesHandlers[$key] ) )
-        {
-            return $this->attributesHandlers[$key];
+        elseif ( in_array( $key, $this->contentObjectAttributeIdentifiers() ) )
+        {            
+            return $this->getAttributesHandlers( $key );
         }
         eZDebug::writeNotice( "Service or AttributeHandler $key does not exist", __METHOD__ );
         return false;
@@ -271,7 +328,7 @@ class OpenPAObjectHandler
     public function service( $key )
     {
         if ( isset( $this->services[$key] ) )
-        {
+        {            
             return $this->services[$key]->data();
         }
         eZDebug::writeNotice( "Service $key does not exist", __METHOD__ );

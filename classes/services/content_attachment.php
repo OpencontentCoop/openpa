@@ -2,12 +2,13 @@
 
 class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
 {
+    protected $list;
+    
     function run()
-    {
-        $list = $this->getAttributeList();
-        $this->data['attributes'] = $list;
-        $this->data['identifiers'] = array_keys( $list );
-        $this->data['has_content'] = count( $this->data['attributes'] ) > 0;
+    {        
+        $this->fnData['attributes'] = 'getAttributeList';
+        $this->fnData['identifiers'] = 'getAttributeListIdentifiers';
+        $this->fnData['has_content'] = 'getAttributeListCount';
         $this->fnData['children_count'] = 'getChildrenCount';
         $this->fnData['children'] = 'getChildren';
     }
@@ -43,16 +44,29 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         return $list;
     }
 
+    protected function getAttributeListIdentifiers()
+    {
+        return array_keys( $this->getAttributeList() );
+    }
+    
+    protected function getAttributeListCount()
+    {
+        return count( $this->getAttributeList() ) > 0;
+    }
+    
     protected function getAttributeList()
     {
-        $list = array();
-        foreach( $this->container->attributesHandlers as $attribute )
+        if ($this->list === null)
         {
-            if ( $attribute->is( 'attributi_allegati_atti' ) && $attribute->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
+            $this->list = array();
+            foreach( $this->container->attributesHandlers as $attribute )
             {
-                $list[$attribute->attribute( 'identifier' )] = $attribute->attribute( 'contentobject_attribute' );
+                if ( $attribute->is( 'attributi_allegati_atti' ) && $attribute->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
+                {
+                    $this->list[$attribute->attribute( 'identifier' )] = $attribute->attribute( 'contentobject_attribute' );
+                }
             }
         }
-        return $list;
+        return $this->list;
     }
 }

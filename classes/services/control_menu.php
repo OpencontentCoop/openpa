@@ -9,7 +9,17 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         $this->data['available_menu'] = array( 'top_menu', 'side_menu' );
 
         $this->data['show_top_menu'] = true;
-        $this->data['top_menu'] = new OpenPATempletizable( array(
+        $this->fnData['top_menu'] = 'topMenu';
+        
+        $this->data['show_side_menu'] = $this->hasSideMenu();
+        $this->fnData['side_menu'] = 'sideMenu';
+
+        $this->fnData['show_extra_menu'] = 'hasExtraMenu';
+    }
+    
+    protected function topMenu()
+    {
+        return new OpenPATempletizable( array(
             'root_node'=> OpenPaFunctionCollection::fetchHome(),
             'classes' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu', array() ),
             'exclude' => OpenPAINI::variable( 'TopMenu', 'NascondiNodi', array() ),
@@ -21,9 +31,11 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'custom_max_recursion' => $this->getTopMenuCustomRecursions(),
             'custom_fetch_parameters' => $this->getTopMenuCustomFetchParameters()
         ));
-
-        $this->data['show_side_menu'] = $this->hasSideMenu();
-        $this->data['side_menu'] = new OpenPATempletizable( array(
+    }
+    
+    protected function sideMenu()
+    {
+        return new OpenPATempletizable( array(
             'root_node' => $this->getSideMenuRootNode(),
             'classes' => $this->getSideMenuClassIdentifiers(),
             'exclude' => OpenPAINI::variable( 'SideMenu', 'NascondiNodi', array() ),
@@ -33,8 +45,6 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'custom_max_recursion' => array(),
             'custom_fetch_parameters' => array()
         ));
-
-        $this->fnData['show_extra_menu'] = 'hasExtraMenu';
     }
 
     //@todo

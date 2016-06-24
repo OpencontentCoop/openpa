@@ -1,22 +1,60 @@
 <?php
 class OpenPAAttributeHandler extends OpenPATempletizable
 {
+    protected $attribute;
+     
+    protected $contentClassAttribute;
+    
+    protected $contentClass;
+    
     public function __construct( eZContentObjectAttribute $attribute, $params = array() )
     {
+        $this->attribute = $attribute;        
+        
         $this->data['contentobject_attribute'] = $attribute;
+        $this->fnData['contentclass_attribute'] = 'getContentClassAttribute';
+        $this->fnData['contentclass'] = 'getContentClass';
+        $this->fnData['identifier'] = 'getContentClassAttributeIdentifier';
+        $this->fnData['label'] = 'getContentClassAttributeName';
+        $this->data['data_type_string'] = $this->attribute->attribute( 'data_type_string' );
+        $this->data['is_information_collector'] = $this->attribute->attribute( 'is_information_collector' );
 
-        $this->data['contentclass_attribute'] = $attribute->attribute( 'contentclass_attribute' );
-        $this->data['contentclass'] = eZContentClass::fetch( $this->data['contentclass_attribute']->attribute( 'contentclass_id' ) );
-        $this->data['identifier'] = $this->data['contentclass_attribute']->attribute( 'identifier' );
-        $this->data['label'] = $this->data['contentclass_attribute']->attribute( 'name' );
-        $this->data['data_type_string'] = $this->data['contentclass_attribute']->attribute( 'data_type_string' );
-        $this->data['is_information_collector'] = $attribute->attribute( 'is_information_collector' );
-
-        $this->data['full_identifier'] = $this->data['contentclass']->attribute( 'identifier' ) . '/' . $this->data['contentclass_attribute']->attribute( 'identifier' );
+        $this->fnData['full_identifier'] = 'getFullIdentifier';
         $this->fnData['full'] = 'fullData';
         $this->fnData['line'] = 'lineData';
-        $this->data['has_content'] = $this->hasContent();
+        $this->fnData['has_content'] = 'hasContent';
         parent::__construct();
+    }
+    
+    protected function getFullIdentifier()
+    {
+        return $this->getContentClass()->attribute( 'identifier' ) . '/' . $this->getContentClassAttribute()->attribute( 'identifier' );
+    }
+    
+    protected function getContentClass()
+    {
+        if ($this->contentClass === null ){
+           $this->contentClass = eZContentClass::fetch( $this->getContentClassAttribute()->attribute( 'contentclass_id' ) );
+        }
+        return $this->contentClass;
+    }
+    
+    protected function getContentClassAttribute()
+    {
+        if ($this->contentClassAttribute === null ){
+           $this->contentClassAttribute =  $this->attribute->attribute( 'contentclass_attribute' );
+        }
+        return $this->contentClassAttribute;
+    }
+    
+    protected function getContentClassAttributeIdentifier()
+    {
+        return $this->getContentClassAttribute()->attribute( 'identifier' );
+    }
+    
+    protected function getContentClassAttributeName()
+    {
+        return $this->getContentClassAttribute()->attribute( 'name' );
     }
 
     public function is( $settingValue, $defaults = array() )
@@ -26,7 +64,7 @@ class OpenPAAttributeHandler extends OpenPATempletizable
 
     protected function inSettings( $settings )
     {
-        return in_array( $this->data['full_identifier'], $settings ) || in_array( $this->data['identifier'], $settings );
+        return in_array( $this->getFullIdentifier(), $settings ) || in_array( $this->getContentClassAttributeIdentifier(), $settings );
     }
 
     protected function fullData()
@@ -46,9 +84,9 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     //@todo
     protected function hasContent()
     {
-        $hasContent = $this->data['contentobject_attribute']->attribute( 'has_content' );
-        if ( $this->data['contentobject_attribute']->attribute( 'data_type_string' ) == 'ezinteger'
-             && $this->data['contentobject_attribute']->toString() == 0 )
+        $hasContent = $this->attribute->attribute( 'has_content' );
+        if ( $this->attribute->attribute( 'data_type_string' ) == 'ezinteger'
+             && $this->attribute->toString() == 0 )
         {
             if ( $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) ) )
             {

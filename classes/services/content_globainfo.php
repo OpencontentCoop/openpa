@@ -5,12 +5,16 @@ class ObjectHandlerServiceContentGlobaInfo extends ObjectHandlerServiceBase
     protected $globalLayout;
 
     function run()
-    {
-        $content = $this->content();
-        $this->data['object'] = $content;
-        $this->data['has_content'] = $content instanceof eZContentObjectTreeNode;
+    {        
+        $this->fnData['object'] = 'content';
+        $this->fnData['has_content'] = 'hasContent';
     }
 
+    function hasContent()
+    {
+        return $this->content() instanceof eZContentObjectTreeNode;
+    }
+    
     function content()
     {
         if ( $this->globalLayout == null ){
