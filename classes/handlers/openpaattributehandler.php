@@ -7,6 +7,8 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     
     protected $contentClass;
     
+    protected $attributeCaches = array();
+    
     public function __construct( eZContentObjectAttribute $attribute, $params = array() )
     {
         $this->attribute = $attribute;        
@@ -109,5 +111,30 @@ class OpenPAAttributeHandler extends OpenPATempletizable
             'has_content' => $this->hasContent(),
             'show_link' => !$this->is( 'attributi_senza_link' )
         );
+    }
+    
+    public function attribute( $key )
+    {
+        if (!isset( $this->attributeCaches[$key] ))
+        {
+            if ( isset( $this->data[$key] ) )
+            {
+                eZDebugSetting::writeDebug( 'openpa-attribute-handler', "({$this->attribute->ContentClassAttributeIdentifier}).{$key}", $this->attribute->ContentObjectID . ' - ' . get_called_class());
+                $this->attributeCaches[$key] = $this->data[$key];
+            }
+            elseif ( isset( $this->fnData[$key] ) )
+            {
+                eZDebugSetting::writeDebug( 'openpa-attribute-handler', "(function) ({$this->attribute->ContentClassAttributeIdentifier}).{$key}", $this->attribute->ContentObjectID . ' - ' . get_called_class());
+                $this->attributeCaches[$key] = call_user_func( array( $this, $this->fnData[$key] ) );
+                //return $this->{$this->fnData[$key]}();
+            }
+            else
+            {
+                eZDebug::writeNotice( "Attribute $key does not exist", get_called_class() );
+                $this->attributeCaches[$key] = false;    
+            }            
+        }
+        
+        return $this->attributeCaches[$key];
     }
 }

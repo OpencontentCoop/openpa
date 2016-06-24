@@ -171,6 +171,9 @@ class BlockHandlerLista extends OpenPABlockHandler
                         case 'pubblicato':
                             $orderBy = 'published';
                             break;
+                        
+                        default:
+                            $orderBy = 'published';
                     }
                     if ( $orderBy )
                     {

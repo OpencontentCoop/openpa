@@ -8,6 +8,8 @@ class OpenPAObjectHandler
      * @var OpenPAObjectHandler[]
      */
     protected static $instances = array();
+        
+    protected $attributeCaches = array();
 
     /**
      * @var eZContentObject|null
@@ -308,16 +310,24 @@ class OpenPAObjectHandler
      */
     public function attribute( $key )
     {
-        if ( isset( $this->services[$key] ) )
+        if (!isset( $this->attributeCaches[$key] ))
         {
-            return $this->services[$key]->data();
+            if ( isset( $this->services[$key] ) )
+            {                
+                $this->attributeCaches[$key] = $this->services[$key]->data();
+            }
+            elseif ( in_array( $key, $this->contentObjectAttributeIdentifiers() ) )
+            {                            
+                $this->attributeCaches[$key] = $this->getAttributesHandlers( $key );
+            }
+            else
+            {
+                eZDebug::writeNotice( "Service or AttributeHandler $key does not exist", __METHOD__ );
+                $this->attributeCaches[$key] = false;
+            }            
         }
-        elseif ( in_array( $key, $this->contentObjectAttributeIdentifiers() ) )
-        {            
-            return $this->getAttributesHandlers( $key );
-        }
-        eZDebug::writeNotice( "Service or AttributeHandler $key does not exist", __METHOD__ );
-        return false;
+        
+        return $this->attributeCaches[$key];
     }
 
     /**
@@ -328,7 +338,7 @@ class OpenPAObjectHandler
     public function service( $key )
     {
         if ( isset( $this->services[$key] ) )
-        {            
+        {                        
             return $this->services[$key]->data();
         }
         eZDebug::writeNotice( "Service $key does not exist", __METHOD__ );

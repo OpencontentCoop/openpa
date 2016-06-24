@@ -37,7 +37,7 @@ class OpenPaFunctionCollection
     protected static function dipendentiClassIdentifiers()
     {
         $returnData = array();
-        $classIdentifiers = array( 'dipendente', 'personale', 'consulente' );
+        $classIdentifiers = array( 'user', 'dipendente', 'personale', 'consulente' );
         foreach( $classIdentifiers as $classIdentifier )
             if ( eZContentClass::classIDByIdentifier( $classIdentifier ) )
                 $returnData[] = $classIdentifier;

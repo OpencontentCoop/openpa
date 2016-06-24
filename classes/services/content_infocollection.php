@@ -19,7 +19,7 @@ class ObjectHandlerServiceContentInfoCollection extends ObjectHandlerServiceBase
     
     protected function hasInfoCollectionAttributes()
     {
-        return count($this->getInfoCollectionAttributes() > 0);
+        return count( (array)$this->getInfoCollectionAttributes() ) > 0;
     }
     
     protected function getInfoCollectionAttributeIdentifiers()
@@ -38,7 +38,7 @@ class ObjectHandlerServiceContentInfoCollection extends ObjectHandlerServiceBase
                 {
                     $this->infoCollectionAttribute[$handler->attribute( 'identifier' )] = $handler;
                 }
-            }
+            }        
         }
         return $this->infoCollectionAttribute;
     }
