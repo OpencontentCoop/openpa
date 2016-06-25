@@ -9,6 +9,7 @@ class ObjectHandlerServiceControlTemplate extends ObjectHandlerServiceBase
         $this->data['panel'] = $this->getViewTemplate( 'panel' );
         $this->data['carousel'] = $this->getViewTemplate( 'carousel' );
         $this->data['carousel_simple'] = $this->getViewTemplate( 'carousel_simple' );
+        $this->data['accordion_content'] = $this->getViewTemplate( 'accordion_content' );
         $this->data['mail_ezsubtreenotification'] = $this->getViewTemplate( 'mail_ezsubtreenotification' );
     }
 
