@@ -134,7 +134,14 @@ $ViewList['cookie'] = array(
 $ViewList['refreshorganigramma'] = array(
     'functions' => array('editor_tools'),
     'script' => 'refreshorganigramma.php',
-    'params' => array());
+    'params' => array()
+);
+
+$ViewList['block'] = array(
+    'functions' => array('editor_tools'),
+    'script' => 'block.php',
+    'params' => array('BlockID','View')
+);
 
 
 $FunctionList['classdefinition'] = array();
