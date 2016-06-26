@@ -34,10 +34,9 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
         $link = false;
         if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )
         {
-            $link = $this->container->getContentNode()->attribute( 'url_alias' );
+            $link = $this->container->getContentNode()->attribute( 'url_alias' );            
             if ( $this->container->currentNodeId != $this->container->currentMainNodeId
-                 && $this->container->hasAttribute( 'control_area_tematica' )
-                 && $this->container->attribute( 'control_area_tematica' )->attribute( 'is_area_tematica' ) )
+                 && in_array( $this->container->getContentNode()->attribute( 'class_identifier' ), OpenPAINI::variable( 'AreeTematiche', 'IdentificatoreAreaTematica', array( 'area_tematica' ) ) ) )
             {
                 $link = $this->container->getContentObject()->attribute( 'main_node' )->attribute( 'url_alias' );
             }
