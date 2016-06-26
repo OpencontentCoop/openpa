@@ -120,6 +120,10 @@ class OpenPAPageData
                     'parameters' => $currentModuleParams['parameters'],
                 );
                 $data['is_login_page'] = $data['request']['module'] == 'user' && $data['request']['function'] == 'login';
+                if (class_exists('OcCrossLogin')){
+                    $helper = OcCrossLogin::instance();                    
+                    $data['is_login_page'] = $helper->needRedirectionToLoginAccessByModule();
+                }
                 $data['is_register_page'] = $data['request']['module'] == 'user' && $data['request']['function'] == 'register';
                 $data['is_search_page'] = $data['request']['module'] == 'content' && ( $data['request']['function'] == 'search' || $data['request']['function'] == 'advancedsearch' );
 
