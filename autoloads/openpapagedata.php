@@ -120,7 +120,8 @@ class OpenPAPageData
                     'parameters' => $currentModuleParams['parameters'],
                 );
                 $data['is_login_page'] = $data['request']['module'] == 'user' && $data['request']['function'] == 'login';
-                if (class_exists('OcCrossLogin')){
+                if (class_exists('OcCrossLogin') && in_array('occrosslogin', eZExtension::activeExtensions('access'))){
+                    /** @var OcCrossLogin $helper */
                     $helper = OcCrossLogin::instance();                    
                     $data['is_login_page'] = $helper->needRedirectionToLoginAccessByModule();
                 }
