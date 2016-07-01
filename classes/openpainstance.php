@@ -15,7 +15,8 @@ class OpenPAInstance
      */
     private static $validIps = array(
         '84.18.151.65', //proxy Riva del Garda
-        '194.105.50.4' //consorzio-web
+        '194.105.50.4', //consorzio-web
+        '194.105.50.2' //consorzio-varnish
     );
 
     /**
