@@ -11,7 +11,7 @@ $script = eZScript::instance(array(
 $script->startup();
 
 $options = $script->getOptions(
-    '[dry-run][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][refresh_org_internal_id][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][repush_all][delete_all][repush_org][delete_org][archive_current_ckan_ids][remove_current_ckan_ids]',
+    '[dry-run][zzz_footer_link][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][refresh_org_internal_id][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][repush_all][delete_all][repush_org][delete_org][archive_current_ckan_ids][remove_current_ckan_ids]',
     '',
     array(
         'dry-run' => 'Non esegue azioni e mostra eventuali errori'
@@ -30,7 +30,45 @@ $db = eZDB::instance();
 try {
 
     $footerRemoteId = 'opendata_footer_link';
+    if ($options['zzz_footer_link'] ){
+        $areaObject = eZContentObject::fetchByRemoteID('opendata_area');
+        //OpenPALog::output($areaObject->attribute('id'));
+        $footerObject = eZContentObject::fetchByRemoteID('opendata_footer_link');
+        //OpenPALog::error($footerObject->attribute('id'));
+        $home = OpenPaFunctionCollection::fetchHome();
+        if ($areaObject instanceof eZContentObject && $footerObject instanceof eZContentObject ){
+            $dataMap = $home->attribute('data_map');
+            if (isset($dataMap['link_nel_footer'])){
+                //OpenPALog::warning($dataMap['link_nel_footer']->toString());
+                $current = explode('-',$dataMap['link_nel_footer']->toString());
+                $new = array();
+                $store = false;
+                foreach($current as $id){
+                    if ( $id == $areaObject->attribute('id') ){
+                        continue;
+                    }
+                    if ( $id == $footerObject->attribute('id') ){
+                        $id = $areaObject->attribute('id');
+                        $store = true;
+                    }
+                    $new[] = $id;
+                }
+                if (!in_array($areaObject->attribute('id'), $new)){
+                    $new[] = $areaObject->attribute('id');
+                }
+                if ($store){
+                    $newString = implode('-', $new);
+                    OpenPALog::output($newString);
+                    $dataMap['link_nel_footer']->fromString($newString);
+                    $dataMap['link_nel_footer']->store();
+                    eZContentCacheManager::clearContentCache($home->attribute('contentobject_id'));
+                    eZCache::clearTemplateBlockCache();
+                }
+                eZContentObjectTreeNode::hideSubTree( $footerObject->attribute('main_node') );
+            }
+        }
         
+    }
     if ($options['archive_current_ckan_ids'] ){
         $data = array();
         $tools = new OCOpenDataTools();
