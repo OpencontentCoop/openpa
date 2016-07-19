@@ -55,4 +55,9 @@ Shown[default]=true
 Shown[navigation]=true
 Shown[browse]=true
 
+[Leftmenu_setup]
+Links[openpa_seo]=openpa/seo
+PolicyList_openpa_seo[]=openpa/seo
+LinkNames[openpa_seo]=Impostazioni SEO
+
 */ ?>

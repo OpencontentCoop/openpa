@@ -131,6 +131,12 @@ $ViewList['cookie'] = array(
     'functions' => array( 'cookie' )
 );
 
+$ViewList['seo'] = array(
+    'script' =>	'seo.php',
+    'params' => array(),
+    'functions' => array( 'seo' )
+);
+
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
@@ -141,6 +147,7 @@ $FunctionList['editor_tools'] = array();
 $FunctionList['object'] = array();
 $FunctionList['signup'] = array();
 $FunctionList['cookie'] = array();
+$FunctionList['seo'] = array();
 
 
 

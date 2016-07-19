@@ -5,6 +5,7 @@ class OpenPAINI
     protected static $filters = array(
         'TopMenu::NodiCustomMenu',
         'GestioneSezioni::sezioni_per_tutti',
+        'Seo::GoogleAnalyticsAccountID'
         //'SideMenu::EsponiLink'
     );
     
@@ -49,6 +50,26 @@ class OpenPAINI
         return $result; 
     }
     
+    protected static function googleAnalyticsAccountID()
+    {
+        if ( !eZSiteData::fetchByName('GoogleAnalyticsAccountID') instanceof eZSiteData )
+        {
+            $ini = eZINI::instance( 'openpa.ini' );
+            if ( $ini->hasVariable( 'Seo', 'GoogleAnalyticsAccountID' ) )
+            {
+                $googleAnalyticsAccountID = $ini->variable( 'Seo', 'GoogleAnalyticsAccountID' );
+                $data = new eZSiteData(array(
+                    'name' => 'GoogleAnalyticsAccountID',
+                    'value' => $googleAnalyticsAccountID
+                ));
+                $data->store();
+                return $googleAnalyticsAccountID;
+            }
+            return false;
+        }
+        return eZSiteData::fetchByName('GoogleAnalyticsAccountID')->attribute('value');
+    }
+    
     protected static function filter( $block, $value, $default )
     {
         $filter = $block . '::' . $value;
@@ -60,6 +81,10 @@ class OpenPAINI
         
             case 'GestioneSezioni::sezioni_per_tutti':
                 return self::filterSezioniPerTutti();              
+            break;
+        
+            case 'Seo::GoogleAnalyticsAccountID':
+                return self::googleAnalyticsAccountID();              
             break;
         
             //case 'SideMenu::EsponiLink':
@@ -80,17 +105,39 @@ class OpenPAINI
     {
         if ( $block && $settingName && $value )
         {
-            $frontend = OpenPABase::getFrontendSiteaccessName();
-            $path = "settings/siteaccess/{$frontend}/";
-            $iniFile = "openpa.ini";
-            $ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true );                
-            $ini->setVariable( $block, $settingName, $value );
-            eZCache::clearById( 'global_ini' );
-            if ( $ini->save() )
+            
+            $filter = $block . '::' . $settingName;
+            switch( $filter )
             {
-                return $path . $iniFile;
+
+                case 'Seo::GoogleAnalyticsAccountID':
+                    $data = eZSiteData::fetchByName('GoogleAnalyticsAccountID'); 
+                    if ( !$data instanceof eZSiteData )
+                    {                        
+                        $data = new eZSiteData(array(
+                            'name' => 'GoogleAnalyticsAccountID',
+                            'value' => ''
+                        ));
+                    }
+                    $data->setAttribute('value', $value);
+                    $data->store();
+                    return true;
+                break;
+            
+                default:
+                    $frontend = OpenPABase::getFrontendSiteaccessName();
+                    $path = "settings/siteaccess/{$frontend}/";
+                    $iniFile = "openpa.ini";
+                    $ini = new eZINI( $iniFile . '.append', $path, null, null, null, true, true );                
+                    $ini->setVariable( $block, $settingName, $value );
+                    eZCache::clearById( 'global_ini' );
+                    if ( $ini->save() )
+                    {
+                        return $path . $iniFile;
+                    }
+                    return false;
             }
-            return false;
+            
         }
         return false;
     }
