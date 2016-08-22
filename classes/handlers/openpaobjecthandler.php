@@ -207,7 +207,7 @@ class OpenPAObjectHandler
     
     protected function getAttributesHandlers( $key = null )
     {
-        if ($this->attributesHandlers === null)
+        if ($this->attributesHandlers === null && $this->contentObject instanceof eZContentObject)
         {
             $dataMap = $this->contentObject->attribute( 'data_map' );            
             foreach( $dataMap as $identifier => $attribute )
