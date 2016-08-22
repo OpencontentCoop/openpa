@@ -18,6 +18,8 @@ class OpenPAPageData
         "Numero Civico",
         "CAP",
         "Comune",
+        "Latitudine",
+        "Longitudine",
     );
 
     function operatorList()
