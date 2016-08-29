@@ -20,6 +20,8 @@ class OpenPAPageData
         "Comune",
         "Latitudine",
         "Longitudine",
+        "Linkedin",
+        "Instagram"
     );
 
     function operatorList()
