@@ -44,6 +44,7 @@ elseif ( $http->hasGetVariable( 'from' ) )
     try
     {
         $copy = OpenPAObjectTools::copyObject( $object );
+        $http->setSessionVariable('RedirectURIAfterPublish', 'openpa/object/' . $copy->attribute( 'id' ));
         $module->redirectTo( 'content/edit/' . $copy->attribute( 'id' ) . '/' . $copy->attribute( 'current_version' ) . $queryString );
         return;
     }    

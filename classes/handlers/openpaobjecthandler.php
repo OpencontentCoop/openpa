@@ -110,7 +110,7 @@ class OpenPAObjectHandler
 
     public function setCurrentNode( eZContentObjectTreeNode $node = null )
     {
-        if ( $this->contentNode === null )
+        if ( $this->contentNode === null && $this->contentObject instanceof eZContentObject )
         {
             if ( $node instanceof eZContentObjectTreeNode )
             {
