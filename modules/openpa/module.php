@@ -18,8 +18,14 @@ $ViewList['class'] = array(
     'script' => 'class.php',
     'ui_context' => 'edit',
     'default_navigation_part' => 'ezsetupnavigationpart',
-    'single_post_actions' => array('SyncButton' => 'Sync',
-        'InstallButton' => 'Install'),
+    'single_post_actions' => array(
+        'SyncButton' => 'Sync',
+        'InstallButton' => 'Install',
+        'SyncPropertyButton' => 'SyncProperty',
+        'SyncAttributeButton' => 'SyncAttribute',
+        'RemoveAttributeButton' => 'RemoveAttribute',
+        'AddAttributeButton' => 'AddAttribute'
+    ),
     'params' => array('ID'),
     'unordered_params' => array());
 

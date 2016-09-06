@@ -1,5 +1,6 @@
 <?php
 
+/** @var eZModule $module */
 $module = $Params['Module'];
 $id = $Params['ID'];
 $http = eZHTTPTool::instance();
@@ -17,7 +18,8 @@ try
     {        
         $tools = new OpenPAClassTools( $id, true );
         $tools->sync();
-        return $module->redirectTo( '/openpa/class/' . $id );
+        $module->redirectTo( '/openpa/class/' . $id );
+        return;
     }
     
     $tools = new OpenPAClassTools( $id );
@@ -43,11 +45,42 @@ try
         }
         $tools->sync( $force, $removeExtra );
         $module->redirectTo( '/openpa/class/' . $id );
+        return;
+    }
+
+    $tools->compare();
+    $result = $tools->getData();
+        
+    if ( $module->isCurrentAction( 'SyncProperty' ) )
+    {
+        $tools->syncSingleProperty( $http->variable('SyncPropertyIdentifier') );
+        $module->redirectTo( '/openpa/class/' . $id );
+        return;
     }
     
-    $tools->compare();
-    $result = $tools->getData();                
-    $tpl->setVariable( 'locale', $locale );    
+    if ( $module->isCurrentAction( 'SyncAttribute' ) )
+    {
+        $tools->syncSingleAttribute( $http->variable('SyncAttributeIdentifier') );
+        $module->redirectTo( '/openpa/class/' . $id );
+        return;
+    }
+    
+    if ( $module->isCurrentAction( 'RemoveAttribute' ) )
+    {
+        $tools->removeSingleAttribute( $http->variable('RemoveAttributeIdentifier') );
+        $module->redirectTo( '/openpa/class/' . $id );
+        return;
+    }
+    
+    if ( $module->isCurrentAction( 'AddAttribute' ) )
+    {
+        $tools->addSingleAttribute( $http->variable('AddAttributeIdentifier') );
+        $module->redirectTo( '/openpa/class/' . $id );
+        return;
+    }
+
+    $tpl->setVariable( 'locale', $locale );
+    $tpl->setVariable( 'remote', new OpenPAClassDataItem($remote) );
     $tpl->setVariable( 'id', $id );    
     $missingLocale = array();
     foreach( $tools->getData()->missingAttributes as $item )
@@ -65,17 +98,19 @@ try
     $tpl->setVariable( 'missing_in_remote', $missingRemote );
     $tpl->setVariable( 'missing_in_remote_details', $tools->getData()->extraDetails );
     
-    if ( $tools->getData()->hasError || $tools->getData()->hasWarning )
+    if ( $tools->getData()->hasError || $tools->getData()->hasWarning || $tools->getData()->hasNotice )
     {
         $tpl->setVariable( 'diff', $tools->getData()->diffAttributes );
         $tpl->setVariable( 'warnings', $tools->getData()->warnings );
-        $tpl->setVariable( 'errors', $tools->getData()->errors );            
+        $tpl->setVariable( 'errors', $tools->getData()->errors );
+        $tpl->setVariable( 'notices', $tools->getData()->notices );
     }
     else
     {
         $tpl->setVariable( 'diff', array() );   
         $tpl->setVariable( 'errors', array() );           
-        $tpl->setVariable( 'warnings', array() );  
+        $tpl->setVariable( 'warnings', array() );
+        $tpl->setVariable( 'notices', array() );
     }
     
     $tpl->setVariable( 'diff_properties', $tools->getData()->diffProperties );
@@ -111,17 +146,46 @@ else
 
 
 class OpenPAClassDataItem
-{    
-    protected $item;
+{        
     public $attributes;
-    function __construct( $item )
+    
+    public function __construct( $item )
     {        
-        $this->item = $item;
-        foreach( $this->item as $property => $value )
-        {
-            $this->attributes[$property] = $this->item->{$property};
+        $this->fieldsMap = $fieldsMap;
+        
+        foreach( $item as $property => $value )
+        {                        
+            if ( $property == 'DataMap' )
+            {
+                $this->attributes['data_map'] = $this->parseValue($item->DataMap[0]);
+            }
+            else
+            {
+                $this->attributes[$property] = $this->parseValue($item->{$property});
+            }
         }
-    }    
+    }
+        
+    private function parseValue( $value )
+    {
+        if ( is_array( $value ) )
+        {
+            $data = array();
+            foreach( $value as $item )
+            {
+                $data[] = $this->parseValue( $item );
+            }            
+        }
+        elseif ( is_object( $value ) )
+        {
+            $data = new OpenPAClassDataItem( $value );
+        }
+        else
+        {
+            $data = $value;
+        }
+        return $data;
+    }
     
     public function attributes()
     {        
@@ -136,11 +200,8 @@ class OpenPAClassDataItem
     public function attribute( $name )
     {
         if ( isset( $this->attributes[$name] ) )
-        {
-            if ( is_string( $this->attributes[$name] ) )
-            {
-                return $this->attributes[$name];  
-            }
+        {            
+            return $this->attributes[$name]; 
         }
         return false;
         

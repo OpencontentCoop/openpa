@@ -31,8 +31,8 @@ try
         die( "Non esiste un utente con nome utente admin" ); 
     }
     
-    $dir = "/home/httpd/openpa.opencontent.it/html/extension/openpa/data/class_report/json/";
-    $CSVdir = "/home/httpd/openpa.opencontent.it/html/extension/openpa/data/class_report/csv/";
+    $dir = eZSys::rootDir() . "/var/storage/class_report/json/";
+    $CSVdir = eZSys::rootDir() . "/var/storage/class_report/csv/";
         
     $groups = eZContentClassGroup::fetchList( false, true );
     
