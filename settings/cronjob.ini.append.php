@@ -12,6 +12,7 @@ Scripts[]=rssimport.php
 Scripts[]=clear_frontpages_cache.php
 Scripts[]=ezflowupdate.php
 Scripts[]=index_pending.php
+Scripts[]=update_class_pending.php
 
 [CronjobPart-clearfrontpages]
 Scripts[]=clear_frontpages_cache.php
