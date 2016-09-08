@@ -56,6 +56,7 @@
         <thead>
         <tr>
             <th style="vertical-align: middle;text-align: center">Classe</th>
+            <th style="vertical-align: middle;text-align: center">Numero di<br />oggetti</th>
             <th style="vertical-align: middle;text-align: center">Attributi<br />mancanti</th>
             <th style="vertical-align: middle;text-align: center">Errori<br />gravi</th>
             <th style="vertical-align: middle;text-align: center">Errori</th>
@@ -71,6 +72,7 @@
                         {$class.name} ({$class.identifier})
                     </a>
                 </td>
+                <td class="result" style="vertical-align: middle;text-align: center">{$class.object_count}</td>
                 <td class="hasMissingAttributes result" data-errorclass="message-error"><em><small>caricamento</small></em></td>
                 <td class="hasError result" data-errorclass="message-error"><em><small>caricamento</small></em></td>
                 <td class="hasWarning result" data-errorclass="message-error"><em><small>caricamento</small></em></td>

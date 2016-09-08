@@ -94,7 +94,10 @@
                 </thead>
                 <tbody>
                 {foreach $diff_properties as $item sequence array(bglight,bgdark) as $style}
-                    <tr class="{$style}">
+                    <tr class="{$style}"
+                        {if and( is_set($errors['properties']), is_set( $errors['properties'][$item.field_name] ) )}style="background:#ff0"
+                        {elseif and( is_set($warnings['properties']), is_set( $warnings['properties'][$item.field_name] ) )}style="background:#f2dede"
+                            {/if}>
                         <td>{$item.field_name}</td>
                         <td>{$item.locale_value}</td>
                         <td>{$item.remote_value}</td>
@@ -124,7 +127,7 @@
                 </thead>
                 <tbody>
                 {foreach $missing_in_locale as $item sequence array(bglight,bgdark) as $style}
-                    <tr class="{$style}">
+                    <tr class="{$style}" style="background:#f2dede">
                         <td>{$item.Identifier}</td>
                         <td>{$item.DataTypeString}</td>
                         <td style="vertical-align: middle">

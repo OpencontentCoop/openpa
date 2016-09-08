@@ -917,7 +917,7 @@ class OpenPAClassTools
                     $this->currentClass->DescriptionList = $descriptionList;
                 }
 
-                $this->storeClass( false );
+                $this->storeClass( $this->currentAttributes );
             }
         }
     }
