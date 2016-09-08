@@ -46,7 +46,7 @@ if (is_array($entries) && count($entries) != 0) {
 
                 foreach ($ids as $id) {
                     $progressBar->advance();
-                    eZContentOperationCollection::registerSearchObject($id);
+                    eZDB::instance()->query( "INSERT INTO ezpending_actions( action, param ) VALUES ( 'index_object', '$id' )" );
                 }
                 $progressBar->finish();
             }
