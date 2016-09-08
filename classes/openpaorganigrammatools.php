@@ -202,10 +202,7 @@ class OpenPAOrganigrammaTools
                         $nodeId
                     );
                     foreach ($nodes as $node) {
-                        $item = $this->appendRootItem(
-                            $node,
-                            array('exclude' => array('servizi_correlati'))
-                        );
+                        $item = $this->appendRootItem($node);
 
                         $subItems = new OpenPAOrganigrammaSubItemCollection();
                         $subItems->identifier = 'servizio_area';
@@ -391,10 +388,7 @@ class OpenPAOrganigrammaItem
             $results = $this->fetch("id != '$this->id' and area.id = $this->id classes [servizio] sort [name=>asc] limit 100");
             foreach ($results as $result) {
 
-                $item = OpenPAOrganigrammaItem::instanceFromArray(
-                    (array)$result,
-                    array('build' => false)
-                );
+                $item = OpenPAOrganigrammaItem::instanceFromArray((array)$result, array('exclude' => array('servizi_correlati')));
                 $subItems->append($item);
             }
 
@@ -592,6 +586,7 @@ class OpenPAOrganigrammaItem
             $search->setEnvironment(new DefaultEnvironmentSettings());
             $searchResults = $search->search($query);
             $result = $searchResults->searchHits;
+            eZDebug::writeNotice($query, $searchResults->totalCount);
 
         } catch (Exception $e) {
             eZDebug::writeNotice('Query error: "' . $e->getMessage() . '" in < ' . $query . ' >', __METHOD__);

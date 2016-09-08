@@ -11,5 +11,7 @@ $redirectURI = $http->getVariable( 'RedirectURI', $http->sessionVariable( 'LastA
 
 OpenPAOrganigrammaTools::clearCache();
 OpenPAOrganigrammaTools::instance();
-
+if ($id) {
+    eZContentCacheManager::clearContentCache($id);
+}
 $module->redirectTo( $redirectURI );
