@@ -3,14 +3,26 @@
 class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
 {
     protected $list;
-    
+
     function run()
-    {        
+    {
         $this->fnData['attributes'] = 'getAttributeList';
         $this->fnData['identifiers'] = 'getAttributeListIdentifiers';
         $this->fnData['has_content'] = 'getAttributeListCount';
         $this->fnData['children_count'] = 'getChildrenCount';
         $this->fnData['children'] = 'getChildren';
+    }
+
+    protected function getChildrenClasses()
+    {
+        $classes = OpenPAINI::variable('GestioneClassi', 'classi_allegato', array( 'file_pdf' ) );
+        if ($this->container->hasAttribute('content_virtual')){
+            $virtualParameters = $this->container->attribute( 'content_virtual' )->attribute( 'folder' );
+            if (is_array($virtualParameters['classes']) && !empty($virtualParameters['classes'])){
+                $classes = array_diff( $classes, $virtualParameters['classes'] );
+            }
+        }
+        return $classes;
     }
 
     protected function getChildrenCount()
@@ -21,7 +33,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         {
             $count = $node->subTreeCount( array(
                 'ClassFilterType' => 'include',
-                'ClassFilterArray' => OpenPAINI::variable('GestioneClassi', 'classi_allegato', array( 'file_pdf' ) ),
+                'ClassFilterArray' => $this->getChildrenClasses(),
                 'Depth' => 1,
                 'DepthOperator' => 'eq' ) );
         }
@@ -36,7 +48,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         {
             $list = $node->subTree( array(
                 'ClassFilterType' => 'include',
-                'ClassFilterArray' => OpenPAINI::variable('GestioneClassi', 'classi_allegato', array( 'file_pdf' ) ),
+                'ClassFilterArray' => $this->getChildrenClasses(),
                 'SortBy' => $node->attribute( 'sort_array' ),
                 'Depth' => 1,
                 'DepthOperator' => 'eq' ) );
@@ -48,12 +60,12 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
     {
         return array_keys( $this->getAttributeList() );
     }
-    
+
     protected function getAttributeListCount()
     {
         return count( $this->getAttributeList() ) > 0;
     }
-    
+
     protected function getAttributeList()
     {
         if ($this->list === null)

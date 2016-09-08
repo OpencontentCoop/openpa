@@ -61,12 +61,12 @@ class OpenPaFunctionCollection
             $virtualParameters = $handler->attribute( 'content_virtual' )->attribute( 'folder' );
             if ( $virtualParameters )
             {
-
+                $classes = (array) $virtualParameters['classes'];
                 if ( $class_filter_type == 'include' )
                 {
                     $classes = array_intersect( $class_filter_array, $virtualParameters['classes'] );
                 }
-                elseif ( $class_filter_type == 'exclude' )
+                elseif ( $class_filter_type == 'exclude' && empty( $virtualParameters['classes'] ) )
                 {
                     $classes = array_diff( $virtualParameters['classes'], $class_filter_array );
                 }
@@ -105,11 +105,12 @@ class OpenPaFunctionCollection
 
             if ( $virtualParameters )
             {
+                $classes = (array) $virtualParameters['classes'];
                 if ( $class_filter_type == 'include' )
                 {
                     $classes = array_intersect( $class_filter_array, $virtualParameters['classes'] );
                 }
-                elseif ( $class_filter_type == 'exclude' )
+                elseif ( $class_filter_type == 'exclude' && empty( $virtualParameters['classes'] ) )
                 {
                     $classes = array_diff( $virtualParameters['classes'], $class_filter_array );
                 }
@@ -1312,4 +1313,3 @@ class OpenPaFunctionCollection
     }
 
 }
-
