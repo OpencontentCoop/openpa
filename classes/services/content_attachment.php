@@ -21,7 +21,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         {
             $count = $node->subTreeCount( array(
                 'ClassFilterType' => 'include',
-                'ClassFilterArray' => array( 'file_pdf' ),
+                'ClassFilterArray' => OpenPAINI::variable('GestioneClassi', 'classi_allegato', array( 'file_pdf' ) ),
                 'Depth' => 1,
                 'DepthOperator' => 'eq' ) );
         }
@@ -36,7 +36,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         {
             $list = $node->subTree( array(
                 'ClassFilterType' => 'include',
-                'ClassFilterArray' => array( 'file_pdf' ),
+                'ClassFilterArray' => OpenPAINI::variable('GestioneClassi', 'classi_allegato', array( 'file_pdf' ) ),
                 'SortBy' => $node->attribute( 'sort_array' ),
                 'Depth' => 1,
                 'DepthOperator' => 'eq' ) );
