@@ -644,9 +644,13 @@ class OpenPAClassTools
             $array = json_decode( json_encode( $xml ), true );
             $value = $this->arrayToList( $array );
         }
-        if (strpos( $value, 'a:' ) !== false )
+        elseif (strpos( $value, 'a:' ) !== false )
         {
             $value = $this->arrayToList( unserialize($value) );
+        }
+        else
+        {
+            $value = htmlentities($value);
         }
         return $value;
     }

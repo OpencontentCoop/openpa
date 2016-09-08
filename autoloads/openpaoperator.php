@@ -339,7 +339,8 @@ class OpenPAOperator
                 }
 
                 $queryArray[] = "sort [{$sort}=>{$order}]";
-                
+
+                $queryString = null;
                 if ( !empty( $queryArray ) )
                 {
                     $queryString = implode( ' and ', $queryArray );
@@ -350,6 +351,11 @@ class OpenPAOperator
                 
                 try
                 {
+                    if (!$queryString){
+                        throw new Exception("Query string is null");
+                    }
+
+                    $override = array();
                     if ( is_array( $namedParameters['override'] ) )
                     {
                         $override = $namedParameters['override'];
