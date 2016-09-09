@@ -5,6 +5,8 @@ class OpenPAINI
 
     public static $useDynamicIni;
 
+    private static $googleAnalyticsAccountID;
+
     public static $dynamicIniMap = array(
         'GestioneAttributi' => array(
             'attributi_contatti' => array(
@@ -161,22 +163,27 @@ class OpenPAINI
 
     protected static function googleAnalyticsAccountID()
     {
-        if ( !eZSiteData::fetchByName('GoogleAnalyticsAccountID') instanceof eZSiteData )
+        if ( self::$googleAnalyticsAccountID === null )
         {
-            $ini = eZINI::instance( 'openpa.ini' );
-            if ( $ini->hasVariable( 'Seo', 'GoogleAnalyticsAccountID' ) )
+            $googleAnalyticsAccountIDSiteData = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
+            if ( !$googleAnalyticsAccountIDSiteData instanceof eZSiteData )
             {
-                $googleAnalyticsAccountID = $ini->variable( 'Seo', 'GoogleAnalyticsAccountID' );
-                $data = new eZSiteData(array(
-                    'name' => 'GoogleAnalyticsAccountID',
-                    'value' => $googleAnalyticsAccountID
-                ));
-                $data->store();
-                return $googleAnalyticsAccountID;
+                $ini = eZINI::instance( 'openpa.ini' );
+                if ( $ini->hasVariable( 'Seo', 'GoogleAnalyticsAccountID' ) )
+                {
+                    $googleAnalyticsAccountID = $ini->variable( 'Seo', 'GoogleAnalyticsAccountID' );
+                    $data = new eZSiteData(array(
+                        'name' => 'GoogleAnalyticsAccountID',
+                        'value' => $googleAnalyticsAccountID
+                    ));
+                    $data->store();
+                    self::$googleAnalyticsAccountID = $googleAnalyticsAccountID;
+                }
+                self::$googleAnalyticsAccountID = false;
             }
-            return false;
+            self::$googleAnalyticsAccountID = $googleAnalyticsAccountIDSiteData->attribute('value');
         }
-        return eZSiteData::fetchByName('GoogleAnalyticsAccountID')->attribute('value');
+        return self::$googleAnalyticsAccountID;
     }
 
     protected static function filter( $block, $value, $default )

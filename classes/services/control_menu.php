@@ -54,11 +54,11 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         {
             $debug = array();
             $result = false;
-            if ( !$result && $this->container->hasAttribute( 'content_gallery' ) )
-            {
-                $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
-                if ( $result ) $debug[] = 'content_gallery';
-            }
+//            if ( !$result && $this->container->hasAttribute( 'content_gallery' ) )
+//            {
+//                $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
+//                if ( $result ) $debug[] = 'content_gallery';
+//            }
             if ( !$result && $this->container->hasAttribute( 'content_related' ) )
             {
                 $result = $this->container->attribute( 'content_related' )->attribute( 'has_data' );
