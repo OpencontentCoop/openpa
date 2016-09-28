@@ -87,17 +87,17 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     protected function hasContent()
     {
         $hasContent = $this->attribute->attribute( 'has_content' );
-        if ( $this->attribute->attribute( 'data_type_string' ) == 'ezinteger'
-             && $this->attribute->toString() == 0 )
+        if ( $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) ) )
         {
-            if ( $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) ) )
-            {
-                $hasContent = true;
-            }
-            else
-            {
-                $hasContent = false;
-            }
+            $hasContent = true;
+        }
+        if ( $this->is( 'zero_is_content', array( 'ente_controllato/onere_complessivo' ) ) )
+        {
+            $hasContent = $this->attribute->attribute( 'data_type_string' ) == 'ezinteger' && $this->attribute->toString() == 0;
+        }
+        if ( $this->is( 'force_has_content', array() ) )
+        {
+            $hasContent = true;
         }
         return $hasContent;
     }
