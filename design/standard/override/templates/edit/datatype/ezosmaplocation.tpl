@@ -387,7 +387,7 @@ $contacts = openpapagedata().contacts}
                     map.invalidateSize();
                 });
 
-                if ( $('a[data-toggle="tab"').length > 0) {
+                if ( $('a[data-toggle="tab"]').length > 0) {
                     $('a[data-toggle="tab"]').bind('shown.bs.tab', function (e) {
                         map.invalidateSize(false);
                     });
