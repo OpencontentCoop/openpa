@@ -616,7 +616,7 @@ class OpenPaFunctionCollection
             {
                 foreach( $values as $value )
                 {
-                    $query = OpenPASolr::generateSolrField($value['attribute_identifier'], 'string') .":\"{$object->attribute( 'name' )}\" AND " . eZSolr::getMetaFieldName( 'contentclass_id' ) . ":{$value['class_id']}";
+                    $query = OpenPASolr::generateSolrSubMetaField($value['attribute_identifier'], 'id') .":\"{$object->attribute( 'id' )}\" AND " . eZSolr::getMetaFieldName( 'contentclass_id' ) . ":{$value['class_id']}";
                     $facetQuery[$query] = $query;
                     $facetQueryData[$query] = $value;
                     //$attributeFilter[] = "submeta_servizio___id_si:" . $object->attribute( 'id' );
