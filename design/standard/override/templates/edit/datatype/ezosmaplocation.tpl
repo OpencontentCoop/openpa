@@ -348,7 +348,7 @@ $contacts = openpapagedata().contacts}
                         this.resetMakers().addMarker(this.marker,true);
                         this.map.loadingControl.addLoader('sc');
                         var that = this;
-                        this.geocoder().reverse(latLng, 0, function (result) {
+                        this.geocoder().reverse(latLng, 1, function (result) {
 //                            console.log(result);
                             that.map.loadingControl.removeLoader('sc');
                             $container.find('.ezgml-form-fields p').remove();
