@@ -22,6 +22,11 @@ class OpenPAObjectHandler
     protected $contentNode;
 
     /**
+     * @var eZContentObjectTreeNode|null
+     */
+    protected $contentMainNode;
+
+    /**
      * @var OpenPAObjectHandlerServiceInterface[]
      */
     protected $services = array();
@@ -170,6 +175,19 @@ class OpenPAObjectHandler
                 //eZDebug::writeNotice($this->currentNodeId . ' ' . var_export( $this->currentPathNodeIds,1));
             }
         }        
+    }
+
+    public function getContentMainNode()
+    {
+        if ($this->contentMainNode === null && $this->contentObject instanceof eZContentObject) {
+            if ($this->contentNode instanceof eZContentObjectTreeNode && $this->contentNode->attribute('is_main')) {
+                $this->contentMainNode = $this->contentNode;
+            } else {
+                $this->contentMainNode = $this->contentObject->attribute('main_node');
+            }
+        }
+
+        return $this->contentMainNode;
     }
 
     public function getContentNode()

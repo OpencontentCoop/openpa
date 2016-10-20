@@ -28,7 +28,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
     protected function getChildrenCount()
     {
         $count = 0;
-        $node = $this->container->getContentNode();
+        $node = $this->container->getContentMainNode();
         if ( $node instanceof eZContentObjectTreeNode )
         {
             $count = $node->subTreeCount( array(
@@ -43,7 +43,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
     protected function getChildren()
     {
         $list = array();
-        $node = $this->container->getContentNode();
+        $node = $this->container->getContentMainNode();
         if ( $node instanceof eZContentObjectTreeNode )
         {
             $list = $node->subTree( array(
