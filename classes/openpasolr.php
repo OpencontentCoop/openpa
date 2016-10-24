@@ -70,7 +70,7 @@ class OpenPASolr extends eZSolr
             eZDebug::accumulatorStop( 'Engine time' );
         }
 
-        if ( $resultArray )
+        if ( $resultArray && isset($resultArray[ 'response' ]) )
         {
             $searchCount = $resultArray[ 'response' ][ 'numFound' ];
             $objectRes = $this->buildResultObjects(
@@ -90,7 +90,7 @@ class OpenPASolr extends eZSolr
         {
             eZDebug::accumulatorStop( 'Search' );
             return array(
-                'SearchResult' => false,
+                'SearchResult' => array(),
                 'SearchCount' => 0,
                 'StopWordArray' => array(),
                 'SearchExtras' => new ezfSearchResultInfo( array( 'error' => ezpI18n::tr( 'ezfind', $error ) ) ) );
@@ -123,7 +123,7 @@ class OpenPASolr extends eZSolr
                  !isset( $result['docs'] ) ||
                  !is_array( $result['docs'] ) )
             {
-                eZDebug::writeError( 'Unexpected response from Solr: ' . var_export( $result, true ), __METHOD__ );
+                eZDebug::writeError( 'Unexpected response from Solr: ' . var_export( $result, true ) . var_export( $params, true ), __METHOD__ );
                 return $objectRes;
             }
 

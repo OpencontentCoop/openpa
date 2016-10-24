@@ -32,7 +32,7 @@ class BlockHandlerLista extends OpenPABlockHandler
             'Filter' => $this->solrFetchParameter( 'Filter' ),
             'SortBy' => $this->solrFetchParameter( 'SortBy' ),
         );
-        //eZDebug::writeDebug( $params, __METHOD__ );
+        eZDebug::writeDebug( $params, __METHOD__ );
         $search = OpenPaFunctionCollection::search( $params );
         //eZDebug::writeDebug( $search['SearchExtras'], __METHOD__ );
         $search['SearchParams'] = $params;
@@ -46,9 +46,14 @@ class BlockHandlerLista extends OpenPABlockHandler
         switch( $key )
         {
             case "SearchLimit":
-                if ( isset( $this->fetchParameters['limit'] ) )
+                if ( isset( $this->fetchParameters['limit'] ))
                 {
-                    $data = $this->fetchParameters['limit'];
+                    if (is_numeric($this->fetchParameters['limit'])){
+                        $data = (int)$this->fetchParameters['limit'];
+                    }else{
+                        $data = 10; //default
+                    }
+
                 }
                 break;
 
@@ -112,9 +117,14 @@ class BlockHandlerLista extends OpenPABlockHandler
                         
                         $virtualFilter[] = $pathFilter;
                     }
-                    foreach( $this->fetchParameters['virtual_classes'] as $class )
-                    {
-                        $virtualFilter[] =  "meta_class_identifier_ms:" . $class;
+                    if (count($this->fetchParameters['virtual_classes']) > 1) {
+                        $virtualClassFilter = array('or');
+                        foreach ($this->fetchParameters['virtual_classes'] as $class) {
+                            $virtualClassFilter[] = "meta_class_identifier_ms:" . $class;
+                        }
+                        $virtualFilter[] = $virtualClassFilter;
+                    }elseif (count($this->fetchParameters['virtual_classes']) == 1) {
+                        $virtualFilter[] = "meta_class_identifier_ms:" . $this->fetchParameters['virtual_classes'][0];
                     }
                 }
                 

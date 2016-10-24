@@ -34,6 +34,7 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
         $objects = array();
         if ( !empty( $attributeList ) )
         {
+            $attributeList = array_unique($attributeList);
             foreach( $attributeList as $attributeIdentifier )
             {
                 if ( isset( $this->container->attributesHandlers[$attributeIdentifier] ) )
@@ -70,6 +71,7 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
         $objects = 0;
         if ( !empty( $attributeList ) )
         {
+            $attributeList = array_unique($attributeList);
             foreach( $attributeList as $attributeIdentifier )
             {
                 if ( isset( $this->container->attributesHandlers[$attributeIdentifier] ) )
