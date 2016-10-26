@@ -295,11 +295,15 @@ class OpenPAINI
                     $classRepository = new \Opencontent\Opendata\Api\ClassRepository();
                     $classes = $classRepository->listAll();
                     foreach( $classes as $class ){
-                        $class = $classRepository->load( $class['identifier'] );
-                        foreach( $class->fields as $field ){
-                            if ( !in_array( $class->identifier . '/' . $field['identifier'], $resultPart ) ){
-                                $results[] = $class->identifier . '/' . $field['identifier'];
+                        try {
+                            $class = $classRepository->load($class['identifier']);
+                            foreach ($class->fields as $field) {
+                                if (!in_array($class->identifier . '/' . $field['identifier'], $resultPart)) {
+                                    $results[] = $class->identifier . '/' . $field['identifier'];
+                                }
                             }
+                        }catch(Exception $e){
+                            eZDebug::writeError($e->getMessage(), __METHOD__);
                         }
                     }
                 }else{
