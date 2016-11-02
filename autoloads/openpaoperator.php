@@ -382,7 +382,7 @@ class OpenPAOperator
                     eZDebugSetting::writeNotice( 'openpa-operators', $queryArray, __METHOD__ );
                     $solr = new eZSolr();
                     $results = @$solr->search(
-                        $queryArray['_query'],
+                        trim($queryArray['_query'], "'"),
                         $queryArray
                     );
                     
