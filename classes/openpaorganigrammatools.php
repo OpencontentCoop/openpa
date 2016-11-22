@@ -186,7 +186,7 @@ class OpenPAOrganigrammaTools
                     ), $nodeId);
                     foreach ($nodes as $node) {
                         $this->appendRootItem(
-                            $node
+                            $node->object()->mainNode()
                         );
                     }
                     break;
@@ -202,7 +202,9 @@ class OpenPAOrganigrammaTools
                         $nodeId
                     );
                     foreach ($nodes as $node) {
-                        $item = $this->appendRootItem($node);
+                        $item = $this->appendRootItem(
+                            $node->object()->mainNode()
+                        );
 
                         $subItems = new OpenPAOrganigrammaSubItemCollection();
                         $subItems->identifier = 'servizio_area';
