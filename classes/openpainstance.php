@@ -89,18 +89,19 @@ class OpenPAInstance
     private static function getIP( $url )
     {
         $dns = dns_get_record( $url );
+        $ip = false;
         foreach( $dns as $dnsItem )
         {
             if ( isset( $dnsItem['type'] ) && $dnsItem['type'] == 'A' )
             {
-                return $dnsItem['ip'];
+                $ip = $dnsItem['ip'];
             }
             elseif ( isset( $dnsItem['type'] ) && $dnsItem['type'] == 'CNAME' )
             {
-                return self::getIP( $dnsItem['target'] );
+                $ip = self::getIP( $dnsItem['target'] );
             }
         }
-        return false;
+        return $ip;
     }
 
     /**

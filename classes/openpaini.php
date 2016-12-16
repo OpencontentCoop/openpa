@@ -172,11 +172,11 @@ class OpenPAINI
                 if ( $ini->hasVariable( 'Seo', 'GoogleAnalyticsAccountID' ) )
                 {
                     $googleAnalyticsAccountID = $ini->variable( 'Seo', 'GoogleAnalyticsAccountID' );
-                    $data = new eZSiteData(array(
+                    $googleAnalyticsAccountIDSiteData = new eZSiteData(array(
                         'name' => 'GoogleAnalyticsAccountID',
                         'value' => $googleAnalyticsAccountID
                     ));
-                    $data->store();
+                    $googleAnalyticsAccountIDSiteData->store();
                     self::$googleAnalyticsAccountID = $googleAnalyticsAccountID;
                 }
                 self::$googleAnalyticsAccountID = false;
