@@ -69,6 +69,26 @@ class OpenPAAttributeHandler extends OpenPATempletizable
         return in_array( $this->getFullIdentifier(), $settings ) || in_array( $this->getContentClassAttributeIdentifier(), $settings );
     }
 
+    protected function getExtraParameter( $extraIdentifier )
+    {
+        if (class_exists('OCClassExtraParameters')) {
+            $data = OCClassExtraParameters::fetchObject(
+                OCClassExtraParameters::definition(),
+                null,
+                array(
+                    'handler' => 'table_view',
+                    'class_identifier' => $this->getContentClass()->attribute('identifier'),
+                    'attribute_identifier' => $this->getContentClassAttributeIdentifier(),
+                    'key' => $extraIdentifier
+                )
+            );
+            if ($data instanceof OCClassExtraParameters) {
+                return $data->attribute('value');
+            }
+        }
+        return null;
+    }
+
     protected function fullData()
     {
         return array(
@@ -79,7 +99,7 @@ class OpenPAAttributeHandler extends OpenPATempletizable
             'show_link' => !$this->is( 'attributi_senza_link' ),
             'show_empty' => $this->is( 'zero_is_content' ),
             'contatti' => $this->is( 'attributi_contatti' ),
-            'collapse_label' => false
+            'collapse_label' => $this->getExtraParameter('collapse_label')
         );
     }
 
