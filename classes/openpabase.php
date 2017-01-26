@@ -84,8 +84,14 @@ class OpenPABase
 
     public static function getSubSiteaccessIdentifierList()
     {
-        $list = eZLocale::languageList();
+        $list = array();
+        $languages = eZLocale::languageList();
+        foreach( $languages as $language ) {
+            $parts = explode('-', $language);
+            $list[] = $parts[0];
+        }
         $list[] = 'intranet';
+        $list[] = 'debug';
         return $list;
     }
 
@@ -123,13 +129,24 @@ class OpenPABase
         if ( !$identifier )
             $identifier = self::getCurrentSiteaccessIdentifier();
         $siteaccess = $identifier . '_' . strtolower( $customName );
+
+        if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
+        {
+            $language = eZLocale::currentLocaleCode();
+            $parts = explode('-', $language);
+            $locale = $parts[0];
+            $siteaccess = "{$identifier}_{$locale}_{$customName}";
+        }
+
         if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
         {
             /** @var eZContentLanguage[] $languages */
             $languages = eZLocale::languageList();
             foreach( $languages as $language )
             {
-                $siteaccess = "{$identifier}_{$language}_{$customName}";
+                $parts = explode('-', $language);
+                $locale = $parts[0];
+                $siteaccess = "{$identifier}_{$locale}_{$customName}";
                 if ( file_exists( "settings/siteaccess/$siteaccess" ) )
                 {
                     break;
