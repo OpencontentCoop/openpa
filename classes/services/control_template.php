@@ -11,6 +11,7 @@ class ObjectHandlerServiceControlTemplate extends ObjectHandlerServiceBase
         $this->data['carousel_simple'] = $this->getViewTemplate( 'carousel_simple' );
         $this->data['carousel_evidence'] = $this->getViewTemplate( 'carousel_evidence' );
         $this->data['accordion_content'] = $this->getViewTemplate( 'accordion_content' );
+        $this->data['full_block'] = $this->getViewTemplate( 'full_block' );
         $this->data['mail_ezsubtreenotification'] = $this->getViewTemplate( 'mail_ezsubtreenotification' );
     }
 
