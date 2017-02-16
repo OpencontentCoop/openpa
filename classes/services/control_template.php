@@ -13,6 +13,7 @@ class ObjectHandlerServiceControlTemplate extends ObjectHandlerServiceBase
             'carousel_evidence',
             'accordion_content',
             'mail_ezsubtreenotification',
+            'full_block',
         ));
         foreach($availableView as $view){
             $this->data[$view] = $this->getViewTemplate($view);
