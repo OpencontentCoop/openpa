@@ -61,7 +61,7 @@ class OpenPAOrganigrammaTools
 
         return array(
             'content' => $data,
-            'scope' => 'openpa-organigramma-cache'
+            'scope' => 'organigramma-cache'
         );
     }
 
