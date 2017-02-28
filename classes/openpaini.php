@@ -83,7 +83,8 @@ class OpenPAINI
         'TopMenu::NodiCustomMenu',
         'GestioneSezioni::sezioni_per_tutti',
         'Attributi::EscludiDaRicerca',
-        'Seo::GoogleAnalyticsAccountID'
+        'Seo::GoogleAnalyticsAccountID',
+        'GeneralSettings::valutation'
         //'SideMenu::EsponiLink'
     );
     
@@ -205,6 +206,17 @@ class OpenPAINI
 
             case 'Seo::GoogleAnalyticsAccountID':
                 return self::googleAnalyticsAccountID();
+            break;
+
+            case 'GeneralSettings::valutation':
+                    if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
+                        && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
+                        $valuationClass = eZContentClass::fetchByIdentifier('valuation');
+                        if ($valuationClass instanceof eZContentClass){
+                            return $valuationClass->objectCount() > 0;
+                        }
+                    }
+                    return false;
             break;
 
         }

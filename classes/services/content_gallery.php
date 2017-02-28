@@ -11,20 +11,20 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
 
     function run()
     {
-        if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )
+        if ( $this->container->getContentMainNode() instanceof eZContentObjectTreeNode )
         {
             $this->imagesFetchParams = array(
-                'parent_node_id' => $this->container->currentNodeId,
+                'parent_node_id' => $this->container->currentMainNodeId,
                 'class_filter_type' => 'include',
                 'class_filter_array' => array( 'image' ),
-                'sort_by' => $this->container->getContentNode()->attribute( 'sort_array' )
+                'sort_by' => $this->container->getContentMainNode()->attribute( 'sort_array' )
             );
 
             $this->galleriesFetchParams = array(
-                'parent_node_id' => $this->container->currentNodeId,
+                'parent_node_id' => $this->container->currentMainNodeId,
                 'class_filter_type' => 'include',
                 'class_filter_array' => array( 'gallery' ),
-                'sort_by' => $this->container->getContentNode()->attribute( 'sort_array' )
+                'sort_by' => $this->container->getContentMainNode()->attribute( 'sort_array' )
             );
         }
 
@@ -38,7 +38,7 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
 
     function hasFlip()
     {
-        if ( !isset( self::$flipControlCache[$this->container->currentNodeId] ) )
+        if ( !isset( self::$flipControlCache[$this->container->currentMainNodeId] ) )
         {
             if ( $this->container->hasAttribute( 'file' ) && method_exists( 'eZFlip', 'instance' ) )
             {
@@ -46,24 +46,24 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
                 {
                     if ( eZFlip::instance( $this->container->attribute( 'file' )->attribute( 'contentobject_attribute' ) )->isConverted() )
                     {
-                        self::$flipControlCache[$this->container->currentNodeId] = true;
+                        self::$flipControlCache[$this->container->currentMainNodeId] = true;
                     }
                     else
                     {
-                        self::$flipControlCache[$this->container->currentNodeId] = false;
+                        self::$flipControlCache[$this->container->currentMainNodeId] = false;
                     }
                 }
                 catch( Exception $e )
                 {
-                    self::$flipControlCache[$this->container->currentNodeId] = false;
+                    self::$flipControlCache[$this->container->currentMainNodeId] = false;
                 }
             }
             else
             {
-                self::$flipControlCache[$this->container->currentNodeId] = false;
+                self::$flipControlCache[$this->container->currentMainNodeId] = false;
             }
         }
-        return self::$flipControlCache[$this->container->currentNodeId];
+        return self::$flipControlCache[$this->container->currentMainNodeId];
     }
 
     function getSingleImagesCount()
@@ -73,12 +73,12 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
             return false;
         }
 
-        if ( !$this->container->getContentNode() instanceof eZContentObjectTreeNode )
+        if ( !$this->container->getContentMainNode() instanceof eZContentObjectTreeNode )
         {
             return false;
         }
 
-        if ( !isset( self::$cache[$this->container->currentNodeId]['single_images_count'] ) )
+        if ( !isset( self::$cache[$this->container->currentMainNodeId]['single_images_count'] ) )
         {
             $imageCount = eZFunctionHandler::execute(
                 'content',
@@ -86,28 +86,28 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
                 $this->imagesFetchParams
             );
 
-            self::$cache[$this->container->currentNodeId]['single_images_count'] = $imageCount;
+            self::$cache[$this->container->currentMainNodeId]['single_images_count'] = $imageCount;
         }
-        return self::$cache[$this->container->currentNodeId]['single_images_count'] > 0;
+        return self::$cache[$this->container->currentMainNodeId]['single_images_count'] > 0;
     }
 
     function getGalleriesCount()
     {
-        if ( !$this->container->getContentNode() instanceof eZContentObjectTreeNode )
+        if ( !$this->container->getContentMainNode() instanceof eZContentObjectTreeNode )
         {
             return false;
         }
 
-        if ( !isset( self::$cache[$this->container->currentNodeId]['galleries_count'] ) )
+        if ( !isset( self::$cache[$this->container->currentMainNodeId]['galleries_count'] ) )
         {
             $galleryChildrenCount = eZFunctionHandler::execute(
                 'content',
                 'list_count',
                 $this->galleriesFetchParams
             );
-            self::$cache[$this->container->currentNodeId]['galleries_count'] = $galleryChildrenCount;
+            self::$cache[$this->container->currentMainNodeId]['galleries_count'] = $galleryChildrenCount;
         }
-        return self::$cache[$this->container->currentNodeId]['galleries_count'] > 0;
+        return self::$cache[$this->container->currentMainNodeId]['galleries_count'] > 0;
     }
 
     function getImageListCount()
@@ -131,16 +131,16 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
             return false;
         }
 
-        if ( !$this->container->getContentNode() instanceof eZContentObjectTreeNode )
+        if ( !$this->container->getContentMainNode() instanceof eZContentObjectTreeNode )
         {
             return false;
         }
 
-        if ( !isset( self::$cache[$this->container->currentNodeId]['single_images'] ) )
+        if ( !isset( self::$cache[$this->container->currentMainNodeId]['single_images'] ) )
         {
             if ( $this->getImageListCount() > 0 )
             {
-                self::$cache[$this->container->currentNodeId]['single_images'] = eZFunctionHandler::execute(
+                self::$cache[$this->container->currentMainNodeId]['single_images'] = eZFunctionHandler::execute(
                     'content',
                     'list',
                     $this->imagesFetchParams
@@ -148,24 +148,24 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
             }
             else
             {
-                self::$cache[$this->container->currentNodeId]['single_images'] = array();
+                self::$cache[$this->container->currentMainNodeId]['single_images'] = array();
             }
         }
-        return self::$cache[$this->container->currentNodeId]['single_images'];
+        return self::$cache[$this->container->currentMainNodeId]['single_images'];
     }
 
     function getGalleryList()
     {
-        if ( !$this->container->getContentNode() instanceof eZContentObjectTreeNode )
+        if ( !$this->container->getContentMainNode() instanceof eZContentObjectTreeNode )
         {
             return false;
         }
 
-        if ( !isset( self::$cache[$this->container->currentNodeId]['galleries'] ) )
+        if ( !isset( self::$cache[$this->container->currentMainNodeId]['galleries'] ) )
         {
             if ( $this->getGalleriesCount() > 0 )
             {
-                self::$cache[$this->container->currentNodeId]['galleries'] = eZFunctionHandler::execute(
+                self::$cache[$this->container->currentMainNodeId]['galleries'] = eZFunctionHandler::execute(
                     'content',
                     'list',
                     $this->galleriesFetchParams
@@ -173,10 +173,10 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
             }
             else
             {
-                self::$cache[$this->container->currentNodeId]['galleries'] = array();
+                self::$cache[$this->container->currentMainNodeId]['galleries'] = array();
             }
         }
-        return self::$cache[$this->container->currentNodeId]['galleries'];
+        return self::$cache[$this->container->currentMainNodeId]['galleries'];
     }
 
 }
