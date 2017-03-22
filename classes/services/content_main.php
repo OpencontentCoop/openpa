@@ -7,8 +7,7 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
     
     function run()
     {
-        //@todo
-        $this->data['identifiers'] = array(
+        $this->data['identifiers'] = OpenPAINI::variable('ContentMain', 'Identifiers', array(
             'image',
             'ruolo',
             'ruolo2',
@@ -17,7 +16,7 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
             'short_description',
             'description',
             'descrizione'
-        );
+        ));
         $this->fnData['attributes'] = 'getAttributeList';
         $this->fnData['has_content'] = 'getAttributeCount';
         $this->fnData['parts'] = 'getParts';

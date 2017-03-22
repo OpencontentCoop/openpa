@@ -21,20 +21,34 @@ try
     {
         throw new Exception( 'Script non eseguibile sul prototipo' );        
     }
-    
+
     if ( stripos( $siteaccess['name'], 'consorzioinnovazione' ) !== false )
     {
-        throw new Exception( 'Script non eseguibile su consorzioinnovazione' );        
+        throw new Exception( 'Script non eseguibile su consorzioinnovazione' );
     }
-    
+
     if ( stripos( $siteaccess['name'], 'consorzio' ) !== false )
     {
-        throw new Exception( 'Script non eseguibile su consorzio' );        
+        throw new Exception( 'Script non eseguibile su consorzio' );
     }
-    
+
     if ( stripos( $siteaccess['name'], 'asia' ) !== false )
     {
-        throw new Exception( 'Script non eseguibile su asia' );        
+        throw new Exception( 'Script non eseguibile su asia' );
+    }
+
+    if ( stripos( $siteaccess['name'], 'airspa' ) !== false )
+    {
+        throw new Exception( 'Script non eseguibile su airspa' );
+    }
+
+    if ( stripos( $siteaccess['name'], 'bim' ) !== false )
+    {
+        throw new Exception( 'Script non eseguibile su bim' );
+    }
+
+    if (OpenPAINI::variable('NetworkSettings', 'SyncTrasparenza', 'enabled') != 'enabled'){
+        throw new Exception( 'Script non eseguibile secondo configurazione openpa.ini' );
     }
         
     // sincronizzazaione classi
