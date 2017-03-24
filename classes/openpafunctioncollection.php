@@ -176,7 +176,20 @@ class OpenPaFunctionCollection
                 $params['Filter'][] = array( OpenPASolr::generateSolrSubMetaField('utente', 'id') . ':' . $dipendente );
 
             $search = self::search( $params );
-            $result = $search['SearchResult'];
+
+            $result = array();
+            foreach( $search['SearchResult'] as $item )
+            {
+                /** @var eZContentObjectAttribute[] $dataMap */
+                $dataMap = $item->attribute( 'data_map' );
+                if ( isset( $dataMap['utente'] )
+                     && $dataMap['utente'] instanceof eZContentObjectAttribute
+                     && $dataMap['utente']->hasContent())
+                {
+                    $result[] = $item;
+                }
+            }
+
         }
         elseif( $subtree )
         {
@@ -248,15 +261,17 @@ class OpenPaFunctionCollection
                     {
                         $users = explode( '-', $dataMap['utente']->toString() );
                     }
-                    if ( isset( $idsData[$item->attribute( 'name' )] ) )
-                    {
-                        $idsData[$item->attribute( 'name' )] = array_merge( $idsData[$item->attribute( 'name' )], $users );
+                    if (count($users) > 0) {
+                        if (isset( $idsData[$item->attribute('name')] )) {
+                            $idsData[$item->attribute('name')] = array_merge(
+                                $idsData[$item->attribute('name')],
+                                $users
+                            );
+                        } else {
+                            $idsData[$item->attribute('name')] = $users;
+                        }
+                        $idsData[$item->attribute('name')] = array_unique($idsData[$item->attribute('name')]);
                     }
-                    else
-                    {
-                        $idsData[$item->attribute( 'name' )] = $users;
-                    }
-                    $idsData[$item->attribute( 'name' )] = array_unique( $idsData[$item->attribute( 'name' )] );
                 }
 
                 foreach( $idsData as $ruolo => $ids )
