@@ -151,8 +151,6 @@ class OpenPAClassDataItem
     
     public function __construct( $item )
     {        
-        $this->fieldsMap = $fieldsMap;
-        
         foreach( $item as $property => $value )
         {                        
             if ( $property == 'DataMap' )
