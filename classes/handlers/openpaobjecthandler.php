@@ -374,7 +374,7 @@ class OpenPAObjectHandler
         {
             if ( get_class( $service ) == $className )
             {
-                return $service;
+                return $service->data();
             }
         }
         eZDebug::writeNotice( "Service by $className does not exist", __METHOD__ );
