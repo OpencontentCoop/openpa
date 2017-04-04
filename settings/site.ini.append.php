@@ -3,6 +3,7 @@
 
 [Cache]
 CacheItems[]=openpamenu
+CacheItems[]=openpadynamicini
 
 [Cache_openpamenu]
 name=Menu cache
@@ -10,6 +11,11 @@ id=openpamenu
 tags[]=openpamenu
 path=openpamenu
 isClustered=true
+
+[Cache_openpamenu]
+name=Configurazioni di visualizzazione
+id=openpaini
+path=openpaini
 
 [RoleSettings]
 PolicyOmitList[]=openpa/classdefinition

@@ -97,13 +97,16 @@ class OpenPABase
 
     public static function getSiteaccessIdentifier( $siteaccessName )
     {
+        //prototipo_ger_sensor
         $parts = explode( '_', $siteaccessName );
         array_pop( $parts );
+        //prototipo_ger
         if ( count( $parts ) > 1 )
         {
             if ( in_array( $parts[1], self::getSubSiteaccessIdentifierList() ) )
             {
                 unset( $parts[1] );
+                //prototipo
             }
         }
         return implode( '_', $parts );

@@ -336,7 +336,13 @@ class OpenPAINI
     }
 
     public static function dynamicIniRetrieveCache( $file, $mtime ){
-        $result = include( $file );
+        if (file_exists($file)){
+            $result = include( $file );
+        }else{
+            eZDebug::writeNotice("File $file not exists, regenerate", __METHOD__);
+            $result = new eZClusterFileFailure(eZClusterFileFailure::FILE_RETRIEVAL_FAILED);
+        }
+
         return $result;
     }
 
