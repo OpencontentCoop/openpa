@@ -2,7 +2,6 @@
 
 class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
 {
-
     protected $availableViews = array(
         'default',
         'filters',
@@ -13,22 +12,26 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
     );
     protected $currentView;
 
+    protected $currentExtraConfigs = array();
+
+    protected $currentViews;
+
     function run()
     {
         $this->fnData['current_view'] = 'getCurrentView';
+        $this->fnData['current_extra_configs'] = 'getCurrentExtraConfigs';
+        $this->fnData['current_views'] = 'getCurrentViews';
         $this->fnData['views'] = 'getViews';
     }
 
     function getViews()
     {
         $data = array();
-        foreach( $this->availableViews as $view )
+        $availableViews = OpenPAChildrenViewType::getAvailableViews();
+        foreach( $availableViews as $identifier => $view )
         {
-            $data[$view] = array(
-                'current_view' => $this->getCurrentView(),
-                'identifier' => $view,
-                'template' => $this->templatePath( $view )
-            );
+            $view['current_view'] = $this->getCurrentView();
+            $data[$identifier] = $view;
         }
         return $data;
     }
@@ -36,18 +39,33 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
     function template()
     {
         $this->getCurrentView();
-        $templateName = 'default';
+        $viewIdentifier = 'default';
         if ( $this->currentView != null )
         {
-            $templateName = $this->currentView;
+            $viewIdentifier = $this->currentView;
         }
-        return $this->templatePath( $templateName );
+        return OpenPAChildrenViewType::getViewTemplatePath($viewIdentifier);
+    }
+
+    protected function getCurrentExtraConfigs()
+    {
+        $this->getCurrentView();
+        return $this->currentExtraConfigs;
+    }
+
+    protected function getCurrentViews()
+    {
+        $this->getCurrentView();
+        return $this->currentViews;
     }
 
     protected function getCurrentView()
     {
-        if ( $this->currentView === null )
+        if ( $this->currentView === null && $this->currentViews === null )
         {
+            $this->currentView = false;
+            $this->currentViews = array();
+
             $showChildren = true;
             if ( isset( $this->container->attributesHandlers['show_children'] ) )
             {
@@ -66,13 +84,32 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
                         $this->availableViews[] = strtolower( $value['name'] );
                     }
 
-                    $value = $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'value' );
-                    if ( is_array( $value ) )
+                    $values = $this->container->attributesHandlers['children_view']->attribute( 'contentobject_attribute' )->attribute( 'content' );
+                    if (class_exists('OpenPAChildrenViewContent') && $values instanceof OpenPAChildrenViewContent){
+                        $this->currentExtraConfigs = $values->getExtraConfigs();
+                        $values = $values->getOptions();
+                    }
+                    if ( is_array( $values ) )
                     {
-                        $value = $value[0];
-                        if ( isset( $contentClassAttributeContent['options'][$value] ) )
-                        {
-                            $this->currentView = strtolower( $contentClassAttributeContent['options'][$value]['name'] );
+                        $index = 0;
+                        foreach($values as $value){
+                            if ( isset($contentClassAttributeContent['active_list']) && in_array($value, $contentClassAttributeContent['active_list'] ) && isset($contentClassAttributeContent['views']))
+                            {
+                                foreach($contentClassAttributeContent['views'] as $view){
+                                    if ((int)$view['id'] == (int)$value){
+                                        $viewName = $view['identifier'];
+                                        if ($index == 0){
+                                            $this->currentView = $viewName;
+                                        }
+                                        $this->currentViews[] = $viewName;
+                                        $index++;
+                                        break;
+                                    }
+                                }
+                            }elseif ( isset( $contentClassAttributeContent['options'][$value] ) ){
+                                $viewName = strtolower( $contentClassAttributeContent['options'][$value]['name'] );
+                                $this->currentView = $viewName;
+                            }
                         }
                     }
                 }
@@ -99,17 +136,16 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
                 $this->currentView = 'empty';
             }
         }
-        if ( $this->currentView === null )
-            $this->currentView = false;
+
+        $currentUri = eZURI::instance(eZSys::requestURI());
+        if (isset($currentUri->UserArray['view'])){
+            $userView = $currentUri->UserArray['view'];
+            if (in_array($userView, $this->currentViews)){
+                $this->currentView = $userView;
+            }
+        }
 
         return $this->currentView;
-    }
-
-
-
-    protected function templatePath( $view )
-    {
-        return "design:parts/children/{$view}.tpl";
     }
 
 }
