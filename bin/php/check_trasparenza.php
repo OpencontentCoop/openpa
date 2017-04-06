@@ -72,9 +72,8 @@ try
             $errorClassCount++;
         }
     }
-   
-    //@todo mettere in un openpa.ini
-    $treeNode = 'http://openpa.opencontent.it/api/opendata/v1/content/node/966';
+
+    $treeNode = OpenPAINI::variable('NetworkSettings', 'SyncTrasparenzaRemoteUrl', 'http://openpa.opencontent.it/api/opendata/v1/content/node/966');
     $treeUrl = $treeNode . '/list/offset/0/limit/1000';
     
     $apiNode = OpenPAApiNode::fromLink( $treeNode );

@@ -15,11 +15,11 @@ try
 {
     $user = eZUser::fetchByName( 'admin' );
     eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
-    
+
     $siteaccess = eZSiteAccess::current();
     if ( stripos( $siteaccess['name'], 'prototipo' ) !== false )
     {
-        throw new Exception( 'Script non eseguibile sul prototipo' );        
+        throw new Exception( 'Script non eseguibile sul prototipo' );
     }
 
     if ( stripos( $siteaccess['name'], 'consorzioinnovazione' ) !== false )
@@ -37,20 +37,10 @@ try
         throw new Exception( 'Script non eseguibile su asia' );
     }
 
-    if ( stripos( $siteaccess['name'], 'airspa' ) !== false )
-    {
-        throw new Exception( 'Script non eseguibile su airspa' );
-    }
-
-    if ( stripos( $siteaccess['name'], 'bim' ) !== false )
-    {
-        throw new Exception( 'Script non eseguibile su bim' );
-    }
-
     if (OpenPAINI::variable('NetworkSettings', 'SyncTrasparenza', 'enabled') != 'enabled'){
         throw new Exception( 'Script non eseguibile secondo configurazione openpa.ini' );
     }
-        
+
     // sincronizzazaione classi
     $classiTrasparenza = array(
         //'conferimento_incarico',
@@ -65,29 +55,37 @@ try
         //'sovvenzione_contributo',
         //'organo_politico'
     );
-    
+
     foreach( $classiTrasparenza as $identifier )
     {
         OpenPALog::warning( 'Sincronizzo classe ' . $identifier );
         $tools = new OpenPAClassTools( $identifier, true ); // creo se non esiste
         $tools->sync( true, true ); // forzo e rimuovo attributi in più
     }
-   
-    //@todo mettere in un openpa.ini
-    $treeNode = 'http://openpa.opencontent.it/api/opendata/v1/content/node/966';
+
+    $treeNode = OpenPAINI::variable('NetworkSettings', 'SyncTrasparenzaRemoteUrl', 'http://openpa.opencontent.it/api/opendata/v1/content/node/966');
     $treeUrl = $treeNode . '/list/offset/0/limit/1000';
-    
-    OpenPAObjectTools::syncObjectFormRemoteApiNode( OpenPAApiNode::fromLink( $treeNode ) );
-    
+
+    $rootNode = OpenPAApiNode::fromLink( $treeNode );
+    $objectRoot = OpenPAObjectTools::syncObjectFormRemoteApiNode( $rootNode );
+    if ( !$objectRoot )
+    {
+        $objectRoot = $rootNode->createContentObject( 1 );
+    }
+
     $dataTree = json_decode( OpenPABase::getDataByURL( $treeUrl ), true );
     if ( $dataTree )
     {
         foreach( $dataTree['childrenNodes'] as $item )
         {
-            $item = new OpenPAApiChildNode( $item );            
+            $item = new OpenPAApiChildNode( $item );
             try
             {
                 $objectForItem = OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $item );
+                if ( !$objectForItem )
+                {
+                    $objectForItem = $item->getApiNode()->createContentObject( $objectRoot->attribute( 'main_node_id' ) );
+                }
                 foreach( $item->getChildren() as $child )
                 {
                     if ( $child->classIdentifier == 'pagina_trasparenza' )
@@ -96,8 +94,8 @@ try
                         $objectForChild = OpenPAObjectTools::syncObjectFormRemoteApiChildNode( $child );
                         if ( !$objectForChild )
                         {
-                            $child->getApiNode()->createContentObject( $objectForItem->attribute( 'main_node_id' ) );
-                        }                        
+                            $objectForChild = $child->getApiNode()->createContentObject( $objectForItem->attribute( 'main_node_id' ) );
+                        }
                         foreach( $child->getChildren() as $child2 )
                         {
                             if ( $child2->classIdentifier == 'pagina_trasparenza' )
@@ -119,7 +117,7 @@ try
             }
         }
     }
-    
+
     $script->shutdown();
 }
 catch( Exception $e )
