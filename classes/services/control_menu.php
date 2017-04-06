@@ -86,7 +86,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             }
             if ( !$result && $this->container->getContentNode() instanceof eZContentObjectTreeNode) {
                 $parent = $this->container->getContentNode()->attribute('parent');
-                if ( $parent instanceof eZContentObjectTreeNode ) {
+                if ( $parent instanceof eZContentObjectTreeNode && $parent->attribute('node_id') > 1) {
                     $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
                     if ( $parent->hasAttribute('content_virtual')) {
                         $result = $parent->attribute('content_virtual')->attribute('folder');
@@ -100,10 +100,12 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
                 if ( $result ) $debug[] = 'content_globalinfo';
                 if ( !$result ){
                     $parent = $this->container->getContentNode()->attribute('parent');
-                    $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
-                    if ( $parent->hasAttribute('content_globalinfo')) {
-                        $result = $parent->attribute('content_globalinfo')->attribute('has_content');
-                        if ( $result ) $debug[] = 'content_globalinfo_parent';
+                    if ( $parent instanceof eZContentObjectTreeNode && $parent->attribute('node_id') > 1) {
+                        $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
+                        if ( $parent->hasAttribute('content_globalinfo')) {
+                            $result = $parent->attribute('content_globalinfo')->attribute('has_content');
+                            if ( $result ) $debug[] = 'content_globalinfo_parent';
+                        }
                     }
                 }
             }

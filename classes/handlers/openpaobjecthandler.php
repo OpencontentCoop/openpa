@@ -237,31 +237,31 @@ class OpenPAObjectHandler
             return isset( $this->attributesHandlers[$key] ) ? $this->attributesHandlers[$key] : null;
         return $this->attributesHandlers;
     }
-    
+
     function contentObjectAttributeIdentifiers()
     {
         if ($this->attributesIdentifiers === null && $this->contentObject instanceof eZContentObject)
         {
             $db = eZDB::instance();
-            $version = $this->contentObject->CurrentVersion;
+            $version = (int)$this->contentObject->CurrentVersion;
             $language = $this->contentObject->CurrentLanguage;
-    
+
             $versionText = "AND ezcontentobject_attribute.version = '$version'";
-            $languageText = "AND  ezcontentobject_attribute.language_code = '$language'";        
-            
-            
+            $languageText = "AND  ezcontentobject_attribute.language_code = '$language'";
+
+            $id = (int)$this->contentObject->ID;
             $query = "SELECT ezcontentclass_attribute.identifier as identifier FROM
                         ezcontentobject_attribute, ezcontentclass_attribute, ezcontentobject_version
                       WHERE
                         ezcontentclass_attribute.version = '0' AND
                         ezcontentclass_attribute.id = ezcontentobject_attribute.contentclassattribute_id AND
-                        ezcontentobject_version.contentobject_id = '{$this->contentObject->ID}' AND
+                        ezcontentobject_version.contentobject_id = '{$id}' AND
                         ezcontentobject_version.version = '$version' AND
-                        ezcontentobject_attribute.contentobject_id = '{$this->contentObject->ID}' $versionText $languageText                  
+                        ezcontentobject_attribute.contentobject_id = '{$id}' $versionText $languageText
                       ORDER BY
                         ezcontentclass_attribute.placement ASC,
                         ezcontentobject_attribute.language_code ASC";
-    
+
             $this->attributesIdentifiers = array();
             $attributeArray = $db->arrayQuery( $query );
             foreach($attributeArray as $row)
