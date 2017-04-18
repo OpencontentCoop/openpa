@@ -10,11 +10,23 @@ $script = eZScript::instance(array(
 
 $script->startup();
 
+$footerRemoteId = 'opendata_footer_link';
+$areaRemoteId = 'opendata_area';
+$indiceIpaRemoteUrl = "http://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt";
+
+
 $options = $script->getOptions(
-    '[dry-run][zzz_footer_link][remove_old_dataset][fix_area_remote_ids][add_class_descriptions][fix_footer_link_remote_id][areatematica_sync][check_org][refresh_org_internal_id][parse_indicepa][find_codiceipa][generate_from_classes][fix_section][repush_all][delete_all][repush_org][delete_org][archive_current_ckan_ids][remove_current_ckan_ids]',
+    '[dry-run][install_areatematica][fix_footer_link_remote_id][swap_footer_link][find_org_data][find_codiceipa][fix_area_remote_ids][fix_section][remove_old_dataset][add_class_descriptions]',
     '',
     array(
-        'dry-run' => 'Non esegue azioni e mostra eventuali errori'
+        'dry-run' => 'Non esegue azioni e mostra eventuali errori',
+        'install_areatematica' => "Installa/aggiorna l'area Open Data",
+        'fix_footer_link_remote_id' => "Cerca la vecchia pagina 'Linked Open Data' e ne imposta il remote id a '$footerRemoteId'",
+        'swap_footer_link' => "Aggiunge $areaRemoteId nel footer della home e rimuove $footerRemoteId",
+        'find_org_data' => "Cerca nelle info della home i dati e popola la matrice dei contatti (da usare se la martice è vuota)",
+        'find_codiceipa' => "Cerca l'istanza corrente in $indiceIpaRemoteUrl e popola il codice_ipa nei contatti",
+        'fix_area_remote_ids' => "Aggiorna i remoti dell'area tematica (solo per eccezioni)",
+        'fix_section' => "Assegan la sezione standard all'area tematica $areaRemoteId",
     )
 );
 $script->initialize();
@@ -22,6 +34,7 @@ $script->setUseDebugAccumulators(true);
 
 OpenPALog::setOutputLevel($script->isQuiet() ? OpenPALog::ERROR : OpenPALog::ALL);
 
+/** @var eZUser $user */
 $user = eZUser::fetchByName( 'admin' );
 eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
 
@@ -29,15 +42,15 @@ $db = eZDB::instance();
 
 try {
 
-    $footerRemoteId = 'opendata_footer_link';
         
-    if ($options['zzz_footer_link'] ){
-        $areaObject = eZContentObject::fetchByRemoteID('opendata_area');
+    if ($options['swap_footer_link'] ){
+        $areaObject = eZContentObject::fetchByRemoteID($areaRemoteId);
         //OpenPALog::output($areaObject->attribute('id'));
-        $footerObject = eZContentObject::fetchByRemoteID('opendata_footer_link');
+        $footerObject = eZContentObject::fetchByRemoteID($footerRemoteId);
         //OpenPALog::error($footerObject->attribute('id'));
         $home = OpenPaFunctionCollection::fetchHome();
         if ($areaObject instanceof eZContentObject && $footerObject instanceof eZContentObject ){
+            /** @var eZContentObjectAttribute[] $dataMap */
             $dataMap = $home->attribute('data_map');
             if (isset($dataMap['link_nel_footer'])){
                 //OpenPALog::warning($dataMap['link_nel_footer']->toString());
@@ -63,212 +76,14 @@ try {
                     $dataMap['link_nel_footer']->fromString($newString);
                     $dataMap['link_nel_footer']->store();
                     eZContentCacheManager::clearContentCache($home->attribute('contentobject_id'));
-                    eZCache::clearTemplateBlockCache();
+                    eZCache::clearTemplateBlockCache(null);
                 }
                 eZContentObjectTreeNode::hideSubTree( $footerObject->attribute('main_node') );
             }
         }
         
     }
-    if ($options['archive_current_ckan_ids'] ){
-        $data = array();
-        $tools = new OCOpenDataTools();
-        
-        $tools->getOrganizationBuilder()->build();
-        
-        $currentSettingsId = $tools->getCurrentEndpointIdentifier();
-        foreach( $tools->getDatasetObjects() as $object ){
-            OpenPALog::notice($object->attribute('name') . ' ',false);
-            if (!$options['dry-run']) {
-                try{
-                    $datasetId = $tools->getConverter()->getDatasetId($object);
-                    $data[$object->attribute('id')] = $datasetId;
-                    OpenPALog::warning($datasetId);
-                }catch(Exception $e){
-                    OpenPALog::error('Not found!' . $e->getMessage());
-                }
-            }else{
-                OpenPALog::notice();
-            }
-        }
-        
-        $organizationId = $tools->getOrganizationBuilder()->getStoresOrganizationId();
-        
-        $store = array(
-            $organizationId => $data
-        );
-        
-        $cacheDir = eZSys::storageDirectory();
-        $phpCache = new eZPHPCreator(
-            $cacheDir,
-            'dataset_' . $currentSettingsId . '.php',
-            '',
-            array( 'clustering' => 'ocopendata' )
-        );
-        $phpCache->addVariable( 'dataSetList', $store );
-        $phpCache->store();        
-    }
-    
-    if ($options['remove_current_ckan_ids']){
-        
-        //$instanceId = OpenPAInstance::current()->getIdentifier();
-        //if ( $instanceId == 'ala' ){
-        //    $data = array(
-        //        "Avvisi del Comune di Ala" => "9397669f-57ff-4ef0-816c-19c8132bf563", 
-        //        "Albi ed elenchi del Comune di Ala" => "f9ed017a-8fdc-45d8-bc3a-3597cc815d64", 
-        //        "Bandi di gara del Comune di Ala" => "157ac3da-4153-4787-9728-179289d8e7a1", 
-        //        "Bilanci di previsione del Comune di Ala" => "8dcb06ca-2c6c-495c-a781-0973182b5ead", 
-        //        "Concorsi del Comune di Ala" => "a47f02a9-073c-42d9-97f7-86646c4f4baf", 
-        //        "Dipendenti del Comune di Ala" => "c0b36684-94ac-42cc-8258-1c7eb9f22036", 
-        //        "Disciplinari del Comune di Ala" => "b4cb9f89-d8bf-4390-931c-0c5c85ed8564", 
-        //        "Documenti del Comune di Ala" => "8e7e0e8f-0255-4250-8de9-35e88b7e7658", 
-        //        "Gruppi consiliari del Comune di Ala" => "9db5864e-44ed-40c0-a8f6-2c3ae49abac9", 
-        //        "Moduli del Comune di Ala" => "c7178e2c-1f6c-4c5a-abf2-dd6c0cdc49e6", 
-        //        "Organi politici del Comune di Ala" => "ec3bd8dd-1ed4-4ff3-bd5f-d0d800ef4a37", 
-        //        "Piani e progetti del Comune di Ala" => "151cc87e-b486-49fa-9d4d-7dbc8fe03cec", 
-        //        "Politici del Comune di Ala" => "05769eac-7df5-4ae5-9024-e7ca4ce79388", 
-        //        "Pubblicazioni del Comune di Ala" => "f999a65f-3c7d-4f19-bb87-7083278ffefe", 
-        //        "Regolamenti del Comune di Ala" => "5c1076f3-c37f-4536-ac7b-dc249a12428a", 
-        //        "Rendiconti del Comune di Ala" => "a7c2158c-0d73-4de5-9fab-9fb9b3d70e76", 
-        //        "Servizi del Comune di Ala" => "54538543-3e6b-4b0f-9c1e-8a151638524c", 
-        //        "Uffici del Comune di Ala" => "e6eaf925-8fa9-4d60-8402-83af25c91e0c", 
-        //        "Servizi sul territorio del Comune di Ala" => "d7251b01-49a3-4d99-8f34-4b526e014eeb", 
-        //        "Statuti del Comune di Ala" => "76ba5521-88ce-4146-b752-01039390b0b3", 
-        //        "Concessioni del Comune di Ala" => "53e647a1-63fc-4fb4-a56c-2dc08ffac1d4", 
-        //        "Eventi del Comune di Ala" => "d3a2421b-4bce-412b-9314-7506e56a1a8e", 
-        //        "Procedimenti del Comune di Ala" => "54e34dab-25c5-49d8-8f81-ff608593eb36", 
-        //        "Aree tematiche del Comune di Ala" => "24105993-406a-4547-b51f-bfae117bd884", 
-        //        "Associazioni del Comune di Ala" => "6d8299bb-1e11-4d29-888b-82f6ea8e1d09", 
-        //        "Enti controllati del Comune di Ala" => "c0ccc0be-849a-4267-a087-494a22ef309f", 
-        //        "Interpellanze del Comune di Ala" => "d4db1543-c7b1-4a6b-a983-f9a58723cd7c", 
-        //        "Interrogazioni del Comune di Ala" => "617cbda8-fbc3-446c-9fed-b54ddd8a6908", 
-        //        "Mozioni del Comune di Ala" => "14cb93ab-55c9-439b-873b-8bd4163de8d0", 
-        //        "Sedute di consiglio del Comune di Ala" => "a9f9db78-9c3d-41a4-ab11-78768343d841"
-        //    );
-        //    
-        //    $tools = new OCOpenDataTools();        
-        //    foreach( $tools->getDatasetObjects() as $object ){
-        //        if ( isset( $data[$object->attribute('name')] ) ){
-        //            OpenPALog::warning($object->attribute('name'));
-        //            $object->setAttribute( 'remote_id', 'ckan_' . $data[$object->attribute('name')]  );
-        //            $object->store();
-        //        }
-        //        else{
-        //            OpenPALog::error($object->attribute('name'));
-        //        }
-        //    }
-        //
-        //}
-        
-        $instanceId = OpenPAInstance::current()->getIdentifier();
-        
-        //if ( $instanceId == 'ala' || $instanceId == 'albiano' ){
-        //    throw new Exception('(non serve)');
-        //}
-        
-        $tools = new OCOpenDataTools();
-        
-        $tools->getOrganizationBuilder()->build();
-        
-        $builder = $tools->getOrganizationBuilder();
-        $organizationId = $builder->getStoresOrganizationId();
-        $converter = $tools->getConverter();
-        
-        $currentSettingsId = $tools->getCurrentEndpointIdentifier();
-        foreach( $tools->getDatasetObjects() as $object ){
-            OpenPALog::notice($object->attribute('name') . ' ',false);
-                try{
-                    $tools->validateObject($object);
-                    $datasetId = $tools->getConverter()->getDatasetId($object);
-                    if ( $options['remove_current_ckan_ids'] ){
-                        if (!$options['dry-run']) $converter->markObjectDeleted( $object, null );
-                        OpenPALog::warning(' Rimosso link con ' . $datasetId );
-                    }
-                }catch(Exception $e){
-                    OpenPALog::error('Not found!' . $e->getMessage());
-                }
-        }
-        
-        if ( $options['remove_current_ckan_ids'] ){
-            //if (!$options['dry-run']) $builder->removeStoresOrganizationId();
-            //OpenPALog::warning('Rimosso link organiz: ' . $datasetId );
-        }
-    }
-    
-    if ($options['repush_org']) {
-        try
-        {
-            $tools = new OCOpenDataTools();
-            $tools->pushOrganization();
-            OpenPALog::warning('OK');
-        }catch(Exception $e){
-            OpenPALog::error($e->getMessage());
-        }
-    }
-    
-    if ($options['refresh_org_internal_id']) {
-        try
-        {
-            $tools = new OCOpenDataTools();
-            $data = $tools->getOrganizationBuilder()->build();
-            $remote = $tools->getClient()->getOrganization($data->name);
-            $tools->getOrganizationBuilder()->storeOrganizationPushedId( $remote );
-            OpenPALog::warning('OK');
-        }catch(Exception $e){
-            OpenPALog::error($e->getMessage());
-        }
-    }
-    
-    if ($options['delete_org']) {
-        $tools = new OCOpenDataTools();
-        try
-        {            
-            $tools->deleteOrganization(true);
-            OpenPALog::warning('OK');
-        }catch(Exception $e){
-            $builder = $tools->getOrganizationBuilder();
-            $organizationId = $builder->getStoresOrganizationId();
-            OpenPALog::error( $organizationId . ' ' . $e->getMessage());
-        }
-    }
-    
-    if ($options['repush_all']) {
-        $tools = new OCOpenDataTools();
-        $tools->getOrganizationBuilder()->build();
-        foreach( $tools->getDatasetObjects() as $object ){
-            OpenPALog::notice($object->attribute('name') . ' ',false);
-            if (!$options['dry-run']) {
-                try{
-                    $tools->validateObject($object);
-                    $tools->pushObject($object);
-                    OpenPALog::warning('OK');
-                }catch(Exception $e){
-                    OpenPALog::error('KO ' . $e->getMessage());
-                    eZLog::write( OpenPAInstance::current()->getIdentifier() . ' ' . $object->attribute( 'id' ) . ' ' . $e->getMessage(), 'ckan_republish_errors.log' );
-                }
-            }else{
-                OpenPALog::notice();
-            }
-        }
-    }
-    
-    if ($options['delete_all']) {
-        $tools = new OCOpenDataTools();
-        foreach( $tools->getDatasetObjects() as $object ){
-            OpenPALog::notice($object->attribute('name') . ' ',false);
-            if (!$options['dry-run']) {
-                try{
-                    $tools->deleteObject($object);
-                    OpenPALog::warning('OK');
-                }catch(Exception $e){
-                    OpenPALog::error('KO ' . $e->getMessage());
-                }
-            }else{
-                OpenPALog::notice();
-            }
-        }
-    }
-    
+
     if ($options['fix_section']){
         $container = eZContentObject::fetchByRemoteID('opendata_datasetcontainer');
         if ( $container instanceof eZContentObject){
@@ -284,107 +99,38 @@ try {
         }
     }
 
-    if ($options['generate_from_classes']){
+    function getIndicePAData()
+    {
+        $data = array();
+        $dataFileName = 'indicepa.gov.it_amministrazioni.php';
+        $dataFilePath = eZSys::cacheDirectory() . '/' . $dataFileName;
 
-        $count = 0;
+        if ( !file_exists( $dataFilePath  ) ) {
 
-        $classes = array(
-            'accordo',
-            'convenzione',
-            'concessioni',
-            'event',
-            'procedimento',
-            'tasso_assenza',
-            'area_tematica',
-            'associazione',
-            'ente',
-            'ente_controllato',
-            'interpellanza',
-            'interrogazione',
-            'mozione',
-            'sovvenzione_contributo',
-            'seduta_consiglio',
-            'rapporto',
-            'albo_elenco',
-            'avviso',
-            'bando',
-            'bilancio_di_previsione',
-            'concorso',
-            'conferimento_incarico',
-            'consulenza',
-            'decreto_sindacale',
-            'dipendente',
-            'disciplinare',
-            'documento',
-            'gruppo_consiliare',
-            'modulo',
-            'organo_politico',
-            'piano_progetto',
-            'politico',
-            'pubblicazione',
-            'luogo',
-            'regolamento',
-            'rendiconto',
-            'sala_pubblica',
-            'servizio',
-            'ufficio',
-            'servizio_sul_territorio',
-            'statuto'
-        );
-        $tools = new OCOpenDataTools();
-        $tools->pushOrganization();
-        $generator = $tools->getDatasetGenerator();
-        if ($generator instanceof OcOpendataDatasetGeneratorInterface) {
-            foreach( $classes as $class ) {
-                $logs = array( OpenPAInstance::current()->getIdentifier(), $class);
-                try {
-                    $object = $generator->createFromClassIdentifier(
-                        $class,
-                        array(),
-                        $options['dry-run'] !== null
-                    );
-                    $count++;
-                    if (!$options['dry-run']) {
-                        $logs[] = '#' . $object->attribute('id');
-                        OpenPALog::output("Generato/aggiornato oggetto " . $object->attribute('id'));
-                        try {
-                            $tools->pushObject($object);
-                            $logs[] = 'ok';
-                        }catch( Exception $e ){
-                            $logs[] =  $e->getMessage();
-                            OpenPALog::error( $e->getMessage() );
-                        }
-                    }
-                }catch( Exception $e ){
-                    $logs[] =  $e->getMessage();
-                    OpenPALog::error( $e->getMessage() );
-                }
-                eZLog::write( implode( ' ', $logs ), 'ckan_generate.log' );
-            }
-            OpenPALog::warning( "Totale: " . $count );
-        } else {
-            throw new Exception('Generator not found');
-        }
-    }
+            OpenPALog::warning("Download data from www.indicepa.gov.it");
 
-    if ($options['parse_indicepa']){
-        $sourceTextFilePath = eZSys::rootDir() . '/extension/openpa/data/amministrazioni.txt';
-        if ( file_exists( $sourceTextFilePath ) ) {
-            $textContent = file_get_contents( $sourceTextFilePath );
+            $textContent = OpenPABase::getDataByURL(
+                $indiceIpaRemoteUrl,
+                false,
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:52.0) Gecko/20100101 Firefox/52.0',
+                10,
+                30
+            );
+
             $rows = explode("\n", $textContent);
-            $data = array();
+            $indexes = array();
             foreach ($rows as $index => $row) {
                 if ($index == 0) {
                     $headers = explode("\t", $row);
                 } elseif ($index > 1) {
-                    $data[$index] = explode("\t", $row);
+                    $indexes[$index] = explode("\t", $row);
                 }
             }
             array_walk($headers, function (&$value, $key) {
                 $value = trim($value);
             });
-            $result = array();
-            foreach ($data as $d) {
+            $data = array();
+            foreach ($indexes as $d) {
                 array_walk($d, function (&$value, $key) {
                     $value = trim($value);
                 });
@@ -393,19 +139,22 @@ try {
                     $addToResult = array_combine($headers, $d);
                 }
                 if ( $addToResult && $addToResult['Provincia'] == 'TN' ){
-                    $result[] = $addToResult;
+                    $data[] = $addToResult;
                 }
             }
-            if ( count( $result ) > 0 ){
-                eZFile::create('amministrazioni.php', eZSys::rootDir() . '/extension/openpa/data/', '<?php $data=' . var_export($result,1) . ';' );
+
+            if ( count( $data ) > 0 ){
+                eZFile::create($dataFileName, eZSys::cacheDirectory(), '<?php $data=' . var_export($data,1) . ';' );
             }
         }else{
-            OpenPALog::error( "File $sourceTextFilePath non trovato" );
+            include $dataFilePath;
         }
+
+        return $data;
     }
 
     if ($options['find_codiceipa']){
-        include eZSys::rootDir() . '/extension/openpa/data/amministrazioni.php';
+        $data = getIndicePAData();
         $siteName = eZINI::instance()->variable( 'SiteSettings', 'SiteName' );
         if ( strpos( strtolower( $siteName ), 'comune di' ) === false ){
             $siteName = false;
@@ -491,7 +240,7 @@ try {
         }
     }
 
-    if ($options['check_org']){
+    if ($options['find_org_data']){
 
         $dict = array(
             '_telefono' => "Telefono",
@@ -640,48 +389,36 @@ try {
                     }
                 }
             }
-        }
 
-        $storeContacts = array();
-        foreach( $dict as $key => $id ){
-            if ( !isset($fullContacts[$id]) ){
-                $storeContacts[$id] = '';
-            }else{
-                $storeContacts[$id] = $fullContacts[$id];
+            $storeContacts = array();
+            foreach( $dict as $key => $id ){
+                if ( !isset($fullContacts[$id]) ){
+                    $storeContacts[$id] = '';
+                }else{
+                    $storeContacts[$id] = $fullContacts[$id];
+                }
             }
-        }
 
-        if( !empty($fullContacts) && $contacts){
-            $stringArray = array();
-            foreach($storeContacts as $key => $value){
-                $stringArray[] = $key . '|' . $value;
+            if( !empty($fullContacts) && $contacts){
+                $stringArray = array();
+                foreach($storeContacts as $key => $value){
+                    $stringArray[] = $key . '|' . $value;
+                }
+                $string = implode('&', $stringArray);
+                OpenPALog::warning("Salvo contatti");
+                $contacts->fromString($string);
+                $contacts->store();
             }
-            $string = implode('&', $stringArray);
-            OpenPALog::warning("Salvo contatti");
-            $contacts->fromString($string);
-            $contacts->store();
         }
 
 
     }
 
-    if ($options['areatematica_sync']) {
+    if ($options['install_areatematica']) {
 
         $footerObject = eZContentObject::fetchByRemoteID($footerRemoteId);
 
         if ( $footerObject ) {
-
-            $classi = array(
-                'pagina_sito'
-            );
-
-            foreach( $classi as $identifier )
-            {
-                OpenPALog::warning( 'Sincronizzo classe ' . $identifier );
-                $tools = new OpenPAClassTools( $identifier, true ); // creo se non esiste
-                $tools->sync( true, false ); // forzo e rimuovo attributi in più
-            }
-
 
             $remotes = array(
                 'opendata_link',
@@ -691,136 +428,123 @@ try {
                 'opendata_normativa',
                 'opendata_info',
                 'opendata_global_info',
-                'opendata_area'
+                $areaRemoteId
             );
 
-            $areaObject = eZContentObject::fetchByRemoteID('opendata_area');
-            if ( !$areaObject ) {
-                $apiNode = OpenPAApiNode::fromLink('http://openpa.opencontent.it/api/opendata/v1/content/object/opendata_area');
-                OpenPALog::warning("Create area");
-                $areaObject = $apiNode->createContentObject($footerObject->attribute('main_node')->attribute('parent_node_id'));
-            }
-
-            $globalObject = eZContentObject::fetchByRemoteID('opendata_global_info');
-            if ( !$globalObject ) {
-                $apiNode = OpenPAApiNode::fromLink('http://openpa.opencontent.it/api/opendata/v1/content/object/opendata_global_info');
-                OpenPALog::warning("Create global");
-                $apiNode->createContentObject($areaObject->attribute('main_node_id'));
-            }
-
-
             foreach ($remotes as $remote) {
-                $link = 'http://openpa.opencontent.it/api/opendata/v1/content/object/' . $remote;
-                $apiNode = OpenPAApiNode::fromLink($link);
-                if ( !OpenPAObjectTools::syncObjectFormRemoteApiNode($apiNode) )
-                {
-                    OpenPALog::warning("Create $remote");
-                    $apiNode->createContentObject($areaObject->attribute('main_node_id'));
-                }
+                OpenPALog::notice("Check $remote");
+                $object = eZContentObject::fetchByRemoteID($remote);
+                if ( !$object ) {
+                    $link = 'http://openpa.opencontent.it/api/opendata/v1/content/object/' . $remote;
+                    $apiNode = OpenPAApiNode::fromLink($link);
+                    if (!OpenPAObjectTools::syncObjectFormRemoteApiNode($apiNode)) {
+                        OpenPALog::warning("Create $remote");
+                        $apiNode->createContentObject($areaObject->attribute('main_node_id'));
+                    }
 
-                $data = json_decode(OpenPABase::getDataByURL('http://openpa.opencontent.it/api/opendata/v2/content/read/' . $remote), true);
-                if (isset( $data['data']['ita-IT']['layout'] )||isset( $data['data']['ita-IT']['page'] )) {
-                    $object = eZContentObject::fetchByRemoteID($remote);
-                    $dataMap = $object->dataMap();
-                    $layoutAttribute = isset( $data['data']['ita-IT']['layout'] ) ? $dataMap['layout'] : $dataMap['page'];
+                    $data = json_decode(OpenPABase::getDataByURL('http://openpa.opencontent.it/api/opendata/v2/content/read/' . $remote),
+                        true);
+                    if (isset( $data['data']['ita-IT']['layout'] ) || isset( $data['data']['ita-IT']['page'] )) {
+                        $object = eZContentObject::fetchByRemoteID($remote);
+                        $dataMap = $object->dataMap();
+                        $layoutAttribute = isset( $data['data']['ita-IT']['layout'] ) ? $dataMap['layout'] : $dataMap['page'];
 
-                    $zones = isset( $data['data']['ita-IT']['layout'] ) ? $data['data']['ita-IT']['layout'] : $data['data']['ita-IT']['page'];
-                    $page = new eZPage();
-                    $pools = array();
+                        $zones = isset( $data['data']['ita-IT']['layout'] ) ? $data['data']['ita-IT']['layout'] : $data['data']['ita-IT']['page'];
+                        $page = new eZPage();
+                        $pools = array();
 
-                    if ( isset($zones['zone_layout']) ) {
+                        if (isset( $zones['zone_layout'] )) {
 
-                        $page->setAttribute('zone_layout', $zones['zone_layout']);
-                        unset( $zones['zone_layout'] );
+                            $page->setAttribute('zone_layout', $zones['zone_layout']);
+                            unset( $zones['zone_layout'] );
 
-                        foreach ($zones as $zoneIdentifier => $zone) {
-                            $newZone = $page->addZone(new eZPageZone());
-                            $newZone->setAttribute('id', $zone['zone_id']);
-                            $newZone->setAttribute('zone_identifier', $zoneIdentifier);
+                            foreach ($zones as $zoneIdentifier => $zone) {
+                                $newZone = $page->addZone(new eZPageZone());
+                                $newZone->setAttribute('id', $zone['zone_id']);
+                                $newZone->setAttribute('zone_identifier', $zoneIdentifier);
 
-                            $zoneBlocksIds = array();
-                            foreach ($zone['blocks'] as $block) {
-                                $zoneBlocksIds[] = $block['block_id'];
-                            }
-
-                            $db->query("DELETE from ezm_block WHERE zone_id = '" . $db->escapeString($zone['zone_id']) . "' AND id NOT IN ('" . implode("', '",
-                                    $zoneBlocksIds) . "')");
-
-                            foreach ($zone['blocks'] as $block) {
-
-                                $dbBlock = new eZFlowBlock(array(
-                                    'id' => $block['block_id'],
-                                    'zone_id' => $newZone->attribute('id'),
-                                    'name' => $block['name'],
-                                    'node_id' => $object->attribute('main_node_id'),
-                                    'block_type' => $block['type']
-                                ));
-                                $dbBlock->store();
-
-                                $newBlock = $newZone->addBlock(new eZPageBlock($block['name']));
-                                $newBlock->setAttribute('action', 'add');
-                                $newBlock->setAttribute('id', $block['block_id']);
-                                $newBlock->setAttribute('zone_id', $newZone->attribute('id'));
-                                $newBlock->setAttribute('type', $block['type']);
-                                $newBlock->setAttribute('view', $block['view']);
-                                if (is_array($block['custom_attributes'])) {
-                                    $newBlock->setAttribute('custom_attributes', $block['custom_attributes']);
+                                $zoneBlocksIds = array();
+                                foreach ($zone['blocks'] as $block) {
+                                    $zoneBlocksIds[] = $block['block_id'];
                                 }
-                                foreach ($block['valid_items'] as $index => $item) {
-                                    $itemObject = eZContentObject::fetchByRemoteID($item);
-                                    if ($itemObject instanceof eZContentObject) {
 
-                                        $timestamp = time();
+                                $db->query("DELETE from ezm_block WHERE zone_id = '" . $db->escapeString($zone['zone_id']) . "' AND id NOT IN ('" . implode("', '",
+                                        $zoneBlocksIds) . "')");
 
-                                        $db->query("DELETE from ezm_pool WHERE block_id = '" . $db->escapeString($block['block_id']) . "'");
-                                        $pools[] = array(
-                                            'blockID' => $block['block_id'],
-                                            'objectID' => $itemObject->attribute('id'),
-                                            'nodeID' => $itemObject->attribute('main_node_id'),
-                                            'priority' => ++$index,
-                                            'timestamp' => $timestamp
-                                        );
+                                foreach ($zone['blocks'] as $block) {
 
-                                        $newItem = $newBlock->addItem(new eZPageBlockItem());
-                                        $newItem->setAttribute('object_id', $itemObject->attribute('id'));
-                                        $newItem->setAttribute('node_id', $itemObject->attribute('main_node_id'));
-                                        $newItem->setAttribute('priority', $index);
-                                        $newItem->setAttribute('ts_publication', $timestamp);
+                                    $dbBlock = new eZFlowBlock(array(
+                                        'id' => $block['block_id'],
+                                        'zone_id' => $newZone->attribute('id'),
+                                        'name' => $block['name'],
+                                        'node_id' => $object->attribute('main_node_id'),
+                                        'block_type' => $block['type']
+                                    ));
+                                    $dbBlock->store();
+
+                                    $newBlock = $newZone->addBlock(new eZPageBlock($block['name']));
+                                    $newBlock->setAttribute('action', 'add');
+                                    $newBlock->setAttribute('id', $block['block_id']);
+                                    $newBlock->setAttribute('zone_id', $newZone->attribute('id'));
+                                    $newBlock->setAttribute('type', $block['type']);
+                                    $newBlock->setAttribute('view', $block['view']);
+                                    if (is_array($block['custom_attributes'])) {
+                                        $newBlock->setAttribute('custom_attributes', $block['custom_attributes']);
+                                    }
+                                    foreach ($block['valid_items'] as $index => $item) {
+                                        $itemObject = eZContentObject::fetchByRemoteID($item);
+                                        if ($itemObject instanceof eZContentObject) {
+
+                                            $timestamp = time();
+
+                                            $db->query("DELETE from ezm_pool WHERE block_id = '" . $db->escapeString($block['block_id']) . "'");
+                                            $pools[] = array(
+                                                'blockID' => $block['block_id'],
+                                                'objectID' => $itemObject->attribute('id'),
+                                                'nodeID' => $itemObject->attribute('main_node_id'),
+                                                'priority' => ++$index,
+                                                'timestamp' => $timestamp
+                                            );
+
+                                            $newItem = $newBlock->addItem(new eZPageBlockItem());
+                                            $newItem->setAttribute('object_id', $itemObject->attribute('id'));
+                                            $newItem->setAttribute('node_id', $itemObject->attribute('main_node_id'));
+                                            $newItem->setAttribute('priority', $index);
+                                            $newItem->setAttribute('ts_publication', $timestamp);
+                                        }
                                     }
                                 }
                             }
+                        } else {
+                            $page->setAttribute('zone_layout', '0ZonesLayoutFolder');
+                            $newZone = $page->addZone(new eZPageZone());
+                            $newZone->setAttribute('id', 'nessuna');
+                            $newZone->setAttribute('zone_identifier', 'nessuna');
                         }
-                    }else{
-                        $page->setAttribute('zone_layout', '0ZonesLayoutFolder');
-                        $newZone = $page->addZone(new eZPageZone());
-                        $newZone->setAttribute('id', 'nessuna');
-                        $newZone->setAttribute('zone_identifier', 'nessuna');
-                    }
-                    if (count($pools) > 0) {
-                        $db->lock( 'ezm_pool' );
+                        if (count($pools) > 0) {
+                            $db->lock('ezm_pool');
 
-                        foreach ( $pools as $item )
-                        {
-                            $escapedBlockID = $db->escapeString( $item['blockID'] );
+                            foreach ($pools as $item) {
+                                $escapedBlockID = $db->escapeString($item['blockID']);
 
-                            $itemCount = $db->arrayQuery(
-                                "SELECT COUNT( * ) as count " .
-                                "FROM ezm_pool " .
-                                "WHERE block_id='$escapedBlockID' AND object_id=" . (int)$item['objectID'] );
+                                $itemCount = $db->arrayQuery(
+                                    "SELECT COUNT( * ) as count " .
+                                    "FROM ezm_pool " .
+                                    "WHERE block_id='$escapedBlockID' AND object_id=" . (int)$item['objectID']);
 
-                            if ( $itemCount[0]['count'] == 0 )
-                            {
-                                $db->query( "INSERT INTO ezm_pool ( block_id, object_id, node_id, priority, ts_publication, ts_visible ) " .
-                                            "VALUES ( '$escapedBlockID', " . (int)$item['objectID'] . ", " . (int)$item['nodeID'] . ", " . (int)$item['priority'] . ", " . (int)$item['timestamp'] . ", 1 )" );
+                                if ($itemCount[0]['count'] == 0) {
+                                    $db->query("INSERT INTO ezm_pool ( block_id, object_id, node_id, priority, ts_publication, ts_visible ) " .
+                                               "VALUES ( '$escapedBlockID', " . (int)$item['objectID'] . ", " . (int)$item['nodeID'] . ", " . (int)$item['priority'] . ", " . (int)$item['timestamp'] . ", 1 )");
+                                }
                             }
+
+                            $db->unlock();
+
                         }
-
-                        $db->unlock();
-
+                        $layoutAttribute->setContent($page);
+                        $layoutAttribute->store();
+                        eZFlowOperations::update(array($object->attribute('main_node_id')));
                     }
-                    $layoutAttribute->setContent($page);
-                    $layoutAttribute->store();
-                    eZFlowOperations::update( array($object->attribute('main_node_id')) );
                 }
             }
 
@@ -946,7 +670,7 @@ try {
 
     if ($options['fix_area_remote_ids']) {
         $matches = array(
-            'c62f589eb338057627de6f62d08b48ac' => 'opendata_area',
+            'c62f589eb338057627de6f62d08b48ac' => $areaRemoteId,
             '0a79408f805dcc52bc402411b34bb95e' => 'opendata_global_info',
             'e419816bf6a5fb323931fade9eb44a8b' => 'opendata_link',
             '8aa799d9883f6ab7d1d1f35346d670cf' => 'opendata_datasetcontainer',
