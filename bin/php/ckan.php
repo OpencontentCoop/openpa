@@ -99,7 +99,7 @@ try {
         }
     }
 
-    function getIndicePAData()
+    function getIndicePAData($indiceIpaRemoteUrl)
     {
         $data = array();
         $dataFileName = 'indicepa.gov.it_amministrazioni.php';
@@ -154,7 +154,7 @@ try {
     }
 
     if ($options['find_codiceipa']){
-        $data = getIndicePAData();
+        $data = getIndicePAData($indiceIpaRemoteUrl);
         $siteName = eZINI::instance()->variable( 'SiteSettings', 'SiteName' );
         if ( strpos( strtolower( $siteName ), 'comune di' ) === false ){
             $siteName = false;
