@@ -21,11 +21,10 @@
 {if is_set($anno_s)|not()}{def $anno_s=hash(0, 'none')}{/if}
 
 {def $foldersClasses = array( 'folder', 'pagina_sito' )}
-{def $openpa_search_node = object_handler($node)}
 
 {def $subtreearray=ezini( 'NodeSettings', 'RootNode', 'content.ini' )}
 {if $foldersClasses|contains( $node.class_identifier )}
-	{if $openpa_search_node.content_virtual.folder}
+	{if $node.data_map.classi_filtro.has_content}
 		{def $related_nodes = fetch('content','related_objects', hash('object_id', $node.contentobject_id, 'attribute_identifier', concat( $node.class_identifier, '/subfolders' ) ))}
 		{if $related_nodes|count()|gt(0)}
 			{set $subtreearray=$related_nodes[0].main_node_id}
@@ -34,8 +33,7 @@
 		{/if}
 	{/if}
 {elseif $foldersClasses|contains( $node.parent.class_identifier )}
-    {def $openpa_search_parent_node = object_handler($node.parent)}
-    {if $openpa_search_parent_node.content_virtual.folder}
+	{if $node.parent.data_map.classi_filtro.has_content}
 		{def $related_nodes = fetch('content','related_objects', hash('object_id', $node.parent.contentobject_id, 'attribute_identifier', concat( $node.parent.class_identifier, '/subfolders' ) ))}	
 		{if $related_nodes|count()|gt(0)}
 			{set $subtreearray=$related_nodes[0].main_node_id}
@@ -78,8 +76,8 @@ $(function() {
 
 	<input placeholder="Ricerca libera" {if $search_included} id="Search" size="20" class="halfbox" {else} id="search-string"{/if} type="text" name="SearchText" value="{$search_text}" />
 
-{if and($foldersClasses|contains( $node.class_identifier ), $openpa_search_node.content_virtual.folder)}
-	{set $class_filters = $openpa_search_node.content_virtual.folder.classes}
+{if $foldersClasses|contains( $node.class_identifier )}
+	{set $class_filters = $node.data_map.classi_filtro.content|explode(',')}
 {/if}
 
 {if $class_filters[0]|ne('')}

@@ -10,13 +10,13 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
 
         $this->data['show_top_menu'] = true;
         $this->fnData['top_menu'] = 'topMenu';
-
+        
         $this->data['show_side_menu'] = $this->hasSideMenu();
         $this->fnData['side_menu'] = 'sideMenu';
 
         $this->fnData['show_extra_menu'] = 'hasExtraMenu';
     }
-
+    
     protected function topMenu()
     {
         return new OpenPATempletizable( array(
@@ -32,7 +32,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'custom_fetch_parameters' => $this->getTopMenuCustomFetchParameters()
         ));
     }
-
+    
     protected function sideMenu()
     {
         return new OpenPATempletizable( array(
@@ -129,14 +129,6 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
                     return false;
                 }
             }
-
-            $currentChildrenView = $this->container->attribute( 'control_children' )->attribute( 'current_view' );
-            $currentChildrenViewsConfigs = $this->container->attribute( 'control_children' )->attribute( 'views' );
-            if (isset($currentChildrenViewsConfigs[$currentChildrenView]['hide_menu'])){
-                $result = !$currentChildrenViewsConfigs[$currentChildrenView]['hide_menu'];
-                if ( !$result ) $debug[] = 'hide by control_children (hide_menu)';
-            }
-
             $this->hasExtraMenu = $result;
             eZDebug::writeDebug( implode( ', ', $debug ), __METHOD__ );
         }
@@ -183,24 +175,15 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         return $data;
     }
 
+
     protected function hasSideMenu()
     {
         $nascondi = OpenPAINI::variable( 'SideMenu', 'Nascondi', false );
         $nascondiNeiNodi = OpenPAINI::variable( 'SideMenu', 'NascondiNeiNodi', array() );
         $nascondiNelleClassi = OpenPAINI::variable( 'SideMenu', 'NascondiNelleClassi', array() );
-
-        $currentChildrenView = $this->container->attribute( 'control_children' )->attribute( 'current_view' );
-        $currentChildrenViewsConfigs = $this->container->attribute( 'control_children' )->attribute( 'views' );
-        $nascondiPerChildrenView = false;
-        if (isset($currentChildrenViewsConfigs[$currentChildrenView]['hide_menu'])){
-            $nascondiPerChildrenView = $currentChildrenViewsConfigs[$currentChildrenView]['hide_menu'];
-        }
-
-        return !( in_array($this->container->currentNodeId, $nascondiNeiNodi)
-                  || in_array($this->container->currentClassIdentifier, $nascondiNelleClassi)
-                  || $nascondi
-                  || $nascondiPerChildrenView
-        );
+        return !( in_array( $this->container->currentNodeId, $nascondiNeiNodi )
+                  || in_array( $this->container->currentClassIdentifier, $nascondiNelleClassi )
+                  || $nascondi );
     }
 
     protected function getSideMenuRootNode()
