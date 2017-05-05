@@ -240,12 +240,24 @@ class OpenPAOperator
                         $searchText = implode( ' OR ', explode( ' ', $searchText ) );
                     }
                     $queryArray[] = "q = '$searchText'";
-                }            
-                
-                $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
+                }
+
                 if ( $http->hasGetVariable( 'SubTreeArray' ) && !empty( $http->getVariable( 'SubTreeArray' ) ) )
                 {
                     $subtree = (array)$http->getVariable( 'SubTreeArray' );                    
+                }else{
+                    $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
+                    /** @var eZContentObjectTreeNode[] $trasparenzaList */
+                    $trasparenzaList = eZContentObjectTreeNode::subTreeByNodeID(
+                        array(
+                            'ClassFilterType' => 'include',
+                            'ClassFilterArray' => array('trasparenza'),
+                            'Limit' => 1
+                        ), 1
+                    );
+                    if (count($trasparenzaList) > 0){
+                        $subtree[] = $trasparenzaList[0]->attribute('main_node_id');
+                    }
                 }
                 $queryArray[] = 'subtree [' . implode( ',', $subtree ) . ']';
                 
