@@ -21,19 +21,7 @@
 
     {foreach $attribute.class_content.views as $view}
         {if $view.edit_template}
-            <div class="{$view.identifier}">
-                <label for="{$attribute.id}-{$view.identifier}">
-                    Configurazioni visualizzazione {$view.name|wash()}
-                </label>
-                <p>
-                    <em class="attribute-description">{$view.edit_template_help}</em>
-                </p>
-                <input id="{$attribute.id}-{$view.identifier}"
-                       type="text"
-                       size="70"
-                       name="{$attribute_base}_openpachildrenview_extra_{$attribute.id}[{$view.identifier}]"
-                       value="{cond(is_set($extra_configs[$view.identifier]), $extra_configs[$view.identifier], '')}" />
-            </div>
+            {include uri=concat('design:content/datatype/edit/openpachildrenview/', $view.identifier, '.tpl')}
         {/if}
     {/foreach}
 {/let}
