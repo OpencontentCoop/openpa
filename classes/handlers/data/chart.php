@@ -20,7 +20,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
      */
     private $class;
 
-    private $strategies = array();
+    private $options = array();
 
     private $baseQuery;
 
@@ -66,13 +66,64 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         $this->subtree = (array)eZHTTPTool::instance()->getVariable('subtree',
             eZINI::instance('content.ini')->variable('NodeSettings', 'RootNode'));
         $this->parameters = eZHTTPTool::instance()->getVariable('params', '');
+    }
 
-        $this->parseRequest();
+    public function getData()
+    {
+        if (isset( $_GET['debug'] )) {
+            $this->displayDebug();
+        }else{
+            try {
+                $this->parseRequest();
+                $data = array();
+                $rows = $this->getRows();
+                $columns = $this->getColumns();
+                for ($i = 0; $i < count($rows); $i++) {
+                    $data[] = array(
+                        $rows[$i],
+                        $columns[$i]
+                    );
+                }
+
+                $delimiter = ',';
+                $enclosure = '"';
+
+                header('Content-Type: text/plain; charset=utf-8');
+                $output = fopen('php://output', 'w');
+
+                if (!empty( $this->headers )) {
+                    $this->fputcsv($output, $this->headers, $delimiter, $enclosure);
+                }
+                $countBaseZero = count($data) - 1;
+                foreach ($data as $index => $row) {
+                    $this->fputcsv($output, $row, $delimiter, $enclosure, $index == $countBaseZero);
+                }
+            }catch(Exception $e){
+                echo $e->getMessage();
+            }
+        }
+        eZExecution::cleanExit();
+    }
+
+    public function displayDebug()
+    {
+        echo '<pre>';
+        try {
+            $this->parseRequest();
+            print_r(
+                array_combine($this->getRows(), $this->getColumns())
+            );
+        }catch(Exception $e){
+            echo '<h1>'.$e->getMessage().'</h1>';
+            print_r($e);
+        }
+        echo '</pre>';
+        eZDisplayDebug();
     }
 
     private function parseRequest()
     {
-        $parts = explode('|', $this->parameters);
+        $parts = $this->explode('|', $this->parameters);
         $this->class = $this->classRepository->load($parts[0]);
 
         $this->rowField = isset( $parts[1] ) ? $this->getField(trim($parts[1])) : null;
@@ -92,18 +143,24 @@ class DataHandlerChart implements OpenPADataHandlerInterface
 
         $this->headers = array('', $this->columnField['name'][$this->language]);
 
-        $this->strategies = isset( $parts[3] ) ? explode(',', $parts[3]) : null;
+        $this->options = isset( $parts[3] ) ? $this->explode(',', $parts[3]) : array();
 
         $queryParts = array();
         $queryParts[] = "subtree [" . implode(',', $this->subtree) . "]";
         $queryParts[] = "classes [" . $this->class->identifier . "]";
+        $queryParts[] = "sort [name => asc]";
         $this->baseQuery = implode(' and ', $queryParts);
     }
 
-    private function getField($identifier)
+    private function getField($field)
     {
+        $parts = $this->explode('-', $field);
+        $identifier = $parts[0];
+        $options = isset($parts[1]) ? $this->explode(',', $parts[1]) : array();
         foreach ($this->class->fields as $field) {
             if ($field['identifier'] == $identifier) {
+
+                $field['options'] = $options;
 
                 if ($field['dataType'] == eZStringType::DATA_TYPE_STRING) {
                     $field['query_field'] = "raw[" . OpenPASolr::generateSolrField($identifier, 'string') . "]";
@@ -114,13 +171,13 @@ class DataHandlerChart implements OpenPADataHandlerInterface
                 $field['is_facet'] = false;
                 if ($field['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
                     $field['is_facet'] = true;
-                    $field['query_facet'] = $field['query_field'] . ".id|count|" . self::FACETS_LIMIT;
+                    $field['query_facet'] = $field['query_field'] . ".id|alpha|" . self::FACETS_LIMIT;
 
                 } elseif ($field['dataType'] == eZStringType::DATA_TYPE_STRING) {
                     $field['query_facet'] = "raw[" . OpenPASolr::generateSolrField($identifier,
-                            'string') . "]|count|" . self::FACETS_LIMIT;
+                            'string') . "]|alpha|" . self::FACETS_LIMIT;
                 } else {
-                    $field['query_facet'] = $field['query_field'] . "|count|" . self::FACETS_LIMIT;
+                    $field['query_facet'] = $field['query_field'] . "|alpha|" . self::FACETS_LIMIT;
                 }
 
                 $field['converter'] = AttributeConverterLoader::load(
@@ -144,7 +201,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
                 $this->rows = $this->getAllRows();
             }
 
-            if ($this->hasStrategy('total')) {
+            if ($this->hasOption('total')) {
                 $this->rows[] = 'Totale';
             }
         }
@@ -221,9 +278,9 @@ class DataHandlerChart implements OpenPADataHandlerInterface
                 : 0;
         }
 
-        if ($this->hasStrategy('total')) {
+        if ($this->hasOption('total')) {
             $count = $this->getAllSearchCount();
-            if ($this->hasStrategy('avg')) {
+            if ($this->hasOption('avg', $this->columnField)) {
                 $data[] = number_format(array_sum($data) / $count, 2);
             }else{
                 $data[] = $count;
@@ -256,10 +313,10 @@ class DataHandlerChart implements OpenPADataHandlerInterface
                 $total += $key * $value;
             }
         }
-        if ($this->hasStrategy('avg')) {
+        if ($this->hasOption('avg', $this->columnField)) {
             $total = number_format($total / $count, 2);;
         }
-        if ($this->hasStrategy('total')) {
+        if ($this->hasOption('total')) {
             $data[] = $total;
         }
 
@@ -279,7 +336,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
                 $data += $key * $value;
             }
         }
-        if ($this->hasStrategy('avg')) {
+        if ($this->hasOption('avg', $this->columnField)) {
             $data = number_format($data / $count, 2);
         }
 
@@ -325,7 +382,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
     {
         $converted = $value;
         if ($field['dataType'] == eZStringType::DATA_TYPE_STRING) {
-            if ($this->hasStrategy('force')) {
+            if ($this->hasOption('force', $field)) {
                 $converted = number_format(floatval($value), 2);
             }else{
                 $converted = 1;
@@ -339,48 +396,10 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         return trim($value);
     }
 
-    private function hasStrategy($value)
+    private function hasOption($value, $field = null)
     {
-        return in_array($value, $this->strategies);
-    }
-
-    public function getData()
-    {
-
-        if (isset( $_GET['debug'] )) {
-            echo '<pre>';
-            print_r(
-                array_combine($this->getRows(), $this->getColumns())
-            );
-            echo '</pre>';
-            eZDisplayDebug();
-            eZExecution::cleanExit();
-        }
-
-        $data = array();
-        $rows = $this->getRows();
-        $columns = $this->getColumns();
-        for ($i = 0; $i < count($rows); $i++) {
-            $data[] = array(
-                $rows[$i],
-                $columns[$i]
-            );
-        }
-
-        $delimiter = ',';
-        $enclosure = '"';
-
-        header('Content-Type: text/plain; charset=utf-8');
-        $output = fopen('php://output', 'w');
-
-        if (!empty( $this->headers )) {
-            $this->fputcsv($output, $this->headers, $delimiter, $enclosure);
-        }
-        $countBaseZero = count($data) - 1;
-        foreach ($data as $index => $row) {
-            $this->fputcsv($output, $row, $delimiter, $enclosure, $index == $countBaseZero);
-        }
-        eZExecution::cleanExit();
+        $haystack = $field ? $field['options'] : $this->options;
+        return in_array($value, $haystack);
     }
 
     private function searchAll($query, array $limitation = null) {
@@ -465,5 +484,12 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         }
 
         return fwrite($handle, $str);
+    }
+
+    private function explode($delimiter, $string)
+    {
+        $data = explode($delimiter, $string);
+        $data = array_map('trim', $data);
+        return $data;
     }
 }
