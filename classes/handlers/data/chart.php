@@ -20,7 +20,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
      */
     private $class;
 
-    private $strategy;
+    private $strategies = array();
 
     private $baseQuery;
 
@@ -52,6 +52,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
     private $facetsSearchResults;
 
     private $allSearchResults;
+    private $allSearchCount;
 
     private $language = 'ita-IT';
 
@@ -74,16 +75,24 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         $parts = explode('|', $this->parameters);
         $this->class = $this->classRepository->load($parts[0]);
 
-        $this->rowField = isset( $parts[1] ) ? $this->getField(trim($parts[1])) : array();
-        $this->columnField = isset( $parts[2] ) ? $this->getField(trim($parts[2])) : array();
+        $this->rowField = isset( $parts[1] ) ? $this->getField(trim($parts[1])) : null;
+        if (!$this->rowField) {
+            throw new Exception("Attributo per la riga non specificato");
+        }
 
-        if (!in_array($this->columnField['dataType'], array(eZIntegerType::DATA_TYPE_STRING, eZStringType::DATA_TYPE_STRING))){
+        $this->columnField = isset( $parts[2] ) ? $this->getField(trim($parts[2])) : null;
+        if (!$this->columnField) {
+            throw new Exception("Attributo per la colonna non specificato");
+        }
+        if (!in_array($this->columnField['dataType'],
+            array(eZIntegerType::DATA_TYPE_STRING, eZStringType::DATA_TYPE_STRING))
+        ) {
             throw new Exception("Colonna {$this->columnField['identifier']}: tipo {$this->columnField['dataType']} non gestito");
         }
 
         $this->headers = array('', $this->columnField['name'][$this->language]);
 
-        $this->strategy = isset( $parts[3] ) ? trim($parts[3]) : null;
+        $this->strategies = isset( $parts[3] ) ? explode(',', $parts[3]) : null;
 
         $queryParts = array();
         $queryParts[] = "subtree [" . implode(',', $this->subtree) . "]";
@@ -94,7 +103,32 @@ class DataHandlerChart implements OpenPADataHandlerInterface
     private function getField($identifier)
     {
         foreach ($this->class->fields as $field) {
-            if ($field['identifier'] == $identifier){
+            if ($field['identifier'] == $identifier) {
+
+                if ($field['dataType'] == eZStringType::DATA_TYPE_STRING) {
+                    $field['query_field'] = "raw[" . OpenPASolr::generateSolrField($identifier, 'string') . "]";
+                } else {
+                    $field['query_field'] = $identifier;
+                }
+
+                $field['is_facet'] = false;
+                if ($field['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
+                    $field['is_facet'] = true;
+                    $field['query_facet'] = $field['query_field'] . ".id|count|" . self::FACETS_LIMIT;
+
+                } elseif ($field['dataType'] == eZStringType::DATA_TYPE_STRING) {
+                    $field['query_facet'] = "raw[" . OpenPASolr::generateSolrField($identifier,
+                            'string') . "]|count|" . self::FACETS_LIMIT;
+                } else {
+                    $field['query_facet'] = $field['query_field'] . "|count|" . self::FACETS_LIMIT;
+                }
+
+                $field['converter'] = AttributeConverterLoader::load(
+                    $this->class->identifier,
+                    $field['identifier'],
+                    $field['dataType']
+                );
+
                 return $field;
             }
         }
@@ -104,45 +138,59 @@ class DataHandlerChart implements OpenPADataHandlerInterface
     private function getRows()
     {
         if ($this->rows === null) {
-            if ($this->rowField['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
-                $this->rows = $this->getFacetedRows($this->rowField['identifier'], $this->rowField['dataType']);
+            if ($this->rowField['is_facet']) {
+                $this->rows = $this->getFacetedRows();
             } else {
-                $this->rows = $this->getAllRows($this->rowField['identifier'], $this->rowField['dataType']);
+                $this->rows = $this->getAllRows();
+            }
+
+            if ($this->hasStrategy('total')) {
+                $this->rows[] = 'Totale';
             }
         }
+
         return $this->rows;
     }
 
-    private function getAllRows($identifier, $datatype)
+    private function getAllRows()
     {
+        $identifier = $this->rowField['identifier'];
+        /** @var \Opencontent\Opendata\Api\AttributeConverter\Base $converter */
+        $converter = $this->rowField['converter'];
+
         $data = array();
-        foreach($this->getAllSearchResults() as $result){
-            $converter = AttributeConverterLoader::load(
-                $this->class->identifier,
-                $identifier,
-                $datatype
-            );
-            $data[] = isset($result['data'][$this->language][$identifier]) ? $converter->toCSVString($result['data'][$this->language][$identifier]) : '';
+        foreach ($this->getAllSearchResults() as $result) {
+            $data[] = isset( $result['data'][$this->language][$identifier] ) ?
+                $this->toString(
+                    $converter->toCSVString($result['data'][$this->language][$identifier]),
+                    $this->rowField
+                ) : '';
         }
+
         return $data;
     }
 
-    private function getFacetedRows($identifier, $datatype)
+    private function getFacetedRows()
     {
         $data = array();
-        if ($this->rowField['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING){
-            $facets = "$identifier.id|count|" . self::FACETS_LIMIT;;
-        }else{
-            $facets = "$identifier|count|" . self::FACETS_LIMIT;
-        }
-        $query = $this->baseQuery . ' limit 1 facets [' . $facets . ']';
+        $query = $this->baseQuery . ' limit 1 facets [' . $this->rowField['query_facet'] . ']';
         $this->facetsSearchResults = $this->search($query);
-        foreach($this->facetsSearchResults->facets as $facet){
-            $data = $this->getNameFromId(array_keys($facet['data']));
-            //$data = array_keys($facet['data']);
+        foreach ($this->facetsSearchResults->facets as $facet) {
+            $data = array_keys($facet['data']);
+            $areIntegers = array_reduce($data, function ($carry, $item) {
+                if ($carry === null || $carry) {
+                    return is_numeric($item);
+                }
+
+                return $carry;
+            });
+            if ($areIntegers) {
+                $data = $this->getNameFromId(array_keys($facet['data']));
+            }else{
+                // toString su data;
+            }
         }
-        if ($this->strategy == 'total')
-            $data[] = 'Totale';
+
         return $data;
     }
 
@@ -150,87 +198,97 @@ class DataHandlerChart implements OpenPADataHandlerInterface
     {
         if ($this->columns === null) {
             if ($this->rowField['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
-                $this->columns = $this->getFacetedColumns($this->columnField['identifier'], $this->columnField['dataType']);
+                $this->columns = $this->getFacetedColumns();
             } else {
-                $this->columns = $this->getAllColumns($this->columnField['identifier'], $this->columnField['dataType']);
+                $this->columns = $this->getAllColumns();
             }
         }
 
         return $this->columns;
     }
 
-    private function getAllColumns($identifier, $datatype)
+    private function getAllColumns()
     {
+        $identifier = $this->columnField['identifier'];
+        /** @var \Opencontent\Opendata\Api\AttributeConverter\Base $converter */
+        $converter = $this->columnField['converter'];
         $data = array();
-        foreach($this->getAllSearchResults() as $result){
-            $converter = AttributeConverterLoader::load(
-                $this->class->identifier,
-                $identifier,
-                $datatype
-            );
-            $data[] = isset($result['data'][$this->language][$identifier]) ? $converter->toCSVString($result['data'][$this->language][$identifier]) : 0;
+        foreach ($this->getAllSearchResults() as $result) {
+            $data[] = isset( $result['data'][$this->language][$identifier] ) ?
+                $this->toNumber(
+                    $converter->toCSVString($result['data'][$this->language][$identifier]),
+                    $this->columnField)
+                : 0;
         }
+
+        if ($this->hasStrategy('total')) {
+            $count = $this->getAllSearchCount();
+            if ($this->hasStrategy('avg')) {
+                $data[] = number_format(array_sum($data) / $count, 2);
+            }else{
+                $data[] = $count;
+            }
+        }
+
         return $data;
     }
 
-    private function getFacetedColumns($identifier, $datatype)
+    private function getFacetedColumns()
     {
         $this->getRows();
         $data = array();
 
-        foreach($this->facetsSearchResults->facets as $facet){
-            foreach(array_keys($facet['data']) as $value){
+        foreach ($this->facetsSearchResults->facets as $facet) {
+            foreach (array_keys($facet['data']) as $value) {
                 $filter = "{$facet['name']} in ['{$value}']";
-                $data[] = $this->getFacetedColumnFiltered($filter, $identifier, $datatype);
+                $data[] = $this->getFacetedColumnFiltered($filter);
             }
         }
 
-        $facets = "$identifier|count|" . self::FACETS_LIMIT;
-        $query = "$this->baseQuery limit 1 facets [$facets]";
+        $query = "$this->baseQuery limit 1 facets [{$this->columnField['query_facet']}]";
         $facetsSearchResults = $this->search($query);
         $total = 0;
-        foreach($facetsSearchResults->facets as $facet) {
-            foreach($facet['data'] as $key => $value){
-                if ($datatype == eZStringType::DATA_TYPE_STRING){
-                    $key = floatval($value);
-                }
+        $count = 1;
+        foreach ($facetsSearchResults->facets as $facet) {
+            $count = array_sum($facet['data']);
+            foreach ($facet['data'] as $key => $value) {
+                $key = $this->toNumber($key, $this->columnField);
                 $total += $key * $value;
             }
         }
-        if ($this->strategy == 'total')
+        if ($this->hasStrategy('avg')) {
+            $total = number_format($total / $count, 2);;
+        }
+        if ($this->hasStrategy('total')) {
             $data[] = $total;
-
-        if ($this->strategy == 'avg'){
-            $avgData = array_map(function($n) use($total){
-                return number_format($n * 100 / $total, 2);
-            }, $data);
-
-            $data = $avgData;
         }
 
         return $data;
     }
 
-    private function getFacetedColumnFiltered($filter, $identifier, $datatype)
+    private function getFacetedColumnFiltered($filter)
     {
-        $facets = "$identifier|count|" . self::FACETS_LIMIT;
-        $query = "$filter and $this->baseQuery limit 1 facets [$facets]";
+        $query = "$filter and $this->baseQuery limit 1 facets [{$this->columnField['query_facet']}]";
         $facetsSearchResults = $this->search($query);
         $data = 0;
-        foreach($facetsSearchResults->facets as $facet) {
-            foreach($facet['data'] as $key => $value){
-                if ($datatype == eZStringType::DATA_TYPE_STRING){
-                    $key = floatval($value);
-                }
+        $count = 1;
+        foreach ($facetsSearchResults->facets as $facet) {
+            $count = array_sum($facet['data']);
+            foreach ($facet['data'] as $key => $value) {
+                $key = $this->toNumber($key, $this->columnField);
                 $data += $key * $value;
             }
         }
+        if ($this->hasStrategy('avg')) {
+            $data = number_format($data / $count, 2);
+        }
+
         return $data;
     }
 
     private function getAllSearchResults()
     {
-        if ($this->allSearchResults === null){
+        if ($this->allSearchResults === null) {
             $query = $this->baseQuery;
             $this->allSearchResults = $this->searchAll($query);
         }
@@ -238,24 +296,58 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         return $this->allSearchResults;
     }
 
+    private function getAllSearchCount()
+    {
+        if ($this->allSearchCount === null) {
+            $query = $this->baseQuery;
+            $this->allSearchCount = $this->count($query);
+        }
+
+        return $this->allSearchCount;
+    }
+
     private function getNameFromId(array $idList)
     {
         $data = array();
-        $hits = $this->searchAll("id in [". implode(',', $idList) . "]");
-        foreach($hits as $hit){
+        $hits = $this->searchAll("id in [" . implode(',', $idList) . "]");
+        foreach ($hits as $hit) {
             $data[$hit['metadata']['id']] = trim($hit['metadata']['name'][$this->language]);
         }
         $result = array();
-        foreach($idList as $id){
-            $result[] = isset($data[$id]) ? $data[$id] : '?';
+        foreach ($idList as $id) {
+            $result[] = isset( $data[$id] ) ? $data[$id] : '?';
         }
+
         return $result;
+    }
+
+    private function toNumber($value, $field)
+    {
+        $converted = $value;
+        if ($field['dataType'] == eZStringType::DATA_TYPE_STRING) {
+            if ($this->hasStrategy('force')) {
+                $converted = number_format(floatval($value), 2);
+            }else{
+                $converted = 1;
+            }
+        }
+        return $converted;
+    }
+
+    private function toString($value, $field)
+    {
+        return trim($value);
+    }
+
+    private function hasStrategy($value)
+    {
+        return in_array($value, $this->strategies);
     }
 
     public function getData()
     {
 
-        if (isset($_GET['debug'])) {
+        if (isset( $_GET['debug'] )) {
             echo '<pre>';
             print_r(
                 array_combine($this->getRows(), $this->getColumns())
@@ -268,7 +360,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         $data = array();
         $rows = $this->getRows();
         $columns = $this->getColumns();
-        for ($i=0; $i<count($rows); $i++) {
+        for ($i = 0; $i < count($rows); $i++) {
             $data[] = array(
                 $rows[$i],
                 $columns[$i]
@@ -291,8 +383,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         eZExecution::cleanExit();
     }
 
-    private function searchAll($query, array $limitation = null)
-    {
+    private function searchAll($query, array $limitation = null) {
         $hits = array();
         $query .= ' and limit ' . $this->currentEnvironment->getMaxSearchLimit();
         while ($query) {
@@ -304,10 +395,20 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         return $hits;
     }
 
-    private function search($query, array $limitation = null)
-    {
+    private function count($query, array $limitation = null) {
+        $query .= ' and limit 1';
+        $results = $this->search($query, $limitation);
+
+        return $results->totalCount;
+    }
+
+    private function search(
+        $query,
+        array $limitation = null
+    ) {
         try {
             eZDebug::writeDebug($query, __METHOD__);
+
             return $this->contentSearch->search($query, $limitation);
         } catch (Exception $e) {
             eZDebug::writeError($e->getMessage() . "\n" . $e->getTraceAsString(), __METHOD__);
@@ -322,8 +423,13 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         }
     }
 
-    private function fputcsv(&$handle, $fields = array(), $delimiter = ',', $enclosure = '"', $last = false)
-    {
+    private function fputcsv(
+        &$handle,
+        $fields = array(),
+        $delimiter = ',',
+        $enclosure = '"',
+        $last = false
+    ) {
         $str = '';
         $escape_char = '\\';
         foreach ($fields as $value) {
