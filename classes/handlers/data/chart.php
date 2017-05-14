@@ -165,8 +165,6 @@ class DataHandlerChart implements OpenPADataHandlerInterface
                 throw new Exception("Colonna {$columnField['identifier']}: tipo {$columnField['dataType']} non gestito");
             }
 
-            $this->headers[] = $columnField['expose_as'];
-
             $this->columnFields[] = $columnField;
         }
 
@@ -199,7 +197,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
                     $field['query_field'] = $identifier;
                 }
 
-                $field['is_facet'] = false;
+                $field['is_facet'] = $this->hasOption('facet', $field);
                 if ($field['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
                     $field['is_facet'] = true;
                     $field['query_facet'] = $field['query_field'] . ".id|alpha|" . self::FACETS_LIMIT;
@@ -272,7 +270,7 @@ class DataHandlerChart implements OpenPADataHandlerInterface
 
                 return $carry;
             });
-            if ($areIntegers) {
+            if ($areIntegers && $this->rowField['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
                 $data = $this->getNameFromId(array_keys($facet['data']));
             }else{
                 // toString su data;
@@ -287,10 +285,10 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         if ($this->columns === null) {
             $this->columns = array();
             foreach($this->columnFields as $columnField) {
-                if ($this->rowField['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
-                    $this->columns[] = $this->getFacetedColumns($columnField);
-                } else {
-                    $this->columns[] = $this->getAllColumns($columnField);
+                if ($columnField['is_facet']){
+                    $this->setFacetedColumns($columnField);
+                }else{
+                    $this->setColumn($columnField);
                 }
             }
         }
@@ -298,7 +296,46 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         return $this->columns;
     }
 
-    private function getAllColumns($columnField)
+    private function setColumn($columnField, $filter = null)
+    {
+        $this->headers[] = $columnField['expose_as'];
+
+        if ($this->rowField['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
+            $this->columns[] = $this->getFacetedRowColumn($columnField, $filter);
+        } else {
+            $this->columns[] = $this->getAllRowColumn($columnField, $filter);
+        }
+    }
+
+    private function setFacetedColumns($columnField)
+    {
+        $data = array();
+        $query = $this->baseQuery . ' limit 1 facets [' . $columnField['query_facet'] . ']';
+        $facetsSearchResults = $this->search($query);
+        foreach ($facetsSearchResults->facets as $facet) {
+            $data = array_keys($facet['data']);
+            $areIntegers = array_reduce($data, function ($carry, $item) {
+                if ($carry === null || $carry) {
+                    return is_numeric($item);
+                }
+
+                return $carry;
+            });
+            if ($areIntegers && $columnField['dataType'] == eZObjectRelationListType::DATA_TYPE_STRING) {
+                $data = $this->getNameFromId(array_keys($facet['data']));
+            }else{
+                // toString su data;
+            }
+
+            foreach ($data as $value) {
+                $columnField['expose_as'] = $value;
+                $filter = "{$facet['name']} in ['{$value}']";
+                $this->setColumn($columnField, $filter);
+            }
+        }
+    }
+
+    private function getAllRowColumn($columnField, $filter = null)
     {
         $identifier = $columnField['identifier'];
         /** @var \Opencontent\Opendata\Api\AttributeConverter\Base $converter */
@@ -324,19 +361,27 @@ class DataHandlerChart implements OpenPADataHandlerInterface
         return $data;
     }
 
-    private function getFacetedColumns($columnField)
+    private function getFacetedRowColumn($columnField, $filter = null)
     {
         $this->getRows();
         $data = array();
 
         foreach ($this->facetsSearchResults->facets as $facet) {
             foreach (array_keys($facet['data']) as $value) {
-                $filter = "{$facet['name']} in ['{$value}']";
-                $data[] = $this->getFacetedColumnFiltered($filter, $columnField);
+                if (!$filter){
+                    $currentFilter = "{$facet['name']} in ['{$value}']";
+                }else{
+                    $currentFilter = "$filter and {$facet['name']} in ['{$value}']";
+                }
+
+                $data[] = $this->getFacetedColumnFiltered($currentFilter, $columnField);
             }
         }
 
-        $query = "$this->baseQuery limit 1 facets [{$columnField['query_facet']}]";
+        if ($filter){
+            $filter .= " and ";
+        }
+        $query = "$filter $this->baseQuery limit 1 facets [{$columnField['query_facet']}]";
         $facetsSearchResults = $this->search($query);
         $total = 0;
         $count = 1;
@@ -421,6 +466,9 @@ class DataHandlerChart implements OpenPADataHandlerInterface
             }else{
                 $converted = 1;
             }
+        }
+        if ($this->hasOption('count', $field)) {
+            $converted = 1;
         }
         return $converted;
     }
