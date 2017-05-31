@@ -5,11 +5,11 @@ use Opencontent\Opendata\Api\ClassRepository;
 
 class OpenPAOperator
 {
-    
+
     private $area_tematica_node = array();
-    
+
     private static $currentObjectId;
-    
+
     function OpenPAOperator()
     {
         $this->Operators= array(
@@ -100,7 +100,7 @@ class OpenPAOperator
             'strReplace' => array(
                 'var' => array ( 'type' => 'string', 'required' => true, 'default' => ''),
 				'value' => array ( 'type' => 'array', 'required' => true,'default' => '' )
-			),            
+			),
             'search_query' => array(
                 'override' => array ( 'type' => 'mixed', 'required' => false, 'default' => array())
 			),
@@ -122,7 +122,7 @@ class OpenPAOperator
      * @return array|bool|mixed|string
      */
     function modify( &$tpl, &$operatorName, &$operatorParameters, &$rootNamespace, &$currentNamespace, &$operatorValue, &$namedParameters )
-    {		
+    {
         $ini = eZINI::instance( 'openpa.ini' );
         if ( $tpl->hasVariable('module_result') )
         {
@@ -132,7 +132,7 @@ class OpenPAOperator
         {
             $moduleResult = array();
         }
-        
+
         $viewmode = false;
         if ( isset( $moduleResult['content_info'] ) )
         {
@@ -141,9 +141,9 @@ class OpenPAOperator
                 $viewmode = $moduleResult['content_info']['viewmode'];
             }
         }
-                
+
         $path = ( isset( $moduleResult['path'] ) && is_array( $moduleResult['path'] ) ) ? $moduleResult['path'] : array();
-        
+
         switch ( $operatorName )
         {
             case 'organigramma':
@@ -154,41 +154,41 @@ class OpenPAOperator
             }
 
             case 'strReplace':
-			{				
+			{
 				$variable = $namedParameters['var'];
                 $value = @$namedParameters['value'];
                 $operatorValue = str_replace($value[0],$value[1],$variable);
 				break;
 			}
-            
+
             case 'search_exclude_class_facets':
             case 'search_exclude_classes':
             {
                 $excludeFacets = array();
                 $excludeClasses = array();
-                
+
                 $iniNotAvailableFacets 	= OpenPAINI::variable( 'MotoreRicerca', 'faccette_non_disponibili', array() );
-                $iniNotAvailableFacetsGroups = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_faccette_non_disponibili', array() );            
+                $iniNotAvailableFacetsGroups = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_faccette_non_disponibili', array() );
                 $classesNotAvailable 	= OpenPAINI::variable( 'MotoreRicerca', 'classi_non_disponibili', array() );
                 $classGroupNotAvailable = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_classi_non_disponibili', array() );
-                                
+
                 $classes = eZPersistentObject::fetchObjectList( eZContentClass::definition(), null, array( "version" => eZContentClass::VERSION_STATUS_DEFINED ) );
                 foreach ( $classes as $class )
-                {                    
+                {
                     if ( in_array( $class->attribute('id'), $iniNotAvailableFacets )
                          || strpos( $class->attribute( 'identifier' ), 'tipo' ) === 0
                          || count( array_intersect( $iniNotAvailableFacetsGroups, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
                     {
                         $excludeFacets[$class->attribute('id')] = $class->attribute('identifier');
                     }
-                    
-                    if ( in_array( $class->attribute('id'), $classesNotAvailable )                         
+
+                    if ( in_array( $class->attribute('id'), $classesNotAvailable )
                          || count( array_intersect( $classGroupNotAvailable, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
                     {
                         $excludeClasses[$class->attribute('id')] = $class->attribute('identifier');
                     }
-                    
-                }                
+
+                }
                 if ( $operatorName == 'search_exclude_class_facets' )
                 {
                     $operatorValue = array(
@@ -203,16 +203,16 @@ class OpenPAOperator
                       'identifiers' => array_values( $excludeClasses )
                     );
                 }
-                
+
             } break;
-            
+
             case 'search_query':
             {
-                $operatorValue = null; 
-                $http = eZHTTPTool::instance();                
-                
-                $queryArray = array();                
-                
+                $operatorValue = null;
+                $http = eZHTTPTool::instance();
+
+                $queryArray = array();
+
                 $sort = null;
                 $order = 'desc';
                 if ( $http->hasGetVariable( 'Sort' ) )
@@ -220,7 +220,7 @@ class OpenPAOperator
                     $sort = $http->getVariable( 'Sort' );
                     if ( !empty( $sort ) )
                     {
-                        $order = $http->hasGetVariable( 'Order' ) ? $http->getVariable( 'Order' ) : 'desc';                        
+                        $order = $http->hasGetVariable( 'Order' ) ? $http->getVariable( 'Order' ) : 'desc';
                     }
                 }
                 if ( !$sort && $http->hasGetVariable( 'SearchText' ) && !empty( $http->getVariable( 'SearchText' ) ) )
@@ -230,11 +230,12 @@ class OpenPAOperator
                 if ( !$sort )
                 {
                     $sort = 'published';
-                }                
-                
+                }
+
                 if ( $http->hasGetVariable( 'SearchText' ) && !empty( $http->getVariable( 'SearchText' ) ) )
                 {
                     $searchText = $http->getVariable( 'SearchText' );
+                    $searchText = addslashes($searchText);
                     if ( $http->hasGetVariable( 'Logic' ) && $http->getVariable( 'Logic' ) == 'OR' )
                     {
                         $searchText = implode( ' OR ', explode( ' ', $searchText ) );
@@ -244,7 +245,7 @@ class OpenPAOperator
 
                 if ( $http->hasGetVariable( 'SubTreeArray' ) && !empty( $http->getVariable( 'SubTreeArray' ) ) )
                 {
-                    $subtree = (array)$http->getVariable( 'SubTreeArray' );                    
+                    $subtree = (array)$http->getVariable( 'SubTreeArray' );
                 }else{
                     $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
                     /** @var eZContentObjectTreeNode[] $trasparenzaList */
@@ -260,8 +261,8 @@ class OpenPAOperator
                     }
                 }
                 $queryArray[] = 'subtree [' . implode( ',', $subtree ) . ']';
-                
-                $classList = array();                
+
+                $classList = array();
                 if ( $http->hasGetVariable( 'ClassArray' ) && !empty( $http->getVariable( 'ClassArray' ) ) )
                 {
                     $classIDList = $http->getVariable( 'ClassArray' );
@@ -279,32 +280,32 @@ class OpenPAOperator
                         $queryArray[] = 'classes [' . implode( ',', $classList ) . ']';
                     }
                 }
-                
+
                 if ( count( $classList ) == 1 && $http->hasGetVariable( 'Data' ) && !empty( $http->getVariable( 'Data' ) ) )
                 {
                     try
                     {
                         $_GET['Sort'] = $sort;
-                        
+
                         $classRepository = new ClassRepository();
                         $class = (array) $classRepository->load( $classList[0] );
                         $fields = array();
                         foreach ( $class['fields'] as $field ){
                             $fields[$field['identifier']] = $field;
                         }
-                        
+
                         $data = $http->getVariable( 'Data' );
                         foreach( $data as $key => $values )
                         {
-                            if ( $key == 'published' ){                                
+                            if ( $key == 'published' ){
                                 $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
                                 $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
                                 if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
                                 {
                                     $queryArray[] = "published range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
-                                }                                
+                                }
                             }
-                            
+
                             if ( isset($fields[$key] ) ){
                                 if ( in_array( $fields[$key]['dataType'], array( 'ezdate', 'ezdatetime' ) ) )
                                 {
@@ -313,10 +314,10 @@ class OpenPAOperator
                                     if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
                                     {
                                         $queryArray[] = "$key range [{$startDateTime->format('Y-m-d')},{$endDateTime->format('Y-m-d')}]";
-                                    }                                
+                                    }
                                 }
                                 elseif ( in_array( $fields[$key]['dataType'], array( 'ezobjectrelationlist' ) ) )
-                                {                                    
+                                {
                                     $stringValue = trim( implode(',', $values) );
                                     if ( !empty($stringValue) )
                                     {
@@ -324,7 +325,7 @@ class OpenPAOperator
                                     }
                                 }
                                 elseif ( in_array( $fields[$key]['dataType'], array( 'ezstring' ) ) )
-                                {                                    
+                                {
                                     if ( !empty( $values ) )
                                         $queryArray[] = "{$key} = [\"{$values}\"]";
                                 }
@@ -338,16 +339,16 @@ class OpenPAOperator
                     }
                     catch( Exception $e )
                     {
-                        eZDebug::writeError( $e->getMessage(), __METHOD__ . ':' . $operatorName );                                
+                        eZDebug::writeError( $e->getMessage(), __METHOD__ . ':' . $operatorName );
                     }
                 }
-                
+
                 if ( $http->hasGetVariable( 'Anno' ) && !empty( $http->getVariable( 'Anno' ) ) )
                 {
                     $start = $http->getVariable( 'Anno' ) . '-01-01';
                     $end = $http->getVariable( 'Anno' ) . '-12-31';
                     $_GET['Data']['published'] = array( '01-01-'.$http->getVariable( 'Anno' ), '31-12-'.$http->getVariable( 'Anno' ) );
-                    $queryArray[] = "published range [$start,$end]";                    
+                    $queryArray[] = "published range [$start,$end]";
                 }
 
                 $queryArray[] = "sort [{$sort}=>{$order}]";
@@ -358,9 +359,9 @@ class OpenPAOperator
                     $queryString = implode( ' and ', $queryArray );
                     eZDebugSetting::writeNotice( 'openpa-operators', $queryString, __METHOD__ );
                 }
-                
-                $builder = new EzFindQueryBuilder();  
-                
+
+                $builder = new EzFindQueryBuilder();
+
                 try
                 {
                     if (!$queryString){
@@ -382,14 +383,14 @@ class OpenPAOperator
                             $override = $ezFindQueryObject->getArrayCopy();
                         }
                     }
-                                        
+
                     $queryObject = $builder->instanceQuery( $queryString );
                     $ezFindQueryObject = $queryObject->convert();
                     if ( $ezFindQueryObject instanceof ArrayObject )
                     {
                         $queryArray = $ezFindQueryObject->getArrayCopy();
                     }
-                    
+
                     $queryArray = array_merge( $queryArray, $override );
                     eZDebugSetting::writeNotice( 'openpa-operators', $queryArray, __METHOD__ );
                     $solr = new eZSolr();
@@ -397,8 +398,8 @@ class OpenPAOperator
                         trim($queryArray['_query'], "'"),
                         $queryArray
                     );
-                    
-                    
+
+
                     $results['UriSuffix'] = '?' . http_build_query( $_GET );
                 }
                 catch( Exception $e )
@@ -406,10 +407,10 @@ class OpenPAOperator
                     eZDebug::writeError( $e->getMessage(), __METHOD__ . ':' . $operatorName );
                     $results = null;
                 }
-                
+
                 return $operatorValue = $results;
             } break;
-            
+
             case 'solr_field':
             {
                 return $operatorValue = OpenPASolr::generateSolrField( $namedParameters['identifier'], $namedParameters['type'] );
@@ -441,26 +442,26 @@ class OpenPAOperator
                 foreach( eZContentObjectStateGroup::limitations() as $limitation )
                 {
                     $groupName = str_replace( 'StateGroup_', '', $limitation['name'] );
-                    $limitationValueList = call_user_func_array( array( $limitation['class'], $limitation['function'] ), $limitation['parameter'] );                    
+                    $limitationValueList = call_user_func_array( array( $limitation['class'], $limitation['function'] ), $limitation['parameter'] );
                     foreach ( $limitationValueList as $limitationValue )
-                    {                        
+                    {
                         $list[$limitationValue['id']] = "({$groupName}) {$limitationValue['name']} ";
-                    }                    
+                    }
                 }
                 return $operatorValue = $list;
             } break;
-            
+
             case 'fix_dimension':
             {
-                $parts = explode( 'px', $operatorValue );                
+                $parts = explode( 'px', $operatorValue );
                 $operatorValue = $parts[0];
             } break;
-            
+
             case 'current_object_id':
             {
-                $operatorValue = self::currentObjectId();                
+                $operatorValue = self::currentObjectId();
             } break;
-            
+
             case 'find_first_parent':
             {
                 $startNode = $operatorValue;
@@ -481,9 +482,9 @@ class OpenPAOperator
                             }
                         }
                     }
-                }                
+                }
             } break;
-            
+
             case 'unique':
             {
                 if ( is_array( $operatorValue ) )
@@ -491,7 +492,7 @@ class OpenPAOperator
                     $operatorValue = array_unique( $operatorValue );
                 } break;
             }
-            
+
             case 'access_style':
             {
                 $result = '';
@@ -510,7 +511,7 @@ class OpenPAOperator
                 }
                 $operatorValue = $result;
             } break;
-            
+
             case 'materia_make_tree':
             {
                 $items = $namedParameters['relation_list'];
@@ -537,7 +538,7 @@ class OpenPAOperator
                 }
                 return $operatorValue = $materie;
             } break;
-            
+
             case 'rss_list':
             {
                 $list = array();
@@ -561,11 +562,11 @@ class OpenPAOperator
                 }
                 return $operatorValue = $list;
             } break;
-            
+
             case 'has_main_style':
             {
                 $style = false;
-                
+
                 $node = $namedParameters['node'];
 
                 if ( is_numeric( $node ) )
@@ -586,17 +587,17 @@ class OpenPAOperator
                     }
                 }
 
-                $operatorValue = $style; 
+                $operatorValue = $style;
 
             } break;
-            
+
             case 'get_main_style':
             {
                 $style = 'no-main-style';
-                
+
                 if ( $viewmode && $viewmode !== 'full' )
                     return $operatorValue = $style;
-                
+
                 $mainStyles = array();
                 $mainStylesTmp = $ini->hasVariable( 'Stili', 'Nodo_NomeStile' ) ? $ini->variable( 'Stili', 'Nodo_NomeStile' ) : array();
                 foreach( $mainStylesTmp as $styleParts )
@@ -607,24 +608,24 @@ class OpenPAOperator
                         $mainStyles[$nodeStyle[0]] = $nodeStyle[1];
                     }
                 }
-                
+
                 foreach ( $path as $key => $item )
                 {
                     if ( isset( $item['node_id'] ) )
                     {
-                        
+
                         if ( isset( $mainStyles[ $item['node_id'] ] ) )
                         {
                             $style = $mainStyles[ $item['node_id'] ];
                         }
-                        
+
                     }
                 }
 
                 $areaStyle = array();
-                
+
                 if ( OpenPAINI::variable( 'AreeTematiche', 'UsaStileInMotoreRicerca', false ) == 'enabled' )
-                {                    
+                {
                     $http = eZHTTPTool::instance();
                     if ( $http->hasGetVariable( 'SubTreeArray' ) )
                     {
@@ -642,13 +643,13 @@ class OpenPAOperator
                     {
                         $isAreaTematica = $this->get_area_tematica_node( $p['node_id'] );
                         if ( $isAreaTematica !== false )
-                        {                        
+                        {
                             if ( empty( $areaStyle ) )
                             {
                                 $areaStyle[] = 'aree-tematiche';
                                 $areaStyle[] = 'area_tematica';
                             }
-                            
+
                             $areaCustomStyle =  $this->get_area_tematica_style( $p['node_id'] );
                             if ( !empty( $areaCustomStyle ) )
                             {
@@ -657,17 +658,17 @@ class OpenPAOperator
                         }
                     }
                 }
-                
+
                 if ( !empty( $areaStyle ) )
                 {
                     $style = implode( ' ', $areaStyle );
-                }                
-                
+                }
+
                 $operatorValue = $style;
             } break;
-            
+
             case 'is_area_tematica':
-            {                
+            {
                 $result = false;
                 if ( empty( $path ) )
                 {
@@ -687,25 +688,25 @@ class OpenPAOperator
                                 $path[] = array( 'node_id' => $p );
                             }
                         }
-                        
+
                     }
                 }
-                
+
                 foreach ( $path as $key => $item )
                 {
                     if ( isset( $item['node_id'] ) )
                     {
                         if ( $this->get_area_tematica_node( $item['node_id'] ) )
                         {
-                            
+
                             $result = $this->get_area_tematica_node( $item['node_id'] );
                             break;
                         }
                     }
                 }
-                
+
                 if ( OpenPAINI::variable( 'AreeTematiche', 'UsaStileInMotoreRicerca', false ) == 'enabled' )
-                {                    
+                {
                     $http = eZHTTPTool::instance();
                     if ( $http->hasGetVariable( 'SubTreeArray' ) )
                     {
@@ -716,11 +717,11 @@ class OpenPAOperator
                         }
                     }
                 }
-                
+
                 $operatorValue = $result;
-                
+
             } break;
-            
+
             case 'get_area_tematica_style':
             {
                 $result = false;
@@ -736,16 +737,16 @@ class OpenPAOperator
                             if ( $p != '' && $p != 1 )
                                 $path[] = array( 'node_id' => $p );
                         }
-                        
+
                     }
                 }
-                
+
                 foreach ( $path as $key => $item )
                 {
                     if ( isset( $item['node_id'] ) )
                     {
                         if ( $this->get_area_tematica_node( $item['node_id'] ) )
-                        {                            
+                        {
                             $customStyle = $this->get_area_tematica_style( $item['node_id'] );
                             if ( !empty( $customStyle ) )
                             {
@@ -755,42 +756,42 @@ class OpenPAOperator
                         }
                     }
                 }
-                
+
                 $operatorValue = $result;
-                
+
             } break;
-            
+
             case 'openpaini':
             {
                 $result = OpenPAINI::variable( $namedParameters['block'], $namedParameters['setting'], $namedParameters['default'] );
                 $operatorValue = $result;
-                
+
             } break;
-            
+
             case 'is_dipendente':
             {
                 $currentUser = eZUser::currentUser();
                 $gruppoDipendenti = $ini->hasVariable( 'ControlloUtenti', 'GruppoDipendenti' ) ? $ini->variable( 'ControlloUtenti', 'GruppoDipendenti' ) : array();
                 $gruppoAmministratori = $ini->hasVariable( 'ControlloUtenti', 'GruppoAmministratori' ) ? $ini->variable( 'ControlloUtenti', 'GruppoAmministratori' ) : array( 12 );
-                
+
                 $groups = $currentUser->groups();
-                
+
                 $return = false;
-                
+
                 if ( in_array( $gruppoDipendenti, $groups ) )
                 {
                     $return = true;
                 }
-                
+
                 if ( in_array( $gruppoAmministratori, $groups ) )
                 {
                     $return = true;
                 }
-                
+
                 $operatorValue = $return;
-                
+
             } break;
-			
+
             case 'openpa_shorten':
             {
                 $operatorValue = strip_tags( $operatorValue );
@@ -799,19 +800,19 @@ class OpenPAOperator
                 if ( $strlenFunc( $operatorValue ) > $namedParameters['chars_to_keep'] )
                 {
                     $operatorLength = $strlenFunc( $operatorValue );
-                
+
                     if ( $namedParameters['trim_type'] === 'middle' )
                     {
                         $appendedStrLen = $strlenFunc( $namedParameters['str_to_append'] );
-                
+
                         if ( $namedParameters['chars_to_keep'] > $appendedStrLen )
                         {
                             $chop = $namedParameters['chars_to_keep'] - $appendedStrLen;
-                
+
                             $middlePos = (int)($chop / 2);
                             $leftPartLength = $middlePos;
                             $rightPartLength = $chop - $middlePos;
-                
+
                             $operatorValue = trim( $this->custom_substr( $operatorValue, 0, $leftPartLength ) . $namedParameters['str_to_append'] . $this->custom_substr( $operatorValue, $operatorLength - $rightPartLength, $rightPartLength ) );
                         }
                         else
@@ -831,14 +832,14 @@ class OpenPAOperator
 
 
             } break;
-            
+
             case 'has_abstract':
             case 'abstract':
             {
                 $has_content = false;
                 $text = false;
                 $node = $namedParameters['node'];
-                
+
                 if ( !$node )
                     $node = $operatorValue;
 
@@ -850,7 +851,7 @@ class OpenPAOperator
                 if ( $node instanceof eZContentObjectTreeNode )
                 {
                     if ( $node->hasAttribute( 'highlight' ) )
-                    {                        
+                    {
                         $text = $node->attribute( 'highlight' );
                         $text = str_replace( '&amp;nbsp;', ' ', $text );
 
@@ -859,7 +860,7 @@ class OpenPAOperator
                             $has_content = true;
                         }
                     }
-                    
+
                     if ( !$has_content )
                     {
                         $attributes = $ini->hasVariable( 'Attributi', 'AttributiAbstract' ) ? $ini->variable( 'Attributi', 'AttributiAbstract' ) : array();
@@ -880,21 +881,21 @@ class OpenPAOperator
                                         break;
                                     }
                                 }
-                                
+
                             }
                         }
                     }
                 }
-                
+
                 if ( $operatorName == 'has_abstract' )
                     return $operatorValue = $has_content;
                 else
                     return $operatorValue = $text;
-                
+
             } break;
         }
     }
-    
+
     private function custom_substr( $string, $start, $length )
     {
 		if( strlen( $string ) > $length )
@@ -910,10 +911,10 @@ class OpenPAOperator
                 $firstSpace = strpos( $substr, " " );
                 $string = substr( $substr, $firstSpace, $length );
             }
-		}    
+		}
 		return $string;
 	}
-    
+
     private function get_area_tematica_node( $nodeID = 0 )
     {
         if ( !in_array( $nodeID, $this->area_tematica_node ) )
@@ -921,9 +922,9 @@ class OpenPAOperator
             $ini = eZINI::instance( 'openpa.ini' );
             $areeIdentifiers = $ini->hasVariable( 'AreeTematiche', 'IdentificatoreAreaTematica' ) ? $ini->variable( 'AreeTematiche', 'IdentificatoreAreaTematica' ) : array( 'area_tematica' );
             $node = OpenPABase::fetchNode( $nodeID );
-    
+
             $return = false;
-        
+
             if ( $node )
             {
                 if ( in_array( $node->attribute( 'class_identifier' ), $areeIdentifiers )
@@ -933,12 +934,12 @@ class OpenPAOperator
                     $return = $node;
                 }
             }
-            
+
         }
         $this->area_tematica_node[$nodeID] = $return;
         return $this->area_tematica_node[$nodeID];
     }
-    
+
     private function get_area_tematica_style( $nodeID = 0 )
     {
         $node = $this->get_area_tematica_node( $nodeID );
@@ -956,7 +957,7 @@ class OpenPAOperator
         }
         return false;
     }
-    
+
     public function currentObjectId()
     {
         if ( self::$currentObjectId === null )
@@ -969,7 +970,7 @@ class OpenPAOperator
                 $currentObject = eZContentObject::fetchByNodeID( $currentNodeId, false );
                 if ( is_array( $currentObject ) )
                 {
-                    self::$currentObjectId = $currentObject['id'];    
+                    self::$currentObjectId = $currentObject['id'];
                 }
             }
         }
