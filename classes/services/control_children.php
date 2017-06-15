@@ -66,7 +66,7 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
             $this->currentView = false;
             $this->currentViews = array();
 
-            $showChildren = true;
+            $showChildren = false;
             if ( isset( $this->container->attributesHandlers['show_children'] ) )
             {
                 $showChildren = (bool) $this->container->attributesHandlers['show_children']->attribute( 'contentobject_attribute' )->attribute( 'data_int' );
