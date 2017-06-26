@@ -43,6 +43,10 @@ class OpenPAInstance
     {
         if ( empty( $siteAccessName ) )
             throw new Exception( "SiteAccess name not found" );
+        $ipList = OpenPAINI::variable('InstanceSettings', 'LiveIPList', array());
+        if (!empty($ipList)){
+            self::$validIps = $ipList;
+        }
         $this->currentSiteAccessName = $siteAccessName;
     }
 
@@ -174,34 +178,35 @@ class OpenPAInstance
     {
         return $this->getIdentifier();
     }
-        
+
     public function getType()
     {
         $type = 'altro';
-        $suffix = '_standard';
-        if ( in_array( 'openpa_flight', $this->getSiteIni( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
-        {
-            $suffix = '_new_design';
-        }
-        
-        if ( strpos( $this->currentSiteAccessName, '_sensor' ) !== false )
-        {
+
+        $iniType = OpenPAINI::variable('InstanceSettings', 'InstanceType', false);
+        if (!empty( $iniType )) {
+            $type = $iniType;
+
+        } elseif (strpos($this->currentSiteAccessName, '_sensor') !== false) {
             $type = 'sensor';
-        }
-        elseif ( strpos( $this->currentSiteAccessName, '_dimmi' ) !== false )
-        {
+
+        } elseif (strpos($this->currentSiteAccessName, '_dimmi') !== false) {
             $type = 'dimmi';
-        }
-        elseif ( in_array( 'fusioni', $this->getSiteIni( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
-        {
+
+        } elseif (strpos($this->currentSiteAccessName, '_agenda') !== false) {
+            $type = 'agenda';
+
+        } elseif (strpos($this->currentSiteAccessName, '_booking') !== false) {
+            $type = 'booking';
+
+        } elseif (in_array('fusioni', $this->getSiteIni('DesignSettings', 'AdditionalSiteDesignList'))) {
             $type = 'fusione';
+
+        } elseif (strpos($this->getSiteIni('SiteSettings', 'SiteName'), 'Comun') !== false) {
+            $type = 'comune_standard';
         }
-        elseif ( strpos( $this->getSiteIni( 'SiteSettings', 'SiteName' ), 'Comune' ) !== false )
-        {
-            $type = 'comune';
-        }        
-        
-        return $type . $suffix;
+
+        return $type;
     }
 
     /**
@@ -341,4 +346,14 @@ class OpenPAInstance
         return $this->getSolrIni( 'SolrBase', 'SearchServerURI' );
     }
 
+    public function getContactsData()
+    {
+        $pagedata = new OpenPAPageData();
+        return $pagedata->getContactsData();
+    }
+
+    public function getLogo()
+    {
+        return OpenPaFunctionCollection::fetchStemma();
+    }
 }
