@@ -97,6 +97,20 @@ $(document).ready(function () {
             e.preventDefault();
         });
 
+        $('.ui-tabs .border-content').bind('tabsshow', function(event, ui) {
+            map.invalidateSize();
+        });
+
+        if ( $('a[data-toggle="tab"]').length > 0) {
+            $('a[data-toggle="tab"]').bind('shown.bs.tab', function (e) {
+                map.invalidateSize(false);
+            });
+        } else if ( $(".ui-tabs .ui-tabs-nav").length > 0) {
+            $(".ui-tabs .ui-tabs-panel").bind("cssClassChanged", function (event, ui) {
+                map.invalidateSize(false);
+            });
+        }
+
         L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
