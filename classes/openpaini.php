@@ -7,6 +7,8 @@ class OpenPAINI
 
     private static $googleAnalyticsAccountID;
 
+    private static $enableRobots;
+
     public static $dynamicIniMap = array(
         'GestioneAttributi' => array(
             'attributi_contatti' => array(
@@ -84,24 +86,25 @@ class OpenPAINI
         'GestioneSezioni::sezioni_per_tutti',
         'Attributi::EscludiDaRicerca',
         'Seo::GoogleAnalyticsAccountID',
+        'Seo::EnableRobots',
         'GeneralSettings::valutation'
         //'SideMenu::EsponiLink'
     );
-    
+
     public static function variable( $block, $value, $default = null )
     {
         if ( self::hasFilter( $block, $value, $default ) )
         {
             return self::filter( $block, $value, $default );
         }
-        
+
         $ini = eZINI::instance( 'openpa.ini' );
         $result = $default;
         if ( $ini->hasVariable( $block, $value ) )
         {
             $result = $ini->variable( $block, $value );
         }
-        return $result;        
+        return $result;
     }
 
     public static function group( $block )
@@ -149,17 +152,17 @@ class OpenPAINI
     protected static function filterSezioniPerTutti()
     {
         $result = array();
-        $ini = eZINI::instance( 'openpa.ini' );        
+        $ini = eZINI::instance( 'openpa.ini' );
         if ( $ini->hasVariable( 'GestioneSezioni', 'sezioni_per_tutti' ) )
         {
             $result = (array) $ini->variable( 'GestioneSezioni', 'sezioni_per_tutti' );
         }
         $alboSection = eZSection::fetchByIdentifier( 'albotelematicotrentino', false );
         if ( is_array( $alboSection ) )
-        {            
+        {
             $result[] = $alboSection['id'];
-        }        
-        return $result; 
+        }
+        return $result;
     }
 
     protected static function googleAnalyticsAccountID()
@@ -187,19 +190,47 @@ class OpenPAINI
         return self::$googleAnalyticsAccountID;
     }
 
+    protected static function isRobotsEnabled()
+    {
+        if ( self::$enableRobots === null )
+        {
+            $enableRobotsSiteData = eZSiteData::fetchByName('EnableRobots');
+            if ( !$enableRobotsSiteData instanceof eZSiteData )
+            {
+                $ini = eZINI::instance( 'openpa.ini' );
+                $enableRobotsValue = 'enabled';
+                if ($ini->hasVariable( 'Seo', 'EnableRobots' )){
+                    $enableRobotsValue = $ini->variable( 'Seo', 'EnableRobots' );
+                }
+                if (strpos(eZSys::hostname(), 'opencontent.it') !== false){
+                    $enableRobotsValue = 'disabled';
+                }
+                $enableRobotsSiteData = new eZSiteData(array(
+                    'name' => 'EnableRobots',
+                    'value' => $enableRobotsValue
+                ));
+                $enableRobotsSiteData->store();
+                self::$enableRobots = $enableRobotsValue;
+
+            }
+            self::$enableRobots = $enableRobotsSiteData->attribute('value');
+        }
+        return self::$enableRobots;
+    }
+
     protected static function filter( $block, $value, $default )
     {
         $filter = $block . '::' . $value;
         switch( $filter )
         {
             case 'TopMenu::NodiCustomMenu':
-                return OpenPaFunctionCollection::fetchTopMenuNodes();              
+                return OpenPaFunctionCollection::fetchTopMenuNodes();
             break;
-        
+
             case 'GestioneSezioni::sezioni_per_tutti':
-                return self::filterSezioniPerTutti();              
+                return self::filterSezioniPerTutti();
             break;
-        
+
             case 'Attributi::EscludiDaRicerca':
                 return self::variable( 'GestioneAttributi', 'attributi_da_escludere_dalla_ricerca', $default );
             break;
@@ -207,6 +238,10 @@ class OpenPAINI
             case 'Seo::GoogleAnalyticsAccountID':
                 return self::googleAnalyticsAccountID();
             break;
+
+            case 'Seo::EnableRobots':
+                return self::isRobotsEnabled();
+                break;
 
             case 'GeneralSettings::valutation':
                     if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
@@ -235,7 +270,7 @@ class OpenPAINI
 
         return null;
     }
-    
+
     public static function set( $block, $settingName, $value )
     {
         if ( $block && $settingName && $value ) {
@@ -247,6 +282,20 @@ class OpenPAINI
                     if (!$data instanceof eZSiteData) {
                         $data = new eZSiteData(array(
                             'name' => 'GoogleAnalyticsAccountID',
+                            'value' => ''
+                        ));
+                    }
+                    $data->setAttribute('value', $value);
+                    $data->store();
+
+                    return true;
+                    break;
+
+                case 'Seo::EnableRobots':
+                    $data = eZSiteData::fetchByName('EnableRobots');
+                    if (!$data instanceof eZSiteData) {
+                        $data = new eZSiteData(array(
+                            'name' => 'EnableRobots',
                             'value' => ''
                         ));
                     }
@@ -353,5 +402,5 @@ class OpenPAINI
     public static function clearDynamicIniCache(){
         eZClusterFileHandler::instance( self::dynamicIniCachePath() )->purge();
     }
-    
+
 }
