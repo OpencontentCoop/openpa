@@ -1,6 +1,9 @@
 {ezscript_require( array( 'ezjsc::jquery', 'leaflet/leaflet.0.7.2.js', 'leaflet/leaflet-osm.js') )}
 {ezcss_require( array( 'leaflet/leaflet.css', 'leaflet/map.css' ) )}
 
+{set $xml_link = $xml_link|trim('/')}
+{set $xml_link = cond( $xml_link|ends_with('full'), $xml_link, concat($xml_link, '/full'))}
+
 {if $title}<h4><a href="{$xml_link}">{$title}</a></h4>{/if}
 <div id="percorso-{$xml_link|md5()}" style="width: 100%; height: 400px;"></div>
 {run-once}
@@ -25,7 +28,5 @@
 {/run-once}
 
 <script type="text/javascript">
-    {set $xml_link = $xml_link|trim('/')}
-    {set $xml_link = cond( $xml_link|ends_with('full'), $xml_link, concat($xml_link, '/full'))}
     drawData("{$xml_link}","{$xml_link|md5()}");
 </script>
