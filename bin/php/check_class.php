@@ -47,6 +47,9 @@ try
             $classi[] = $class->attribute( 'identifier' );
         }
     }
+
+    $instance = OpenPAInstance::current();
+    OpenPALog::warning($instance->getType());
     
     foreach( $classi as $identifier )
     {
