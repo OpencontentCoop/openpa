@@ -2,12 +2,24 @@
 
 class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
 {
+    protected $hasExtraMenu;
+
     function run()
     {
         $this->data['available_menu'] = array( 'top_menu', 'side_menu' );
 
         $this->data['show_top_menu'] = true;
-        $this->data['top_menu'] = new OpenPATempletizable( array(
+        $this->fnData['top_menu'] = 'topMenu';
+        
+        $this->data['show_side_menu'] = $this->hasSideMenu();
+        $this->fnData['side_menu'] = 'sideMenu';
+
+        $this->fnData['show_extra_menu'] = 'hasExtraMenu';
+    }
+    
+    protected function topMenu()
+    {
+        return new OpenPATempletizable( array(
             'root_node'=> OpenPaFunctionCollection::fetchHome(),
             'classes' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu', array() ),
             'exclude' => OpenPAINI::variable( 'TopMenu', 'NascondiNodi', array() ),
@@ -19,9 +31,11 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'custom_max_recursion' => $this->getTopMenuCustomRecursions(),
             'custom_fetch_parameters' => $this->getTopMenuCustomFetchParameters()
         ));
-
-        $this->data['show_side_menu'] = $this->hasSideMenu();
-        $this->data['side_menu'] = new OpenPATempletizable( array(
+    }
+    
+    protected function sideMenu()
+    {
+        return new OpenPATempletizable( array(
             'root_node' => $this->getSideMenuRootNode(),
             'classes' => $this->getSideMenuClassIdentifiers(),
             'exclude' => OpenPAINI::variable( 'SideMenu', 'NascondiNodi', array() ),
@@ -31,40 +45,94 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'custom_max_recursion' => array(),
             'custom_fetch_parameters' => array()
         ));
-        
-        $this->data['show_extra_menu'] = $this->hasExtraMenu();
     }
-    
+
     //@todo
     protected function hasExtraMenu()
     {
-        $result = false;
-        if ( !$result && $this->container->hasAttribute( 'content_gallery' ) )
+        if ( $this->hasExtraMenu === null )
         {
-            $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
-        }
-        if ( !$result && $this->container->hasAttribute( 'content_related' ) )
-        {
-            $result = $this->container->attribute( 'content_related' )->attribute( 'has_data' );
-        }
-        if ( !$result && $this->container->hasAttribute( 'content_facets' ) )
-        {
-            $result = $this->container->attribute( 'content_facets' )->attribute( 'has_data' );
-        }
-        $hiddenNodes = OpenPAINI::variable( 'ExtraMenu', 'NascondiNeiNodi', array() );
-        $hiddenClasses = OpenPAINI::variable( 'ExtraMenu', 'NascondiNelleClassi', array() );
-        if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )
-        {
-            if ( in_array( $this->container->getContentNode()->attribute( 'node_id' ), $hiddenNodes ) )
+            $debug = array();
+            $result = false;
+//            if ( !$result && $this->container->hasAttribute( 'content_gallery' ) )
+//            {
+//                $result = $this->container->attribute( 'content_gallery' )->attribute( 'has_images' );
+//                if ( $result ) $debug[] = 'content_gallery';
+//            }
+            if ( !$result && $this->container->hasAttribute( 'content_related' ) )
             {
-                return false;
+                $result = $this->container->attribute( 'content_related' )->attribute( 'has_data' );
+                if ( $result ) $debug[] = 'content_related';
             }
-            if ( in_array( $this->container->getContentNode()->attribute( 'class_identifier' ), $hiddenClasses ) )
+            if ( !$result && $this->container->hasAttribute( 'content_reverse_related' ) )
             {
-                return false;
+                $result = $this->container->attribute( 'content_reverse_related' )->attribute( 'has_data' );
+                if ( $result ) $debug[] = 'content_reverse_related';
             }
+            if ( !$result && $this->container->hasAttribute( 'control_children' ) )
+            {
+                $result = $this->container->attribute( 'control_children' )->attribute( 'current_view' ) == 'filters';
+                if ( $result ) $debug[] = 'control_children';
+            }
+            if ( !$result && $this->container->hasAttribute( 'content_facets' ) )
+            {
+                $result = $this->container->attribute( 'content_facets' )->attribute( 'has_data' );
+                if ( $result ) $debug[] = 'content_facets';
+            }
+            if ( !$result && $this->container->hasAttribute( 'content_virtual' ) )
+            {
+                $result = $this->container->attribute( 'content_virtual' )->attribute( 'folder' );
+                if ( $result ) $debug[] = 'content_virtual';
+            }
+            if ( !$result && $this->container->getContentNode() instanceof eZContentObjectTreeNode) {
+                $parent = $this->container->getContentNode()->attribute('parent');
+                if ( $parent instanceof eZContentObjectTreeNode && $parent->attribute('node_id') > 1) {
+                    $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
+                    if ( $parent->hasAttribute('content_virtual')) {
+                        $result = $parent->attribute('content_virtual')->attribute('folder');
+                        if ( $result ) $debug[] = 'content_virtual';
+                    }
+                }
+            }
+            if ( !$result && $this->container->hasAttribute( 'content_globalinfo' ) )
+            {
+                $result = $this->container->attribute( 'content_globalinfo' )->attribute( 'has_content' );
+                if ( $result ) $debug[] = 'content_globalinfo';
+                if ( !$result ){
+                    $parent = $this->container->getContentNode()->attribute('parent');
+                    if ( $parent instanceof eZContentObjectTreeNode && $parent->attribute('node_id') > 1) {
+                        $parent = OpenPAObjectHandler::instanceFromContentObject( $parent->attribute( 'object' ) );
+                        if ( $parent->hasAttribute('content_globalinfo')) {
+                            $result = $parent->attribute('content_globalinfo')->attribute('has_content');
+                            if ( $result ) $debug[] = 'content_globalinfo_parent';
+                        }
+                    }
+                }
+            }
+
+            if ( !$result && $this->container->hasAttribute( 'layout' ) )
+            {
+                $result = $this->container->attribute( 'layout' )->attribute( 'has_content' );
+                if ( $result ) $debug[] = 'layout';
+            }
+
+            $hiddenNodes = OpenPAINI::variable( 'ExtraMenu', 'NascondiNeiNodi', array() );
+            $hiddenClasses = OpenPAINI::variable( 'ExtraMenu', 'NascondiNelleClassi', array() );
+            if ( $this->container->getContentNode() instanceof eZContentObjectTreeNode )
+            {
+                if ( in_array( $this->container->getContentNode()->attribute( 'node_id' ), $hiddenNodes ) )
+                {
+                    return false;
+                }
+                if ( in_array( $this->container->getContentNode()->attribute( 'class_identifier' ), $hiddenClasses ) )
+                {
+                    return false;
+                }
+            }
+            $this->hasExtraMenu = $result;
+            eZDebug::writeDebug( implode( ', ', $debug ), __METHOD__ );
         }
-        return $result;
+        return $this->hasExtraMenu;
     }
 
     protected function getTopMenuCustomFetchParameters()
@@ -83,7 +151,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             {
                 $data[$nodeId] = array(
                     'limit' => OpenPAINI::variable( 'TopMenu', 'LimiteSecondoLivello', 4 )
-                );                
+                );
             }
         }
         return $data;
@@ -114,8 +182,8 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         $nascondiNeiNodi = OpenPAINI::variable( 'SideMenu', 'NascondiNeiNodi', array() );
         $nascondiNelleClassi = OpenPAINI::variable( 'SideMenu', 'NascondiNelleClassi', array() );
         return !( in_array( $this->container->currentNodeId, $nascondiNeiNodi )
-                 || in_array( $this->container->currentClassIdentifier, $nascondiNelleClassi )
-                 || $nascondi );
+                  || in_array( $this->container->currentClassIdentifier, $nascondiNelleClassi )
+                  || $nascondi );
     }
 
     protected function getSideMenuRootNode()

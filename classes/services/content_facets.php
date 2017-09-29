@@ -5,12 +5,16 @@ class ObjectHandlerServiceContentFacets extends ObjectHandlerServiceBase
     private static $_cachedItems;
     
     function run()
-    {        
-        $items = $this->getItems();        
-        $this->data['has_data'] = count( $items ) > 0;
-        $this->data['items'] = $items;
+    {                
+        $this->fnData['has_data'] = 'getItemsCount';
+        $this->fnData['items'] = 'getItems';
     }
 
+    protected function getItemsCount()
+    {
+        return count( (array)$this->getItems() );
+    }
+    
     protected function getItems()
     {        
         if ( in_array( $this->container->currentClassIdentifier, OpenPAINI::variable( 'GestioneClassi', 'classi_che_producono_contenuti', array() ) ) )

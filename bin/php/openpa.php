@@ -9,7 +9,7 @@ if ( in_array( 'help', $arguments ) )
     print "\tphp extension/openpa/bin/php/openpa.php <nome_file_script_senza_estensione> <parametri> \n\n";
     print "Esempio:\nphp extension/openpa/bin/php/openpa.php check_class --class=folder \nesegue lo script \"php extension/openpa/bin/php/check_class.php\" con i parametri \"--class=folder\" su tutte le istanze\n\n";
     print "E' possibile usare inoltre i seguenti parametri:\n\n";
-    print "\tsleep\t ferma l'esecuzione per 2 secondi dopo l'esecuzione dello script su un'istanza\n";
+    print "\tsleep\t attende input utente dopo l'esecuzione dello script su un'istanza\n";
     print "\tclear\t pulisce lo schermo dopo l'esecuzione dello script su un'istanza\n";
     print "\tbell\t emette un suono dopo l'esecuzione dello script su un'istanza\n\n";
     print "E' inoltre possibile escludere dall'esecuzione alcuni siti attraverso il parametero --exclude, ad esempio:\n\n";
@@ -65,8 +65,11 @@ foreach( $siteaccess as $sa )
     $command = "php extension/openpa/bin/php/{$script}.php -s{$sa} " . implode( ' ', $arguments );
     print "\nEseguo: $command \n";
     system( $command );
-    
-    if ( $doSleep ) sleep(2);
+
+    if ( $doSleep ) {
+        $handle = fopen ("php://stdin","r");
+        $line = fgets($handle);
+    }
     if ( $doClear ) system( 'clear' );
     if ( $doBell ) system( 'tput bel' ); 
 }

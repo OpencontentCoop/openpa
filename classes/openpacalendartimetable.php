@@ -17,8 +17,8 @@ class OpenPACalendarTimeTable
             'main_node_id' => $node->attribute( 'main_node_id' ),
             'main_url_alias' => $node->attribute( 'url_alias' ),
             'fields' => array(
-                'attr_from_time_dt' => 0,
-                'attr_to_time_dt' => 0
+                OpenPASolr::generateSolrField('from_time','date') => 0,
+                OpenPASolr::generateSolrField('to_time','date') => 0
             )
         );
 
@@ -76,9 +76,9 @@ class OpenPACalendarTimeTable
                         {
                             $newEvent = $base;
                             $date->setTime( $value['from_time']['hour'], $value['from_time']['minute'] );
-                            $newEvent['fields']['attr_from_time_dt'] = $date->format( 'Y-m-d\TH:i:s\Z' );
+                            $newEvent['fields'][OpenPASolr::generateSolrField('from_time','date')] = $date->format( 'Y-m-d\TH:i:s\Z' );
                             $date->setTime( $value['to_time']['hour'], $value['to_time']['minute'] );
-                            $newEvent['fields']['attr_to_time_dt'] = $date->format( 'Y-m-d\TH:i:s\Z' );
+                            $newEvent['fields'][OpenPASolr::generateSolrField('to_time','date')] = $date->format( 'Y-m-d\TH:i:s\Z' );
                             $item = OpenPACalendarItem::fromEzfindResultArray( $newEvent );
                             $events[] = $item;
                         }

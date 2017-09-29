@@ -15,7 +15,8 @@ class OpenPAInstance
      */
     private static $validIps = array(
         '84.18.151.65', //proxy Riva del Garda
-        '194.105.50.4' //consorzio-web
+        '194.105.50.4', //consorzio-web
+        '194.105.50.2' //consorzio-varnish
     );
 
     /**
@@ -42,6 +43,10 @@ class OpenPAInstance
     {
         if ( empty( $siteAccessName ) )
             throw new Exception( "SiteAccess name not found" );
+        $ipList = OpenPAINI::variable('InstanceSettings', 'LiveIPList', array());
+        if (!empty($ipList)){
+            self::$validIps = $ipList;
+        }
         $this->currentSiteAccessName = $siteAccessName;
     }
 
@@ -88,18 +93,19 @@ class OpenPAInstance
     private static function getIP( $url )
     {
         $dns = dns_get_record( $url );
+        $ip = false;
         foreach( $dns as $dnsItem )
         {
             if ( isset( $dnsItem['type'] ) && $dnsItem['type'] == 'A' )
             {
-                return $dnsItem['ip'];
+                $ip = $dnsItem['ip'];
             }
             elseif ( isset( $dnsItem['type'] ) && $dnsItem['type'] == 'CNAME' )
             {
-                return self::getIP( $dnsItem['target'] );
+                $ip = self::getIP( $dnsItem['target'] );
             }
         }
-        return false;
+        return $ip;
     }
 
     /**
@@ -172,16 +178,17 @@ class OpenPAInstance
     {
         return $this->getIdentifier();
     }
-        
+
     public function getType()
     {
         $type = 'altro';
         $suffix = '_standard';
+
         if ( in_array( 'openpa_flight', $this->getSiteIni( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
         {
             $suffix = '_new_design';
         }
-        
+
         if ( strpos( $this->currentSiteAccessName, '_sensor' ) !== false )
         {
             $type = 'sensor';
@@ -197,8 +204,14 @@ class OpenPAInstance
         elseif ( strpos( $this->getSiteIni( 'SiteSettings', 'SiteName' ), 'Comune' ) !== false )
         {
             $type = 'comune';
-        }        
-        
+        }
+
+        if ($this->getSiteIni( 'DesignSettings', 'SiteDesign' ) == 'comunefuso')
+        {
+            $type = 'comunefuso';
+            $suffix = '';
+        }
+
         return $type . $suffix;
     }
 
@@ -339,4 +352,14 @@ class OpenPAInstance
         return $this->getSolrIni( 'SolrBase', 'SearchServerURI' );
     }
 
+    public function getContactsData()
+    {
+        $pagedata = new OpenPAPageData();
+        return $pagedata->getContactsData();
+    }
+
+    public function getLogo()
+    {
+        return OpenPaFunctionCollection::fetchStemma();
+    }
 }

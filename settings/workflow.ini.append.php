@@ -11,7 +11,7 @@ AvailableEventTypes[]=event_reindexonupdatepriority
 
 [OperationSettings]
 AvailableOperationList[]=content_delete
-AvailableOperationList[]=content_read
+#AvailableOperationList[]=content_read
 AvailableOperationList[]=content_updatepriority
 
 */?>

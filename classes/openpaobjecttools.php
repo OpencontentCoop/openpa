@@ -19,7 +19,7 @@ class OpenPAObjectTools
         {
             $object = eZContentObject::fetchByRemoteID( $data->metadata['objectRemoteId'] );
         }
-        
+
         try
         {            
             if ( !$object instanceof eZContentObject )
@@ -44,7 +44,7 @@ class OpenPAObjectTools
         }
         catch( Exception $e )
         {
-            OpenPALog::error( ' ...non trovato!' );
+            OpenPALog::error( ' ...errore: ' .  $e->getMessage() );
             return false;
         }     
     }

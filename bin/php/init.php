@@ -45,6 +45,16 @@ try
     }
     else
     {
+        $db = eZDB::instance();
+        $identifier = OpenPABase::getCurrentSiteaccessIdentifier();
+        $rows = $db->arrayQuery("select * from ezcontentobject where remote_id like 'prototipo_%'");
+        foreach ($rows as $row) {
+            $id = $row['id'];
+            $remoteId = str_replace('prototipo_', $identifier . '_', $row['remote_id']);
+            $cli->warning("update ezcontentobject set remote_id = '$remoteId' where id = $id");
+            $db->query("update ezcontentobject set remote_id = '$remoteId' where id = $id");
+        }
+
         require( 'init/site_name.php' );
         require( 'init/anonymous_user_login.php' );
         require( 'init/create_app_section.php' );

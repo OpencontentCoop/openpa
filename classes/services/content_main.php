@@ -2,24 +2,45 @@
 
 class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
 {
-    
+    private $identifiers = array();
+
+    private $abstractIdentifiers = array();
+
+    private $fullTextIdentifiers = array();
+
     protected static $attributeList = array();
-    
-    function run()
+
+    function __construct( $data = array() )
     {
-        //@todo
-        $this->data['identifiers'] = array(
+        $this->identifiers = OpenPAINI::variable('ContentMain', 'Identifiers', array(
             'image',
             'ruolo',
             'ruolo2',
             'oggetto',
             'abstract',
             'short_description',
-            'data_iniziopubblicazione',
-            'data_archiviazione',
             'description',
             'descrizione'
-        );
+        ));
+
+        $this->abstractIdentifiers = OpenPAINI::variable('ContentMain', 'AbstractIdentifiers', array(
+            'abstract',
+            'short_description',
+            'oggetto',
+            'ruolo',
+        ));
+
+        $this->fullTextIdentifiers = OpenPAINI::variable('ContentMain', 'FullTextIdentifiers', array(
+            'descrizione',
+            'description',
+        ));
+
+        parent::__construct($data);
+    }
+
+    function run()
+    {
+        $this->data['identifiers'] = $this->identifiers;
         $this->fnData['attributes'] = 'getAttributeList';
         $this->fnData['has_content'] = 'getAttributeCount';
         $this->fnData['parts'] = 'getParts';
@@ -34,31 +55,22 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
             $data['image'] = $attributes['image'];
         }
 
-        if ( isset( $attributes['abstract'] ) )
-        {
-            $data['abstract'] = $attributes['abstract'];
-        }
-        elseif ( isset( $attributes['short_description'] ) )
-        {
-            $data['abstract'] = $attributes['short_description'];
-        }
-        elseif ( isset( $attributes['oggetto'] ) )
-        {
-            $data['abstract'] = $attributes['oggetto'];
-        }
-        elseif ( isset( $attributes['ruolo'] ) )
-        {
-            $data['abstract'] = $attributes['ruolo'];
+        foreach($this->abstractIdentifiers as $identifier){
+            if ( isset( $attributes[$identifier] ) )
+            {
+                $data['abstract'] = $attributes[$identifier];
+                break;
+            }
         }
 
-        if ( isset( $attributes['descrizione'] ) )
-        {
-            $data['full_text'] = $attributes['descrizione'];
+        foreach($this->fullTextIdentifiers as $identifier){
+            if ( isset( $attributes[$identifier] ) )
+            {
+                $data['full_text'] = $attributes[$identifier];
+                break;
+            }
         }
-        elseif ( isset( $attributes['description'] ) )
-        {
-            $data['full_text'] = $attributes['description'];
-        }
+
         return $data;
     }
 

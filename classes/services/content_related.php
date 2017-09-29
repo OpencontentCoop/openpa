@@ -6,10 +6,15 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
     {
         $this->fnData['info'] = 'infoList';
         $this->fnData['classification'] = 'classificationList';
-        $this->data['has_data'] = ( $this->classificationList( true ) + $this->infoList( true ) ) > 0;
+        $this->fnData['has_data'] = 'hasData';
 
     }
 
+    protected function hasData()
+    {
+        return ( $this->classificationList( true ) + $this->infoList( true ) ) > 0;
+    }
+    
     protected function infoList( $count = false )
     {
         if ( $count )
@@ -29,6 +34,7 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
         $objects = array();
         if ( !empty( $attributeList ) )
         {
+            $attributeList = array_unique($attributeList);
             foreach( $attributeList as $attributeIdentifier )
             {
                 if ( isset( $this->container->attributesHandlers[$attributeIdentifier] ) )
@@ -65,6 +71,7 @@ class ObjectHandlerServiceContentRelated extends ObjectHandlerServiceBase
         $objects = 0;
         if ( !empty( $attributeList ) )
         {
+            $attributeList = array_unique($attributeList);
             foreach( $attributeList as $attributeIdentifier )
             {
                 if ( isset( $this->container->attributesHandlers[$attributeIdentifier] ) )

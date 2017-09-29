@@ -1,4 +1,0 @@
-File /httpd/cms.intra.comune.trento.it/html_2012.8/kernel/settings/validation.php:
-
-//if ( !preg_match( "/^[A-Za-z0-9]*$/", $fieldValue ) ) //@luca @patch per ammettere nomi con underscore tipo "user_incarico"
-if ( !preg_match( "/^[_A-Za-z0-9]*$/", $fieldValue ) )

@@ -40,6 +40,7 @@ class DataHandlerMapMarkers implements OpenPADataHandlerInterface
                     $properties = array(
                         'class' => isset( $item['class'] ) ? $item['class'] : '',
                         'type' => isset( $item['type'] ) ? $item['type'] : '',
+                        'className' => isset( $item['className'] ) ? $item['className'] : '',
                         'name' => $item['title'],
                         'url' => $item['urlAlias'],
                         'popupContent' => '<em>Loading...</em>'

@@ -21,7 +21,10 @@ class OpenPAApiChildNode implements ArrayAccess
         }
         return false;
     }
-    
+
+    /**
+     * @return OpenPAApiChildNode[]
+     */
     public function getChildren()
     {        
         if ( $this->children == null )

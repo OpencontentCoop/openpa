@@ -18,8 +18,14 @@ $ViewList['class'] = array(
     'script' => 'class.php',
     'ui_context' => 'edit',
     'default_navigation_part' => 'ezsetupnavigationpart',
-    'single_post_actions' => array('SyncButton' => 'Sync',
-        'InstallButton' => 'Install'),
+    'single_post_actions' => array(
+        'SyncButton' => 'Sync',
+        'InstallButton' => 'Install',
+        'SyncPropertyButton' => 'SyncProperty',
+        'SyncAttributeButton' => 'SyncAttribute',
+        'RemoveAttributeButton' => 'RemoveAttribute',
+        'AddAttributeButton' => 'AddAttribute'
+    ),
     'params' => array('ID'),
     'unordered_params' => array());
 
@@ -131,6 +137,24 @@ $ViewList['cookie'] = array(
     'functions' => array( 'cookie' )
 );
 
+$ViewList['refreshorganigramma'] = array(
+    'functions' => array('editor_tools'),
+    'script' => 'refreshorganigramma.php',
+    'params' => array()
+);
+
+$ViewList['block'] = array(
+    'functions' => array('editor_tools'),
+    'script' => 'block.php',
+    'params' => array('BlockID','View')
+);
+
+$ViewList['seo'] = array(
+    'script' =>	'seo.php',
+    'params' => array(),
+    'functions' => array( 'seo' )
+);
+
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
@@ -141,7 +165,7 @@ $FunctionList['editor_tools'] = array();
 $FunctionList['object'] = array();
 $FunctionList['signup'] = array();
 $FunctionList['cookie'] = array();
-
+$FunctionList['seo'] = array();
 
 
 ?>

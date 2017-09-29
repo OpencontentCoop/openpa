@@ -47,6 +47,9 @@ try
             $classi[] = $class->attribute( 'identifier' );
         }
     }
+
+    $instance = OpenPAInstance::current();
+    OpenPALog::warning($instance->getType());
     
     foreach( $classi as $identifier )
     {
@@ -74,45 +77,65 @@ try
                     foreach( $result->extraAttributes as $attribute )
                     {
                         $detail = $result->extraDetails[$attribute->Identifier];
-                        OpenPALog::notice( " -> {$attribute->Identifier} ({$attribute->DataTypeString}) ({$detail['count']} oggetti)" );
+                        OpenPALog::notice( " -> {$attribute->Identifier} ({$attribute->DataTypeString})" );
                     }
                 }
             }
             if ( $result->hasDiffAttributes )
             {
-                if ( count( $result->errors ) > 0 )
+                $identifiers = array_keys($result->diffAttributes);
+                $errors = array_intersect( array_keys($result->errors), $identifiers );
+                $warnings = array_intersect( array_keys($result->warnings), $identifiers );
+                
+                if ( count( $errors ) > 0 )
                     OpenPALog::error( 'Attributi che differiscono dal prototipo: ' . count( $result->diffAttributes ) );
+                elseif ( count( $warnings ) > 0 )
+                    OpenPALog::warning( 'Attributi che differiscono dal prototipo: ' . count( $result->diffAttributes ) );
                 else
                     OpenPALog::notice( 'Attributi che differiscono dal prototipo: ' . count( $result->diffAttributes ) );
                 
-                foreach( $result->diffAttributes as $identifier => $value )
+                if ( isset( $options['verbose'] ) )
                 {
-                    if ( isset( $options['verbose'] ) )
+                    foreach( $result->diffAttributes as $identifier => $value )
                     {
                         if ( isset( $result->errors[$identifier] ) )
+                            OpenPALog::error( " -> $identifier" );
+                        elseif ( isset( $result->warnings[$identifier] ) )
                             OpenPALog::warning( " -> $identifier" );
                         else
-                            OpenPALog::notice( " -> $identifier" );
+                            OpenPALog::notice( " -> $identifier" );                    
+                            
+                        foreach( $value as $diff )
+                        {                        
+                            if ( isset( $result->errors[$identifier][$diff['field_name']] ) )
+                                OpenPALog::error( "    {$diff['field_name']}" );
+                            elseif ( isset( $result->warnings[$identifier][$diff['field_name']] ) )
+                                OpenPALog::warning( "    {$diff['field_name']}" );
+                            else
+                                OpenPALog::notice( "    {$diff['field_name']}" );
+                        }                        
                     }
-                        
-                    foreach( $value as $diff )
-                    {
-                        $alert = isset( $result->errors[$identifier] ) && $result->errors[$identifier] == $diff['field_name'] ? '*' : ' ';
-                        if ( $alert == '*' )
-                            OpenPALog::error( "  $alert {$diff['field_name']} ({$diff['detail']['count']} oggetti)" );
-                        elseif ( isset( $options['verbose'] ) )
-                            OpenPALog::notice( "  $alert {$diff['field_name']} ({$diff['detail']['count']} oggetti)" );
-                    }                        
                 }
             }
             if ( $result->hasDiffProperties )
             {
-                OpenPALog::notice( 'Proprietà che differiscono dal prototipo: '  . count( $result->diffProperties ) );
+                if ( isset( $result->errors['properties'] ) )
+                    OpenPALog::notice( 'Proprietà che differiscono dal prototipo: '  . count( $result->diffProperties ) );
+                elseif ( isset( $result->warnings['properties'] ) )
+                    OpenPALog::notice( 'Proprietà che differiscono dal prototipo: '  . count( $result->diffProperties ) );
+                else
+                    OpenPALog::notice( 'Proprietà che differiscono dal prototipo: '  . count( $result->diffProperties ) );
+                
                 if ( isset( $options['verbose'] ) )
                 {
                     foreach( $result->diffProperties as $property )
                     {                        
-                        OpenPALog::notice( " -> {$property['field_name']}" );
+                        if ( isset( $result->errors['properties'][$property['field_name']] ) )
+                            OpenPALog::error( "    {$property['field_name']}" );
+                        elseif ( isset( $result->warnings['properties'][$property['field_name']] ) )
+                            OpenPALog::warning( "    {$property['field_name']}" );
+                        else
+                            OpenPALog::notice( "    {$property['field_name']}" );
                     }
                 }
             }

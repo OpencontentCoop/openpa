@@ -2,25 +2,38 @@
 
 class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
 {
+    protected $list;
+
     function run()
     {
-        $list = $this->getAttributeList();
-        $this->data['attributes'] = $list;
-        $this->data['identifiers'] = array_keys( $list );
-        $this->data['has_content'] = count( $this->data['attributes'] ) > 0;
+        $this->fnData['attributes'] = 'getAttributeList';
+        $this->fnData['identifiers'] = 'getAttributeListIdentifiers';
+        $this->fnData['has_content'] = 'getAttributeListCount';
         $this->fnData['children_count'] = 'getChildrenCount';
         $this->fnData['children'] = 'getChildren';
+    }
+
+    protected function getChildrenClasses()
+    {
+        $classes = OpenPAINI::variable('GestioneClassi', 'classi_allegato', array( 'file_pdf' ) );
+        if ($this->container->hasAttribute('content_virtual')){
+            $virtualParameters = $this->container->attribute( 'content_virtual' )->attribute( 'folder' );
+            if (is_array($virtualParameters['classes']) && !empty($virtualParameters['classes'])){
+                $classes = array_diff( $classes, $virtualParameters['classes'] );
+            }
+        }
+        return $classes;
     }
 
     protected function getChildrenCount()
     {
         $count = 0;
-        $node = $this->container->getContentNode();
+        $node = $this->container->getContentMainNode();
         if ( $node instanceof eZContentObjectTreeNode )
         {
             $count = $node->subTreeCount( array(
                 'ClassFilterType' => 'include',
-                'ClassFilterArray' => array( 'file_pdf' ),
+                'ClassFilterArray' => $this->getChildrenClasses(),
                 'Depth' => 1,
                 'DepthOperator' => 'eq' ) );
         }
@@ -30,12 +43,12 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
     protected function getChildren()
     {
         $list = array();
-        $node = $this->container->getContentNode();
+        $node = $this->container->getContentMainNode();
         if ( $node instanceof eZContentObjectTreeNode )
         {
             $list = $node->subTree( array(
                 'ClassFilterType' => 'include',
-                'ClassFilterArray' => array( 'file_pdf' ),
+                'ClassFilterArray' => $this->getChildrenClasses(),
                 'SortBy' => $node->attribute( 'sort_array' ),
                 'Depth' => 1,
                 'DepthOperator' => 'eq' ) );
@@ -43,16 +56,29 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         return $list;
     }
 
+    protected function getAttributeListIdentifiers()
+    {
+        return array_keys( $this->getAttributeList() );
+    }
+
+    protected function getAttributeListCount()
+    {
+        return count( $this->getAttributeList() ) > 0;
+    }
+
     protected function getAttributeList()
     {
-        $list = array();
-        foreach( $this->container->attributesHandlers as $attribute )
+        if ($this->list === null)
         {
-            if ( $attribute->is( 'attributi_allegati_atti' ) && $attribute->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
+            $this->list = array();
+            foreach( $this->container->attributesHandlers as $attribute )
             {
-                $list[$attribute->attribute( 'identifier' )] = $attribute->attribute( 'contentobject_attribute' );
+                if ( $attribute->is( 'attributi_allegati_atti' ) && $attribute->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
+                {
+                    $this->list[$attribute->attribute( 'identifier' )] = $attribute->attribute( 'contentobject_attribute' );
+                }
             }
         }
-        return $list;
+        return $this->list;
     }
 }

@@ -71,21 +71,9 @@ class OpenPACalendarItem
     }
     
     protected static function getDateTime( $string )
-    {        
+    {
         // '%Y-%m-%dT%H:%M:%SZ' -> Y-m-d\TH:i:s\Z
-        $timestamp = mktime( 11, 30, 0, 12, 5, 1977 );
-        $gmstrftimeTimestamp = '1977-12-05T10:30:00Z';
-        if( ezfSolrDocumentFieldBase::convertTimestampToDate( $timestamp ) == $gmstrftimeTimestamp )
-        {
-            $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, new DateTimeZone( 'UTC' ) );
-            $date->setTimeZone( OpenPACalendarData::timezone() );    
-        }
-        else
-        {
-            $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, OpenPACalendarData::timezone() );
-        }
-        
-        
+        $date = DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $string, OpenPACalendarData::timezone() );
         return $date;
     }
     
@@ -119,17 +107,17 @@ class OpenPACalendarItem
         }
         $this->fields = $this->data['fields'];
         
-        if ( isset( $this->fields['meta_main_url_alias_ms'] ) )
+        if ( isset( $this->fields[eZSolr::getMetaFieldName('main_url_alias')] ) )
         {
-            $this->data['main_url_alias'] = $this->fields['meta_main_url_alias_ms'];
+            $this->data['main_url_alias'] = $this->fields[eZSolr::getMetaFieldName('main_url_alias')];
         }
         
-        if ( isset( $this->fields['attr_from_time_dt'] ) )
+        if ( isset( $this->fields[OpenPASolr::generateSolrField('from_time','date')] ) )
         {
-            $fromDate = self::getDateTime( $this->fields['attr_from_time_dt'] );
+            $fromDate = self::getDateTime( $this->fields[OpenPASolr::generateSolrField('from_time','date')] );
             if ( !$fromDate instanceof DateTime )
             {
-                throw new Exception( "Value of 'attr_from_time_dt' not a valid date" );
+                throw new Exception( "Value of 'from_time' not a valid date" );
             }
             $this->data['fromDateTime'] = $fromDate;
             $this->data['from'] = $fromDate->getTimestamp();
@@ -137,15 +125,15 @@ class OpenPACalendarItem
         }
         else
         {
-            throw new Exception( "Key 'attr_from_time_dt' not found" );
+            throw new Exception( "Key 'from_time' not found" );
         }
         
-        if ( isset( $this->fields['attr_to_time_dt'] ) )
+        if ( isset( $this->fields[OpenPASolr::generateSolrField('to_time','date')] ) )
         {
-            $toDate = self::getDateTime( $this->fields['attr_to_time_dt'] );
+            $toDate = self::getDateTime( $this->fields[OpenPASolr::generateSolrField('to_time','date')] );
             if ( !$toDate instanceof DateTime )
             {
-                throw new Exception( "Param 'attr_to_time_dt' is not a valid date" );
+                throw new Exception( "Param 'to_time' is not a valid date" );
             }
             if ( $toDate->getTimestamp() == 0 ) // workarpund in caso di eventi (importati) senza data di termine
             {                

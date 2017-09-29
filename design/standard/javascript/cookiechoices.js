@@ -92,6 +92,7 @@
 
     function _createConsentText(cookieText) {
       var consentText = document.createElement('span');
+      consentText.style.cssText = 'line-height:1.8;float:left;padding-right: 20px;';
       _setElementText(consentText, cookieText);
       return consentText;
     }
@@ -101,7 +102,7 @@
       _setElementText(dismissLink, dismissText);
       dismissLink.id = dismissLinkId;
       dismissLink.href = '#';
-      dismissLink.style.cssText = 'margin-left:8px;color:#fff;background:#333;padding:4px 8px;font-weight:bold';
+      dismissLink.style.cssText = 'line-height:2;white-space:nowrap;margin-left:8px;color:#fff;background:#333;margin:4px;padding:6px 8px;font-weight:bold';
       return dismissLink;
     }
 
@@ -110,7 +111,7 @@
       _setElementText(infoLink, linkText);
       infoLink.href = linkHref;
       infoLink.target = '_blank';
-      infoLink.style.cssText = 'margin-left:8px;color:#fff;background:#333;padding:4px 8px;font-weight:bold';
+      infoLink.style.cssText = 'line-height:2;white-space:nowrap;margin-left:8px;color:#fff;background:#333;margin:4px;padding:6px 8px;font-weight:bold';
       return infoLink;
     }
 

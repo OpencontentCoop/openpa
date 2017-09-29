@@ -4,12 +4,20 @@ class ObjectHandlerServiceControlTemplate extends ObjectHandlerServiceBase
 {
     function run()
     {
-        $this->data['full'] = $this->getViewTemplate( 'full' );
-        $this->data['line'] = $this->getViewTemplate( 'line' );
-        $this->data['panel'] = $this->getViewTemplate( 'panel' );
-        $this->data['carousel'] = $this->getViewTemplate( 'carousel' );
-        $this->data['carousel_simple'] = $this->getViewTemplate( 'carousel_simple' );
-        $this->data['mail_ezsubtreenotification'] = $this->getViewTemplate( 'mail_ezsubtreenotification' );
+        $availableView = OpenPAINI::variable('ViewSettings', 'AvailableView', array(
+            'full',
+            'line',
+            'panel',
+            'carousel',
+            'carousel_simple',
+            'carousel_evidence',
+            'accordion_content',
+            'mail_ezsubtreenotification',
+            'full_block',
+        ));
+        foreach($availableView as $view){
+            $this->data[$view] = $this->getViewTemplate($view);
+        }
     }
 
     protected function getViewTemplate( $view )

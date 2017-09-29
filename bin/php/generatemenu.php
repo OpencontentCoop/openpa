@@ -19,7 +19,7 @@ try
     if ( OpenPAINI::variable( 'CacheSettings', 'Menu' ) == 'enabled' )
     {
         OpenPAMenuTool::generateAllMenus();
-        eZCache::clearByTag( 'template' );
+        //eZCache::clearByTag( 'template' );
     }
     
     $script->shutdown();

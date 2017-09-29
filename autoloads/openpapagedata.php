@@ -2,9 +2,31 @@
 
 class OpenPAPageData
 {
+    public static $contactsMatrixFields = array(
+        "Telefono",
+        "Fax",
+        "Email",
+        "PEC",
+        "Indirizzo",        
+        "Facebook",
+        "Twitter",
+        "Web",
+        "Codice fiscale",
+        "Partita IVA",
+        "Codice iPA",
+        "Via",
+        "Numero Civico",
+        "CAP",
+        "Comune",
+        "Latitudine",
+        "Longitudine",
+        "Linkedin",
+        "Instagram"
+    );
+
     function operatorList()
     {
-        return array( 'openpapagedata', 'fill_contacts_matrix' );
+        return array( 'openpapagedata', 'fill_contacts_matrix', 'contacts_matrix_fields' );
     }
 
     function namedParameterPerOperator()
@@ -20,7 +42,7 @@ class OpenPAPageData
             ),
             'fill_contacts_matrix' => array(
                 'attribute' => array( 'type' => 'object', 'required' => true ),
-                'fields' => array( 'type' => 'array', 'required' => true )
+                'fields' => array( 'type' => 'array', 'required' => false, 'default' => self::$contactsMatrixFields )
             ),
         );
     }
@@ -29,6 +51,11 @@ class OpenPAPageData
     {
         switch ( $operatorName )
         {
+            case 'contacts_matrix_fields':
+            {
+                $operatorValue = self::$contactsMatrixFields;
+            } break;
+
             case 'fill_contacts_matrix':
             {
                 $attribute = $namedParameters['attribute'];
@@ -97,6 +124,12 @@ class OpenPAPageData
                     'parameters' => $currentModuleParams['parameters'],
                 );
                 $data['is_login_page'] = $data['request']['module'] == 'user' && $data['request']['function'] == 'login';
+                if (class_exists('OcCrossLogin') && in_array('occrosslogin', eZExtension::activeExtensions('access'))){
+                    /** @var OcCrossLogin $helper */
+                    $helper = OcCrossLogin::instance();
+                    $data['is_login_page'] = $helper->needRedirectionToLoginAccessByModule();
+                }
+
                 $data['is_register_page'] = $data['request']['module'] == 'user' && $data['request']['function'] == 'register';
                 $data['is_search_page'] = $data['request']['module'] == 'content' && ( $data['request']['function'] == 'search' || $data['request']['function'] == 'advancedsearch' );
 

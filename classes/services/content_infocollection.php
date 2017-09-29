@@ -2,26 +2,45 @@
 
 class ObjectHandlerServiceContentInfoCollection extends ObjectHandlerServiceBase
 {
+    protected $infoCollectionAttribute;
+    
     function run()
-    {
-        $infoCollections = $this->getInfoCollectionAttributes();
-        $this->data['is_information_collector'] = count( $infoCollections ) > 0;
-        $this->data['attributes'] = $infoCollections;
-        $this->data['identifiers'] = array_keys( $infoCollections );
-        $this->data['extra_identifiers'] = $this->data['is_information_collector'] ? $this->infoCollectorAttributesExtra() : array();
+    {        
+        $this->fnData['is_information_collector'] = 'hasInfoCollectionAttributes';
+        $this->fnData['attributes'] = 'getInfoCollectionAttributes';
+        $this->fnData['identifiers'] = 'getInfoCollectionAttributeIdentifiers';
+        $this->fnData['extra_identifiers'] = 'getExtraInfoCollectionAttributeIdentifiers';
     }
 
+    protected function getExtraInfoCollectionAttributeIdentifiers()
+    {        
+        return $this->hasInfoCollectionAttributes() ? $this->infoCollectorAttributesExtra() : array();
+    }
+    
+    protected function hasInfoCollectionAttributes()
+    {
+        return count( (array)$this->getInfoCollectionAttributes() ) > 0;
+    }
+    
+    protected function getInfoCollectionAttributeIdentifiers()
+    {
+        return array_keys( $this->getInfoCollectionAttributes() );
+    }
+    
     protected function getInfoCollectionAttributes()
     {
-        $data = array();
-        foreach( $this->container->attributesHandlers as $handler )
+        if ($this->infoCollectionAttribute === null)
         {
-            if ( $handler->attribute( 'contentobject_attribute' )->attribute( 'is_information_collector' ) )
+            $this->infoCollectionAttribute = array();
+            foreach( $this->container->attributesHandlers as $handler )
             {
-                $data[$handler->attribute( 'identifier' )] = $handler;
-            }
+                if ( $handler->attribute( 'contentobject_attribute' )->attribute( 'is_information_collector' ) )
+                {
+                    $this->infoCollectionAttribute[$handler->attribute( 'identifier' )] = $handler;
+                }
+            }        
         }
-        return $data;
+        return $this->infoCollectionAttribute;
     }
 
     //@todo

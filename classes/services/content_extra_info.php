@@ -53,15 +53,17 @@ class ObjectHandlerServiceContentExtraInfo extends ObjectHandlerServiceBase
             $nodesParams = array();
             foreach( $this->container->currentPathNodeIds as $pathNodeId )
             {
-                $nodesParams[] = array(
-                    'ParentNodeID' => $pathNodeId,
-                    'ResultID' => 'ezcontentobject_tree.node_id',
-                    'ClassFilterType' => 'include',
-                    'ClassFilterArray' => array( 'global_layout' ),
-                    'Depth' => 1,
-                    'DepthOperator' => 'eq',
-                    'AsObject' => false
-                );
+                if ((int)$pathNodeId > 1) {
+                    $nodesParams[] = array(
+                        'ParentNodeID' => (int)$pathNodeId,
+                        'ResultID' => 'ezcontentobject_tree.node_id',
+                        'ClassFilterType' => 'include',
+                        'ClassFilterArray' => array('global_layout'),
+                        'Depth' => 1,
+                        'DepthOperator' => 'eq',
+                        'AsObject' => false
+                    );
+                }
             }
             if ( !empty( $nodesParams ) )
             {

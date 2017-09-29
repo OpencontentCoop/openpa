@@ -1,1 +1,0 @@
-#286 $useFork = false; //@patch vedi https://github.com/ezsystems/ezfind/pull/71

@@ -82,27 +82,60 @@ try
             }
             if ( $result->hasDiffAttributes )
             {
-                OpenPALog::error( 'Attributi che differiscono dal prototipo' );
-                foreach( $result->diffAttributes as $identifier => $value )
+                $identifiers = array_keys($result->diffAttributes);
+                $errors = array_intersect( array_keys($result->errors), $identifiers );
+                $warnings = array_intersect( array_keys($result->warnings), $identifiers );
+                
+                if ( count( $errors ) > 0 )
+                    OpenPALog::error( 'Attributi che differiscono dal prototipo: ' . count( $result->diffAttributes ) );
+                elseif ( count( $warnings ) > 0 )
+                    OpenPALog::warning( 'Attributi che differiscono dal prototipo: ' . count( $result->diffAttributes ) );
+                else
+                    OpenPALog::notice( 'Attributi che differiscono dal prototipo: ' . count( $result->diffAttributes ) );
+                
+                if ( isset( $options['verbose'] ) )
                 {
-                    if ( isset( $result->errors[$identifier] ) )
-                        OpenPALog::warning( " -> $identifier" );
-                    else
-                        OpenPALog::notice( " -> $identifier" );
-                    
-                    foreach( $value as $diff )
+                    foreach( $result->diffAttributes as $identifier => $value )
                     {
-                        $alert = isset( $result->errors[$identifier] ) && $result->errors[$identifier] == $diff['field_name'] ? '*' : ' ';
-                        OpenPALog::notice( "  $alert {$diff['field_name']} ({$diff['detail']['count']} oggetti)" );   
-                    }                        
+                        if ( isset( $result->errors[$identifier] ) )
+                            OpenPALog::error( " -> $identifier" );
+                        elseif ( isset( $result->warnings[$identifier] ) )
+                            OpenPALog::warning( " -> $identifier" );
+                        else
+                            OpenPALog::notice( " -> $identifier" );                    
+                            
+                        foreach( $value as $diff )
+                        {                        
+                            if ( isset( $result->errors[$identifier][$diff['field_name']] ) )
+                                OpenPALog::error( "    {$diff['field_name']}" );
+                            elseif ( isset( $result->warnings[$identifier][$diff['field_name']] ) )
+                                OpenPALog::warning( "    {$diff['field_name']}" );
+                            else
+                                OpenPALog::notice( "    {$diff['field_name']}" );
+                        }                        
+                    }
                 }
             }
             if ( $result->hasDiffProperties )
             {
-                OpenPALog::error( 'Proprietà che differiscono dal prototipo' );
-                foreach( $result->diffProperties as $property )
-                {                        
-                    OpenPALog::notice( " -> {$property['field_name']}" );
+                if ( isset( $result->errors['properties'] ) )
+                    OpenPALog::notice( 'Proprietà che differiscono dal prototipo: '  . count( $result->diffProperties ) );
+                elseif ( isset( $result->warnings['properties'] ) )
+                    OpenPALog::notice( 'Proprietà che differiscono dal prototipo: '  . count( $result->diffProperties ) );
+                else
+                    OpenPALog::notice( 'Proprietà che differiscono dal prototipo: '  . count( $result->diffProperties ) );
+                
+                if ( isset( $options['verbose'] ) )
+                {
+                    foreach( $result->diffProperties as $property )
+                    {                        
+                        if ( isset( $result->errors['properties'][$property['field_name']] ) )
+                            OpenPALog::error( "    {$property['field_name']}" );
+                        elseif ( isset( $result->warnings['properties'][$property['field_name']] ) )
+                            OpenPALog::warning( "    {$property['field_name']}" );
+                        else
+                            OpenPALog::notice( "    {$property['field_name']}" );
+                    }
                 }
             }
             $tools->sync( $force, $removeExtras );

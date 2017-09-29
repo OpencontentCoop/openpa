@@ -84,20 +84,29 @@ class OpenPABase
 
     public static function getSubSiteaccessIdentifierList()
     {
-        $list = eZLocale::languageList();
+        $list = array();
+        $languages = eZLocale::languageList();
+        foreach( $languages as $language ) {
+            $parts = explode('-', $language);
+            $list[] = $parts[0];
+        }
         $list[] = 'intranet';
+        $list[] = 'debug';
         return $list;
     }
 
     public static function getSiteaccessIdentifier( $siteaccessName )
     {
+        //prototipo_ger_sensor
         $parts = explode( '_', $siteaccessName );
         array_pop( $parts );
+        //prototipo_ger
         if ( count( $parts ) > 1 )
         {
             if ( in_array( $parts[1], self::getSubSiteaccessIdentifierList() ) )
             {
                 unset( $parts[1] );
+                //prototipo
             }
         }
         return implode( '_', $parts );
@@ -123,13 +132,24 @@ class OpenPABase
         if ( !$identifier )
             $identifier = self::getCurrentSiteaccessIdentifier();
         $siteaccess = $identifier . '_' . strtolower( $customName );
+
+        if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
+        {
+            $language = eZLocale::currentLocaleCode();
+            $parts = explode('-', $language);
+            $locale = $parts[0];
+            $siteaccess = "{$identifier}_{$locale}_{$customName}";
+        }
+
         if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
         {
             /** @var eZContentLanguage[] $languages */
             $languages = eZLocale::languageList();
             foreach( $languages as $language )
             {
-                $siteaccess = "{$identifier}_{$language}_{$customName}";
+                $parts = explode('-', $language);
+                $locale = $parts[0];
+                $siteaccess = "{$identifier}_{$locale}_{$customName}";
                 if ( file_exists( "settings/siteaccess/$siteaccess" ) )
                 {
                     break;

@@ -44,6 +44,7 @@ $cli = eZCLI::instance();
 $cli->setUseStyles( true );
 $cli->setIsQuiet( $isQuiet );
 
+/** @var eZUser $user */
 $user = eZUser::fetchByName( 'admin' );
 if ( $user )
 {
@@ -53,8 +54,6 @@ else
 {    
     throw new InvalidArgumentException( "Non esiste un utente admin" ); 
 }
-$loggedUser = eZUser::currentUser();
-$cli->output( "Si sta eseguendo l'agente con l'utente " . $loggedUser->attribute( 'contentobject' )->attribute( 'name' )  );
 
 try
 {
@@ -73,6 +72,7 @@ try
                 $cli->output( "Eseguito cambio sezione per i nodi di classe $classIdentifier: " . implode( ', ', $nodeIds ) );
         }
     }
+
 }
 catch ( Exception $e )
 {

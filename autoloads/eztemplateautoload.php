@@ -19,7 +19,16 @@ $eZTemplateOperatorArray[] = array(
         'find_first_parent',
         'current_object_id',
         'fix_dimension',
-        'object_state_list'
+        'object_state_list',
+        'solr_field',
+        'solr_meta_field',
+        'solr_subfield',
+        'solr_meta_subfield',
+        'search_exclude_class_facets',
+        'search_exclude_classes',
+        'search_query',
+        'strReplace',
+        'organigramma'
     )
 );
 
@@ -77,7 +86,7 @@ $eZTemplateOperatorArray[] = array(
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/openpapagedata.php',
     'class' => 'OpenPAPageData',
-    'operator_names' => array( 'openpapagedata', 'fill_contacts_matrix' )
+    'operator_names' => array( 'openpapagedata', 'fill_contacts_matrix', 'contacts_matrix_fields' )
 );
 
 $eZTemplateOperatorArray[] = array(

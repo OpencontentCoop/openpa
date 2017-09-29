@@ -3,7 +3,7 @@
 $params = array( 'Limitation'  => array(),
                  'LoadDataMap' => false,
                  'ClassFilterType' => 'include',
-                 'ClassFilterArray' => array( 'frontpage' )
+                 'ClassFilterArray' => array( 'frontpage', 'homepage' )
                  );
 $root = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
 
