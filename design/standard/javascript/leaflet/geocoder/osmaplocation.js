@@ -77,6 +77,11 @@ $(document).ready(function () {
 
         reset();
 
+        $container.bind('osmaplocation.setMarker', function(event, data){
+            setMarker(data.latLng, data.address);
+            map.setView(data.latLng, 18);
+        });
+
         myLocationButton.bind('click', function (e) {
             map.loadingControl.addLoader('lc');
             map.locate({setView: true, watch: false})
