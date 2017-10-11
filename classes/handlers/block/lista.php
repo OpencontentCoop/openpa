@@ -61,7 +61,7 @@ class BlockHandlerLista extends OpenPABlockHandler
 
                 $defaultFilter = array();
                 foreach ($this->fetchParameters['subtree_array'] as $subtree) {
-                    $defaultFilter[] = "meta_path_si:" . intval($subtree);
+                    $defaultFilter[] = "path:" . intval($subtree);
                     $defaultFilter[] = "-meta_node_id_si:" . intval($subtree);
                 }
                 if (isset( $this->fetchParameters['class_filter_array'] )
@@ -100,7 +100,7 @@ class BlockHandlerLista extends OpenPABlockHandler
                     if (isset( $this->fetchParameters['virtual_subtree_array'] )) {
                         $pathFilter = array('or');
                         foreach ($this->fetchParameters['virtual_subtree_array'] as $subtree) {
-                            $pathFilter[] = "meta_path_si:" . intval($subtree);
+                            $pathFilter[] = "path:" . intval($subtree);
                         }
 
                         if (count($pathFilter) == 2) {
