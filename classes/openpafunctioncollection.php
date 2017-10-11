@@ -774,7 +774,7 @@ class OpenPaFunctionCollection
 
             if ( !$subTree )
             {
-                $fq[] = eZSolr::getMetaFieldName( 'path' ) . ":" . $contentINI->variable( 'NodeSettings', 'RootNode' );
+                //$fq[] = eZSolr::getMetaFieldName( 'path' ) . ":" . $contentINI->variable( 'NodeSettings', 'RootNode' );
             }
             else
             {
