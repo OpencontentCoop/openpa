@@ -182,37 +182,31 @@ class OpenPAInstance
     public function getType()
     {
         $type = 'altro';
-        $suffix = '_standard';
 
-        if ( in_array( 'openpa_flight', $this->getSiteIni( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
-        {
-            $suffix = '_new_design';
-        }
+        $iniType = OpenPAINI::variable('InstanceSettings', 'InstanceType', false);
+        if (!empty( $iniType )) {
+            $type = $iniType;
 
-        if ( strpos( $this->currentSiteAccessName, '_sensor' ) !== false )
-        {
+        } elseif (strpos($this->currentSiteAccessName, '_sensor') !== false) {
             $type = 'sensor';
-        }
-        elseif ( strpos( $this->currentSiteAccessName, '_dimmi' ) !== false )
-        {
+
+        } elseif (strpos($this->currentSiteAccessName, '_dimmi') !== false) {
             $type = 'dimmi';
-        }
-        elseif ( in_array( 'fusioni', $this->getSiteIni( 'DesignSettings', 'AdditionalSiteDesignList' ) ) )
-        {
+
+        } elseif (strpos($this->currentSiteAccessName, '_agenda') !== false) {
+            $type = 'agenda';
+
+        } elseif (strpos($this->currentSiteAccessName, '_booking') !== false) {
+            $type = 'booking';
+
+        } elseif (in_array('fusioni', $this->getSiteIni('DesignSettings', 'AdditionalSiteDesignList'))) {
             $type = 'fusione';
-        }
-        elseif ( strpos( $this->getSiteIni( 'SiteSettings', 'SiteName' ), 'Comune' ) !== false )
-        {
-            $type = 'comune';
+
+        } elseif (strpos($this->getSiteIni('SiteSettings', 'SiteName'), 'Comun') !== false) {
+            $type = 'comune_standard';
         }
 
-        if ($this->getSiteIni( 'DesignSettings', 'SiteDesign' ) == 'comunefuso')
-        {
-            $type = 'comunefuso';
-            $suffix = '';
-        }
-
-        return $type . $suffix;
+        return $type;
     }
 
     /**
