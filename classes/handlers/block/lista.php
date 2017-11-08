@@ -94,29 +94,33 @@ class BlockHandlerLista extends OpenPABlockHandler
                 }
 
                 $virtualFilter = array();
-                if (isset( $this->fetchParameters['virtual_subtree_array'] )
-                    || isset( $this->fetchParameters['virtual_classes'] )
-                ) {
-                    if (isset( $this->fetchParameters['virtual_subtree_array'] )) {
-                        $pathFilter = array('or');
-                        foreach ($this->fetchParameters['virtual_subtree_array'] as $subtree) {
-                            $pathFilter[] = "path:" . intval($subtree);
+                if ( isset( $this->fetchParameters['virtual_subtree_array'] )
+                     || isset( $this->fetchParameters['virtual_classes'] ) )
+                {
+                    if ( isset( $this->fetchParameters['virtual_subtree_array']  ) )
+                    {
+                        $pathFilter = array( 'or' );
+                        foreach( $this->fetchParameters['virtual_subtree_array'] as $subtree )
+                        {
+                            $pathFilter[] = "meta_path_si:" . intval( $subtree );
                         }
 
-                        if (count($pathFilter) == 2) {
+                        if ( count( $pathFilter ) == 2 )
                             $pathFilter = $pathFilter[1];
-                        }
 
                         $virtualFilter[] = $pathFilter;
                     }
-                    if (count($this->fetchParameters['virtual_classes']) > 1) {
-                        $virtualClassFilter = array('or');
-                        foreach ($this->fetchParameters['virtual_classes'] as $class) {
-                            $virtualClassFilter[] = "meta_class_identifier_ms:" . $class;
-                        }
-                        $virtualFilter[] = $virtualClassFilter;
-                    } elseif (count($this->fetchParameters['virtual_classes']) == 1) {
-                        $virtualFilter[] = "meta_class_identifier_ms:" . $this->fetchParameters['virtual_classes'][0];
+                    $virtualClassFilters = array();
+                    foreach( $this->fetchParameters['virtual_classes'] as $class )
+                    {
+                        $virtualClassFilters[] =  "meta_class_identifier_ms:" . $class;
+                    }
+                    if (count($virtualClassFilters) > 1){
+                        array_unshift($virtualClassFilters, 'or');
+                    }
+
+                    if (!empty($virtualClassFilters)){
+                        $virtualFilter[] = $virtualClassFilters;
                     }
                 }
 
