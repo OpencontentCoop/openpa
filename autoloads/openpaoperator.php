@@ -243,11 +243,16 @@ class OpenPAOperator
                     $queryArray[] = "q = '$searchText'";
                 }
 
+                $subtree = array();
                 if ( $http->hasGetVariable( 'SubTreeArray' ) && !empty( $http->getVariable( 'SubTreeArray' ) ) )
                 {
                     $subtree = (array)$http->getVariable( 'SubTreeArray' );
-                }else{
-                    $subtree = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
+                }
+
+                $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
+                if (empty($subtree) || (count($subtree) == 1 && $subtree[0] = $rootNodeId))
+                {
+                    $subtree = array($rootNodeId);
                     /** @var eZContentObjectTreeNode[] $trasparenzaList */
                     $trasparenzaList = eZContentObjectTreeNode::subTreeByNodeID(
                         array(
