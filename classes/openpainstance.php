@@ -39,6 +39,8 @@ class OpenPAInstance
      */
     protected $currentSiteAccessName;
 
+    private $db;
+
     public function __construct( $siteAccessName )
     {
         if ( empty( $siteAccessName ) )
@@ -167,7 +169,51 @@ class OpenPAInstance
      */
     public function getGoogleId()
     {
+        $stmt = $this->connectToInstanceDb()->prepare( 'SELECT value FROM ezsite_data WHERE name = :name' );
+        $stmt->bindValue( ':name', 'GoogleAnalyticsAccountID' );
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($data){
+            return $data['value'];
+        }
         return $this->getOpenpaIni( 'Seo', 'GoogleAnalyticsAccountID' );
+    }
+
+    private function connectToInstanceDb()
+    {
+        if (!$this->db){
+
+            $dbMapping = array( 'ezmysqli' => 'mysql',
+                                'ezmysql' => 'mysql',
+                                'mysql' => 'mysql',
+                                'mysqli' => 'mysql',
+                                'pgsql' => 'pgsql',
+                                'postgresql' => 'pgsql',
+                                'ezpostgresql' => 'pgsql',
+                                'ezoracle' => 'oracle',
+                                'oracle' => 'oracle' );
+
+            $databaseSettings = $this->getDatabaseSettings();
+            $dbType = $databaseSettings['DatabaseImplementation'];
+            $dbUser = $databaseSettings['User'];
+            $dbPass = $databaseSettings['Password'];
+            $dbHost = $databaseSettings['Server'];
+            $dbPort = $databaseSettings['Port'];
+            $dbName = $databaseSettings['Database'];
+
+            if ( !isset( $dbMapping[$dbType] ) ) {
+                throw new Exception( "Unknown / unmapped DB type '$dbType'" );
+            }
+
+            $dbType = $dbMapping[$dbType];
+
+            $dsnHost = $dbHost . ( $dbPort != '' ? ":$dbPort" : '' );
+
+            $dsn = "{$dbType}://{$dbUser}:{$dbPass}@{$dsnHost}/{$dbName}";
+            $this->db = ezcDbFactory::create( $dsn );
+        }
+
+        return $this->db;
     }
 
     /**
@@ -207,97 +253,6 @@ class OpenPAInstance
         }
 
         return $type;
-    }
-
-    /**
-     * Ritorna l'istanza in formato wiki table row
-     * @param string $index Indice della riga
-     * @param bool $returnHeaders Restituisce gli headers
-     *
-     * @return string
-     */
-    public function toWikiTableRow( $index = '', $returnHeaders = false )
-    {
-        $isValid = ( $this->isLive() == true ) ? '[[span(style=color: #FF0000, si )]]' : 'no';
-        $seo = $this->getGoogleId() != '' ? '{{{' . $this->getGoogleId() . '}}}' : '?';
-
-        $data = array(
-            '=N='                       => $index,
-            '=Identificatore='          => $this->getSiteAccessBaseName(),
-            '=Tipologia='               => $this->getType(),
-            '=Ente='                    => $this->getName(),
-            '=Dominio di produzione='   => $this->isLive() ? "'''" . $this->getUrl( self::PRODUCTION ) . "'''" : $this->getUrl( self::PRODUCTION ),
-            '=Dominio di staging='      => $this->isLive() ? $this->getUrl( self::STAGING ) : "'''" . $this->getUrl( self::STAGING ) . "'''",
-            '=Data='                    => $this->getProductionDate(),
-            '=Live='                    => $isValid,
-            '=GoogleID='                => $seo,
-        );
-
-        if ( $returnHeaders )
-        {
-            $toImplode = array_keys( $data );
-        }
-        else
-        {
-            $toImplode = array_values( $data );
-        }
-
-        $string = '||'. implode( '||', $toImplode ) . '||';
-
-        return $string;
-    }
-
-    /**
-     * Restituisce un set di valori in formato hash usato poi da instances.yml
-     * @todo Astrarre formato hash con OCSiteInstanceInterface o simili
-     * @return array
-     */
-    public function toHash()
-    {
-        return array(
-            'name' => $this->getName(),
-            'url' => $this->getUrl( self::PRODUCTION ),
-            'url_staging' => $this->getUrl( self::STAGING ),
-            'production_date' => $this->getProductionDate(),
-            'google_id' => $this->getGoogleId()
-        );
-    }
-
-    /**
-     * @todo Astrarre formato hash con OCSiteInstanceInterface o simili
-     * @see self::toHash
-     * @param string $instanceName
-     * @param array $compareValues
-     *
-     * @throws Exception
-     */
-    public static function compare( $instanceName, $compareValues )
-    {
-        $silentErrorKeys = array( 'production_date' );
-        $errors = array();
-        $instance = new self( $instanceName . '_frontend' );
-        $liveData = $instance->toHash();
-        foreach( $compareValues as $name => $value )
-        {
-            if ( !isset( $liveData[$name] ) )
-            {
-                $errors[] = "Il valore '$name' non esiste nell'installazione corrente";
-            }
-            elseif ( $liveData[$name] !== $value )
-            {
-                if ( !in_array( $name, $silentErrorKeys ) )
-                    $errors[] = "Il valore di '$name' è '$value', nell'installazione corrente invece è '$liveData[$name]'";
-            }
-        }
-        if ( count( $errors ) > 0 )
-        {
-            throw new Exception( implode( "\n", $errors ) );
-        }
-        $googleId = $instance->getGoogleId();
-        if ( empty( $googleId ) )
-        {
-            throw new Exception( "Attenzione valore GoogleId vuoto" );
-        }
     }
 
     public function isMain()
