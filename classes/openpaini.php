@@ -400,7 +400,8 @@ class OpenPAINI
     }
 
     public static function clearDynamicIniCache(){
-        eZClusterFileHandler::instance( self::dynamicIniCachePath() )->purge();
+        eZClusterFileHandler::instance( self::dynamicIniCachePath() )->delete();
+        eZCache::clearContentCache(null);
     }
 
 }
