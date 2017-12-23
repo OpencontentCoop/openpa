@@ -3,7 +3,7 @@
 ExtensionDirectories[]=openpa
 
 Scripts[]=change_section.php
-Scripts[]=generate_menu.php
+#Scripts[]=generate_menu.php
 
 [CronjobPart-rss]
 Scripts[]=rssimport.php
