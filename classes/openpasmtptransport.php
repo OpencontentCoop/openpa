@@ -103,7 +103,7 @@ class OpenPASMTPTransport extends eZMailTransport
         $from = $mail->Mail->from;
         $toList = array_merge($mail->Mail->to, $mail->Mail->cc, $mail->Mail->bcc);
         $to = implode(', ', $toList);
-        $subject = $mail->Subject;
+        $subject = $mail->Mail->subject;
 
         return "[$current] Subject: $subject From: $from To: $to [$caller]";
     }
