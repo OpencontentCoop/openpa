@@ -155,6 +155,12 @@ $ViewList['seo'] = array(
     'functions' => array( 'seo' )
 );
 
+$ViewList['recaptcha'] = array(
+    'script' =>	'recaptcha.php',
+    'params' => array(),
+    'functions' => array( 'recaptcha' )
+);
+
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
@@ -166,6 +172,7 @@ $FunctionList['object'] = array();
 $FunctionList['signup'] = array();
 $FunctionList['cookie'] = array();
 $FunctionList['seo'] = array();
+$FunctionList['recaptcha'] = array();
 
 
 ?>
