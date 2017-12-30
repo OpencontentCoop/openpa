@@ -48,6 +48,17 @@ class OpenPASMTPTransport extends eZMailTransport
             if ($emailSender) {
                 $mail->setSenderText($emailSender);
             }
+        }else{
+            $sender = $mail->Mail->from->email;
+            $isValid = $sender == $ini->variable('MailSettings', 'EmailSender');
+            if ($ini->hasVariable('MailSettings', 'VerifiedEmailSender')){
+                $verifiedSenders = (array)$ini->variable('MailSettings', 'VerifiedEmailSender');
+                $isValid = in_array($sender, $verifiedSenders);
+            }
+            if(!$isValid){
+                $mail->Mail->from->email = $ini->variable('MailSettings', 'EmailSender');
+                $mail->Mail->from->name	= $sender;
+            }
         }
 
         $excludeHeaders = $ini->variable('MailSettings', 'ExcludeHeaders');
