@@ -125,11 +125,11 @@ class OpenPASMTPTransport extends eZMailTransport
             $domain = substr(strrchr($address->email, "@"), 1);
             $suffix = substr(strrchr($address->email, "."), 1);
             if (in_array($domain, $blackListDomains)){
-                throw new Exception("Receiver domain <{$domain}> is in black list");
+                throw new ezcMailException("Receiver domain <{$domain}> is in black list");
             }
 
             if (in_array($suffix, $blackListDomainSuffixes)){
-                throw new Exception("Receiver domain suffix <{$suffix}> is in black list");
+                throw new ezcMailException("Receiver domain suffix <{$suffix}> is in black list");
             }
         }
     }
