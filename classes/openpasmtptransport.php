@@ -73,6 +73,12 @@ class OpenPASMTPTransport extends eZMailTransport
         $smtp = new ezcMailSmtpTransport($parameters['host'], $user, $password,
             $parameters['port'], $options);
 
+
+        /* @see eZMailNotificationTransport::send#49 workaround */
+        if (empty($mail->Mail->to) && !empty($mail->Mail->bcc)){
+            $mail->Mail->to = array_shift($mail->Mail->bcc);
+        }
+
         // If in debug mode, send to debug email address and nothing else
         if ($ini->variable('MailSettings', 'DebugSending') == 'enabled') {
             $mail->Mail->to = array(new ezcMailAddress($ini->variable('MailSettings', 'DebugReceiverEmail')));
