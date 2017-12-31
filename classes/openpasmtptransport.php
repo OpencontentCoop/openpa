@@ -89,8 +89,12 @@ class OpenPASMTPTransport extends eZMailTransport
         // send() from ezcMailSmtpTransport doesn't return anything (it uses exceptions in case
         // something goes bad)
         try {
+
+            $this->validateReceivers($mail->Mail);
             $smtp->send($mail->Mail);
+
         } catch (ezcMailException $e) {
+
             eZDebug::writeError($e->getMessage(), __METHOD__);
             $this->logError($mail, $e->getMessage());
 
@@ -100,6 +104,34 @@ class OpenPASMTPTransport extends eZMailTransport
 
         // return true in case of no exceptions
         return true;
+    }
+
+    private function validateReceivers(ezcMail $mail)
+    {
+        $ini = eZINI::instance();
+
+        $blackListDomains = array();
+        if ($ini->hasVariable('MailSettings', 'BlackListEmailDomains')){
+            $blackListDomains = (array)$ini->variable('MailSettings', 'BlackListEmailDomains');
+        }
+        $blackListDomainSuffixes = array();
+        if ($ini->hasVariable('MailSettings', 'BlackListEmailDomainSuffixes')){
+            $blackListDomainSuffixes = (array)$ini->variable('MailSettings', 'BlackListEmailDomainSuffixes');
+        }
+
+        /** @var ezcMailAddress[] $toList */
+        $toList = array_merge($mail->to, $mail->cc, $mail->bcc);
+        foreach($toList as $address){
+            $domain = substr(strrchr($address->email, "@"), 1);
+            $suffix = substr(strrchr($address->email, "."), 1);
+            if (in_array($domain, $blackListDomains)){
+                throw new Exception("Receiver domain <{$domain}> is in black list");
+            }
+
+            if (in_array($suffix, $blackListDomainSuffixes)){
+                throw new Exception("Receiver domain suffix <{$suffix}> is in black list");
+            }
+        }
     }
 
     private function logSuccess(eZMail $mail)
