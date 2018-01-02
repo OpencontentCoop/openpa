@@ -76,7 +76,7 @@ class OpenPASMTPTransport extends eZMailTransport
 
         /* @see eZMailNotificationTransport::send#49 workaround */
         if (empty($mail->Mail->to) && !empty($mail->Mail->bcc)){
-            $mail->Mail->to = array_shift($mail->Mail->bcc);
+            $mail->Mail->to = array(array_shift($mail->Mail->bcc));
         }
 
         // If in debug mode, send to debug email address and nothing else
