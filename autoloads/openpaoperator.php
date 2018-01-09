@@ -250,7 +250,7 @@ class OpenPAOperator
                 }
 
                 $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' );
-                if (empty($subtree) || (count($subtree) == 1 && $subtree[0] = $rootNodeId))
+                if (empty($subtree) || (count($subtree) == 1 && $subtree[0] == $rootNodeId))
                 {
                     $subtree = array($rootNodeId);
                     /** @var eZContentObjectTreeNode[] $trasparenzaList */
