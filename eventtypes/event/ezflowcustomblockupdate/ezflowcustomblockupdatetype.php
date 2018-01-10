@@ -11,27 +11,30 @@ class eZFlowCustomBlockupdateType extends eZWorkflowEventType
  
     public function execute( $process, $event )
     {
-        $parameters = $process->attribute( 'parameter_list' );
-        $customBlocks = new CustomBlockFinder();
-        if ( isset( $parameters['object_id'] ) )
-        {
-            $objectID = $parameters['object_id'];
-            $object = eZContentObject::fetch( $objectID );
-            if ( $object )
-            {
-                $customBlocks->checkObject( $object, true );
-            }
-        }
-        elseif ( isset( $parameters['node_id_list'] ) ) //delete
-        {
-            foreach( $parameters['node_id_list'] as $node_id )
-            {
-                $node = eZContentObjectTreeNode::fetch( $node_id );
-                $customBlocks->checkNode( $node, true );
-            }
-        }
-        
+        eZDebug::writeNotice('Workflow eZFlowCustomBlockupdateType disabilitato per problemi di perfomance', __METHOD__);
         return eZWorkflowType::STATUS_ACCEPTED;
+
+//        $parameters = $process->attribute( 'parameter_list' );
+//        $customBlocks = new CustomBlockFinder();
+//        if ( isset( $parameters['object_id'] ) )
+//        {
+//            $objectID = $parameters['object_id'];
+//            $object = eZContentObject::fetch( $objectID );
+//            if ( $object )
+//            {
+//                $customBlocks->checkObject( $object, true );
+//            }
+//        }
+//        elseif ( isset( $parameters['node_id_list'] ) ) //delete
+//        {
+//            foreach( $parameters['node_id_list'] as $node_id )
+//            {
+//                $node = eZContentObjectTreeNode::fetch( $node_id );
+//                $customBlocks->checkNode( $node, true );
+//            }
+//        }
+//
+//        return eZWorkflowType::STATUS_ACCEPTED;
     }
 }
 eZWorkflowEventType::registerEventType( eZFlowCustomBlockupdateType::WORKFLOW_TYPE_STRING, 'eZFlowCustomBlockupdateType' );
