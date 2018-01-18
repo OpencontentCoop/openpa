@@ -10,6 +10,8 @@ class OpenPAOperator
 
     private static $currentObjectId;
 
+    private static $trasparenzaRootNodeId;
+
     function OpenPAOperator()
     {
         $this->Operators= array(
@@ -36,7 +38,8 @@ class OpenPAOperator
             'search_exclude_classes',
             'search_query',
             'strReplace',
-            'organigramma'
+            'organigramma',
+            'trasparenza_root_node_id'
         );
     }
 
@@ -99,11 +102,11 @@ class OpenPAOperator
             ),
             'strReplace' => array(
                 'var' => array ( 'type' => 'string', 'required' => true, 'default' => ''),
-				'value' => array ( 'type' => 'array', 'required' => true,'default' => '' )
-			),
+                'value' => array ( 'type' => 'array', 'required' => true,'default' => '' )
+            ),
             'search_query' => array(
                 'override' => array ( 'type' => 'mixed', 'required' => false, 'default' => array())
-			),
+            ),
             'organigramma' => array(
                 'root_object_id' => array ( 'type' => 'integer', 'required' => false, 'default' => null)
             )
@@ -146,6 +149,12 @@ class OpenPAOperator
 
         switch ( $operatorName )
         {
+            case 'trasparenza_root_node_id':
+            {
+                $operatorValue = $this->getTrasparenzaRootNodeId();
+                break;
+            }
+
             case 'organigramma':
             {
                 $data = OpenPAOrganigrammaTools::instance()->tree($namedParameters['root_object_id']);
@@ -154,12 +163,12 @@ class OpenPAOperator
             }
 
             case 'strReplace':
-			{
-				$variable = $namedParameters['var'];
+            {
+                $variable = $namedParameters['var'];
                 $value = @$namedParameters['value'];
                 $operatorValue = str_replace($value[0],$value[1],$variable);
-				break;
-			}
+                break;
+            }
 
             case 'search_exclude_class_facets':
             case 'search_exclude_classes':
@@ -167,9 +176,9 @@ class OpenPAOperator
                 $excludeFacets = array();
                 $excludeClasses = array();
 
-                $iniNotAvailableFacets 	= OpenPAINI::variable( 'MotoreRicerca', 'faccette_non_disponibili', array() );
+                $iniNotAvailableFacets  = OpenPAINI::variable( 'MotoreRicerca', 'faccette_non_disponibili', array() );
                 $iniNotAvailableFacetsGroups = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_faccette_non_disponibili', array() );
-                $classesNotAvailable 	= OpenPAINI::variable( 'MotoreRicerca', 'classi_non_disponibili', array() );
+                $classesNotAvailable    = OpenPAINI::variable( 'MotoreRicerca', 'classi_non_disponibili', array() );
                 $classGroupNotAvailable = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_classi_non_disponibili', array() );
 
                 $classes = eZPersistentObject::fetchObjectList( eZContentClass::definition(), null, array( "version" => eZContentClass::VERSION_STATUS_DEFINED ) );
@@ -253,16 +262,9 @@ class OpenPAOperator
                 if (empty($subtree) || (count($subtree) == 1 && $subtree[0] == $rootNodeId))
                 {
                     $subtree = array($rootNodeId);
-                    /** @var eZContentObjectTreeNode[] $trasparenzaList */
-                    $trasparenzaList = eZContentObjectTreeNode::subTreeByNodeID(
-                        array(
-                            'ClassFilterType' => 'include',
-                            'ClassFilterArray' => array('trasparenza'),
-                            'Limit' => 1
-                        ), 1
-                    );
-                    if (count($trasparenzaList) > 0){
-                        $subtree[] = $trasparenzaList[0]->attribute('main_node_id');
+                    $trasparenzaRootNodeId = $this->getTrasparenzaRootNodeId();
+                    if ($trasparenzaRootNodeId){
+                        $subtree[] = $trasparenzaRootNodeId;
                     }
                 }
                 $queryArray[] = 'subtree [' . implode( ',', $subtree ) . ']';
@@ -903,9 +905,9 @@ class OpenPAOperator
 
     private function custom_substr( $string, $start, $length )
     {
-		if( strlen( $string ) > $length )
+        if( strlen( $string ) > $length )
         {
-			$substr = substr( $string, $start, $length );
+            $substr = substr( $string, $start, $length );
             if ( $start == 0 )
             {
                 $lastSpace = strrpos( $substr, " " );
@@ -916,9 +918,9 @@ class OpenPAOperator
                 $firstSpace = strpos( $substr, " " );
                 $string = substr( $substr, $firstSpace, $length );
             }
-		}
-		return $string;
-	}
+        }
+        return $string;
+    }
 
     private function get_area_tematica_node( $nodeID = 0 )
     {
@@ -982,6 +984,30 @@ class OpenPAOperator
         return self::$currentObjectId;
     }
 
-}
+    /**
+     * @return null|int
+     */
+    private function getTrasparenzaRootNodeId()
+    {
+        if (self::$trasparenzaRootNodeId === null) {
 
-?>
+            self::$trasparenzaRootNodeId = false;
+
+            /** @var eZContentObjectTreeNode[] $trasparenzaList */
+            $trasparenzaList = eZContentObjectTreeNode::subTreeByNodeID(
+                array(
+                    'ClassFilterType' => 'include',
+                    'ClassFilterArray' => array('trasparenza'),
+                    'Limit' => 1
+                ), 1
+            );
+
+            if (count($trasparenzaList) > 0) {
+                self::$trasparenzaRootNodeId = $trasparenzaList[0]->attribute('main_node_id');
+            }
+        }
+
+        return self::$trasparenzaRootNodeId;
+    }
+
+}

@@ -28,7 +28,8 @@ $eZTemplateOperatorArray[] = array(
         'search_exclude_classes',
         'search_query',
         'strReplace',
-        'organigramma'
+        'organigramma',
+        'trasparenza_root_node_id'
     )
 );
 
