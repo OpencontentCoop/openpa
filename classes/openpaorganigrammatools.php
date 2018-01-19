@@ -47,9 +47,11 @@ class OpenPAOrganigrammaTools
 
     public static function clearCache()
     {
-        $cacheFilePath = eZSys::cacheDirectory() . "/openpaorganigramma";
+        $language = eZLocale::currentLocaleCode();
+        $cacheFilePath = eZSys::cacheDirectory() . "/openpaorganigramma/$language.php";
         $cacheFile = eZClusterFileHandler::instance($cacheFilePath);
         if ($cacheFile->exists()){
+            $cacheFile->delete();
             $cacheFile->purge();
         }
     }
