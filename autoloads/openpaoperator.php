@@ -334,7 +334,8 @@ class OpenPAOperator
                                 elseif ( in_array( $fields[$key]['dataType'], array( 'ezstring' ) ) )
                                 {
                                     if ( !empty( $values ) )
-                                        $queryArray[] = "{$key} = [\"{$values}\"]";
+                                        $queryArray[] = "{$key} = [{$values}]";
+                                        //$queryArray[] = "{$key} = [\"{$values}\"]"; //@see Opencontent\Opendata\Api\QueryLanguage\EzFind\SentenceConverter::formatFilterValue
                                 }
                                 else
                                 {
