@@ -1066,7 +1066,11 @@ class OpenPaFunctionCollection
             {
                 $rootNodeId = eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'HomepageNode' );
             }
-            self::$home = eZContentObjectTreeNode::fetch( $rootNodeId );
+            if (is_numeric($rootNodeId)){
+                self::$home = eZContentObjectTreeNode::fetch( $rootNodeId );
+            }else{
+                self::$home = eZContentObjectTreeNode::fetchByRemoteID( $rootNodeId );
+            }
         }
         return self::$home;
     }
