@@ -406,4 +406,11 @@ class OpenPABase
         return $returnValue;
     }
 
+    public static function addXIstanceHeader($output)
+    {
+        header( 'X-Istance-Id: ' . self::getCurrentSiteaccessIdentifier());
+
+        return $output;
+    }
+
 }
