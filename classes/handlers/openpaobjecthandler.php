@@ -426,20 +426,15 @@ class OpenPAObjectHandler
         return new $class( $attribute, $parameters );
     }
 
-    public function flush( $index = true )
+    public function flush( $index = true, $clearCache = true )
     {
-        if ( $this->contentObject instanceof eZContentObject )
-        {
-            /*
-            $eZSolr = eZSearch::getEngine();
-            $eZSolr->addObject( $this->contentObject, false );
-            $eZSolr->commit();
-             */
-            if ( $index )
-            {
+        if ( $this->contentObject instanceof eZContentObject ) {
+            if ( $index ) {
                 $this->addPendingIndex();
             }
-            eZContentCacheManager::clearContentCacheIfNeeded( $this->currentObjectId );
+            if ( $clearCache ) {
+                eZContentCacheManager::clearContentCacheIfNeeded($this->currentObjectId);
+            }
             $this->contentObject->resetDataMap();
             eZContentObject::clearCache( array( $this->currentObjectId ) );
             unset( self::$instances[$this->currentObjectId] );
