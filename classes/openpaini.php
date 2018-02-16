@@ -5,8 +5,6 @@ class OpenPAINI
 
     public static $useDynamicIni;
 
-    private static $googleAnalyticsAccountID;
-
     private static $enableRobots;
 
     public static $dynamicIniMap = array(
@@ -167,7 +165,9 @@ class OpenPAINI
 
     protected static function googleAnalyticsAccountID()
     {
-        if ( self::$googleAnalyticsAccountID === null )
+        $http = eZHTTPTool::instance();
+        $sessionVar = OpenPABase::getCurrentSiteaccessIdentifier() . '-GoogleAnalyticsAccountID';
+        if ( !$http->hasSessionVariable($sessionVar) )
         {
             $googleAnalyticsAccountIDSiteData = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
             if ( !$googleAnalyticsAccountIDSiteData instanceof eZSiteData )
@@ -181,13 +181,13 @@ class OpenPAINI
                         'value' => $googleAnalyticsAccountID
                     ));
                     $googleAnalyticsAccountIDSiteData->store();
-                    self::$googleAnalyticsAccountID = $googleAnalyticsAccountID;
+                }else {
+                    $http->setSessionVariable($sessionVar, false);
                 }
-                self::$googleAnalyticsAccountID = false;
             }
-            self::$googleAnalyticsAccountID = $googleAnalyticsAccountIDSiteData->attribute('value');
+            $http->setSessionVariable($sessionVar, $googleAnalyticsAccountIDSiteData->attribute('value'));
         }
-        return self::$googleAnalyticsAccountID;
+        return $http->sessionVariable($sessionVar);
     }
 
     protected static function isRobotsEnabled()
@@ -287,6 +287,10 @@ class OpenPAINI
                     }
                     $data->setAttribute('value', $value);
                     $data->store();
+
+                    $http = eZHTTPTool::instance();
+                    $sessionVar = OpenPABase::getCurrentSiteaccessIdentifier() . '-GoogleAnalyticsAccountID';
+                    $http->setSessionVariable($sessionVar, $data->attribute('value'));
 
                     return true;
                     break;
