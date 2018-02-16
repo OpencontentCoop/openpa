@@ -155,44 +155,56 @@ class OpenPASectionTools
             $this->cli->output();
         }
 
-        /** @var eZContentObjectTreeNode[] $nodeArray */
-        $nodeArray = $this->currentRootNode->subTree( array(
-                'ClassFilterType' => 'include',
-                'ClassFilterArray' => array( $this->currentClassIdentifier ),
-                'LoadDataMap' => false,
-                'Limitation' => array(),
-                'AttributeFilter' => array( array( 'section', '!=', $this->currentSectionDestinationId ) )
-            )
+        $params = array(
+            'ClassFilterType' => 'include',
+            'ClassFilterArray' => array( $this->currentClassIdentifier ),
+            'LoadDataMap' => false,
+            'Limitation' => array(),
+            'AttributeFilter' => array( array( 'section', '!=', $this->currentSectionDestinationId ) )
         );
 
-        $count = count( $nodeArray );
-        if ( $count > 0 )
-        {
+        $count = (int)$this->currentRootNode->subTreeCount($params);
+        if ($this->log){
+            $this->cli->output( 'Trovati: '.$count.' oggetti' );
+        }
+        if ($count > 0) {
+            $length = 50;
+            $params['Offset'] = 0;
+            $params['Limit'] = $length;
+
             $progressBar = false;
-            if ( $this->log )
-            {
+            if ($this->log) {
                 $output = new ezcConsoleOutput();
-                $progressBarOptions = array( 'emptyChar' => ' ', 'barChar'  => '=' );
-                $progressBar = new ezcConsoleProgressbar( $output, intval( $count ), $progressBarOptions );
+                $progressBarOptions = array('emptyChar' => ' ', 'barChar' => '=');
+                $progressBar = new ezcConsoleProgressbar($output, $count, $progressBarOptions);
                 $progressBar->start();
             }
 
-            foreach ( $nodeArray as $currentNode )
-            {
-                if ( $this->log ) $progressBar->advance();
-                $result = $this->changeNodeSection( $currentNode, $moveToTrashNodes );
-                if ( $this->log && $result ) $this->cli->output( '*' );
+            do {
+                /** @var eZContentObjectTreeNode[] $nodeArray */
+                $nodeArray = (array)$this->currentRootNode->subTree($params);
+                foreach ($nodeArray as $currentNode) {
+                    if ($this->log) {
+                        $progressBar->advance();
+                    }
+                    $result = $this->changeNodeSection($currentNode, $moveToTrashNodes);
+                    if ($this->log && $result) {
+                        $this->cli->output('*');
+                    }
+                }
+                $params['Offset'] += $length;
+            } while (count($nodeArray) == $length);
+
+            if ($this->log) {
+                $progressBar->finish();
             }
-
-            if ( $this->log ) $progressBar->finish();
         }
-
         if ( $this->log )
         {
             $this->cli->output();
             $memoryMax = memory_get_peak_usage(); // Result is in bytes
             $memoryMax = round( $memoryMax / 1024 / 1024, 2 ); // Convert in Megabytes
-            $this->cli->output( ' Memoria usata: '.$memoryMax.'M' );
+            $this->cli->output( 'Memoria usata: '.$memoryMax.'M' );
         }
     }
 
@@ -297,26 +309,21 @@ class OpenPASectionTools
                 if ( $isClone ) return false;
                 //@todo refactor in service end
 
-                if ( eZOperationHandler::operationIsAvailable( 'content_updatesection' ) )
-                {
-                    eZOperationHandler::execute( 'content',
-                        'updatesection',
-                        array(
-                            'node_id' => $currentNode->attribute( 'node_id' ),
-                            'selected_section_id' => $this->currentSectionDestinationId ),
-                        null,
-                        true
-                    );
-                }
-                else
-                {
+                if ($currentNode->childrenCount() > 0){
                     eZContentOperationCollection::updateSection( $currentNode->attribute( 'node_id' ), $this->currentSectionDestinationId );
+                }else {
+                    $db = eZDB::instance();
+                    $objectId = (int)$currentNode->attribute('contentobject_id');
+                    $db->begin();
+                    $db->query("UPDATE ezcontentobject SET section_id='{$this->currentSectionDestinationId}' WHERE id = $objectId");
+                    $db->commit();
                 }
+                
                 self::$changeNodeIds[$this->currentClassIdentifier][] = $currentNode->attribute( 'node_id' );                
                 $handler->flush();
                 return true;
             }
-            $handler->flush( false );
+            $handler->flush(false, false);
         }
         return false;
     }
