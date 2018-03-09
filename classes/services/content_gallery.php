@@ -86,6 +86,18 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
                 $this->imagesFetchParams
             );
 
+            if (
+                isset($this->container->attributesHandlers['image'])
+                && $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->attribute( 'data_type_string' ) == 'ezobjectrelation'
+                && $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->attribute( 'has_content' )
+            ){
+                $relatedImages = explode('-', $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->toString());
+                if(OpenPAINI::variable('ContentGallery', 'ExcludeFirstImageRelation', 'enabled') == 'enabled'){
+                    array_shift($relatedImages);
+                }
+                $imageCount += count($relatedImages);
+            }
+
             self::$cache[$this->container->currentMainNodeId]['single_images_count'] = $imageCount;
         }
         return self::$cache[$this->container->currentMainNodeId]['single_images_count'] > 0;
@@ -145,6 +157,22 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
                     'list',
                     $this->imagesFetchParams
                 );
+
+                if (
+                    isset($this->container->attributesHandlers['image'])
+                    && $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->attribute( 'data_type_string' ) == 'ezobjectrelationlist'
+                    && $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->attribute( 'has_content' )
+                ){
+                    $relatedImages = explode('-', $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->toString());
+                    if(OpenPAINI::variable('ContentGallery', 'ExcludeFirstImageRelation', 'enabled') == 'enabled'){
+                        array_shift($relatedImages);
+                    }
+                    foreach ($relatedImages as $id) {
+                        $relatedImage = eZContentObject::fetch((int)$id);
+                        if ($relatedImage instanceof eZContentObject)
+                            self::$cache[$this->container->currentMainNodeId]['single_images'][] = $relatedImage->mainNode();
+                    }
+                }
             }
             else
             {
