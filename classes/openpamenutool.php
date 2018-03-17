@@ -3,7 +3,7 @@
 class OpenPAMenuTool
 {
     const CACHE_IDENTIFIER = 'openpamenu';
-    
+
     const TOPMENU = 'topmenu';
     const LEFTMENU = 'leftmenu';
     const TREEMENU = 'treemenu';
@@ -40,7 +40,7 @@ class OpenPAMenuTool
      * @throws Exception
      */
     public static function getLeftMenu( $parameters )
-    {        
+    {
         $instance = self::instanceMenuHandler( self::LEFTMENU, $parameters );
         return self::getMenu( $instance );
     }
@@ -125,7 +125,7 @@ class OpenPAMenuTool
             );
         }
     }
-    
+
     public static function refreshMenu( $id = null, $siteAccess = 'current' )
     {
         if ( $id === null && $siteAccess === false )
@@ -178,9 +178,9 @@ class OpenPAMenuTool
             }
         }
     }
-    
+
     public static function generateAllMenus()
-    {        
+    {
         $designList = (array) eZINI::instance()->variable( 'DesignSettings', 'AdditionalSiteDesignList' );
         if ( in_array( 'admin', $designList ) )
         {
@@ -192,7 +192,7 @@ class OpenPAMenuTool
         $siteAccess = $GLOBALS['eZCurrentAccess']['name'];
         OpenPALog::notice( "Clear all menu for siteaccess $siteAccess" );
         self::refreshMenu();
-        
+
         $menuItems = OpenPaFunctionCollection::fetchTopMenuNodes();
 
         foreach( $menuItems as $index => $item )
@@ -326,7 +326,7 @@ class OpenPAMenuTool
 
     public static function exitAnonymous()
     {
-        if ( self::$currentUser instanceof eZUser )
+        if ( self::$currentUser instanceof eZUser && self::$currentUser->id() != eZUser::anonymousId() )
         {
             eZUser::setCurrentlyLoggedInUser( self::$currentUser, self::$currentUser->id() );
         }

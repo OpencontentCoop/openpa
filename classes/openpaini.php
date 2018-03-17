@@ -5,6 +5,8 @@ class OpenPAINI
 
     public static $useDynamicIni;
 
+    public static $googleAccountId;
+
     private static $enableRobots;
 
     public static $dynamicIniMap = array(
@@ -163,31 +165,62 @@ class OpenPAINI
         return $result;
     }
 
-    protected static function googleAnalyticsAccountID()
+    protected static function googleAnalyticsAccountID($setValue = null)
     {
-        $http = eZHTTPTool::instance();
-        $sessionVar = OpenPABase::getCurrentSiteaccessIdentifier() . '-GoogleAnalyticsAccountID';
-        if ( !$http->hasSessionVariable($sessionVar) )
-        {
-            $googleAnalyticsAccountIDSiteData = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
-            if ( !$googleAnalyticsAccountIDSiteData instanceof eZSiteData )
-            {
-                $ini = eZINI::instance( 'openpa.ini' );
-                if ( $ini->hasVariable( 'Seo', 'GoogleAnalyticsAccountID' ) )
-                {
-                    $googleAnalyticsAccountID = $ini->variable( 'Seo', 'GoogleAnalyticsAccountID' );
-                    $googleAnalyticsAccountIDSiteData = new eZSiteData(array(
-                        'name' => 'GoogleAnalyticsAccountID',
-                        'value' => $googleAnalyticsAccountID
-                    ));
-                    $googleAnalyticsAccountIDSiteData->store();
-                }else {
-                    $http->setSessionVariable($sessionVar, false);
-                }
+        $googleAnalyticsCachePath = eZSys::cacheDirectory() . '/' . 'google_analytics_account_id.cache';
+
+        if ($setValue){
+            $data = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
+            if (!$data instanceof eZSiteData) {
+                $data = new eZSiteData(array(
+                    'name' => 'GoogleAnalyticsAccountID',
+                    'value' => ''
+                ));
             }
-            $http->setSessionVariable($sessionVar, $googleAnalyticsAccountIDSiteData->attribute('value'));
+            $data->setAttribute('value', $setValue);
+            $data->store();
+            $cacheFile = eZClusterFileHandler::instance( $googleAnalyticsCachePath );
+            $cacheFile->delete();
+            $cacheFile->purge();
+            self::$googleAccountId = null;
         }
-        return $http->sessionVariable($sessionVar);
+
+        if (self::$googleAccountId === null) {
+            self::$googleAccountId = eZClusterFileHandler::instance($googleAnalyticsCachePath)->processCache(
+                function ($file, $mtime) {
+                    if (file_exists($file)) {
+                        $result = include( $file );
+                    } else {
+                        $result = new eZClusterFileFailure(eZClusterFileFailure::FILE_RETRIEVAL_FAILED);
+                    }
+
+                    return $result;
+                },
+                function () {
+                    $googleAnalyticsAccountIDSiteData = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
+                    if (!$googleAnalyticsAccountIDSiteData instanceof eZSiteData) {
+                        $googleAnalyticsAccountIDSiteData = new eZSiteData(array(
+                            'name' => 'GoogleAnalyticsAccountID',
+                            'value' => ''
+                        ));
+                        $ini = eZINI::instance('openpa.ini');
+                        if ($ini->hasVariable('Seo', 'GoogleAnalyticsAccountID')) {
+                            $googleAnalyticsAccountID = $ini->variable('Seo', 'GoogleAnalyticsAccountID');
+                            $googleAnalyticsAccountIDSiteData->setAttribute('value', $googleAnalyticsAccountID);
+                            $googleAnalyticsAccountIDSiteData->store();
+                        }
+                    }
+                    $result = $googleAnalyticsAccountIDSiteData->attribute('value');
+
+                    return array(
+                        'content' => $result,
+                        'scope' => 'google_analytics'
+                    );
+                }
+            );
+        }
+
+        return self::$googleAccountId;
     }
 
     protected static function isRobotsEnabled()
@@ -225,34 +258,34 @@ class OpenPAINI
         {
             case 'TopMenu::NodiCustomMenu':
                 return OpenPaFunctionCollection::fetchTopMenuNodes();
-            break;
+                break;
 
             case 'GestioneSezioni::sezioni_per_tutti':
                 return self::filterSezioniPerTutti();
-            break;
+                break;
 
             case 'Attributi::EscludiDaRicerca':
                 return self::variable( 'GestioneAttributi', 'attributi_da_escludere_dalla_ricerca', $default );
-            break;
+                break;
 
             case 'Seo::GoogleAnalyticsAccountID':
                 return self::googleAnalyticsAccountID();
-            break;
+                break;
 
             case 'Seo::EnableRobots':
                 return self::isRobotsEnabled();
                 break;
 
             case 'GeneralSettings::valutation':
-                    if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
-                        && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
-                        $valuationClass = eZContentClass::fetchByIdentifier('valuation');
-                        if ($valuationClass instanceof eZContentClass){
-                            return $valuationClass->objectCount() > 0;
-                        }
+                if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
+                    && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
+                    $valuationClass = eZContentClass::fetchByIdentifier('valuation');
+                    if ($valuationClass instanceof eZContentClass){
+                        return $valuationClass->objectCount() > 0;
                     }
-                    return false;
-            break;
+                }
+                return false;
+                break;
 
         }
 
@@ -278,19 +311,7 @@ class OpenPAINI
             switch ($filter) {
 
                 case 'Seo::GoogleAnalyticsAccountID':
-                    $data = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
-                    if (!$data instanceof eZSiteData) {
-                        $data = new eZSiteData(array(
-                            'name' => 'GoogleAnalyticsAccountID',
-                            'value' => ''
-                        ));
-                    }
-                    $data->setAttribute('value', $value);
-                    $data->store();
-
-                    $http = eZHTTPTool::instance();
-                    $sessionVar = OpenPABase::getCurrentSiteaccessIdentifier() . '-GoogleAnalyticsAccountID';
-                    $http->setSessionVariable($sessionVar, $data->attribute('value'));
+                    self::googleAnalyticsAccountID($value);
 
                     return true;
                     break;
@@ -316,7 +337,7 @@ class OpenPAINI
                     $iniFile = "openpa.ini";
                     $ini = new eZINI($iniFile . '.append', $path, null, null, null, true, true);
                     $ini->setVariable($block, $settingName, $value);
-                    eZCache::clearById('global_ini');
+                    eZCache::clearById(array('global_ini'));
                     if ($ini->save()) {
                         return $path . $iniFile;
                     }
