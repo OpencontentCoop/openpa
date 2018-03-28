@@ -26,7 +26,7 @@ class OpenPAPageData
 
     function operatorList()
     {
-        return array( 'openpapagedata', 'fill_contacts_matrix', 'contacts_matrix_fields' );
+        return array( 'openpapagedata', 'fill_contacts_matrix', 'contacts_matrix_fields', 'parse_contacts_matrix' );
     }
 
     function namedParameterPerOperator()
@@ -44,6 +44,9 @@ class OpenPAPageData
                 'attribute' => array( 'type' => 'object', 'required' => true ),
                 'fields' => array( 'type' => 'array', 'required' => false, 'default' => self::$contactsMatrixFields )
             ),
+            'parse_contacts_matrix' => array(
+                'node' => array( 'type' => 'object', 'required' => true )
+            )
         );
     }
 
@@ -51,6 +54,11 @@ class OpenPAPageData
     {
         switch ( $operatorName )
         {
+            case 'parse_contacts_matrix':
+                {
+                    $operatorValue = $this->getContactsData($namedParameters['node']);
+                } break;
+
             case 'contacts_matrix_fields':
             {
                 $operatorValue = self::$contactsMatrixFields;
@@ -162,16 +170,20 @@ class OpenPAPageData
         }
     }
 
-    function getContactsData()
+    function getContactsData($node = null)
     {
         $data = array();
-        $homePage = OpenPaFunctionCollection::fetchHome();
-        if ( $homePage instanceof eZContentObjectTreeNode  )
+
+        if ($node === null) {
+            $node = OpenPaFunctionCollection::fetchHome();
+        }
+
+        if ( $node instanceof eZContentObjectTreeNode  )
         {
-            $homeObject = $homePage->attribute( 'object' );
-            if ( $homeObject instanceof eZContentObject )
+            $object = $node->attribute( 'object' );
+            if ( $object instanceof eZContentObject )
             {
-                $dataMap = $homeObject->attribute( 'data_map' );
+                $dataMap = $object->attribute( 'data_map' );
                 if ( isset( $dataMap['contacts'] )
                      && $dataMap['contacts'] instanceof eZContentObjectAttribute
                      && $dataMap['contacts']->attribute( 'data_type_string' ) == 'ezmatrix'
