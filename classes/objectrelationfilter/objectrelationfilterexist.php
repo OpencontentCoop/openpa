@@ -1,7 +1,7 @@
 <?php
 class ObjectRelationExist
 {
-	function ObjectRelationExist()
+	function __construct()
 	{
 	}
 

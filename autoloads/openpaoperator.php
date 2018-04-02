@@ -12,7 +12,7 @@ class OpenPAOperator
 
     private static $trasparenzaRootNodeId;
 
-    function OpenPAOperator()
+    function __construct()
     {
         $this->Operators= array(
             'openpaini',

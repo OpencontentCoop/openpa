@@ -1,7 +1,7 @@
 <?php
 class ObjectRelationFilterAndInv
 {
-	function ObjectRelationFilterAndInv()
+	function __construct()
 	{
 	}
 
