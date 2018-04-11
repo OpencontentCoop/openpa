@@ -86,6 +86,20 @@ MatchFile=edit/datatype/contacts_ezmatrix.tpl
 Subdir=templates
 Match[attribute_identifier]=contacts
 
+[openpa_view_ente_controllato_percentuale_partecipazione]
+Source=content/datatype/view/ezfloat.tpl
+MatchFile=datatype/ente_controllato_percentuale_partecipazione.tpl
+Subdir=templates
+Match[class_identifier]=ente_controllato
+Match[attribute_identifier]=percentuale_partecipazione
+
+[openpa_edit_ente_controllato_percentuale_partecipazione]
+Source=content/datatype/edit/ezfloat.tpl
+MatchFile=edit/datatype/ente_controllato_percentuale_partecipazione.tpl
+Subdir=templates
+Match[class_identifier]=ente_controllato
+Match[attribute_identifier]=percentuale_partecipazione
+
 #####################################################
 ###################### BLOCCHI ######################
 #####################################################
