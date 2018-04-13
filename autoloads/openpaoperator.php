@@ -12,7 +12,9 @@ class OpenPAOperator
 
     private static $trasparenzaRootNodeId;
 
-    function OpenPAOperator()
+    private static $searchData;
+
+    function __construct()
     {
         $this->Operators= array(
             'openpaini',
@@ -36,6 +38,7 @@ class OpenPAOperator
             'solr_meta_subfield',
             'search_exclude_class_facets',
             'search_exclude_classes',
+            'search_include_classes',
             'search_query',
             'strReplace',
             'organigramma',
@@ -151,7 +154,7 @@ class OpenPAOperator
         {
             case 'trasparenza_root_node_id':
             {
-                $operatorValue = $this->getTrasparenzaRootNodeId();
+                $operatorValue = self::getTrasparenzaRootNodeId();
                 break;
             }
 
@@ -172,32 +175,13 @@ class OpenPAOperator
 
             case 'search_exclude_class_facets':
             case 'search_exclude_classes':
+            case 'search_include_classes':
             {
-                $excludeFacets = array();
-                $excludeClasses = array();
+                $searchData = self::getSearchData();
+                $excludeFacets = $searchData['exclude_facets'];
+                $excludeClasses = $searchData['exclude_classes'];
+                $includeClasses = $searchData['include_classes'];
 
-                $iniNotAvailableFacets  = OpenPAINI::variable( 'MotoreRicerca', 'faccette_non_disponibili', array() );
-                $iniNotAvailableFacetsGroups = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_faccette_non_disponibili', array() );
-                $classesNotAvailable    = OpenPAINI::variable( 'MotoreRicerca', 'classi_non_disponibili', array() );
-                $classGroupNotAvailable = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_classi_non_disponibili', array() );
-
-                $classes = eZPersistentObject::fetchObjectList( eZContentClass::definition(), null, array( "version" => eZContentClass::VERSION_STATUS_DEFINED ) );
-                foreach ( $classes as $class )
-                {
-                    if ( in_array( $class->attribute('id'), $iniNotAvailableFacets )
-                         || strpos( $class->attribute( 'identifier' ), 'tipo' ) === 0
-                         || count( array_intersect( $iniNotAvailableFacetsGroups, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
-                    {
-                        $excludeFacets[$class->attribute('id')] = $class->attribute('identifier');
-                    }
-
-                    if ( in_array( $class->attribute('id'), $classesNotAvailable )
-                         || count( array_intersect( $classGroupNotAvailable, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
-                    {
-                        $excludeClasses[$class->attribute('id')] = $class->attribute('identifier');
-                    }
-
-                }
                 if ( $operatorName == 'search_exclude_class_facets' )
                 {
                     $operatorValue = array(
@@ -210,6 +194,13 @@ class OpenPAOperator
                     $operatorValue = array(
                       'ids' => array_keys( $excludeClasses ),
                       'identifiers' => array_values( $excludeClasses )
+                    );
+                }
+                if ( $operatorName == 'search_include_classes' )
+                {
+                    $operatorValue = array(
+                        'ids' => array_keys( $includeClasses ),
+                        'identifiers' => array_values( $includeClasses )
                     );
                 }
 
@@ -266,7 +257,7 @@ class OpenPAOperator
                 if (empty($subtree) || (count($subtree) == 1 && $subtree[0] == $rootNodeId))
                 {
                     $subtree = array($rootNodeId);
-                    $trasparenzaRootNodeId = $this->getTrasparenzaRootNodeId();
+                    $trasparenzaRootNodeId = self::getTrasparenzaRootNodeId();
                     if ($trasparenzaRootNodeId){
                         $subtree[] = $trasparenzaRootNodeId;
                     }
@@ -992,7 +983,7 @@ class OpenPAOperator
     /**
      * @return null|int
      */
-    private function getTrasparenzaRootNodeId()
+    private static function getTrasparenzaRootNodeId()
     {
         if (self::$trasparenzaRootNodeId === null) {
 
@@ -1013,6 +1004,67 @@ class OpenPAOperator
         }
 
         return self::$trasparenzaRootNodeId;
+    }
+
+    private static function getSearchData()
+    {
+        if (self::$searchData === null){
+            self::$searchData = OpenPAPageData::getSearchDataCache()->processCache(
+                function ($file) {
+                    $content = include($file);
+                    return $content;
+                },
+                function () {
+                    eZDebug::writeNotice("Regenerate search_data cache", 'OpenPAOperator::getSearchExclude');
+
+                    $excludeFacets = array();
+                    $excludeClasses = array();
+                    $includeClasses = array();
+
+                    $iniNotAvailableFacets  = OpenPAINI::variable( 'MotoreRicerca', 'faccette_non_disponibili', array() );
+                    $iniNotAvailableFacetsGroups = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_faccette_non_disponibili', array() );
+                    $classesNotAvailable    = OpenPAINI::variable( 'MotoreRicerca', 'classi_non_disponibili', array() );
+                    $classGroupNotAvailable = OpenPAINI::variable( 'MotoreRicerca', 'gruppi_classi_non_disponibili', array() );
+
+                    $classes = eZPersistentObject::fetchObjectList( eZContentClass::definition(), null, array( "version" => eZContentClass::VERSION_STATUS_DEFINED ) );
+                    foreach ( $classes as $class )
+                    {
+                        if ( in_array( $class->attribute('id'), $iniNotAvailableFacets )
+                            || strpos( $class->attribute( 'identifier' ), 'tipo' ) === 0
+                            || count( array_intersect( $iniNotAvailableFacetsGroups, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
+                        {
+                            $excludeFacets[$class->attribute('id')] = $class->attribute('identifier');
+                        }
+
+                        if ( in_array( $class->attribute('id'), $classesNotAvailable )
+                            || count( array_intersect( $classGroupNotAvailable, $class->attribute( 'ingroup_id_list' ) ) ) > 0 )
+                        {
+                            $excludeClasses[$class->attribute('id')] = $class->attribute('identifier');
+                        }
+                        else
+                        {
+                            $includeClasses[$class->attribute('id')] = $class->attribute('identifier');
+                        }
+
+                    }
+
+                    $result = array(
+                        'exclude_facets' => $excludeFacets,
+                        'exclude_classes' => $excludeClasses,
+                        'include_classes' => $includeClasses
+                    );
+
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache',
+                        'datatype' => 'php',
+                        'store' => true
+                    );
+                }
+            );
+        }
+
+        return self::$searchData;
     }
 
 }

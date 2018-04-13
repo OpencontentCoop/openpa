@@ -23,7 +23,7 @@ class OpenPAOrganigrammaTools
     {
         if (self::$_instance === null) {
             $language = eZLocale::currentLocaleCode();
-            $cacheFilePath = eZSys::cacheDirectory() . "/openpaorganigramma/$language.php";
+            $cacheFilePath = eZSys::cacheDirectory() . "/openpa/organigramma/$language.php";
             $cacheFile = eZClusterFileHandler::instance($cacheFilePath);
 
             $tree = $cacheFile->processCache(
@@ -48,7 +48,7 @@ class OpenPAOrganigrammaTools
     public static function clearCache()
     {
         $language = eZLocale::currentLocaleCode();
-        $cacheFilePath = eZSys::cacheDirectory() . "/openpaorganigramma/$language.php";
+        $cacheFilePath = eZSys::cacheDirectory() . "/openpa/organigramma/$language.php";
         $cacheFile = eZClusterFileHandler::instance($cacheFilePath);
         if ($cacheFile->exists()){
             $cacheFile->delete();

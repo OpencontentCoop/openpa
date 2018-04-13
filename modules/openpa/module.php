@@ -161,6 +161,11 @@ $ViewList['recaptcha'] = array(
     'functions' => array( 'recaptcha' )
 );
 
+$ViewList['loadwt'] = array(
+    'functions' => array('data'),
+    'script' => 'loadwt.php',
+    'params' => array('CurrentNodeId')
+);
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
