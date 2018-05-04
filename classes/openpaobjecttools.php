@@ -131,7 +131,30 @@ class OpenPAObjectTools
                     $attribute->setAttribute( "data_text", '' );
                     if ( isset( $dataMap[$identifier] ) )
                     {
-                        $attribute->fromString( $dataMap[$identifier]->toString() );                        
+                        $string = $dataMap[$identifier]->toString();
+                        $delimiterPos = strpos( $string, '|' );
+                        if ( $delimiterPos === false )
+                        {
+                            $filepath = $string;
+                            $alternativeText = '';
+                        }
+                        else
+                        {
+                            $filepath = substr( $string, 0, $delimiterPos );
+                            $alternativeText = substr( $string, $delimiterPos + 1 );
+                        }
+                        $tempFilename = basename($filepath);
+                        $tempDirectory = eZSys::cacheDirectory() . '/' . eZINI::instance( 'image.ini' )->variable( 'FileSettings', 'TemporaryDir' );
+
+                        $tempFile = eZFile::create(
+                            $tempFilename,
+                            $tempDirectory,
+                            eZClusterFileHandler::instance($filepath)->fetchContents()
+                        );
+
+                        $attribute->fromString("$tempDirectory/$tempFilename|$alternativeText");
+
+                        @unlink("$tempDirectory/$tempFilename");
                     }
                     $attribute->store();
                 }
