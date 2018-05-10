@@ -249,6 +249,10 @@ class OpenPAOperator
                     {
                         $searchText = implode( ' OR ', explode( ' ', $searchText ) );
                     }
+                    elseif ( $http->hasGetVariable( 'Logic' ) && $http->getVariable( 'Logic' ) == 'AND' )
+                    {
+                        $searchText = implode( ' AND ', explode( ' ', $searchText ) );
+                    }
                     $queryArray[] = "q = '$searchText'";
                 }
 
