@@ -32,10 +32,10 @@ span.hidden{text-decoration: line-through}
 span.meta,span.details{font-style: italic}
 {/literal}</style>
 <!--[if IE]> 
-<script type="text/javascript" src="http://explorercanvas.googlecode.com/svn/trunk/excanvas.js"></script>
+<script type="text/javascript" src="//explorercanvas.googlecode.com/svn/trunk/excanvas.js"></script>
 <![endif]-->
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript" ></script>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript" ></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js"></script>
 <script src={'javascript/jquery.masonry.min.js'|ezdesign()} type="text/javascript" ></script>
 <script src={'javascript/jquery.jsPlumb-1.0.4-min.js'|ezdesign()} type="text/javascript" ></script>
 <script type="text/javascript">{literal}
