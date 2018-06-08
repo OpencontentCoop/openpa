@@ -19,6 +19,8 @@ class OpenPAOrganigrammaTools
 
     public static $preventRepetitions = array();
 
+    public static $logIndent = 0;
+
     public static function instance()
     {
         if (self::$_instance === null) {
@@ -50,7 +52,7 @@ class OpenPAOrganigrammaTools
         $language = eZLocale::currentLocaleCode();
         $cacheFilePath = eZSys::cacheDirectory() . "/openpaorganigramma/$language.php";
         $cacheFile = eZClusterFileHandler::instance($cacheFilePath);
-        if ($cacheFile->exists()){
+        if ($cacheFile->exists()) {
             $cacheFile->delete();
             $cacheFile->purge();
         }
@@ -97,10 +99,11 @@ class OpenPAOrganigrammaTools
         $this->tree->name = eZINI::instance()->variable('SiteSettings', 'SiteName');
         $this->subItemCollection = new OpenPAOrganigrammaSubItemCollection();
 
+        self::$logIndent++;
         foreach ($this->nodeList as $identifier => $nodeId) {
             $this->runOnNode($identifier, $nodeId);
         }
-
+        self::$logIndent--;
         $this->tree->appendSubItemCollection($this->subItemCollection);
 
         return $this->tree;
@@ -166,7 +169,8 @@ class OpenPAOrganigrammaTools
 
     protected function runOnNode($identifier, $nodeId)
     {
-        if (!empty( $nodeId )) {
+        OpenPAOrganigrammaTools::logOutput("Run on node $identifier " . var_export($nodeId, 1));
+        if (!empty($nodeId)) {
             switch ($identifier) {
 
                 case 'CustomNodes':
@@ -218,6 +222,8 @@ class OpenPAOrganigrammaTools
                             false,
                             array('SortBy' => array('name', true))
                         );
+                        OpenPAOrganigrammaTools::logOutput(' fetch reverse related servizio/area ' . count($serviziPerArea));
+                        self::$logIndent++;
                         foreach ($serviziPerArea as $servizio) {
                             if ($servizio->attribute('id') != $item->id) {
                                 /** @var eZContentObjectTreeNode $servizioNode */
@@ -225,7 +231,8 @@ class OpenPAOrganigrammaTools
                                 $subItems->append(OpenPAOrganigrammaItem::instanceFromNode($servizioNode));
                             }
                         }
-                        if (!empty( $subItems )) {
+                        self::$logIndent--;
+                        if (!empty($subItems)) {
                             $item->appendSubItemCollection($subItems);
                         }
                     }
@@ -240,6 +247,29 @@ class OpenPAOrganigrammaTools
         $this->subItemCollection->append($item);
 
         return $item;
+    }
+
+    public static function logOutput($msg)
+    {
+        if (!eZCLI::instance()->isWebOutput())
+            eZCLI::instance()->output(self::formatLogMessage($msg));
+    }
+
+    public static function logError($msg)
+    {
+        if (!eZCLI::instance()->isWebOutput())
+            eZCLI::instance()->error(self::formatLogMessage($msg));
+    }
+
+    public static function logWarning($msg)
+    {
+        if (!eZCLI::instance()->isWebOutput())
+            eZCLI::instance()->warning(self::formatLogMessage($msg));
+    }
+
+    private static function formatLogMessage($msg)
+    {
+        return str_pad('', self::$logIndent*self::$logIndent, ' ', STR_PAD_LEFT) . $msg;
     }
 }
 
@@ -336,6 +366,7 @@ class OpenPAOrganigrammaItem
     public function appendSubItemCollection(OpenPAOrganigrammaSubItemCollection $subItems)
     {
         if ($subItems->hasContent()) {
+            OpenPAOrganigrammaTools::logOutput(' (append ' . count($subItems->itemIdList()) . ' subitems ' . $subItems->identifier . ' to ' . $this->node_id . ' ' . $this->name . ' ' . $this->class_identifier . ')');
             $this->items[] = $subItems;
             $this->collectIdList($subItems->itemIdList());
         }
@@ -351,6 +382,7 @@ class OpenPAOrganigrammaItem
 
     public function build()
     {
+        OpenPAOrganigrammaTools::logWarning(' - ' . $this->node_id . ' ' . $this->name . ' [' . $this->class_identifier . ']');
         if ($this->settings['build']) {
 
             switch ($this->class_identifier) {
@@ -376,12 +408,12 @@ class OpenPAOrganigrammaItem
                     break;
             }
 
-
         }
     }
 
     protected function buildAreaServizio()
     {
+        OpenPAOrganigrammaTools::logOutput(' ' . __METHOD__  . ' ' . implode(', ', $this->settings['exclude']));
 
         if (!in_array('servizi_correlati', $this->settings['exclude'])) {
 
@@ -390,28 +422,33 @@ class OpenPAOrganigrammaItem
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and area.id = $this->id classes [servizio] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
-
-                $item = OpenPAOrganigrammaItem::instanceFromArray((array)$result, array('exclude' => array('servizi_correlati')));
+                $item = OpenPAOrganigrammaItem::instanceFromArray((array)$result,
+                    array('exclude' => array('servizi_correlati')));
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
 
             $this->appendSubItemCollection($subItems);
         }
 
-        if (!in_array('incarichi_correlati', $this->settings['exclude']) && eZContentClass::classIDByIdentifier('incarico')) {
+        if (!in_array('incarichi_correlati', $this->settings['exclude'])
+            && eZContentClass::classIDByIdentifier('incarico')) {
 
             $subItems = new OpenPAOrganigrammaSubItemCollection();
             $subItems->identifier = "incarichi_correlati";
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and {$this->class_identifier}.id = $this->id classes [incarico] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result
                 );
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
 
             $this->appendSubItemCollection($subItems);
         }
@@ -423,6 +460,7 @@ class OpenPAOrganigrammaItem
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and {$this->class_identifier}.id = $this->id classes [ufficio] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result,
@@ -430,6 +468,7 @@ class OpenPAOrganigrammaItem
                 );
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
 
             $this->appendSubItemCollection($subItems);
         }
@@ -441,6 +480,7 @@ class OpenPAOrganigrammaItem
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and {$this->class_identifier}.id = $this->id classes [struttura] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result,
@@ -448,17 +488,20 @@ class OpenPAOrganigrammaItem
                 );
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
 
             $this->appendSubItemCollection($subItems);
         }
 
-        if (!in_array('altre_strutture_correlate', $this->settings['exclude']) && eZContentClass::classIDByIdentifier('altra_struttura')) {
+        if (!in_array('altre_strutture_correlate', $this->settings['exclude'])
+            && eZContentClass::classIDByIdentifier('altra_struttura')) {
 
             $subItems = new OpenPAOrganigrammaSubItemCollection();
             $subItems->identifier = "altre_strutture_correlate";
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and {$this->class_identifier}.id = $this->id classes [altra_struttura] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result,
@@ -466,6 +509,7 @@ class OpenPAOrganigrammaItem
                 );
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
 
             $this->appendSubItemCollection($subItems);
         }
@@ -473,23 +517,28 @@ class OpenPAOrganigrammaItem
 
     protected function buildIncarico()
     {
+        OpenPAOrganigrammaTools::logOutput(' ' . __METHOD__  . ' ' . implode(', ', $this->settings['exclude']));
         $subItems = new OpenPAOrganigrammaSubItemCollection();
         $subItems->identifier = "incarico_uffici_correlati-incarico_altre_strutture_correlate-incarico_strutture_correlate";
+
 
         if (!in_array('incarico_uffici_correlati', $this->settings['exclude'])) {
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and incarico.id = $this->id classes [ufficio] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result
                 );
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
         }
 
         if (!in_array('incarico_strutture_correlate', $this->settings['exclude'])) {
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and incarico.id = $this->id classes [struttura] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result,
@@ -497,11 +546,14 @@ class OpenPAOrganigrammaItem
                 );
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
         }
 
-        if (!in_array('incarico_altre_strutture_correlate', $this->settings['exclude']) && eZContentClass::classIDByIdentifier('altra_struttura')) {
+        if (!in_array('incarico_altre_strutture_correlate', $this->settings['exclude'])
+            && eZContentClass::classIDByIdentifier('altra_struttura')) {
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and incarico.id = $this->id classes [altra_struttura] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result,
@@ -509,6 +561,7 @@ class OpenPAOrganigrammaItem
                 );
                 $subItems->append($item);
             }
+            OpenPAOrganigrammaTools::$logIndent--;
         }
 
         $this->appendSubItemCollection($subItems);
@@ -516,7 +569,7 @@ class OpenPAOrganigrammaItem
 
     protected function buildUfficio()
     {
-
+        OpenPAOrganigrammaTools::logOutput(' ' . __METHOD__  . ' ' . implode(', ', $this->settings['exclude']));
         if (!in_array('ufficio_strutture_correlate', $this->settings['exclude'])) {
 
             $subItems = new OpenPAOrganigrammaSubItemCollection();
@@ -524,30 +577,33 @@ class OpenPAOrganigrammaItem
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and ufficio.id = $this->id classes [struttura] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result
                 );
                 $subItems->append($item);
             }
-
+            OpenPAOrganigrammaTools::$logIndent--;
             $this->appendSubItemCollection($subItems);
         }
 
-        if (!in_array('ufficio_altre_strutture_correlate', $this->settings['exclude']) && eZContentClass::classIDByIdentifier('altra_struttura')) {
+        if (!in_array('ufficio_altre_strutture_correlate', $this->settings['exclude'])
+            && eZContentClass::classIDByIdentifier('altra_struttura')) {
 
             $subItems = new OpenPAOrganigrammaSubItemCollection();
             $subItems->identifier = "ufficio_altre_strutture_correlate";
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and ufficio.id = $this->id classes [altra_struttura] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result
                 );
                 $subItems->append($item);
             }
-
+            OpenPAOrganigrammaTools::$logIndent--;
             $this->appendSubItemCollection($subItems);
         }
 
@@ -555,7 +611,7 @@ class OpenPAOrganigrammaItem
 
     protected function buildStruttura()
     {
-
+        OpenPAOrganigrammaTools::logOutput(' ' . __METHOD__  . ' ' . implode(', ', $this->settings['exclude']));
         if (!in_array('strutture_strutture_correlate', $this->settings['exclude'])) {
 
             $subItems = new OpenPAOrganigrammaSubItemCollection();
@@ -563,6 +619,7 @@ class OpenPAOrganigrammaItem
 
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and struttura.id = $this->id classes [struttura] sort [name=>asc] limit 100");
+            OpenPAOrganigrammaTools::$logIndent++;
             foreach ($results as $result) {
                 $item = OpenPAOrganigrammaItem::instanceFromArray(
                     (array)$result,
@@ -570,7 +627,7 @@ class OpenPAOrganigrammaItem
                 );
                 $subItems->append($item);
             }
-
+            OpenPAOrganigrammaTools::$logIndent--;
             $this->appendSubItemCollection($subItems);
         }
 
@@ -591,13 +648,16 @@ class OpenPAOrganigrammaItem
             $searchResults = $search->search($query);
             $result = $searchResults->searchHits;
             eZDebug::writeNotice($query, $searchResults->totalCount);
+            OpenPAOrganigrammaTools::logOutput(' fetch ' . $query . ' ' . $searchResults->totalCount);
 
         } catch (Exception $e) {
             eZDebug::writeNotice('Query error: "' . $e->getMessage() . '" in < ' . $query . ' >', __METHOD__);
+            OpenPAOrganigrammaTools::logError($e->getMessage());
         }
 
         return $result;
     }
+
 }
 
 class OpenPAOrganigrammaSubItemCollection
@@ -620,9 +680,11 @@ class OpenPAOrganigrammaSubItemCollection
 
     public function append(OpenPAOrganigrammaItem $item)
     {
-        if (!in_array($item->id, OpenPAOrganigrammaTools::$preventRepetitions)){
+        if (!in_array($item->id, OpenPAOrganigrammaTools::$preventRepetitions)) {
             $this->items[] = $item;
             OpenPAOrganigrammaTools::$preventRepetitions[] = $item->id;
+        } else {
+            OpenPAOrganigrammaTools::logError(' * Prevent repetition' . $item->id . ' ' . $item->name . ' ' . $item->class_identifier);
         }
 
     }
