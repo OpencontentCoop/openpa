@@ -11,20 +11,25 @@ class OpenpaMugoVarnishBuilder implements MugoVarnishBuilderInterface
     {
         return 'obj.http.X-Ban-Url ~ ^/.* && obj.http.X-Ban-Host ~ ' . preg_quote($this->getHostName());
     }
-    
+
     private function getHostName()
     {
-        $frontendSiteaccess = OpenPABase::getFrontendSiteaccessName();
-        $siteUrl = eZSiteAccess::getIni($frontendSiteaccess)->variable('SiteSettings', 'SiteURL');
+        $pathPrefix = eZINI::instance()->variable('SiteAccessSettings', 'PathPrefix');
+        if (!empty($pathPrefix)){
+            $siteUrl = eZINI::instance()->variable('SiteSettings', 'SiteURL');
+        }else {
+            $frontendSiteaccess = OpenPABase::getFrontendSiteaccessName();
+            $siteUrl = eZSiteAccess::getIni($frontendSiteaccess)->variable('SiteSettings', 'SiteURL');
 
-        if (empty($siteUrl) || $siteUrl == 'example.com'){
-            $backendSiteaccess = OpenPABase::getBackendSiteaccessName();
-            $siteUrl = eZSiteAccess::getIni($backendSiteaccess)->variable('SiteSettings', 'SiteURL');
+            if (empty($siteUrl) || $siteUrl == 'example.com') {
+                $backendSiteaccess = OpenPABase::getBackendSiteaccessName();
+                $siteUrl = eZSiteAccess::getIni($backendSiteaccess)->variable('SiteSettings', 'SiteURL');
+            }
+
+            $parts = explode('/', $siteUrl);
+            $siteUrl = $parts[0];
+            $siteUrl = str_replace('www', '', $siteUrl);
         }
-
-        $parts = explode('/', $siteUrl);
-        $siteUrl = $parts[0];
-        $siteUrl = str_replace('www', '', $siteUrl);
 
         return $siteUrl;
     }
