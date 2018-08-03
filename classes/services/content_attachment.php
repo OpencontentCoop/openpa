@@ -51,6 +51,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
                 'ClassFilterArray' => $this->getChildrenClasses(),
                 'SortBy' => $node->attribute( 'sort_array' ),
                 'Depth' => 1,
+                'Limit' => 100, //@todo
                 'DepthOperator' => 'eq' ) );
         }
         return $list;
