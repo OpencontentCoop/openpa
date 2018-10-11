@@ -4,6 +4,8 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
 {
     protected $list;
 
+    protected $pageLimit = 20;
+
     function run()
     {
         $this->fnData['attributes'] = 'getAttributeList';
@@ -11,6 +13,7 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
         $this->fnData['has_content'] = 'getAttributeListCount';
         $this->fnData['children_count'] = 'getChildrenCount';
         $this->fnData['children'] = 'getChildren';
+        $this->data['page_limit'] = $this->pageLimit;
     }
 
     protected function getChildrenClasses()
@@ -43,6 +46,10 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
     protected function getChildren()
     {
         $list = array();
+        $uri = $GLOBALS['eZRequestedURI'];
+        $userParameters = $uri instanceof eZURI ? $uri->userParameters() : array();
+        $offset = isset($userParameters['offset']) ? $userParameters['offset'] : 0;
+
         $node = $this->container->getContentMainNode();
         if ( $node instanceof eZContentObjectTreeNode )
         {
@@ -51,7 +58,8 @@ class ObjectHandlerServiceContentAttachment extends ObjectHandlerServiceBase
                 'ClassFilterArray' => $this->getChildrenClasses(),
                 'SortBy' => $node->attribute( 'sort_array' ),
                 'Depth' => 1,
-                'Limit' => 100, //@todo
+                'Limit' => $this->pageLimit,
+                'Offset' => $offset,
                 'DepthOperator' => 'eq' ) );
         }
         return $list;
