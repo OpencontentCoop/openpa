@@ -29,7 +29,8 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
             "Latitudine",
             "Longitudine",
             "Linkedin",
-            "Instagram"
+            "Instagram",
+            "Newsletter"
         );
     }
 
