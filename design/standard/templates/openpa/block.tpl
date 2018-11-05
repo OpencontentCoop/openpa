@@ -2,7 +2,7 @@
 
   <div class="row">
     <div class="col-md-12">
-      <h3>Seleziona il blocco</h3>
+      <h3 class="openpa-widget-title"><span>Seleziona il blocco</span></h3>
       <ul class="list-group">
         {foreach $select_blocks as $block}
           <li class="list-group-item">
@@ -14,17 +14,17 @@
   </div>
 {else}
 
-  <a class="btn btn-xs btn-info" href="{'openpa/block/'|ezurl(no)}">Seleziona nuovo oggetto</a>
+  <a class="btn btn-xs btn-info u-text-xxs" href="{'openpa/block/'|ezurl(no)}">Seleziona nuovo oggetto</a>
 
-  <div class="row">
+  <div class="row" style="background: #eee">
     <div class="nav-section">
       {foreach $blocks as $AllowedType => $AllowedBlock}      
-        <h3>{$AllowedBlock.Name|wash()}</h3>
+        <h3 class="openpa-widget-title"><span>{$AllowedBlock.Name|wash()}</span></h3>
         <ul class="list-group">     
           {foreach $AllowedBlock.ViewName as $ViewList => $ViewName}
             <li class="list-group-item">
               {if $block.view|eq($ViewList)}
-                {$ViewName|wash()} <br /><small>{$ViewList}</small>
+                <a href="#"><strong>{$ViewName|wash()} <br /><small>{$ViewList}</small></strong></a>
               {else}
                 <a href="{concat('openpa/block/',$block.id, '/', $ViewList)|ezurl(no)}">{$ViewName|wash()} <br /><small>{$ViewList}</small></a>
               {/if}
@@ -37,12 +37,12 @@
     <div class="content-main">
       {if $block}
       <p>
-        <a id="expand" class="btn btn-default"><i class="fa fa-expand"></i></a>
-        <a id="collapse" class="btn btn-default"><i class="fa fa-compress"></i></a>
+        <a id="expand" class="btn btn-default u-text-xxs"><i class="fa fa-expand"></i></a>
+        <a id="collapse" class="btn btn-default u-text-xxs"><i class="fa fa-compress"></i></a>
       </p>
       
-      <div class="row">
-        <div id="demo" data-width="12" class="col-md-12">
+      <div class="row frontpage" style="margin-top:20px;">
+        <div id="demo" data-width="12" class="col-md-12" style="background: #fff">
           {block_view_gui block=$block}
         </div>
       </div>    

@@ -400,6 +400,12 @@ class OpenPAPageData
         return eZClusterFileHandler::instance($cacheFilePath);
     }
 
+    public static function getGoogleAnalyticsCache()
+    {
+        $cacheFilePath = eZSys::cacheDirectory() . '/' . 'google_analytics_account_id.cache';
+        return eZClusterFileHandler::instance($cacheFilePath);
+    }
+
     public static function clearCache()
     {
         self::getAreaTematicaNodeIdListCache()->delete();
@@ -419,6 +425,9 @@ class OpenPAPageData
 
         self::getSearchDataCache()->delete();
         self::getSearchDataCache()->purge();
+
+        self::getGoogleAnalyticsCache()->delete();
+        self::getGoogleAnalyticsCache()->purge();
     }
 
     static public function printDebugReport($as_html = true)

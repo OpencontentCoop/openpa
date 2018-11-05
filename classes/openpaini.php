@@ -167,8 +167,6 @@ class OpenPAINI
 
     protected static function googleAnalyticsAccountID($setValue = null)
     {
-        $googleAnalyticsCachePath = eZSys::cacheDirectory() . '/' . 'google_analytics_account_id.cache';
-
         if ($setValue){
             $data = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
             if (!$data instanceof eZSiteData) {
@@ -179,14 +177,14 @@ class OpenPAINI
             }
             $data->setAttribute('value', $setValue);
             $data->store();
-            $cacheFile = eZClusterFileHandler::instance( $googleAnalyticsCachePath );
+            $cacheFile = OpenPAPageData::getGoogleAnalyticsCache();
             $cacheFile->delete();
             $cacheFile->purge();
             self::$googleAccountId = null;
         }
 
         if (self::$googleAccountId === null) {
-            self::$googleAccountId = eZClusterFileHandler::instance($googleAnalyticsCachePath)->processCache(
+            self::$googleAccountId = OpenPAPageData::getGoogleAnalyticsCache()->processCache(
                 function ($file, $mtime) {
                     if (file_exists($file)) {
                         $result = include( $file );
