@@ -30,7 +30,8 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
             "Longitudine",
             "Linkedin",
             "Instagram",
-            "Newsletter"
+            "Newsletter",
+            "Youtube",
         );
     }
 

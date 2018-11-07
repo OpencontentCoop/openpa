@@ -408,9 +408,25 @@ class OpenPAPageData
 
     public static function clearCache()
     {
+        self::clearOnModifyHomepage();
+
+        self::clearOnModifyAreaTematica();
+
+        self::getSearchDataCache()->delete();
+        self::getSearchDataCache()->purge();
+
+        self::getGoogleAnalyticsCache()->delete();
+        self::getGoogleAnalyticsCache()->purge();
+    }
+
+    public static function clearOnModifyAreaTematica()
+    {
         self::getAreaTematicaNodeIdListCache()->delete();
         self::getAreaTematicaNodeIdListCache()->purge();
+    }
 
+    public static function clearOnModifyHomepage()
+    {
         self::getHeaderLogoStyleCache()->delete();
         self::getHeaderLogoStyleCache()->purge();
 
@@ -422,12 +438,6 @@ class OpenPAPageData
 
         self::getEntLocaleBackgroundCache()->delete();
         self::getEntLocaleBackgroundCache()->purge();
-
-        self::getSearchDataCache()->delete();
-        self::getSearchDataCache()->purge();
-
-        self::getGoogleAnalyticsCache()->delete();
-        self::getGoogleAnalyticsCache()->purge();
     }
 
     static public function printDebugReport($as_html = true)

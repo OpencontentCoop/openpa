@@ -983,7 +983,7 @@ class OpenPAOperator
     /**
      * @return null|int
      */
-    private static function getTrasparenzaRootNodeId()
+    public static function getTrasparenzaRootNodeId()
     {
         if (self::$trasparenzaRootNodeId === null) {
 
