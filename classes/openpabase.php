@@ -413,4 +413,35 @@ class OpenPABase
         return $output;
     }
 
+    /**
+     * @param int[] $idList
+     *
+     * @return eZContentObject[]
+     */
+    public static function fetchObjects(array $idList)
+    {
+        if (!empty($idList)) {
+            $db = eZDB::instance();
+            $sqlCondition = $db->generateSQLINStatement($idList, 'ezcontentobject.id', false, true, 'int') . ' AND ';
+
+            $fetchSQLString = "SELECT ezcontentobject.*,
+                               ezcontentclass.serialized_name_list as serialized_name_list,
+                               ezcontentclass.identifier as contentclass_identifier,
+                               ezcontentclass.is_container as is_container
+                           FROM
+                               ezcontentobject,
+                               ezcontentclass
+                           WHERE
+                               $sqlCondition
+                               ezcontentclass.id = ezcontentobject.contentclass_id AND
+                               ezcontentclass.version=0";
+
+            $rows = $db->arrayQuery($fetchSQLString);
+
+            return eZPersistentObject::handleRows($rows, 'eZContentObject', true);
+        }
+
+        return array();
+    }
+
 }

@@ -37,5 +37,63 @@ class OpenPAAjax extends ezjscServerFunctions
         eZExecution::cleanExit();
     }
 
+    public static function userInfo()
+    {
+        $user = eZUser::currentUser();
+        if ($user->isRegistered() && $user->attribute('login') != 'utente'){
+            $sessionKey = 'user_info_' . $user->id();
+            if (!eZHTTPTool::instance()->hasSessionVariable($sessionKey)) {
+                $accessToDashboard = $user->hasAccessTo('content', 'dashboard');
+                $accessToRegister = $user->hasAccessTo('user', 'register');
+                eZHTTPTool::instance()->setSessionVariable( $sessionKey, array(
+                    'name' => $user->contentObject()->attribute('name'),
+                    'has_access_to_dashboard' => $accessToDashboard['accessWord'] == 'yes',
+                    'has_access_to_register' => $accessToRegister['accessWord'] != 'no',
+                ));
+            }
+
+            return eZHTTPTool::instance()->sessionVariable($sessionKey);
+        }
+
+        return false;
+    }
+
+    public static function loadWebsiteToolbar($args)
+    {
+        $currentNodeId = $args[0];
+        $user = eZUser::currentUser();
+        if ($user->isRegistered() && $user->attribute('login') != 'utente'){
+            $access = $user->hasAccessTo('websitetoolbar', 'use');
+            if ($access['accessWord'] != 'no'){
+                $preference = (int)eZPreferences::value('show_editor');
+                $sessionKey = 'websitetoolbar_' . $user->id() . '_' . $currentNodeId . '_' . $preference;
+                if (isset($args[1])){
+                    eZHTTPTool::instance()->removeSessionVariable($sessionKey);
+                }
+                if (!eZHTTPTool::instance()->hasSessionVariable($sessionKey)) {
+                    $tpl = eZTemplate::factory();
+                    $tpl->setVariable('current_node_id', $currentNodeId);
+                    $tpl->setVariable('show_editor', $preference);
+                    $tpl->setVariable('current_user', eZUser::currentUser());
+                    $data = $tpl->fetch('design:parts/website_toolbar.tpl');
+                    eZHTTPTool::instance()->setSessionVariable($sessionKey, $data);
+                }
+                echo eZHTTPTool::instance()->sessionVariable($sessionKey);
+                if (isset($args[1])) eZDisplayDebug();
+                eZExecution::cleanExit();
+            }
+        }
+
+        return false;
+    }
+
+    public static function loadValuation($args)
+    {
+        $tpl = eZTemplate::factory();
+        $tpl->setVariable('node_id', $args[0]);
+        echo $tpl->fetch('design:openpa/valuation.tpl');
+        if (isset($args[1])) eZDisplayDebug();
+        eZExecution::cleanExit();
+    }
+
 }
-?>

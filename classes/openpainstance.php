@@ -119,10 +119,11 @@ class OpenPAInstance
         $url = $this->getUrl( self::PRODUCTION );
         if ( stripos( $url, 'opencontent' ) === false )
         {
-            $url = rtrim( $url, '/' );
-            $url = str_replace( 'http://', '', $url );
-            $ip = self::getIP( $url );
-            return in_array( $ip, self::$validIps );
+//            $url = rtrim( $url, '/' );
+//            $url = str_replace( 'http://', '', $url );
+//            $ip = self::getIP( $url );
+//            return in_array( $ip, self::$validIps );
+            return true;
         }
         return false;
     }

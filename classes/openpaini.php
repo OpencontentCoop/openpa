@@ -167,8 +167,6 @@ class OpenPAINI
 
     protected static function googleAnalyticsAccountID($setValue = null)
     {
-        $googleAnalyticsCachePath = eZSys::cacheDirectory() . '/' . 'google_analytics_account_id.cache';
-
         if ($setValue){
             $data = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
             if (!$data instanceof eZSiteData) {
@@ -179,14 +177,14 @@ class OpenPAINI
             }
             $data->setAttribute('value', $setValue);
             $data->store();
-            $cacheFile = eZClusterFileHandler::instance( $googleAnalyticsCachePath );
+            $cacheFile = OpenPAPageData::getGoogleAnalyticsCache();
             $cacheFile->delete();
             $cacheFile->purge();
             self::$googleAccountId = null;
         }
 
         if (self::$googleAccountId === null) {
-            self::$googleAccountId = eZClusterFileHandler::instance($googleAnalyticsCachePath)->processCache(
+            self::$googleAccountId = OpenPAPageData::getGoogleAnalyticsCache()->processCache(
                 function ($file, $mtime) {
                     if (file_exists($file)) {
                         $result = include( $file );
@@ -251,6 +249,89 @@ class OpenPAINI
         return self::$enableRobots;
     }
 
+    private static function getDynamicIniData()
+    {
+        if ( self::$dynamicIniData === null ){
+            eZDebug::accumulatorStart('dynamic_ini_map', false, 'dynamic_ini_map');
+            self::$dynamicIniData = eZClusterFileHandler::instance( self::dynamicIniCachePath() )->processCache(
+                function ( $file ){
+                    if (file_exists($file)){
+                        $result = include( $file );
+                    }else{
+                        eZDebug::writeNotice("File $file not exists, regenerate", __METHOD__);
+                        $result = new eZClusterFileFailure(eZClusterFileFailure::FILE_RETRIEVAL_FAILED);
+                    }
+
+                    return $result;
+                },
+                function (){
+                    $result = array();
+
+                    $classes = eZDB::instance()->arrayQuery(
+                        'SELECT id, identifier, serialized_name_list ' .
+                        'FROM ezcontentclass ' .
+                        'WHERE version=0'
+                    );
+                    $classAttributes = eZContentClassAttribute::fetchList(false);
+
+                    $classAttributesByClassId = array();
+                    foreach ($classAttributes as $classAttribute){
+                        $classAttributesByClassId[$classAttribute['contentclass_id']][] = $classAttribute;
+                    }
+
+                    foreach( OpenPAINI::$dynamicIniMap as $block => $values ){
+
+                        $result[$block] = array();
+
+                        foreach( $values as $variable => $settings ){
+
+                            $result[$block][$variable] = array();
+
+                            list( $handler, $key ) = explode( '.', $settings['to'] );
+                            $matchValue = $settings['value'];
+
+                            $data = OCClassExtraParameters::fetchObjectList(OCClassExtraParameters::definition(),
+                                null,
+                                array(
+                                    'handler' => $handler,
+                                    'key' => $key,
+                                    'value' => 1
+                                )
+                            );
+
+                            $results = array();
+                            $resultPart = array();
+                            foreach( $data as $item ){
+                                $resultPart[] = $item->attribute( 'class_identifier' ) . '/' .  $item->attribute( 'attribute_identifier' );
+                            }
+
+                            if ( $matchValue == 0 ){
+                                foreach( $classes as $class ){
+                                    foreach ($classAttributesByClassId[$class['id']] as $classAttribute) {
+                                        if (!in_array($class['identifier'] . '/' . $classAttribute['identifier'], $resultPart)) {
+                                            $results[] = $class['identifier'] . '/' . $classAttribute['identifier'];
+                                        }
+                                    }
+                                }
+                            }else{
+                                $results = $resultPart;
+                            }
+
+                            $results= array_unique( $results );
+                            array_multisort( $results );
+                            $result[$block][$variable] = array_values( $results );
+
+                        }
+                    }
+
+                    return array( 'content' => $result,
+                        'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
+                }
+            );
+            eZDebug::accumulatorStop('dynamic_ini_map');
+        }
+    }
+
     protected static function filter( $block, $value, $default )
     {
         $filter = $block . '::' . $value;
@@ -291,13 +372,7 @@ class OpenPAINI
 
         if ( isset( self::$dynamicIniMap[$block][$value] ) )
         {
-            if ( self::$dynamicIniData === null ){
-                self::$dynamicIniData = eZClusterFileHandler::instance( self::dynamicIniCachePath() )->processCache(
-                    array( 'OpenPAINI', 'dynamicIniRetrieveCache' ),
-                    array( 'OpenPAINI', 'dynamicIniGenerateCache' )
-                );
-            }
-
+            self::getDynamicIniData();
             return isset( self::$dynamicIniData[$block][$value] ) ? self::$dynamicIniData[$block][$value] : $default;
         }
 
@@ -349,84 +424,21 @@ class OpenPAINI
     }
 
 
-    public static function dynamicIniGenerateCache( $file ){
-        $result = array();
-        foreach( self::$dynamicIniMap as $block => $values ){
-
-            $result[$block] = array();
-
-            foreach( $values as $variable => $settings ){
-
-                $result[$block][$variable] = array();
-
-                list( $handler, $key ) = explode( '.', $settings['to'] );
-                $matchValue = $settings['value'];
-
-                $data = OCClassExtraParameters::fetchObjectList(OCClassExtraParameters::definition(),
-                    null,
-                    array(
-                        'handler' => $handler,
-                        'key' => $key,
-                        'value' => 1
-                    )
-                );
-
-                $results = array();
-                $resultPart = array();
-                foreach( $data as $item ){
-                    $resultPart[] = $item->attribute( 'class_identifier' ) . '/' .  $item->attribute( 'attribute_identifier' );
-                }
-
-                if ( $matchValue == 0 ){
-                    $classRepository = new \Opencontent\Opendata\Api\ClassRepository();
-                    $classes = $classRepository->listAll();
-                    foreach( $classes as $class ){
-                        try {
-                            $class = $classRepository->load($class['identifier']);
-                            foreach ($class->fields as $field) {
-                                if (!in_array($class->identifier . '/' . $field['identifier'], $resultPart)) {
-                                    $results[] = $class->identifier . '/' . $field['identifier'];
-                                }
-                            }
-                        }catch(Exception $e){
-                            eZDebug::writeError($e->getMessage(), __METHOD__);
-                        }
-                    }
-                }else{
-                    $results = $resultPart;
-                }
-
-
-
-                $results= array_unique( $results );
-                array_multisort( $results );
-                $result[$block][$variable] = array_values( $results );
-
-            }
-        }
-
-        return array( 'content' => $result,
-                      'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
-    }
-
-    public static function dynamicIniRetrieveCache( $file, $mtime ){
-        if (file_exists($file)){
-            $result = include( $file );
-        }else{
-            eZDebug::writeNotice("File $file not exists, regenerate", __METHOD__);
-            $result = new eZClusterFileFailure(eZClusterFileFailure::FILE_RETRIEVAL_FAILED);
-        }
-
-        return $result;
-    }
-
     public static function dynamicIniCachePath(){
-        return eZSys::cacheDirectory() . '/' . 'openpaini.cache';
+        return eZSys::cacheDirectory() . '/' . 'openpa/ini/dynamicini.cache';
     }
 
     public static function clearDynamicIniCache(){
         eZClusterFileHandler::instance( self::dynamicIniCachePath() )->delete();
+        eZClusterFileHandler::instance( self::dynamicIniCachePath() )->purge();
+        self::$dynamicIniData = null;
+        self::getDynamicIniData();
         eZCache::clearContentCache(null);
+    }
+
+    public static function clearCache()
+    {
+        self::clearDynamicIniCache();
     }
 
 }

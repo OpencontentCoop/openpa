@@ -226,7 +226,7 @@ try {
                         //@todo riempire tutti?
 
                         $storeContacts = array();
-                        foreach( OpenPAPageData::$contactsMatrixFields as $id ){
+                        foreach( OpenPAAttributeContactsHandler::getContactsFields() as $id ){
                             if ( !isset($fullContacts[$id]) ){
                                 $storeContacts[$id] = '';
                             }else{

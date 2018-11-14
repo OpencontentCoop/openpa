@@ -5,6 +5,9 @@ class OpenPaFunctionCollection
 
     protected static $topmenu;
     protected static $home;
+    protected static $headerImageStyle;
+    protected static $headerLogoStyle;
+    protected static $headerLogo;
 
     public static $remoteHeader = 'OpenPaHeader';
     public static $remoteLogo = 'OpenPaLogo';
@@ -474,13 +477,29 @@ class OpenPaFunctionCollection
 
     public static function fetchHeaderImageStyle()
     {
-        $result = false;
-        $image = self::fetchHeaderImage();
-        if ( $image )
-        {
-            $result = "background:url(/{$image['full_path']}) no-repeat center center !important; width:{$image['width']}px; height:{$image['height']}px";
+        if (self::$headerImageStyle === null) {
+            self::$headerImageStyle = OpenPAPageData::getHeaderImageStyleCache()->processCache(
+                function ($file) {
+                    $content = include($file);
+                    return $content;
+                },
+                function () {
+                    eZDebug::writeNotice("Regenerate header_image cache", 'OpenPaFunctionCollection::fetchHeaderImageStyle');
+                    $result = false;
+                    $image = OpenPaFunctionCollection::fetchHeaderImage();
+                    if ($image) {
+                        $result = "background:url(/{$image['full_path']}) no-repeat center center !important; width:{$image['width']}px; height:{$image['height']}px";
+                    }
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache',
+                        'datatype' => 'php',
+                        'store' => true
+                    );
+                }
+            );
         }
-        return array( 'result' => $result );
+        return array( 'result' => self::$headerImageStyle );
     }
 
     public static function fetchFooterNotes()
@@ -549,39 +568,53 @@ class OpenPaFunctionCollection
 
     public static function fetchHeaderLogoStyle()
     {
-        $result = false;
-        $homePage = self::fetchHome();
-        if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
-        {
-            $headerObject = $homePage->attribute( 'object' );
-            if ( $headerObject instanceof eZContentObject )
-            {
-                /** @var eZContentObjectAttribute[] $dataMap */
-                $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['logo'] )
-                     && $dataMap['logo'] instanceof eZContentObjectAttribute
-                     && $dataMap['logo']->attribute( 'has_content' ) )
-                {
-                    $result = self::getLogoCssStyle( $dataMap['logo'], 'header_logo' );
+        if (self::$headerLogoStyle === null) {
+            self::$headerLogoStyle = OpenPAPageData::getHeaderLogoStyleCache()->processCache(
+                function ($file) {
+                    $content = include($file);
+                    return $content;
+                },
+                function () {
+                    eZDebug::writeNotice("Regenerate header_logo cache", 'OpenPaFunctionCollection::fetchHeaderLogoStyle');
+                    $homePage = OpenPaFunctionCollection::fetchHome();
+                    if ($homePage->attribute('class_identifier') == 'homepage') {
+                        $headerObject = $homePage->attribute('object');
+                        if ($headerObject instanceof eZContentObject) {
+                            /** @var eZContentObjectAttribute[] $dataMap */
+                            $dataMap = $headerObject->attribute('data_map');
+                            if (isset($dataMap['logo'])
+                                && $dataMap['logo'] instanceof eZContentObjectAttribute
+                                && $dataMap['logo']->attribute('has_content')) {
+                                $result = OpenPaFunctionCollection::getLogoCssStyle($dataMap['logo'], 'header_logo');
+                            }
+                        }
+                    } else {
+                        $headerObject = eZContentObject::fetchByRemoteID(self::$remoteLogo);
+                        if ($headerObject instanceof eZContentObject) {
+                            /** @var eZContentObjectAttribute[] $dataMap */
+                            $dataMap = $headerObject->attribute('data_map');
+                            if (isset($dataMap['image'])
+                                && $dataMap['image'] instanceof eZContentObjectAttribute
+                                && $dataMap['image']->attribute('has_content')) {
+                                $result = OpenPaFunctionCollection::getLogoCssStyle($dataMap['image'], 'header_logo');
+                            }
+                        }
+                    }
+
+                    if (empty($result)) {
+                        $result = '';
+                    }
+
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache',
+                        'datatype' => 'php',
+                        'store' => true
+                    );
                 }
-            }
+            );
         }
-        else
-        {
-            $headerObject = eZContentObject::fetchByRemoteID( self::$remoteLogo );
-            if ( $headerObject instanceof eZContentObject )
-            {
-                /** @var eZContentObjectAttribute[] $dataMap */
-                $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['image'] )
-                     && $dataMap['image'] instanceof eZContentObjectAttribute
-                     && $dataMap['image']->attribute( 'has_content' ) )
-                {
-                    $result = self::getLogoCssStyle( $dataMap['image'], 'header_logo' );
-                }
-            }
-        }
-        return array( 'result' => $result );
+        return array( 'result' => self::$headerLogoStyle );
     }
 
     public static function fetchReverseRelatedObjectClassFacets( $object, $classFilterType, $classFilterArray, $sortBy, $subTree )
@@ -952,43 +985,59 @@ class OpenPaFunctionCollection
 
     public static function fetchHeaderLogo()
     {
-        $result = false;
-        $homePage = self::fetchHome();
-        if ( $homePage->attribute( 'class_identifier' ) == 'homepage' )
-        {
-            $headerObject = $homePage->attribute( 'object' );
-            if ( $headerObject instanceof eZContentObject )
-            {
-                /** @var eZContentObjectAttribute[] $dataMap */
-                $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['logo'] )
-                     && $dataMap['logo'] instanceof eZContentObjectAttribute
-                     && $dataMap['logo']->attribute( 'has_content' ) )
-                {
-                    /** @var eZImageAliasHandler $content */
-                    $content = $dataMap['logo']->attribute( 'content' );
-                    $result = $content->attribute( 'header_logo' );
+        if (self::$headerLogo === null) {
+            self::$headerLogo = OpenPAPageData::getHeaderLogoCache()->processCache(
+                function ($file) {
+                    $content = include($file);
+                    return $content;
+                },
+                function () {
+                    eZDebug::writeNotice("Regenerate header_logo cache", 'OpenPaFunctionCollection::fetchHeaderLogo');
+                    $result = array();
+                    $homePage = OpenPaFunctionCollection::fetchHome();
+                    if ($homePage->attribute('class_identifier') == 'homepage') {
+                        $headerObject = $homePage->attribute('object');
+                        if ($headerObject instanceof eZContentObject) {
+                            /** @var eZContentObjectAttribute[] $dataMap */
+                            $dataMap = $headerObject->attribute('data_map');
+                            if (isset($dataMap['logo'])
+                                && $dataMap['logo'] instanceof eZContentObjectAttribute
+                                && $dataMap['logo']->attribute('has_content')) {
+                                /** @var eZImageAliasHandler $content */
+                                $content = $dataMap['logo']->attribute('content');
+                                $result = $content->attribute('header_logo');
+                            }
+                        }
+                    } else {
+                        $headerObject = eZContentObject::fetchByRemoteID(OpenPaFunctionCollection::$remoteLogo);
+                        if ($headerObject instanceof eZContentObject) {
+                            /** @var eZContentObjectAttribute[] $dataMap */
+                            $dataMap = $headerObject->attribute('data_map');
+                            if (isset($dataMap['image'])
+                                && $dataMap['image'] instanceof eZContentObjectAttribute
+                                && $dataMap['image']->attribute('has_content')) {
+                                /** @var eZImageAliasHandler $content */
+                                $content = $dataMap['image']->attribute('content');
+                                $result = $content->attribute('header_logo');
+                            }
+                        }
+                    }
+
+                    if (empty($result)) {
+                        $result = array('url' => false);
+                    }
+
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache',
+                        'datatype' => 'php',
+                        'store' => true
+                    );
                 }
-            }
+            );
         }
-        else
-        {
-            $headerObject = eZContentObject::fetchByRemoteID( self::$remoteLogo );
-            if ( $headerObject instanceof eZContentObject )
-            {
-                /** @var eZContentObjectAttribute[] $dataMap */
-                $dataMap = $headerObject->attribute( 'data_map' );
-                if ( isset( $dataMap['image'] )
-                     && $dataMap['image'] instanceof eZContentObjectAttribute
-                     && $dataMap['image']->attribute( 'has_content' ) )
-                {
-                    /** @var eZImageAliasHandler $content */
-                    $content = $dataMap['image']->attribute( 'content' );
-                    $result = $content->attribute( 'header_logo' );
-                }
-            }
-        }
-        return $result;
+
+        return self::$headerLogo;
     }
 
     public static function fetchStemma()
@@ -1051,7 +1100,6 @@ class OpenPaFunctionCollection
         return "display: block;text-indent: -9999px;background:url(/{$image['full_path']}) no-repeat center center; width:{$width}; height:{$height};{$additionalStyle}";
     }
 
-
     public static function fetchHomepage()
     {
         return array( 'result' => self::fetchHome() );
@@ -1070,6 +1118,10 @@ class OpenPaFunctionCollection
                 self::$home = eZContentObjectTreeNode::fetch( $rootNodeId );
             }else{
                 self::$home = eZContentObjectTreeNode::fetchByRemoteID( $rootNodeId );
+            }
+
+            if (!self::$home instanceof eZContentObjectTreeNode){
+                throw new RuntimeException("Home node not found");
             }
         }
         return self::$home;

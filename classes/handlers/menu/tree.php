@@ -129,6 +129,11 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
     {
         $handlerObject = OpenPAObjectHandler::instanceFromObject( $rootNode );
 
+        if ($rootNode->attribute('node_id') == OpenPaFunctionCollection::fetchHome()->attribute('node_id'))
+        {
+            $settings['max_recursion'] = 1;
+        }
+
         if ( isset( $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )] ) )
         {
             $settings['max_recursion'] = $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )];
