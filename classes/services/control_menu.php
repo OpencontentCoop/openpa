@@ -24,8 +24,8 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'classes' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu', array() ),
             'exclude' => OpenPAINI::variable( 'TopMenu', 'NascondiNodi', array() ),
             'limits' => array(
-                'level_0' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello', 12 ),
-                'level_1' => OpenPAINI::variable( 'TopMenu', 'LimiteSecondoLivello', 10 ),
+                'level_0' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello', 50 ),
+                'level_1' => OpenPAINI::variable( 'TopMenu', 'LimiteSecondoLivello', 50 ),
                 'level_2' => OpenPAINI::variable( 'TopMenu', 'LimiteTerzoLivello', 10 )
             ),
             'user_hash' => null,
