@@ -70,9 +70,10 @@ class ObjectHandlerServiceControlChildren extends ObjectHandlerServiceBase
                     if ( is_array( $value ) )
                     {
                         $value = $value[0];
-                        if ( isset( $contentClassAttributeContent['options'][$value] ) )
-                        {
-                            $this->currentView = strtolower( $contentClassAttributeContent['options'][$value]['name'] );
+                    }
+                    foreach ($contentClassAttributeContent['options'] as $option) {
+                        if ($option['id'] == $value){
+                            $this->currentView = strtolower( $option['name'] );       
                         }
                     }
                 }
