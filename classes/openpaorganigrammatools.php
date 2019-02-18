@@ -19,6 +19,8 @@ class OpenPAOrganigrammaTools
 
     public static $preventRepetitions = array();
 
+    public static $serviziNonAttiviIdList;
+
     public static function instance()
     {
         if (self::$_instance === null) {
@@ -240,6 +242,27 @@ class OpenPAOrganigrammaTools
         $this->subItemCollection->append($item);
 
         return $item;
+    }
+
+    public static function getServiziNonAttiviIdList()
+    {
+        if (self::$serviziNonAttiviIdList === null){
+            self::$serviziNonAttiviIdList = array();
+            $serviziNonAttiviRootNodeId = OpenPAINI::variable('Nodi', 'ServiziNonAttivi', 0);
+            if ($serviziNonAttiviRootNodeId > 0){
+                $serviziNonAttiviRootNode = eZContentObjectTreeNode::fetch($serviziNonAttiviRootNodeId);
+                if ($serviziNonAttiviRootNode instanceof eZContentObjectTreeNode){
+                    /** @var eZContentObjectTreeNode[] $children */
+                    $children = $serviziNonAttiviRootNode->children();
+                    foreach ($children as $child){
+                        self::$serviziNonAttiviIdList[] = $child->attribute('contentobject_id');
+                    }
+                }
+            }
+
+        }
+
+        return self::$serviziNonAttiviIdList;
     }
 }
 
@@ -621,7 +644,9 @@ class OpenPAOrganigrammaSubItemCollection
     public function append(OpenPAOrganigrammaItem $item)
     {
         if (!in_array($item->id, OpenPAOrganigrammaTools::$preventRepetitions)){
-            $this->items[] = $item;
+            if (!in_array($item->id, OpenPAOrganigrammaTools::getServiziNonAttiviIdList())) {
+                $this->items[] = $item;
+            }
             OpenPAOrganigrammaTools::$preventRepetitions[] = $item->id;
         }
 
