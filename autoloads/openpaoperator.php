@@ -329,7 +329,8 @@ class OpenPAOperator
                                 elseif ( in_array( $fields[$key]['dataType'], array( 'ezstring' ) ) )
                                 {
                                     if ( !empty( $values ) )
-                                        $queryArray[] = "{$key} = [{$values}]";
+                                        $rawField = OpenPASolr::generateSolrField( $key, 'text' );
+                                        $queryArray[] = "raw[{$rawField}] = [{$values}]";
                                         //$queryArray[] = "{$key} = [\"{$values}\"]"; //@see Opencontent\Opendata\Api\QueryLanguage\EzFind\SentenceConverter::formatFilterValue
                                 }
                                 else

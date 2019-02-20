@@ -16,8 +16,8 @@ $cli = eZCLI::instance();
 try {
 
     $current = OpenPABase::getCurrentSiteaccessIdentifier();
-    if ($current != 'prototipo') {
-        throw new Exception("La creazione di una nuova istanza al momento è possibile solo dal prototipo");
+    if ($current != 'prototipo' && $current != 'biblioteca') {
+        throw new Exception("La creazione di una nuova istanza al momento è possibile solo dal prototipo o da biblioteca (hai usato: $current)");
     }
 
     $identifier = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
