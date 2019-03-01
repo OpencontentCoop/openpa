@@ -418,9 +418,16 @@
 </context>
 <context>
     <name>design/retecivica/full/folder</name>
-<message>
+    <message>
         <source>Keep me updated</source>
         <translation>Tienimi aggiornato</translation>
+    </message>
+</context>
+<context>
+    <name>design/standard/websitetoolbar/sort</name>
+    <message>
+        <source>Update priorities</source>
+        <translation>Aggiorna priorità</translation>
     </message>
 </context>
 </TS>
