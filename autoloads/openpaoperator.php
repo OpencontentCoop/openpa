@@ -299,7 +299,7 @@ class OpenPAOperator
                         $data = $http->getVariable( 'Data' );
                         foreach( $data as $key => $values )
                         {
-                            if ( $key == 'published' ){
+                            if ( $key == 'published'  && is_array( $values )  ){
                                 $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
                                 $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
                                 if ( $startDateTime instanceof DateTime && $endDateTime instanceof DateTime )
@@ -309,7 +309,7 @@ class OpenPAOperator
                             }
 
                             if ( isset($fields[$key] ) ){
-                                if ( in_array( $fields[$key]['dataType'], array( 'ezdate', 'ezdatetime' ) ) )
+                                if ( in_array( $fields[$key]['dataType'], array( 'ezdate', 'ezdatetime' ) ) && is_array( $values ) )
                                 {
                                     $startDateTime = isset( $values[0] ) ? DateTime::createFromFormat('d-m-Y', $values[0], new DateTimeZone('Europe/Rome') ) : new DateTime();
                                     $endDateTime = isset( $values[1] ) ? DateTime::createFromFormat('d-m-Y', $values[1], new DateTimeZone('Europe/Rome') ) : new DateTime();
@@ -320,18 +320,26 @@ class OpenPAOperator
                                 }
                                 elseif ( in_array( $fields[$key]['dataType'], array( 'ezobjectrelationlist' ) ) )
                                 {
-                                    $stringValue = trim( implode(',', $values) );
-                                    if ( !empty($stringValue) )
+                                    if ( is_array( $values ) )
                                     {
-                                        $queryArray[] = "{$key}.id in [{$stringValue}]";
+                                        $values = trim( implode(',', $values) );
+                                    }
+                                    if ( !empty($values) )
+                                    {
+                                        $queryArray[] = "{$key}.id in [{$values}]";
                                     }
                                 }
                                 elseif ( in_array( $fields[$key]['dataType'], array( 'ezstring' ) ) )
                                 {
+                                    if ( is_array( $values ) )
+                                    {
+                                        $values = trim( implode(',', $values) );
+                                    }
                                     if ( !empty( $values ) )
-                                        $rawField = OpenPASolr::generateSolrField( $key, 'text' );
+                                    {
+                                        $rawField = OpenPASolr::generateSolrField($key, 'text');
                                         $queryArray[] = "raw[{$rawField}] = [{$values}]";
-                                        //$queryArray[] = "{$key} = [\"{$values}\"]"; //@see Opencontent\Opendata\Api\QueryLanguage\EzFind\SentenceConverter::formatFilterValue
+                                    }
                                 }
                                 else
                                 {
