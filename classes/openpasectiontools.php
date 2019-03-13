@@ -112,7 +112,6 @@ class OpenPASectionTools
                     'value' => json_encode(self::getRulesFromBackendIni())
                 ]);
                 $siteData->store();
-                OpenPASectionTools::storeBackup();
             }
 
             $siteDataValue = json_decode($siteData->attribute('value'), true);
@@ -290,6 +289,16 @@ class OpenPASectionTools
             unset($this->ignore[$classIdentifier]);
     }
 
+    public function removeSetting($classIdentifier)
+    {
+        unset($this->rootNodeIdList[$classIdentifier]);
+        unset($this->dataTimeAttributeIdentifierList[$classIdentifier]);
+        unset($this->sectionIdList[$classIdentifier]);
+        unset($this->secondsExpire[$classIdentifier]);
+        unset($this->overrideValue[$classIdentifier]);
+        unset($this->ignore[$classIdentifier]);
+    }
+
     public function store($data = false)
     {
         if (!$data) {
@@ -458,6 +467,8 @@ class OpenPASectionTools
 
             return $isChanged;
         }
+
+        return false;
     }
 
     public function removeNodes($trashNodes)
@@ -499,6 +510,7 @@ class OpenPASectionTools
                 && $currentObject->attribute('section_id') != $this->currentSectionDestinationId
                 && $this->currentSectionDestinationId !== 0
                 && $handler->filter('change_section', 'run') == OpenPAObjectHandler::FILTER_CONTINUE) {
+
                 //@todo refactor in service start -> $moveToTrashNodes[] = $handler->filter( 'change_section', 'move_to_trash' )
                 $isClone = false;
                 if (class_exists('OscuraAttiHandler')) {
@@ -524,6 +536,7 @@ class OpenPASectionTools
 
                 $this->registerChangeSection($currentObject, $this->currentSectionDestinationId, $relatedChanges);
                 $this->flushObject($currentObject);
+
                 return true;
             }
             $handler->flush(false, false);
@@ -574,7 +587,7 @@ class OpenPASectionTools
         if (count($relatedChanges)) {
             $message .= ' - Related objects' . implode('-', $relatedChanges);
         }
-        eZLog::write($message, 'change_state.log', eZSys::varDirectory() . '/log');
+        eZLog::write($message, 'change_section.log', eZSys::varDirectory() . '/log');
         $this->messages[] = $message;
 
         $dataMap = $object->dataMap();

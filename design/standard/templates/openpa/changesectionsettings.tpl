@@ -91,7 +91,7 @@
                     <td style="white-space: nowrap">
                         {if $is_edit|not()}
                             <button type="submit" class="button btn" name="EditSetting" value="{$class}"><i class="fa fa-edit"></i> <span class="u-hiddenVisually sr-only">Modifica</span></button>
-                            <button type="submit" class="button btn" name="RemoveSetting" value="{$class}"><i class="fa fa-trash"></i> <span class="u-hiddenVisually sr-only">Elimina</span></button>
+                            <button type="submit" class="button btn" name="RemoveSetting" value="{$class}" onclick="return confirm( 'Sei sicuro di voler eliminare questa impostazione?' );"><i class="fa fa-trash"></i> <span class="u-hiddenVisually sr-only">Elimina</span></button>
                         {elseif $current_edit_class|eq($class)}
                             <button type="submit" class="button btn" name="StoreSetting" value="{$class}"><i class="fa fa-save"></i> <span class="u-hiddenVisually sr-only">Salva</span></button>
                             <button type="submit" class="button btn" name="Abort"><i class="fa fa-times"></i> <span class="u-hiddenVisually sr-only">Annulla</span></button>
@@ -111,9 +111,9 @@
 
         <hr />
 
-        <input type="submit" class="button btn" name="ResetRules" value="Reset da file di configurazione" />
+        <input type="submit" class="button btn" name="ResetRules" value="Reset da file di configurazione" onclick="return confirm( 'Sei sicuro di voler resettare le impostazioni?' );" />
         {if $has_backup}
-            <input type="submit" class="button btn" name="RestoreRules" value="Ripristina da ultimo backup" />
+            <input type="submit" class="button btn" name="RestoreRules" value="Annulla ultima modifica" onclick="return confirm( 'Sei sicuro di voler annullare l\'ultima modifica?' );" />
         {/if}
 
     </form>

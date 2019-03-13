@@ -97,7 +97,8 @@ if ($http->hasPostVariable('StoreSetting')) {
         $isEdit = true;
         $currentEditClass = $classIdentifier;
         $isAddSettings = $http->hasPostVariable('new');
-        $classes[] = $classIdentifier;
+        if (!in_array($classIdentifier, $classes))
+            $classes[] = $classIdentifier;
         $settings['rootNodeIdList'][$classIdentifier] = $rootNodeId;
         $settings['dataTimeAttributeIdentifierList'][$classIdentifier] = $dataTimeAttributeIdentifier;
         $settings['sectionIdList'][$classIdentifier] = $sectionId;
@@ -106,6 +107,18 @@ if ($http->hasPostVariable('StoreSetting')) {
         $settings['ignore'][$classIdentifier] = $ignore;
     }
 }
+
+if ($http->hasPostVariable('RemoveSetting')) {
+    OpenPASectionTools::storeBackup();
+
+    $classIdentifier = trim($http->postVariable('RemoveSetting'));
+    $sectionTools->removeSetting($classIdentifier);
+    $sectionTools->store();
+
+    $module->redirectTo('openpa/changesectionsettings');
+    return;
+}
+
 
 if ($http->hasPostVariable('AddSetting')) {
     $classes[] = 'New';

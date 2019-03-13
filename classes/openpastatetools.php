@@ -354,7 +354,6 @@ class OpenPAStateTools
                     'value' => json_encode(self::getRulesFromBackendIni())
                 ]);
                 $siteData->store();
-                OpenPAStateTools::storeRulesBackup();
             }
 
             $siteDataValue = json_decode($siteData->attribute('value'), true);
