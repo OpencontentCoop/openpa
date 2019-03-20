@@ -47,6 +47,8 @@ PolicyOmitList[]=openpa/signup
 PolicyOmitList[]=openpa/cookie
 PolicyOmitList[]=robots.txt
 PolicyOmitList[]=openpa/loadwt
+PolicyOmitList[]=openpa/changestatedefinition
+PolicyOmitList[]=openpa/changesectiondefinition
 
 [RegionalSettings]
 TranslationExtensions[]=openpa
