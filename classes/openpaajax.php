@@ -78,7 +78,19 @@ class OpenPAAjax extends ezjscServerFunctions
                     $data = $tpl->fetch('design:parts/website_toolbar.tpl');
                     eZHTTPTool::instance()->setSessionVariable($sessionKey, $data);
                 }
-                echo eZHTTPTool::instance()->sessionVariable($sessionKey);
+                $result = eZHTTPTool::instance()->sessionVariable($sessionKey);
+
+                if (in_array('ezformtoken', eZExtension::activeExtensions()) && class_exists('ezxFormToken')){
+                    $token = ezxFormToken::getToken();
+                    $field = ezxFormToken::FORM_FIELD;
+                    $result = preg_replace(
+                        '/(<form\W[^>]*\bmethod=(\'|"|)POST(\'|"|)\b[^>]*>)/i',
+                        '\\1' . "\n<input type=\"hidden\" name=\"{$field}\" value=\"{$token}\" />\n",
+                        $result
+                    );
+                }
+
+                echo $result;
                 if (isset($args[1])) eZDisplayDebug();
                 eZExecution::cleanExit();
             }
