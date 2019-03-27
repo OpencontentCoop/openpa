@@ -39,10 +39,18 @@ class OpenpaMugoVarnishBuilder implements MugoVarnishBuilderInterface
         $mugoIni = eZINI::instance('mugo_varnish.ini');
 
         $hostname = $mugoIni->variable('VarnishSettings', 'VarnishHostName');
+        $port = '8080';
+        if ($mugoIni->hasVariable('VarnishSettings', 'VarnishPort')){
+            $port = $mugoIni->variable('VarnishSettings', 'VarnishPort');
+        }
         if(!empty($hostname)) {
             $servers = gethostbynamel($hostname);
             if (empty($servers)) {
                 eZDebug::writeError("Function gethostbynamel on $hostname returns empty result", __METHOD__);
+            }else{
+                foreach ($servers as $index => $server){
+                    $servers[$index] = $server . ':' . $port;
+                }
             }
         }
 
