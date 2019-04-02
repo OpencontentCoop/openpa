@@ -42,7 +42,8 @@ class OpenPAOperator
             'search_query',
             'strReplace',
             'organigramma',
-            'trasparenza_root_node_id'
+            'trasparenza_root_node_id',
+            'openpa_instance_identifier'
         );
     }
 
@@ -152,6 +153,12 @@ class OpenPAOperator
 
         switch ( $operatorName )
         {
+            case 'openpa_instance_identifier':
+            {
+                $operatorValue = OpenPABase::getCurrentSiteaccessIdentifier();
+                break;
+            }
+
             case 'trasparenza_root_node_id':
             {
                 $operatorValue = self::getTrasparenzaRootNodeId();

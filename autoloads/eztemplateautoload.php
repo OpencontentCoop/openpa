@@ -29,7 +29,8 @@ $eZTemplateOperatorArray[] = array(
         'search_query',
         'strReplace',
         'organigramma',
-        'trasparenza_root_node_id'
+        'trasparenza_root_node_id',
+        'openpa_instance_identifier'
     )
 );
 
