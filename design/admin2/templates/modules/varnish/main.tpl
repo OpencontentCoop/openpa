@@ -20,7 +20,7 @@
                 {if ezini('PurgeUrlBuilder', 'BuilderClass', 'mugo_varnish.ini')|eq('OpenpaMugoVarnishBuilder')}
                     <li>obj.http.X-Ban-Url ~ ^/.* && obj.http.X-Ban-Host ~ {ezini('SiteSettings', 'SiteURL')|explode('www.')|implode('')|explode('/')[0]|explode('.')|implode('\.')}</li>
                 {elseif ezini('PurgeUrlBuilder', 'BuilderClass', 'mugo_varnish.ini')|eq('OpenpaMugoVarnishBuilderByInstance')}
-                    <li>obj.http.X-Ban-Url ~ ^/.* && obj.http.X-Instance ~ {openpa_instance_identifier())}</li>
+                    <li>obj.http.X-Ban-Url ~ ^/.* && obj.http.X-Instance ~ {openpa_instance_identifier()}</li>
                 {/if}
             </ul>
             <textarea name="urllist" style="width: 100%; height: 200px;"></textarea>
