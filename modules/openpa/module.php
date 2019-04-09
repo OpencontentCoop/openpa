@@ -161,6 +161,41 @@ $ViewList['recaptcha'] = array(
     'functions' => array( 'recaptcha' )
 );
 
+$ViewList['loadwt'] = array(
+    'functions' => array('data'),
+    'script' => 'loadwt.php',
+    'params' => array('CurrentNodeId')
+);
+
+$ViewList['changestatesettings'] = array(
+    'functions' => array('changestatesettings'),
+    'script' => 'changestatesettings.php',
+    'params' => array('ID'),
+    'unordered_params' => array(),
+    "default_navigation_part" => 'ezsetupnavigationpart',
+);
+
+$ViewList['changestatedefinition'] = array(
+    'script' => 'changestatedefinition.php',
+    'params' => array('ID'),
+    'unordered_params' => array(),
+    "default_navigation_part" => 'ezsetupnavigationpart',
+);
+
+$ViewList['changesectionsettings'] = array(
+    'functions' => array('changesectionsettings'),
+    'script' => 'changesectionsettings.php',
+    'params' => array('ID'),
+    'unordered_params' => array(),
+    "default_navigation_part" => 'ezsetupnavigationpart',
+);
+
+$ViewList['changesectiondefinition'] = array(
+    'script' => 'changesectiondefinition.php',
+    'params' => array('ID'),
+    'unordered_params' => array(),
+    "default_navigation_part" => 'ezsetupnavigationpart',
+);
 
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
@@ -173,6 +208,7 @@ $FunctionList['signup'] = array();
 $FunctionList['cookie'] = array();
 $FunctionList['seo'] = array();
 $FunctionList['recaptcha'] = array();
-
+$FunctionList['changestatesettings'] = array();
+$FunctionList['changesectionsettings'] = array();
 
 ?>

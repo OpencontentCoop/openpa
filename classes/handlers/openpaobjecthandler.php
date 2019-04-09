@@ -47,6 +47,11 @@ class OpenPAObjectHandler
     public $currentPathNodeIds = array();
 
     /**
+     * @var array
+     */
+    public $fullCurrentPathNodeIds = array();
+
+    /**
      * @var int
      */
     public $currentNodeId = 0;
@@ -158,6 +163,12 @@ class OpenPAObjectHandler
                     {
                         $do = false;                        
                     }
+
+                    if ( $do )
+                    {
+                        $this->fullCurrentPathNodeIds[] = $nodeId;
+                    }
+
                     if ( $start && $do )
                     {
                         $this->currentPathNodeIds[] = $nodeId;
@@ -172,6 +183,7 @@ class OpenPAObjectHandler
                     //    $this->currentPathNodeIds[] = $nodeId;
                     //}
                 }
+                //$this->fullCurrentPathNodeIds[] = $this->contentNode->attribute( 'node_id' );
                 //eZDebug::writeNotice($this->currentNodeId . ' ' . var_export( $this->currentPathNodeIds,1));
             }
         }        

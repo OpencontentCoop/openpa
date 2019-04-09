@@ -200,7 +200,7 @@ $(function() {
                      $cleanFilterParameters = array()
                      $tempFilter = false()}
                 
-                {def $query = cond( ezhttp( 'SearchText','get','hasVariable' ), ezhttp( 'SearchText', 'get' ), '' )}
+                {def $query = cond( ezhttp( 'SearchText','get','hasVariable' ), ezhttp( 'SearchText', 'get' )|wash(), '' )}
                 {if count( $subtreearray )|eq(0)}
                     {set $subtreearray = array( ezini( 'NodeSettings', 'RootNode', 'content.ini' ) )}
                 {/if}

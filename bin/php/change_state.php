@@ -11,12 +11,13 @@ $script = eZScript::instance(array(
 
 $script->startup();
 
-$options = $script->getOptions('[id:][class:][dump-rules]',
+$options = $script->getOptions('[id:][class:][dump-rules][wait:]',
     '',
     array(
         'id' => "Object Id",
         'class' => "Class identifier",
-        'dump-rules' => "Export active rules"
+        'dump-rules' => "Export active rules",
+        'wait' => "Add sleep each iteration"
     )
 );
 
@@ -41,6 +42,10 @@ try {
     $stateTools = new OpenPAStateTools();
     if (!$options['quiet']) {
         $stateTools->setLog(true);
+    }
+
+    if ($options['wait']) {
+        $stateTools->setWait((int)$options['wait']);
     }
 
     if ($options['id']) {

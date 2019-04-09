@@ -67,6 +67,7 @@ class OpenPATableViewClassExtraParameters extends OCClassExtraParametersHandlerB
     {
         parent::storeParameters( $data );
         OpenPAINI::clearDynamicIniCache();
+        eZContentCacheManager::clearAllContentCache(true);
     }
 
 }

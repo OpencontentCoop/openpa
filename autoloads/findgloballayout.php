@@ -62,40 +62,43 @@ class FindGlobalLayoutOperator
                 );
             }
         }
-        //eZDebug::writeWarning( var_export($nodesParams,1), __METHOD__);
-        $findNodes = eZContentObjectTreeNode::subTreeMultiPaths( $nodesParams, array( 'SortBy' => array( 'node_id', false ) ) );
-        $sortByParentNodeID = array();
-        $found = false;
-        if ( !empty( $findNodes ) )
+        if ( !empty( $nodesParams ) )
         {
-            foreach( $findNodes as $findNode )
+            //eZDebug::writeWarning( var_export($nodesParams,1), __METHOD__);
+            $findNodes = eZContentObjectTreeNode::subTreeMultiPaths( $nodesParams, array( 'SortBy' => array( 'node_id', false ) ) );
+            $sortByParentNodeID = array();
+            $found = false;
+            if ( !empty( $findNodes ) )
             {
-                $sortByParentNodeID[ $findNode['parent_node_id'] ] = $findNode;
-            }
-
-            krsort( $sortByParentNodeID );
-
-            $reversePathArray = array_reverse( $pathArray );
-            foreach( $reversePathArray as $pathNodeID )
-            {
-                if ( isset( $sortByParentNodeID[$pathNodeID] ) )
+                foreach( $findNodes as $findNode )
                 {
-                    $result = eZContentObjectTreeNode::makeObjectsArray( array( $sortByParentNodeID[$pathNodeID] ) );
+                    $sortByParentNodeID[ $findNode['parent_node_id'] ] = $findNode;
+                }
+
+                krsort( $sortByParentNodeID );
+
+                $reversePathArray = array_reverse( $pathArray );
+                foreach( $reversePathArray as $pathNodeID )
+                {
+                    if ( isset( $sortByParentNodeID[$pathNodeID] ) )
+                    {
+                        $result = eZContentObjectTreeNode::makeObjectsArray( array( $sortByParentNodeID[$pathNodeID] ) );
+                        if ( !empty( $result ) )
+                        {
+                            $result = $result[0];
+                            $found = true;
+                            break;
+                        }
+                    }
+                }
+                if ( !$found )
+                {
+                    $result = array_shift( $sortByParentNodeID );
+                    $result = eZContentObjectTreeNode::makeObjectsArray( array( $result ) );
                     if ( !empty( $result ) )
                     {
                         $result = $result[0];
-                        $found = true;
-                        break;
                     }
-                }
-            }
-            if ( !$found )
-            {
-                $result = array_shift( $sortByParentNodeID );
-                $result = eZContentObjectTreeNode::makeObjectsArray( array( $result ) );
-                if ( !empty( $result ) )
-                {
-                    $result = $result[0];
                 }
             }
         }

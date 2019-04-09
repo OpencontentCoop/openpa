@@ -88,7 +88,7 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
 
             if (
                 isset($this->container->attributesHandlers['image'])
-                && $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->attribute( 'data_type_string' ) == 'ezobjectrelation'
+                && $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->attribute( 'data_type_string' ) == 'ezobjectrelationlist'
                 && $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->attribute( 'has_content' )
             ){
                 $relatedImages = explode('-', $this->container->attributesHandlers['image']->attribute('contentobject_attribute')->toString());

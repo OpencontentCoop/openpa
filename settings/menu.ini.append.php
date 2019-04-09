@@ -61,4 +61,14 @@ PolicyList_openpa_seo[]=openpa/seo
 LinkNames[openpa_seo]=Impostazioni SEO
 
 
+[Leftmenu_setup]
+Links[openpa_changestatesettings]=openpa/changestatesettings
+openpa_changestatesettings[]=openpa/changestatesettings
+LinkNames[openpa_changestatesettings]=Impostazioni per i cambi di stato automatici
+
+Links[openpa_changesectionsettings]=openpa/changesectionsettings
+openpa_changesectionsettings[]=openpa/changesectionsettings
+LinkNames[openpa_changesectionsettings]=Impostazioni per i cambi di sezione automatici
+
+
 */ ?>

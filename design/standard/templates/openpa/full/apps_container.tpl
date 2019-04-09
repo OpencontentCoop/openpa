@@ -1,3 +1,6 @@
+{ezpagedata_set( 'extra_menu', false() )}
+{ezpagedata_set( 'hide_valuation', true() )}
+
 <div class="border-box">
 <div class="border-content">
 

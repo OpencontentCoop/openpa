@@ -148,7 +148,7 @@
                 {else}
                 {* NON E' NE' SERVIZIO NE' UFFICIO *}
                     {if $attribute.contentclass_attribute_identifier|eq('argomento')}                    
-                        {include uri='design:content/datatype/edit/lista_argomenti.tpl' attribute_base=$attribute_base attribute_id=$attribute.id relation_list=$attribute.content.relation_list}
+                        {include uri='design:content/datatype/edit/lista_argomenti.tpl' nodesList=$nodesList attribute_base=$attribute_base attribute_id=$attribute.id relation_list=$attribute.content.relation_list}
                     {else}
     		            <select name="{$attribute_base}_data_object_relation_list_{$attribute.id}[]">
         		        {if $attribute.contentclass_attribute.is_required|not}

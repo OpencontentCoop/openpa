@@ -29,7 +29,8 @@ $eZTemplateOperatorArray[] = array(
         'search_query',
         'strReplace',
         'organigramma',
-        'trasparenza_root_node_id'
+        'trasparenza_root_node_id',
+        'openpa_instance_identifier'
     )
 );
 
@@ -87,7 +88,7 @@ $eZTemplateOperatorArray[] = array(
 $eZTemplateOperatorArray[] = array(
     'script' => 'extension/openpa/autoloads/openpapagedata.php',
     'class' => 'OpenPAPageData',
-    'operator_names' => array( 'openpapagedata', 'fill_contacts_matrix', 'contacts_matrix_fields', 'parse_contacts_matrix' )
+    'operator_names' => array( 'openpapagedata', 'fill_contacts_matrix', 'contacts_matrix_fields', 'parse_contacts_matrix', 'openpacontext' )
 );
 
 $eZTemplateOperatorArray[] = array(
