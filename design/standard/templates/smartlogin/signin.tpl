@@ -10,7 +10,13 @@
         <label for="Pwd">{'Password'|i18n('openpa/signin')}</label>
         <input id="Pwd" class="halfbox form-control" type="password" name="Password">
 
-        <p><a href={'/user/forgotpassword'|ezurl}>{'Forgot your password?'|i18n( 'design/ezwebin/user/login' )}</a></p>
+        <p>
+            {if ezmodule( 'userpaex' )}
+                <a href={'/userpaex/forgotpassword'|ezurl}>{'Forgot your password?'|i18n('sdesign/ezwebin/user/login')}</a>
+            {else}
+                <a href={'/user/forgotpassword'|ezurl}>{'Forgot your password?'|i18n('design/ezwebin/user/login')}</a>
+            {/if}
+        </p>
 
         <button name="LoginButton" type="submit" class="button defaultbutton btn btn-primary btn-lg">{'Accedi'|i18n('openpa/signin')}</button>
 
