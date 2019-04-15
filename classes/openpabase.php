@@ -444,4 +444,21 @@ class OpenPABase
         return array();
     }
 
+    public static function hasActiveSiteaccessSuffix($suffix)
+    {
+        if (empty($suffix)){
+            return false;
+        }
+        $currentPrefix = self::getCurrentSiteaccessIdentifier();
+        $findSiteAccessName = $currentPrefix . '_' . $suffix;
+        $items = eZINI::instance()->variable('SiteAccessSettings', 'HostUriMatchMapItems');
+        foreach ($items as $item){
+            if (strpos($item, ';' . $findSiteAccessName) !== false){
+                $parts = explode(';', $item);
+                return $parts[0] . '/' . $parts[1];
+            }
+        }
+
+        return false;
+    }
 }

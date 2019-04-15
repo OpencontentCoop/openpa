@@ -430,4 +430,27 @@
         <translation>Aggiorna priorità</translation>
     </message>
 </context>
+<context>
+    <name>openpa/usage_metrics</name>
+    <message>
+        <source>Numero di oggetti pubblicati</source>
+        <translation>Numero di oggetti pubblicati</translation>
+    </message>
+    <message>
+        <source>Numero di abitanti riferibili all'ente</source>
+        <translation>Numero di abitanti riferibili all'ente</translation>
+    </message>
+    <message>
+        <source>Numero di associazioni registrate ed approvate</source>
+        <translation>Numero di associazioni registrate ed approvate</translation>
+    </message>
+    <message>
+        <source>Numero di prenotazioni</source>
+        <translation>Numero di prenotazioni</translation>
+    </message>
+    <message>
+        <source>Numero di utenti profilati sul sistema</source>
+        <translation>Numero di utenti profilati sul sistema</translation>
+    </message>
+</context>
 </TS>
