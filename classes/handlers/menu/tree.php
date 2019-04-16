@@ -104,7 +104,8 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             'exclude_node_ids' => $excludeNodes,
             'max_recursion' => $maxRecursion,
             'custom_fetch_parameters' => $fetchParameters,
-            'custom_max_recursion' => $customMaxRecursion
+            'custom_max_recursion' => $customMaxRecursion,
+            'scope' => $parameters['scope']
         );
         $result = self::treeMenu( $parameters['root_node_id'], $settings );
         if ( !isset( $parameters['user_hash'] ) || $parameters['user_hash'] == false  )
@@ -131,7 +132,12 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
 
         if ($rootNode->attribute('node_id') == OpenPaFunctionCollection::fetchHome()->attribute('node_id'))
         {
-            $settings['max_recursion'] = 1;
+            $sideMenuContextRootClasses = OpenPAINI::variable( 'SideMenu', 'SideMenuContextRootClasses', array() );
+            if ( $settings['scope'] == 'side_menu'
+                 && !in_array( $rootNode->attribute('class_identifier'), $sideMenuContextRootClasses )
+            ){
+                $settings['max_recursion'] = 1;
+            }
         }
 
         if ( isset( $settings['custom_max_recursion'][$rootNode->attribute( 'node_id' )] ) )
