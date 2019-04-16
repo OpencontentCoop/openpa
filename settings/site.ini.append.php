@@ -1,5 +1,9 @@
 <?php /*
 
+# Per impedire l'indicizzazione dei file scaricati con content/download attivare la seguente regola
+#[Event]
+#Listeners[]=content/download@OpenPADownloadFilter::addXRobotsTagHeader
+
 
 [Cache]
 CacheItems[]=openpamenu
