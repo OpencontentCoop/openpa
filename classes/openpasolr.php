@@ -290,14 +290,15 @@ class OpenPASolr extends eZSolr
         return $DocumentFieldName->lookupSchemaName( ezfSolrDocumentFieldBase::ATTR_FIELD_PREFIX . $identifier, $type );
     }
 
-    public static function generateSolrSubMetaField( $identifier, $subIdentifier )
+    public static function generateSolrSubMetaField( $identifier, $subIdentifier, $type = null )
     {
         $DocumentFieldName = new ezfSolrDocumentFieldName();
         return $DocumentFieldName->lookupSchemaName(
             ezfSolrDocumentFieldBase::SUBMETA_FIELD_PREFIX . $identifier .
             ezfSolrDocumentFieldBase::SUBATTR_FIELD_SEPARATOR . $subIdentifier .
             ezfSolrDocumentFieldBase::SUBATTR_FIELD_SEPARATOR,
-            eZSolr::getMetaAttributeType( $subIdentifier ) );
+            $type ? $type : eZSolr::getMetaAttributeType( $subIdentifier )
+        );
     }
 
     public static function generateSolrSubField( $identifier, $subIdentifier, $type )
