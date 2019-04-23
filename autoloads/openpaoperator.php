@@ -102,7 +102,8 @@ class OpenPAOperator
             ),
             'solr_meta_subfield' => array(
                 'identifier' => array("type" => "string", "required" => true),
-                'sub_identifier' => array("type" => "string", "required" => true)
+                'sub_identifier' => array("type" => "string", "required" => true),
+                'type' => array("type" => "string", "required" => false, "default" => null)
             ),
             'strReplace' => array(
                 'var' => array ( 'type' => 'string', 'required' => true, 'default' => ''),
@@ -447,7 +448,7 @@ class OpenPAOperator
 
             case 'solr_meta_subfield':
             {
-                return $operatorValue = OpenPASolr::generateSolrSubMetaField( $namedParameters['identifier'], $namedParameters['sub_identifier'] );
+                return $operatorValue = OpenPASolr::generateSolrSubMetaField( $namedParameters['identifier'], $namedParameters['sub_identifier'], $namedParameters['type'] );
             } break;
 
             case 'site_identifier':
