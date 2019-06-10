@@ -460,7 +460,8 @@ try {
 
             $areaObject = eZContentObject::fetchByRemoteID($areaRemoteId);
             if ( !$areaObject ) {
-                $link = 'http://openpa.opencontent.it/api/opendata/v1/content/object/' . $areaRemoteId;
+                $remoteHost = OpenPABase::getPrototypeRemoteHost();
+                $link = 'http://' . $remoteHost . '/api/opendata/v1/content/object/' . $areaRemoteId;
                 $apiNode = OpenPAApiNode::fromLink($link);
                 if (!OpenPAObjectTools::syncObjectFormRemoteApiNode($apiNode)) {
                     OpenPALog::warning("Create $areaRemoteId");
@@ -483,10 +484,11 @@ try {
                 'opendata_global_info'
             );
 
+            $remoteHost = OpenPABase::getPrototypeRemoteHost();
             foreach ($remotes as $remote) {
                 OpenPALog::notice("Check $remote");
                 $object = eZContentObject::fetchByRemoteID($remote);
-                $link = 'http://openpa.opencontent.it/api/opendata/v1/content/object/' . $remote;
+                $link = 'http://' . $remoteHost . ' /api/opendata/v1/content/object/' . $remote;
                 $apiNode = OpenPAApiNode::fromLink($link);
                 if ( !$object ) {
                     OpenPALog::warning("Create $remote");
@@ -494,7 +496,7 @@ try {
                         throw new Exception("Cannot create $remote");
                     }
                     /*
-                                        $data = json_decode(OpenPABase::getDataByURL('http://openpa.opencontent.it/api/opendata/v2/content/read/' . $remote),
+                                        $data = json_decode(OpenPABase::getDataByURL('http://' . . '/api/opendata/v2/content/read/' . $remote),
                                             true);
                                         if (isset( $data['data']['ita-IT']['layout'] ) || isset( $data['data']['ita-IT']['page'] )) {
                                             $object = eZContentObject::fetchByRemoteID($remote);

@@ -73,7 +73,7 @@ try
         }
     }
 
-    $treeNode = OpenPAINI::variable('NetworkSettings', 'SyncTrasparenzaRemoteUrl', 'http://openpa.opencontent.it/api/opendata/v1/content/node/966');
+    $treeNode = OpenPAINI::variable('NetworkSettings', 'SyncTrasparenzaRemoteUrl');
     $treeUrl = $treeNode . '/list/offset/0/limit/1000';
     
     $apiNode = OpenPAApiNode::fromLink( $treeNode );

@@ -41,9 +41,9 @@ try
     {
         throw new Exception( "specificare remote_node_id" );
     }
-    
-    //@todo mettere in un openpa.ini
-    $remoteNodeLink = 'http://openpa.opencontent.it/api/opendata/v1/content/node/' . $options['remote_node_id'];
+
+    $remoteHost = OpenPABase::getPrototypeRemoteHost();
+    $remoteNodeLink = 'http://' . $remoteHost . '/api/opendata/v1/content/node/' . $options['remote_node_id'];
     $remoteNode = OpenPAApiNode::fromLink( $remoteNodeLink );
     
     if ( !$remoteNode )
