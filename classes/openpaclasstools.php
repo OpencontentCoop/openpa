@@ -8,7 +8,7 @@ class OpenPAClassTools
     const WARNING = 1;
     const ERROR = 2;
 
-    public static $remoteUrl = 'http://openpa.opencontent.it/openpa/classdefinition/';
+    public static $remoteUrl;
 
     public $EditLanguage = 'ita-IT';
 
@@ -122,6 +122,8 @@ class OpenPAClassTools
      */
     function __construct( $id, $createIfNotExists = false, $options = array() )
     {
+        self::$remoteUrl = 'http://'. OpenPABase::getPrototypeRemoteHost() .'/openpa/classdefinition/';
+
         $this->notifications = array( self::ERROR => array(),
                                       self::WARNING => array(),
                                       self::NOTICE => array() );

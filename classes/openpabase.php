@@ -444,4 +444,16 @@ class OpenPABase
         return array();
     }
 
+    public static function getPrototypeRemoteHost()
+    {
+        $remoteUrl = OpenPAINI::variable( 'NetworkSettings', 'PrototypeUrl' );
+        if ($remoteUrl){
+            $url = parse_url($remoteUrl);
+
+            return $url['host'];
+        }
+
+        return false;
+    }
+
 }

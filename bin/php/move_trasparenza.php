@@ -58,9 +58,8 @@ try
         $tools = new OpenPAClassTools( $identifier, true ); // creo se non esiste
         $tools->sync( true, true ); // forzo e rimuovo attributi in più
     }
-   
-    //@todo mettere in un openpa.ini
-    $treeNode = 'http://openpa.opencontent.it/api/opendata/v1/content/node/966';
+
+    $treeNode = OpenPAINI::variable('NetworkSettings', 'SyncTrasparenzaRemoteUrl');
     $treeUrl = $treeNode . '/list/offset/0/limit/1000';
     
     OpenPAObjectTools::syncObjectFormRemoteApiNode( OpenPAApiNode::fromLink( $treeNode ) );
