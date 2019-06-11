@@ -1,5 +1,6 @@
 # OpenPA
 
+[![pullreminders](https://pullreminders.com/badge.svg)](https://pullreminders.com?ref=badge)
 
 ## Piattaforma per la comunicazione istituzionale e l'OpenGovernment
 La piattaforma OpenPA fornisce una serie di strumenti, partendo dal sito istituzionale dell'Ente, pensate per gestire le sfide che l'Open Government presenta alle pubbliche amministrazioni.

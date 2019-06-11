@@ -406,6 +406,12 @@ class OpenPAPageData
         return eZClusterFileHandler::instance($cacheFilePath);
     }
 
+    public static function getThemeIdentifierCache()
+    {
+        $cacheFilePath = eZSys::cacheDirectory() . '/' . 'openpa/pagedata/theme_identifier.cache';
+        return eZClusterFileHandler::instance($cacheFilePath);
+    }
+
     public static function clearCache()
     {
         self::clearOnModifyHomepage();

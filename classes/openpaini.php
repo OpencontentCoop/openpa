@@ -9,6 +9,8 @@ class OpenPAINI
 
     private static $enableRobots;
 
+    private static $themeIdentifier;
+
     public static $dynamicIniMap = array(
         'GestioneAttributi' => array(
             'attributi_contatti' => array(
@@ -87,7 +89,8 @@ class OpenPAINI
         'Attributi::EscludiDaRicerca',
         'Seo::GoogleAnalyticsAccountID',
         'Seo::EnableRobots',
-        'GeneralSettings::valutation'
+        'GeneralSettings::valutation',
+        'GeneralSettings::theme'
         //'SideMenu::EsponiLink'
     );
 
@@ -368,6 +371,10 @@ class OpenPAINI
                 return false;
                 break;
 
+            case 'GeneralSettings::theme':
+                return self::getThemeIdentifier($default);
+                break;
+
         }
 
         if ( isset( self::$dynamicIniMap[$block][$value] ) )
@@ -401,6 +408,13 @@ class OpenPAINI
                     }
                     $data->setAttribute('value', $value);
                     $data->store();
+
+                    return true;
+                    break;
+
+
+                case 'GeneralSettings::theme':
+                    self::setThemeIdentifier($value);
 
                     return true;
                     break;
@@ -439,6 +453,65 @@ class OpenPAINI
     public static function clearCache()
     {
         self::clearDynamicIniCache();
+    }
+
+    private static function getThemeIdentifier($default)
+    {
+        if (self::$themeIdentifier === null) {
+            self::$themeIdentifier = OpenPAPageData::getThemeIdentifierCache()->processCache(
+                function ($file, $mtime) {
+                    if (file_exists($file)) {
+                        $result = include( $file );
+                    }
+
+                    return $result;
+                },
+                function () {
+                    $themeIdentifierSiteData = eZSiteData::fetchByName('Theme');
+                    if (!$themeIdentifierSiteData instanceof eZSiteData) {
+                        $themeIdentifierSiteData = new eZSiteData(array(
+                            'name' => 'Theme',
+                            'value' => ''
+                        ));
+                        $ini = eZINI::instance('openpa.ini');
+                        if ($ini->hasVariable('GeneralSettings', 'theme')) {
+                            $themeIdentifier = $ini->variable('GeneralSettings', 'theme');
+                            $themeIdentifierSiteData->setAttribute('value', $themeIdentifier);
+                            $themeIdentifierSiteData->store();
+                        }
+                    }
+                    $result = $themeIdentifierSiteData->attribute('value');
+
+                    return array(
+                        'content' => $result,
+                        'scope' => 'theme_identifier'
+                    );
+                }
+            );
+
+            if (empty(self::$themeIdentifier)){
+                self::$themeIdentifier = $default;
+            }
+        }
+
+        return self::$themeIdentifier;
+    }
+
+    private static function setThemeIdentifier($value)
+    {
+        $data = eZSiteData::fetchByName('Theme');
+        if (!$data instanceof eZSiteData) {
+            $data = new eZSiteData(array(
+                'name' => 'Theme',
+                'value' => ''
+            ));
+        }
+        $data->setAttribute('value', $value);
+        $data->store();
+        $cacheFile = OpenPAPageData::getThemeIdentifierCache();
+        $cacheFile->delete();
+        $cacheFile->purge();
+        self::$themeIdentifier = null;
     }
 
 }

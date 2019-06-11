@@ -446,14 +446,14 @@ class OpenPABase
 
     public static function hasActiveSiteaccessSuffix($suffix)
     {
-        if (empty($suffix)){
+        if (empty($suffix)) {
             return false;
         }
         $currentPrefix = self::getCurrentSiteaccessIdentifier();
         $findSiteAccessName = $currentPrefix . '_' . $suffix;
         $items = eZINI::instance()->variable('SiteAccessSettings', 'HostUriMatchMapItems');
-        foreach ($items as $item){
-            if (strpos($item, ';' . $findSiteAccessName) !== false){
+        foreach ($items as $item) {
+            if (strpos($item, ';' . $findSiteAccessName) !== false) {
                 $parts = explode(';', $item);
                 return $parts[0] . '/' . $parts[1];
             }
@@ -461,4 +461,17 @@ class OpenPABase
 
         return false;
     }
+
+    public static function getPrototypeRemoteHost()
+    {
+        $remoteUrl = OpenPAINI::variable( 'NetworkSettings', 'PrototypeUrl' );
+        if ($remoteUrl){
+            $url = parse_url($remoteUrl);
+
+            return $url['host'];
+        }
+
+        return false;
+    }
+
 }

@@ -21,6 +21,8 @@ OpenPALog::setOutputLevel( OpenPALog::ALL );
 
 try
 {
+    throw new Exception("Script deprecato");
+
     $user = eZUser::fetchByName( 'admin' );
     eZUser::setCurrentlyLoggedInUser( $user , $user->attribute( 'contentobject_id' ) );
     
