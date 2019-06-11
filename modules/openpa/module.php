@@ -197,6 +197,12 @@ $ViewList['changesectiondefinition'] = array(
     "default_navigation_part" => 'ezsetupnavigationpart',
 );
 
+$ViewList['theme'] = array(
+    'script' =>	'theme.php',
+    'params' => array(),
+    'functions' => array( 'theme' )
+);
+
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
 $FunctionList['manage_roles'] = array();
@@ -210,5 +216,6 @@ $FunctionList['seo'] = array();
 $FunctionList['recaptcha'] = array();
 $FunctionList['changestatesettings'] = array();
 $FunctionList['changesectionsettings'] = array();
+$FunctionList['theme'] = array();
 
 ?>
