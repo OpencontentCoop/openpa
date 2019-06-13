@@ -30,6 +30,12 @@
                        placeholder="Codice Tag Manager" value="{$googleTagManagerID|wash()}">
             </div>
 
+            <div class="Form-field block">
+                <label class="Form-label" for="googleSiteVerificationID">Codice Google Site Verification</label>
+                <input id="googleSiteVerificationID" class="Form-input u-color-black form-control" type="text" name="GoogleSiteVerificationID"
+                       placeholder="Codice Google Site Verification" value="{$googleSiteVerificationID|wash()}">
+            </div>
+
             <input type="submit" class="defaultbutton btn btn-success" name="StoreSeo" value="Salva"/>
         </fieldset>
     </form>

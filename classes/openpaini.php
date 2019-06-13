@@ -88,6 +88,7 @@ class OpenPAINI
         'Seo::GoogleAnalyticsAccountID',
         'Seo::EnableRobots',
         'Seo::GoogleTagManagerID',
+        'Seo::GoogleSiteVerificationID',
         'GeneralSettings::valutation',
         'GeneralSettings::theme'
     );
@@ -278,6 +279,10 @@ class OpenPAINI
                 return self::getSeoData()['googleTagManagerID'];
                 break;
 
+            case 'Seo::GoogleSiteVerificationID':
+                return self::getSeoData()['googleSiteVerificationID'];
+                break;
+
             case 'GeneralSettings::valutation':
                 if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
                     && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
@@ -320,6 +325,10 @@ class OpenPAINI
 
                 case 'Seo::GoogleTagManagerID':
                     return self::setSeoData('googleTagManagerID', $value);
+                    break;
+
+                case 'Seo::GoogleSiteVerificationID':
+                    return self::setSeoData('googleSiteVerificationID', $value);
                     break;
 
                 case 'GeneralSettings::theme':
@@ -483,6 +492,7 @@ class OpenPAINI
                 'googleAnalyticsAccountID' => '',
                 'enableRobots' => 'disabled',
                 'googleTagManagerID' => '',
+                'googleSiteVerificationID' => '',
             );
 
             // recupero le informazioni dagli ini o dalla logica precedente di storage

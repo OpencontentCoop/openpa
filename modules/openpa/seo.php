@@ -18,6 +18,11 @@ if ($http->hasPostVariable('StoreSeo')) {
         OpenPAINI::set("Seo", "GoogleTagManagerID", $googleTagManagerID);
     }
 
+    if ($http->hasPostVariable('GoogleSiteVerificationID')) {
+        $googleSiteVerificationID = trim($http->postVariable('GoogleSiteVerificationID'));
+        OpenPAINI::set("Seo", "GoogleSiteVerificationID", $googleSiteVerificationID);
+    }
+
     if ($http->hasPostVariable('Robots')) {
         OpenPAINI::set("Seo", "EnableRobots", 'enabled');
     } else {
@@ -37,6 +42,7 @@ if ($http->hasPostVariable('StoreSeo')) {
 $tpl->setVariable('googleId', OpenPAINI::variable('Seo', 'GoogleAnalyticsAccountID', false));
 $tpl->setVariable('robots', OpenPAINI::variable('Seo', 'EnableRobots', 'disabled'));
 $tpl->setVariable('googleTagManagerID', OpenPAINI::variable('Seo', 'GoogleTagManagerID', false));
+$tpl->setVariable('googleSiteVerificationID', OpenPAINI::variable('Seo', 'GoogleSiteVerificationID', false));
 
 $Result = array();
 $Result['content'] = $tpl->fetch('design:openpa/seo.tpl');
