@@ -5,9 +5,7 @@ class OpenPAINI
 
     public static $useDynamicIni;
 
-    public static $googleAccountId;
-
-    private static $enableRobots;
+    private static $seoData;
 
     private static $themeIdentifier;
 
@@ -89,9 +87,9 @@ class OpenPAINI
         'Attributi::EscludiDaRicerca',
         'Seo::GoogleAnalyticsAccountID',
         'Seo::EnableRobots',
+        'Seo::GoogleTagManagerID',
         'GeneralSettings::valutation',
         'GeneralSettings::theme'
-        //'SideMenu::EsponiLink'
     );
 
     public static function variable( $block, $value, $default = null )
@@ -166,90 +164,6 @@ class OpenPAINI
             $result[] = $alboSection['id'];
         }
         return $result;
-    }
-
-    protected static function googleAnalyticsAccountID($setValue = null)
-    {
-        if ($setValue){
-            $data = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
-            if (!$data instanceof eZSiteData) {
-                $data = new eZSiteData(array(
-                    'name' => 'GoogleAnalyticsAccountID',
-                    'value' => ''
-                ));
-            }
-            $data->setAttribute('value', $setValue);
-            $data->store();
-            $cacheFile = OpenPAPageData::getGoogleAnalyticsCache();
-            $cacheFile->delete();
-            $cacheFile->purge();
-            self::$googleAccountId = null;
-        }
-
-        if (self::$googleAccountId === null) {
-            self::$googleAccountId = OpenPAPageData::getGoogleAnalyticsCache()->processCache(
-                function ($file, $mtime) {
-                    if (file_exists($file)) {
-                        $result = include( $file );
-                    } else {
-                        $result = new eZClusterFileFailure(eZClusterFileFailure::FILE_RETRIEVAL_FAILED);
-                    }
-
-                    return $result;
-                },
-                function () {
-                    $googleAnalyticsAccountIDSiteData = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
-                    if (!$googleAnalyticsAccountIDSiteData instanceof eZSiteData) {
-                        $googleAnalyticsAccountIDSiteData = new eZSiteData(array(
-                            'name' => 'GoogleAnalyticsAccountID',
-                            'value' => ''
-                        ));
-                        $ini = eZINI::instance('openpa.ini');
-                        if ($ini->hasVariable('Seo', 'GoogleAnalyticsAccountID')) {
-                            $googleAnalyticsAccountID = $ini->variable('Seo', 'GoogleAnalyticsAccountID');
-                            $googleAnalyticsAccountIDSiteData->setAttribute('value', $googleAnalyticsAccountID);
-                            $googleAnalyticsAccountIDSiteData->store();
-                        }
-                    }
-                    $result = $googleAnalyticsAccountIDSiteData->attribute('value');
-
-                    return array(
-                        'content' => $result,
-                        'scope' => 'google_analytics'
-                    );
-                }
-            );
-        }
-
-        return self::$googleAccountId;
-    }
-
-    protected static function isRobotsEnabled()
-    {
-        if ( self::$enableRobots === null )
-        {
-            $enableRobotsSiteData = eZSiteData::fetchByName('EnableRobots');
-            if ( !$enableRobotsSiteData instanceof eZSiteData )
-            {
-                $ini = eZINI::instance( 'openpa.ini' );
-                $enableRobotsValue = 'enabled';
-                if ($ini->hasVariable( 'Seo', 'EnableRobots' )){
-                    $enableRobotsValue = $ini->variable( 'Seo', 'EnableRobots' );
-                }
-                if (strpos(eZSys::hostname(), 'opencontent.it') !== false){
-                    $enableRobotsValue = 'disabled';
-                }
-                $enableRobotsSiteData = new eZSiteData(array(
-                    'name' => 'EnableRobots',
-                    'value' => $enableRobotsValue
-                ));
-                $enableRobotsSiteData->store();
-                self::$enableRobots = $enableRobotsValue;
-
-            }
-            self::$enableRobots = $enableRobotsSiteData->attribute('value');
-        }
-        return self::$enableRobots;
     }
 
     private static function getDynamicIniData()
@@ -353,11 +267,15 @@ class OpenPAINI
                 break;
 
             case 'Seo::GoogleAnalyticsAccountID':
-                return self::googleAnalyticsAccountID();
+                return self::getSeoData()['googleAnalyticsAccountID'];
                 break;
 
             case 'Seo::EnableRobots':
-                return self::isRobotsEnabled();
+                return self::getSeoData()['enableRobots'];
+                break;
+
+            case 'Seo::GoogleTagManagerID':
+                return self::getSeoData()['googleTagManagerID'];
                 break;
 
             case 'GeneralSettings::valutation':
@@ -388,30 +306,21 @@ class OpenPAINI
 
     public static function set( $block, $settingName, $value )
     {
-        if ( $block && $settingName && $value ) {
+        if ( $block && $settingName && $value !== null) {
             $filter = $block . '::' . $settingName;
             switch ($filter) {
 
                 case 'Seo::GoogleAnalyticsAccountID':
-                    self::googleAnalyticsAccountID($value);
-
-                    return true;
+                    return self::setSeoData('googleAnalyticsAccountID', $value);
                     break;
 
                 case 'Seo::EnableRobots':
-                    $data = eZSiteData::fetchByName('EnableRobots');
-                    if (!$data instanceof eZSiteData) {
-                        $data = new eZSiteData(array(
-                            'name' => 'EnableRobots',
-                            'value' => ''
-                        ));
-                    }
-                    $data->setAttribute('value', $value);
-                    $data->store();
-
-                    return true;
+                    return self::setSeoData('enableRobots', $value);
                     break;
 
+                case 'Seo::GoogleTagManagerID':
+                    return self::setSeoData('googleTagManagerID', $value);
+                    break;
 
                 case 'GeneralSettings::theme':
                     self::setThemeIdentifier($value);
@@ -436,7 +345,6 @@ class OpenPAINI
         }
         return false;
     }
-
 
     public static function dynamicIniCachePath(){
         return eZSys::cacheDirectory() . '/' . 'openpa/ini/dynamicini.cache';
@@ -514,4 +422,108 @@ class OpenPAINI
         self::$themeIdentifier = null;
     }
 
+    private static function getSeoData()
+    {
+        if (self::$seoData === null) {
+            self::$seoData = OpenPAPageData::getSeoCache()->processCache(
+                function ($file) {
+                    if (file_exists($file)) {
+                        $result = include($file);
+                    }
+
+                    return $result;
+                },
+                function () {
+                    $siteData = eZSiteData::fetchByName('SeoSettings');
+                    if (!$siteData instanceof eZSiteData) {
+                        $result = self::generateSeoData();
+                    } else {
+                        $result = json_decode($siteData->attribute('value'), true);
+                    }
+
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache'
+                    );
+                }
+            );
+        }
+
+        return self::$seoData;
+    }
+
+    private static function setSeoData($key, $value)
+    {
+        $siteData = eZSiteData::fetchByName('SeoSettings');
+        if (!$siteData instanceof eZSiteData) {
+            self::generateSeoData();
+            $siteData = eZSiteData::fetchByName('SeoSettings');
+        }
+
+        $data = json_decode($siteData->attribute('value'), true);
+        $data[$key] = $value;
+
+        $siteData->setAttribute('value', json_encode($data));
+        $siteData->store();
+
+        self::$seoData = null;
+        $cacheFile = OpenPAPageData::getSeoCache();
+        $cacheFile->delete();
+        $cacheFile->purge();
+
+        return true;
+    }
+
+    private static function generateSeoData()
+    {
+        $siteData = eZSiteData::fetchByName('SeoSettings');
+        if (!$siteData instanceof eZSiteData) {
+
+            $data = array(
+                'googleAnalyticsAccountID' => '',
+                'enableRobots' => 'disabled',
+                'googleTagManagerID' => '',
+            );
+
+            // recupero le informazioni dagli ini o dalla logica precedente di storage
+
+            $googleAnalyticsAccountIDSiteData = eZSiteData::fetchByName('GoogleAnalyticsAccountID');
+            if ($googleAnalyticsAccountIDSiteData instanceof eZSiteData) {
+                $data['googleAnalyticsAccountID'] = $googleAnalyticsAccountIDSiteData->attribute('value');
+                $googleAnalyticsAccountIDSiteData->remove();
+            }else{
+                $ini = eZINI::instance('openpa.ini');
+                if ($ini->hasVariable('Seo', 'GoogleAnalyticsAccountID')) {
+                    $data['googleAnalyticsAccountID'] = $ini->variable('Seo', 'GoogleAnalyticsAccountID');
+                }
+            }
+            $cacheFile = OpenPAPageData::getGoogleAnalyticsCache();
+            $cacheFile->delete();
+            $cacheFile->purge();
+
+            $enableRobotsSiteData = eZSiteData::fetchByName('EnableRobots');
+            if ( $enableRobotsSiteData instanceof eZSiteData ) {
+                $data['enableRobots'] = $enableRobotsSiteData->attribute('value');
+                $enableRobotsSiteData->remove();
+            }else{
+                $ini = eZINI::instance( 'openpa.ini' );
+                $enableRobotsValue = 'enabled';
+                if ($ini->hasVariable( 'Seo', 'EnableRobots' )){
+                    $enableRobotsValue = $ini->variable( 'Seo', 'EnableRobots' );
+                }
+                if (strpos(eZSys::hostname(), 'opencontent.it') !== false){
+                    $enableRobotsValue = 'disabled';
+                }
+                $data['enableRobots'] = $enableRobotsValue;
+            }
+
+            $siteData = new eZSiteData(array(
+                'name' => 'SeoSettings',
+                'value' => json_encode($data)
+            ));
+            $siteData->store();
+        }
+
+        return json_decode($siteData->attribute('value'), true);
+    }
 }
