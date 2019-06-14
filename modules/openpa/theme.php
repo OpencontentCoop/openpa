@@ -23,14 +23,9 @@ if ($http->hasPostVariable('StoreTheme') && $http->hasPostVariable('Theme')) {
 
             eZCache::clearByTag('template');
 
-            $optionArray = array('iniFile' => 'site.ini',
+            eZExtension::getHandlerClass(new ezpExtensionOptions(array('iniFile' => 'site.ini',
                 'iniSection' => 'ContentSettings',
-                'iniVariable' => 'StaticCacheHandler');
-
-            $options = new ezpExtensionOptions($optionArray);
-            $staticCacheHandler = eZExtension::getHandlerClass($options);
-
-            $staticCacheHandler->generateCache(true, true);
+                'iniVariable' => 'StaticCacheHandler')))->generateCache(true, true);
 
         } else {
             $tpl->setVariable('message', 'Errore!');

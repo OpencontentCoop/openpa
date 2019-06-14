@@ -400,6 +400,16 @@ class OpenPAPageData
         return eZClusterFileHandler::instance($cacheFilePath);
     }
 
+    public static function getSeoCache()
+    {
+        $cacheFilePath = eZSys::cacheDirectory() . '/openpa/' . 'seo.cache';
+        return eZClusterFileHandler::instance($cacheFilePath);
+    }
+
+    /**
+     * @deprecated
+     * @return eZClusterFileHandlerInterface
+     */
     public static function getGoogleAnalyticsCache()
     {
         $cacheFilePath = eZSys::cacheDirectory() . '/' . 'google_analytics_account_id.cache';
@@ -421,8 +431,8 @@ class OpenPAPageData
         self::getSearchDataCache()->delete();
         self::getSearchDataCache()->purge();
 
-        self::getGoogleAnalyticsCache()->delete();
-        self::getGoogleAnalyticsCache()->purge();
+        self::getSeoCache()->delete();
+        self::getSeoCache()->purge();
     }
 
     public static function clearOnModifyAreaTematica()
