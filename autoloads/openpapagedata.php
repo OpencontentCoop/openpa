@@ -222,7 +222,9 @@ class OpenPAPageData
                     if (class_exists('OcCrossLogin') && in_array('occrosslogin', eZExtension::activeExtensions('access'))) {
                         /** @var OcCrossLogin $helper */
                         $helper = OcCrossLogin::instance();
-                        $data['is_login_page'] = $helper->needRedirectionToLoginAccessByModule();
+                        if ($helper->isEnabled()) {
+                            $data['is_login_page'] = $helper->needRedirectionToLoginAccessByModule();
+                        }
                     }
 
                     $data['is_register_page'] = $data['request']['module'] == 'user' && $data['request']['function'] == 'register';

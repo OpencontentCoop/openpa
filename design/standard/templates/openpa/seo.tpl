@@ -31,9 +31,14 @@
             </div>
 
             <div class="Form-field block">
-                <label class="Form-label" for="googleSiteVerificationID">Codice Google Site Verification</label>
+                <label class="Form-label" for="googleSiteVerificationID">Codice Google Site Verification (richiesto per utilizzare la Google Search Console)</label>
                 <input id="googleSiteVerificationID" class="Form-input u-color-black form-control" type="text" name="GoogleSiteVerificationID"
                        placeholder="Codice Google Site Verification" value="{$googleSiteVerificationID|wash()}">
+            </div>
+
+            <div class="Form-field block">
+                <label class="Form-label" for="RobotsText">Contenuto robots.txt {if $isRobotsTextDefault}(default){/if}</label>
+                <textarea id="RobotsText" class="form-control" rows="20" type="text" name="RobotsText">{$robotsText|wash()}</textarea>
             </div>
 
             <input type="submit" class="defaultbutton btn btn-success" name="StoreSeo" value="Salva"/>
