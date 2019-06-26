@@ -1,7 +1,10 @@
 <?php
 
 if (OpenPAINI::variable('Seo', 'EnableRobots') == 'enabled') {
-    $result = file_get_contents('robots.txt');
+    $result = OpenPAINI::variable('Seo', 'RobotsText', '');
+    if (empty($result)) {
+        $result = OpenPAINI::variable('Seo', 'DefaultRobotsText', false);
+    }
 }else{
     $result = "User-agent: * \nDisallow: /";
 }

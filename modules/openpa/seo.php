@@ -29,6 +29,11 @@ if ($http->hasPostVariable('StoreSeo')) {
         OpenPAINI::set("Seo", "EnableRobots", 'disabled');
     }
 
+    if ($http->hasPostVariable('RobotsText')) {
+        $robotsText = trim($http->postVariable('RobotsText'));
+        OpenPAINI::set("Seo", "RobotsText", $robotsText);
+    }
+
     eZCache::clearByTag('template');
 
     eZExtension::getHandlerClass(new ezpExtensionOptions(array('iniFile' => 'site.ini',
@@ -39,8 +44,17 @@ if ($http->hasPostVariable('StoreSeo')) {
     return;
 }
 
+$robotsTextDefault = false;
+$robotsText = OpenPAINI::variable('Seo', 'RobotsText', '');
+if (empty($robotsText)) {
+    $robotsText = OpenPAINI::variable('Seo', 'DefaultRobotsText', false);
+    $robotsTextDefault = true;
+}
+
 $tpl->setVariable('googleId', OpenPAINI::variable('Seo', 'GoogleAnalyticsAccountID', false));
 $tpl->setVariable('robots', OpenPAINI::variable('Seo', 'EnableRobots', 'disabled'));
+$tpl->setVariable('robotsText', $robotsText);
+$tpl->setVariable('isRobotsTextDefault', $robotsTextDefault);
 $tpl->setVariable('googleTagManagerID', OpenPAINI::variable('Seo', 'GoogleTagManagerID', false));
 $tpl->setVariable('googleSiteVerificationID', OpenPAINI::variable('Seo', 'GoogleSiteVerificationID', false));
 
