@@ -8,7 +8,7 @@ class OpenPAMenuOperator
     
     private static $_cache = array();
     
-    function OpenPAMenuOperator()
+    function __construct()
     {
         $this->Operators= array( 'top_menu_cached', 'left_menu_cached', 'tree_menu' );
     }

@@ -4,7 +4,7 @@ include_once( "extension/openpa/lib/browser_detection.php" );
 class CheckbrowserOperator
 {
 
-    function CheckbrowserOperator()
+    function __construct()
     {
         $this->Operators= array( 'checkbrowser', 'is_deprecated_browser' );
     }

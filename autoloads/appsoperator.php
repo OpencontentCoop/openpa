@@ -45,6 +45,7 @@ class AppsOperators
      * @param mixed $operatorValue
      * @param array $namedParameters
      * @param mixed $placement
+     * @throws Exception
      */
     function modify( $tpl, $operatorName, $operatorParameters, $rootNamespace, $currentNamespace, &$operatorValue, $namedParameters, $placement )
     {

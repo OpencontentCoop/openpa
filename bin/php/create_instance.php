@@ -13,6 +13,7 @@ $script->initialize();
 $script->setUseDebugAccumulators(true);
 $output = new ezcConsoleOutput();
 $cli = eZCLI::instance();
+
 try {
 
     $current = OpenPABase::getCurrentSiteaccessIdentifier();
@@ -28,23 +29,98 @@ try {
         throw new Exception("Esiste già un'istanza con identificatore $identifier");
     }
 
-    $siteUrl = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
-        'text' => "Inserisci dominio di produzione",
+    $siteAccessIdentifierList = array();
+    foreach (eZDir::findSubdirs('settings/siteaccess') as $item) {
+        if (strpos($item, "{$current}_") !== false) {
+            $siteAccessIdentifier = str_replace("{$current}_", '', $item);
+            if ($siteAccessIdentifier != 'backend' && $siteAccessIdentifier != 'debug') {
+                $siteAccessIdentifierList[] = $siteAccessIdentifier;
+            }
+        }
+    }
+    sort($siteAccessIdentifierList);
+
+    class OpenPAMultiChoiceMenuDialogValidator extends ezcConsoleMenuDialogDefaultValidator
+    {
+        public function validate($result)
+        {
+            $result = explode(' ', $result);
+            $result = array_map('trim', $result);
+            foreach ($result as $item) {
+                if (!isset($this->elements[$item])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    $menu = new ezcConsoleMenuDialog($output);
+    $menu->options = new ezcConsoleMenuDialogOptions();
+    $menu->options->text = "Seleziona gli ambienti da attivare (separandoli con uno spazio):\n";
+    $menu->options->validator = new OpenPAMultiChoiceMenuDialogValidator($siteAccessIdentifierList);
+    $envChoice = ezcConsoleDialogViewer::displayDialog($menu);
+    $envChoice = explode(' ', $envChoice);
+    $envChoice = array_map('trim', $envChoice);
+    $siteAccessSelectedList = array();
+    foreach ($envChoice as $env) {
+        $siteAccessSelectedList[] = $siteAccessIdentifierList[$env];
+    }
+    $siteAccessIdentifierList[] = 'debug';
+    if (!empty($siteAccessSelectedList)) {
+        $siteAccessSelectedList[] = 'backend';
+        if (in_array('frontend', $siteAccessSelectedList)) {
+            $siteAccessSelectedList[] = 'debug';
+        }
+    } else {
+        throw new Exception("Selezione ambienti da installare non corretta");
+    }
+
+
+    $nomeAmministrazioneAfferente = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
+        'text' => "Inserisci il nome dell'amministrazione afferente",
+        'showResults' => true
+    ))));
+    $urlAmministrazioneAfferente = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
+        'text' => "Inserisci l'url completo dell'amministrazione afferente",
         'showResults' => true
     ))));
 
-    $siteName = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
-        'text' => "Inserisci titolo del sito (es. Comune di Trento)",
-        'showResults' => true
-    ))));
+    $siteUrl = $urlSuffix = $siteName = $tempSiteUrl = array();
+    $suggestions = array();
+    foreach ($siteAccessSelectedList as $siteAccessSelected) {
+        $cli->warning("Impostazioni per $siteAccessSelected");
+        $suggestions['siteUrl'] = $siteUrl[$siteAccessSelected] = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
+            'text' => "[$siteAccessSelected] Inserisci dominio di produzione (esempio: www.example.com)",
+            'showResults' => true,
+            'validator' => new ezcConsoleQuestionDialogTypeValidator(ezcConsoleQuestionDialogTypeValidator::TYPE_STRING, isset($suggestions['siteUrl']) ? $suggestions['siteUrl'] : '')
+        ))));
 
-    $tempDomainSuffix = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
-        'text' => "Inserisci suffiso del dominio temporaneo (es. comunitatrentina.it)",
-        'showResults' => true
-    ))));
+        $suggestions['tempSiteUrl'] = $tempSiteUrl[$siteAccessSelected] = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
+            'text' => "[$siteAccessSelected] Inserisci il dominio temporaneo (esempio: example.opencontent.it)",
+            'showResults' => true,
+            'validator' => new ezcConsoleQuestionDialogTypeValidator(ezcConsoleQuestionDialogTypeValidator::TYPE_STRING, isset($suggestions['tempSiteUrl']) ? $suggestions['tempSiteUrl'] : '')
+        ))));
 
+        $urlSuffix[$siteAccessSelected] = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
+            'text' => "[$siteAccessSelected] Inserisci il suffisso al dominio di produzione (esempio: backend)",
+            'showResults' => true,
+            'validator' => new ezcConsoleQuestionDialogTypeValidator(ezcConsoleQuestionDialogTypeValidator::TYPE_STRING, '')
+        ))));
 
-    foreach (array('frontend', 'debug', 'backend') as $suffix) {
+        $suggestions['siteName'] = $siteName[$siteAccessSelected] = ezcConsoleDialogViewer::displayDialog(new ezcConsoleQuestionDialog($output, new ezcConsoleQuestionDialogOptions(array(
+            'text' => "[$siteAccessSelected] Inserisci titolo del sito (esempio: Comune di Tornimparte)",
+            'showResults' => true,
+            'validator' => new ezcConsoleQuestionDialogTypeValidator(ezcConsoleQuestionDialogTypeValidator::TYPE_STRING, isset($suggestions['siteName']) ? $suggestions['siteName'] : '')
+        ))));
+        $cli->output();
+    }
+
+    foreach ($siteAccessSelectedList as $suffix) {
+
+        $dirPath = "settings/siteaccess/{$current}_{$suffix}";
+
         $originalDirectory = "settings/siteaccess/{$current}_{$suffix}";
         $directory = "settings/siteaccess/{$identifier}_{$suffix}";
         eZDir::mkdir($directory);
@@ -56,28 +132,55 @@ try {
             $cli->output("Creata cartella $directory");
         }
 
+        $originalOpenpaIni = file_get_contents($directory . '/' . 'openpa.ini.append.php');
+        $newOpenpaIni = $originalOpenpaIni;
+        $openpaIni = new eZINI('openpa.ini.append.php', $dirPath, false, false, false, true, false);
+        $originalNomeAmministrazioneAfferente = $openpaIni->variable('InstanceSettings', 'NomeAmministrazioneAfferente');
+        $originalUrlAmministrazioneAfferente = $openpaIni->variable('InstanceSettings', 'UrlAmministrazioneAfferente');
+        $newOpenpaIni = str_replace(
+            "NomeAmministrazioneAfferente={$originalNomeAmministrazioneAfferente}",
+            "NomeAmministrazioneAfferente=" . $nomeAmministrazioneAfferente,
+            $newOpenpaIni
+        );
+        $newOpenpaIni = str_replace(
+            "UrlAmministrazioneAfferente={$originalUrlAmministrazioneAfferente}",
+            "UrlAmministrazioneAfferente=" . $urlAmministrazioneAfferente,
+            $newOpenpaIni
+        );
+        if (file_put_contents($directory . '/' . 'openpa.ini.append.php', $newOpenpaIni)) {
+            $cli->output("Modificato file openpa.ini.append.php");
+        }
+
         foreach (array('file.ini.append.php', 'solr.ini.append.php', 'site.ini.append.php') as $file) {
             $originalFileIni = file_get_contents($directory . '/' . $file);
             $newFileIni = str_replace($current, $identifier, $originalFileIni);
             if ($file == 'site.ini.append.php') {
-                $dirPath = "settings/siteaccess/{$current}_{$suffix}";
                 $siteIni = new eZINI('site.ini.append.php', $dirPath, false, false, false, true, false);
                 $originalSiteName = $siteIni->variable('SiteSettings', 'SiteName');
                 $originalSiteUrl = $siteIni->variable('SiteSettings', 'SiteURL');
                 $newFileIni = str_replace(
                     "SiteName={$originalSiteName}",
-                    "SiteName={$siteName}",
+                    "SiteName=" . $siteName[$suffix],
                     $newFileIni
                 );
-                $siteUrlSuffixed = $siteUrl;
-                if ($suffix != 'frontend') {
-                    $siteUrlSuffixed .= '/' . $suffix;
-                }
+
+                $siteUrlSuffixed = !empty($siteUrl[$suffix]) ? $siteUrl[$suffix] : $tempSiteUrl[$suffix];
+                if (!empty($urlSuffix[$suffix]))
+                    $siteUrlSuffixed .= '/' . $urlSuffix[$suffix];
                 $newFileIni = str_replace(
                     "SiteURL={$originalSiteUrl}",
                     "SiteURL={$siteUrlSuffixed}",
                     $newFileIni
                 );
+                foreach ($siteAccessIdentifierList as $siteAccessIdentifier){
+                    if(!in_array($siteAccessIdentifier, $siteAccessSelectedList)){
+                        $newFileIni = str_replace(
+                            "RelatedSiteAccessList[]={$identifier}_{$siteAccessIdentifier}\n",
+                            "",
+                            $newFileIni
+                        );
+                    }
+                }
             }
             if (file_put_contents($directory . '/' . $file, $newFileIni)) {
                 $cli->output("Modificato file $file");
@@ -95,21 +198,51 @@ try {
         }
     }
 
-    $newFileList = "SiteList[]={$identifier}_frontend\nSiteList[]={$identifier}_debug\nSiteList[]={$identifier}_backend\n#SiteList";
-    $newAvailableSiteAccessList = "AvailableSiteAccessList[]={$identifier}_frontend\nAvailableSiteAccessList[]={$identifier}_debug\nAvailableSiteAccessList[]={$identifier}_backend\n#AvailableSiteAccessList";
-    $newHostUriMatchMapItems = "HostUriMatchMapItems[]={$siteUrl};backend;{$identifier}_backend\nHostUriMatchMapItems[]={$siteUrl};debug;{$identifier}_debug\nHostUriMatchMapItems[]={$siteUrl};;{$identifier}_frontend\n#HostUriMatchMapItems";
-    $newHostUriMatchMapItems_temp = "HostUriMatchMapItems[]={$identifier}.{$tempDomainSuffix};backend;{$identifier}_backend\nHostUriMatchMapItems[]={$identifier}.{$tempDomainSuffix};debug;{$identifier}_debug\nHostUriMatchMapItems[]={$identifier}.{$tempDomainSuffix};;{$identifier}_frontend\n#TempHostUriMatchMapItems";
+    $reorderSiteAccessSelectedList = array();
+    foreach ($siteAccessSelectedList as $suffix) {
+        if (!empty($urlSuffix[$suffix])){
+            $reorderSiteAccessSelectedList[] = $suffix;
+        }
+    }
+    foreach ($siteAccessSelectedList as $suffix) {
+        if (!in_array($suffix, $reorderSiteAccessSelectedList)){
+            $reorderSiteAccessSelectedList[] = $suffix;
+        }
+    }
+    $siteAccessSelectedList = $reorderSiteAccessSelectedList;
+
+    $newFileList = '';
+    $newAvailableSiteAccessList = '';
+    $newHostUriMatchMapItems = '';
+    $newHostUriMatchMapItems_temp = '';
+    foreach ($siteAccessSelectedList as $suffix) {
+        $newFileList .= "SiteList[]={$identifier}_{$suffix}\n";
+        $newAvailableSiteAccessList .= "AvailableSiteAccessList[]={$identifier}_{$suffix}\n";
+        if (!empty($siteUrl[$suffix])) {
+            $newHostUriMatchMapItems .= "HostUriMatchMapItems[]=" . $siteUrl[$suffix] . ";" . $urlSuffix[$suffix] . ";{$identifier}_{$suffix}\n";
+        }
+        if (!empty($tempSiteUrl[$suffix])) {
+            $newHostUriMatchMapItems_temp .= "HostUriMatchMapItems[]=" . $tempSiteUrl[$suffix] . ";" . $urlSuffix[$suffix] . ";{$identifier}_{$suffix}\n";
+        }
+    }
+    $newFileList .= '#SiteList';
+    $newAvailableSiteAccessList .= '#AvailableSiteAccessList';
+    $newHostUriMatchMapItems .= "#HostUriMatchMapItems";
+    $newHostUriMatchMapItems_temp .= "#TempHostUriMatchMapItems";
+
     $override = file_get_contents("settings/override/site.ini.append.php");
     $override = str_replace('#SiteList', $newFileList, $override);
     $override = str_replace('#AvailableSiteAccessList', $newAvailableSiteAccessList, $override);
     $override = str_replace('#HostUriMatchMapItems', $newHostUriMatchMapItems, $override);
     $override = str_replace('#TempHostUriMatchMapItems', $newHostUriMatchMapItems_temp, $override);
+
     if (file_put_contents("settings/override/site.ini.append.php", $override)) {
         $cli->output("Modificato override/site.ini");
     }
 
     $script->shutdown();
-} catch (Exception $e) {
+} catch
+(Exception $e) {
     $errCode = $e->getCode();
     $errCode = $errCode != 0 ? $errCode : 1; // If an error has occured, script must terminate with a status other than 0
     $script->shutdown($errCode, $e->getMessage());

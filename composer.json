@@ -9,7 +9,11 @@
         }
     ],
     "license": "GPL-2.0",    
-    "minimum-stability": "dev",    
+    "minimum-stability": "dev",
+    "require": {
+        "aws/aws-sdk-php": "3.*",
+        "predis/predis": "^2.0@dev"
+    },
     "extra": {
         "ezpublish-legacy-extension-name": "openpa"
     }
