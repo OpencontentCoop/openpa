@@ -41,6 +41,7 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                 $link = $this->container->getContentObject()->attribute( 'main_node' )->attribute( 'url_alias' );
             }
             if ( isset( $this->container->attributesHandlers['location'] )
+                 && $this->container->attributesHandlers['location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == eZURLType::DATA_TYPE_STRING
                  && $this->container->attributesHandlers['location']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
             {
                 $link = $this->container->attributesHandlers['location']->attribute( 'contentobject_attribute' )->attribute( 'content' );
@@ -50,7 +51,7 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                  && $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'has_content' ) )
             {
                 $content = $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'content' );
-                if ( $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == 'ezobjectrelationlist' )
+                if ( $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == eZObjectRelationListType::DATA_TYPE_STRING )
                 {
                     foreach( $content['relation_list'] as $relation )
                     {
@@ -66,7 +67,7 @@ class ObjectHandlerServiceContentLink extends ObjectHandlerServiceBase
                         }
                     }
                 }
-                elseif ( $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == 'ezobjectrelation' )
+                elseif ( $this->container->attributesHandlers['internal_location']->attribute( 'contentobject_attribute' )->attribute( 'data_type_string' ) == eZObjectRelationType::DATA_TYPE_STRING )
                 {
                     $link = $content->attribute( 'main_node' )->attribute( 'url_alias' );
                     $this->isInternal = true;
