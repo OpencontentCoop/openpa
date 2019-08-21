@@ -61,13 +61,14 @@ class OpenPAAjax extends ezjscServerFunctions
     public static function loadWebsiteToolbar($args)
     {
         $currentNodeId = $args[0];
+        $refresh = true;//isset($args[1]);
         $user = eZUser::currentUser();
         if ($user->isRegistered() && $user->attribute('login') != 'utente'){
             $access = $user->hasAccessTo('websitetoolbar', 'use');
             if ($access['accessWord'] != 'no'){
                 $preference = (int)eZPreferences::value('show_editor');
                 $sessionKey = 'websitetoolbar_' . $user->id() . '_' . $currentNodeId . '_' . $preference;
-                if (isset($args[1])){
+                if ($refresh){
                     eZHTTPTool::instance()->removeSessionVariable($sessionKey);
                 }
                 if (!eZHTTPTool::instance()->hasSessionVariable($sessionKey)) {
