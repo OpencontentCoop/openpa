@@ -7,14 +7,11 @@ $tpl->setVariable('error', false);
 
 // ricavo la classe ruolo
 $ruoloClass = eZContentClass::fetchByIdentifier('ruolo');
-if (!$ruoloClass instanceof eZContentClass) {
-    return $module->handleError(eZError::KERNEL_NOT_AVAILABLE, 'kernel');
-}
 
 // Automazione delle policies: l'utente anonimo può leggere gli oggetti di tipo ruolo?
 $anonymousRole = eZRole::fetchByName('Anonymous');
 $anonymousHasAccess = false;
-if ($anonymousRole instanceof eZRole) {
+if ($anonymousRole instanceof eZRole && $ruoloClass instanceof eZContentClass) {
     foreach ($anonymousRole->attribute('policies') as $policy) {
         if ($policy->attribute('module_name') == 'content' && $policy->attribute('function_name') == 'read') {
             foreach ($policy->attribute('limitations') as $limitation) {
@@ -37,6 +34,11 @@ if ($anonymousRole instanceof eZRole) {
 }
 
 if ($http->hasPostVariable('AggiungiRuolo')) {
+
+    if (!$ruoloClass instanceof eZContentClass) {
+        return $module->handleError(eZError::KERNEL_NOT_AVAILABLE, 'kernel');
+    }
+
     // Oggetto contenitore di ruoli: ricavato da remoteID. Se non esiste veien creato in Media
     $remoteParentObject = OpenPaFunctionCollection::$remoteRoles;
     $parentObject = eZContentObject::fetchByRemoteID($remoteParentObject);
@@ -98,7 +100,18 @@ $Result = array();
 $Result['content'] = $tpl->fetch('design:openpa/ruoli.tpl');
 $Result['path'] = array(
     array(
-        'text' => 'Gestione Ruoli Dipendenti',
+        'text' => 'Gestione Ruoli',
         'url' => false
     )
 );
+$contentInfoArray = array(
+    'node_id' => null,
+    'class_identifier' => null
+);
+$contentInfoArray['persistent_variable'] = array(
+    'show_path' => true
+);
+if ( is_array( $tpl->variable( 'persistent_variable' ) ) ) {
+    $contentInfoArray['persistent_variable'] = array_merge( $contentInfoArray['persistent_variable'], $tpl->variable( 'persistent_variable' ) );
+}
+$Result['content_info'] = $contentInfoArray;
