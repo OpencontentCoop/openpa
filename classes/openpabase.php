@@ -456,4 +456,33 @@ class OpenPABase
         return false;
     }
 
+    public static function setExceptionHandler()
+    {
+        set_exception_handler( function (Throwable $e){
+            $currentSAIdentifier = OpenPABase::getCurrentSiteaccessIdentifier();
+            if( PHP_SAPI != 'cli' )
+            {
+                header( 'HTTP/1.x 500 Internal Server Error' );
+                header( 'Content-Type: text/html' );
+
+                echo file_get_contents('extension/openpa/design/standard/default_exception.html');
+            }
+            else
+            {
+                $cli = eZCLI::instance();
+                $cli->error( "[$currentSAIdentifier] An unexpected error has occurred. Please contact the webmaster.");
+
+                if( eZDebug::isDebugEnabled() )
+                {
+                    $cli->error( $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine() );
+                }
+            }
+
+            eZLog::write( '[' . $currentSAIdentifier . '] Unexpected error, the message was : ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine(), 'error.log' );
+
+            eZExecution::cleanup();
+            eZExecution::setCleanExit();
+            exit( 1 );
+        });
+    }
 }
