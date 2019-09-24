@@ -12,12 +12,12 @@
 
     <div class="Form-field">
       <label class="Form-label" for="recaptcha">Chiave pubblica</label>
-      <input id="recaptcha" class="Form-input u-color-black form-control" type="text" name="GoogleRecaptchaPublic" placeholder="Chiave pubblica" value="{$public}">
+      <input id="recaptcha" class="Form-input u-color-black form-control" type="text" name="GoogleRecaptchaPublic" placeholder="Chiave pubblica" value="{$public|wash()}">
     </div>
 
     <div class="Form-field">
       <label class="Form-label" for="recaptcha2">Chiave privata</label>
-      <input id="recaptcha2" class="Form-input u-color-black form-control" type="text" name="GoogleRecaptchaPrivate" placeholder="Chiave privata" value="{$private}">
+      <input id="recaptcha2" class="Form-input u-color-black form-control" type="text" name="GoogleRecaptchaPrivate" placeholder="Chiave privata" value="{$private|wash()}">
     </div>
 
     <input type="submit" class="defaultbutton btn btn-success" name="StoreSeo" value="Salva" />

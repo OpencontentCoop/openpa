@@ -28,7 +28,7 @@
                 
                 <input class="defaultbutton" type="submit" name="LoginButton" value="{'Login'|i18n('design/ezwebin/user/login','Button')}" tabindex="3" />
                 
-                <input type="hidden" name="RedirectURI" value="{$area.url_alias}" />
+                <input type="hidden" name="RedirectURI" value="{$area.url_alias|wash()}" />
             </form>
         
         {/if}

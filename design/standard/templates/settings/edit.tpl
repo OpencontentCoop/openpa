@@ -37,9 +37,9 @@
             <select name="SettingType" onchange="submit()">
             {section name=Files loop=$setting_type_array}
                 {if eq( $:key, $setting_type )}
-                    <option value="{$:key}" selected="selected">{$:item}</option>
+                    <option value="{$:key|wash()}" selected="selected">{$:item|wash()}</option>
                 {else}
-                    <option value="{$:key}">{$:item}</option>
+                    <option value="{$:key|wash()}">{$:item|wash()}</option>
                 {/if}
             {/section}
             </select>
@@ -50,10 +50,10 @@
 
 </div>
 
-<input type="hidden" name="INIFile" value="{$ini_file}" />
-<input type="hidden" name="Block" value="{$block}" />
+<input type="hidden" name="INIFile" value="{$ini_file|wash()}" />
+<input type="hidden" name="Block" value="{$block|wash()}" />
 
-<input type="hidden" name="SiteAccess" value="{$current_siteaccess}" />
+<input type="hidden" name="SiteAccess" value="{$current_siteaccess|wash()}" />
 
 <div class="block">
 <table class="list" width="100%" cellspacing="0" cellpadding="0" border="0">

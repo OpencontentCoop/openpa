@@ -41,10 +41,10 @@
                     <div class="border-content">
                         <select id="redirect-{$block.name}" name="node_id">
                         {foreach $nodes as $n}
-                            <option value="{$n.node_id}">{$n.name}</option>
+                            <option value="{$n.node_id}">{$n.name|wash()}</option>
                         {/foreach}
                         </select>
-                        <input value={$customs[attribute]} name="view" type="hidden" />
+                        <input value={$customs[attribute]|wash()} name="view" type="hidden" />
 
                         <input id="search-button-{$block.id}" class="defaultbutton" type="submit" name="SearchButton" value="Cerca" />
 

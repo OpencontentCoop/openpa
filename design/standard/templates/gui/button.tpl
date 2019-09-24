@@ -3,8 +3,8 @@
     {def $disabled=false()}
 {/if}
 {if $disabled}
-<input class="button-disabled" disabled="disabled" type="submit" name="{$id_name}" value="{$value}" />
+<input class="button-disabled" disabled="disabled" type="submit" name="{$id_name|wash()}" value="{$value|wash()}" />
 {else}
-<input class="button" type="submit" name="{$id_name}" value="{$value}" />
+<input class="button" type="submit" name="{$id_name|wash()}" value="{$value|wash()}" />
 {/if}
 {undef $disabled}
