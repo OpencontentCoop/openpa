@@ -68,7 +68,7 @@ class OpenPAUsageMetrics
             $stateId = 0;
             $stateGroup = eZContentObjectStateGroup::fetchByIdentifier('privacy');
             if ($stateGroup instanceof eZContentObjectStateGroup) {
-                $state = $stateGroup->stateByIdentifier('private');
+                $state = $stateGroup->stateByIdentifier('public');
                 if ($state instanceof eZContentObjectState) {
                     $stateId = $state->attribute('id');
                 }
