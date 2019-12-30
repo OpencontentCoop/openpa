@@ -4,7 +4,7 @@ require 'autoload.php';
 $script = eZScript::instance(array('description' => ("OpenPA Crea istanza\n\n"),
     'use-session' => false,
     'use-modules' => true,
-    'use-extensions' => true));
+    'use-extensions' => false));
 
 $script->startup();
 
@@ -17,7 +17,7 @@ $cli = eZCLI::instance();
 try {
 
     $current = OpenPABase::getCurrentSiteaccessIdentifier();
-    if ($current != 'prototipo' && $current != 'biblioteca') {
+    if ($current != 'prototipo' && $current != 'biblioteca' && $current != 'opencity' && $current != 'openagenda') {
         throw new Exception("La creazione di una nuova istanza al momento è possibile solo dal prototipo o da biblioteca (hai usato: $current)");
     }
 
@@ -158,6 +158,11 @@ try {
                 $siteIni = new eZINI('site.ini.append.php', $dirPath, false, false, false, true, false);
                 $originalSiteName = $siteIni->variable('SiteSettings', 'SiteName');
                 $originalSiteUrl = $siteIni->variable('SiteSettings', 'SiteURL');
+                $originalSiteUrl = str_replace($current, $identifier, $originalSiteUrl);
+
+                $originalAdditionalLoginFormActionURL = $siteIni->variable('SiteSettings', 'AdditionalLoginFormActionURL');
+                $originalAdditionalLoginFormActionURL = str_replace($current, $identifier, $originalAdditionalLoginFormActionURL);
+
                 $newFileIni = str_replace(
                     "SiteName={$originalSiteName}",
                     "SiteName=" . $siteName[$suffix],
@@ -172,8 +177,19 @@ try {
                     "SiteURL={$siteUrlSuffixed}",
                     $newFileIni
                 );
-                foreach ($siteAccessIdentifierList as $siteAccessIdentifier){
-                    if(!in_array($siteAccessIdentifier, $siteAccessSelectedList)){
+
+                $backendUrl = $tempSiteUrl['backend'];
+                if (!empty($urlSuffix['backend']))
+                    $backendUrl .= '/' . $urlSuffix['backend'];
+                $additionalLoginFormActionURL = 'https://' . $backendUrl . '/user/login';
+                $newFileIni = str_replace(
+                    "AdditionalLoginFormActionURL={$originalAdditionalLoginFormActionURL}",
+                    "AdditionalLoginFormActionURL={$additionalLoginFormActionURL}",
+                    $newFileIni
+                );
+
+                foreach ($siteAccessIdentifierList as $siteAccessIdentifier) {
+                    if (!in_array($siteAccessIdentifier, $siteAccessSelectedList)) {
                         $newFileIni = str_replace(
                             "RelatedSiteAccessList[]={$identifier}_{$siteAccessIdentifier}\n",
                             "",
@@ -200,12 +216,12 @@ try {
 
     $reorderSiteAccessSelectedList = array();
     foreach ($siteAccessSelectedList as $suffix) {
-        if (!empty($urlSuffix[$suffix])){
+        if (!empty($urlSuffix[$suffix])) {
             $reorderSiteAccessSelectedList[] = $suffix;
         }
     }
     foreach ($siteAccessSelectedList as $suffix) {
-        if (!in_array($suffix, $reorderSiteAccessSelectedList)){
+        if (!in_array($suffix, $reorderSiteAccessSelectedList)) {
             $reorderSiteAccessSelectedList[] = $suffix;
         }
     }
