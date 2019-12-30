@@ -39,7 +39,7 @@ class OpenPABase
      */
     public static function getInstances( $siteaccessType = 'frontend' )
     {
-        if ( !in_array( $siteaccessType, array( 'debug', 'frontend', 'backend', 'sensor', 'dimmi' ) ) )
+        if ( !in_array( $siteaccessType, array( 'debug', 'frontend', 'backend', 'sensor', 'dimmi', 'agenda' ) ) )
         {
             throw new Exception( "Tipo di siteaccess $siteaccessType non ammesso" );
         }
