@@ -32,6 +32,8 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
             "Instagram",
             "Newsletter",
             "Youtube",
+            "WhatsApp",
+            "Telegram",
         );
     }
 
