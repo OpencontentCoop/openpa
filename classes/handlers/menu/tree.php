@@ -158,6 +158,34 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             'children' => array()
         );
 
+        if ($handlerObject->hasAttribute('content_tag_menu')){
+            if ($handlerObject->attribute('content_tag_menu')->attribute('has_tag_menu')){
+
+                /** @var eZTagsObject $tagRoot */
+                $tagRoot = $handlerObject->attribute('content_tag_menu')->attribute('tag_menu_root');
+                if ($tagRoot instanceof eZTagsObject) {
+                    $level++;
+                    $menuItem['has_children'] = $tagRoot->getChildrenCount();
+                    foreach ($tagRoot->getChildren() as $child){
+                        $menuItem['children'][] = array(
+                            'item' => array(
+                                'node_id' => $rootNode->attribute( 'node_id' ),
+                                'name' => $child->attribute( 'keyword' ),
+                                'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ) . '/(view)/' . $child->attribute( 'keyword' ),
+                                'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
+                                'target' => $handlerObject->attribute( 'content_link' )->attribute( 'target' ),
+                            ),
+                            'max_recursion' => $settings['max_recursion'],
+                            'level' => $level,
+                            'children' => array()
+                        );
+                    }
+                }
+
+                return $menuItem;
+            }
+        }
+
         $fetchChildren = $level < $settings['max_recursion'];
         if ( $fetchChildren )
         {
