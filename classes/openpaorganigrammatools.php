@@ -465,11 +465,13 @@ class OpenPAOrganigrammaItem
             /** @var \Opencontent\Opendata\Api\Values\Content[] $results */
             $results = $this->fetch("id != '$this->id' and {$this->class_identifier}.id = $this->id classes [struttura] sort [name=>asc] limit 100");
             foreach ($results as $result) {
-                $item = OpenPAOrganigrammaItem::instanceFromArray(
-                    (array)$result,
-                    array('build' => false)
-                );
-                $subItems->append($item);
+                if (empty($result['data'][eZLocale::currentLocaleCode()]['struttura'])) {
+                    $item = OpenPAOrganigrammaItem::instanceFromArray(
+                        (array)$result,
+                        array('build' => true)
+                    );
+                    $subItems->append($item);
+                }
             }
 
             $this->appendSubItemCollection($subItems);
