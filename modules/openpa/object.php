@@ -8,10 +8,10 @@ $redirect = '/';
 
 if ( $objectID )
 {
-    $node = eZContentObjectTreeNode::fetchByContentObjectID( $objectID );
-    if ( $node[0] instanceof eZContentObjectTreeNode )
+    $node = eZContentObjectTreeNode::findMainNode( $objectID, true );
+    if ( $node instanceof eZContentObjectTreeNode )
     {
-        $redirect = $node[0]->attribute( 'url_alias' );        
+        $redirect = $node->attribute( 'url_alias' );
     }
     else
     {
