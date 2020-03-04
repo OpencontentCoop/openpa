@@ -34,6 +34,7 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
             "Youtube",
             "WhatsApp",
             "Telegram",
+            "Codice SDI",
         );
     }
 
