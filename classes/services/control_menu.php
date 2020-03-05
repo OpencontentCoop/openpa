@@ -23,6 +23,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'root_node'=> OpenPaFunctionCollection::fetchHome(),
             'classes' => OpenPAINI::variable( 'TopMenu', 'IdentificatoriMenu', array() ),
             'exclude' => OpenPAINI::variable( 'TopMenu', 'NascondiNodi', array() ),
+            'exclude_tree' => OpenPAINI::variable( 'TopMenu', 'NascondiAlberturaNodi', array() ),
             'limits' => array(
                 'level_0' => OpenPAINI::variable( 'TopMenu', 'LimitePrimoLivello', 50 ),
                 'level_1' => OpenPAINI::variable( 'TopMenu', 'LimiteSecondoLivello', 50 ),
@@ -42,6 +43,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
             'root_node' => $this->getSideMenuRootNode(),
             'classes' => $this->getSideMenuClassIdentifiers(),
             'exclude' => OpenPAINI::variable( 'SideMenu', 'NascondiNodi', array() ),
+            'exclude_tree' => OpenPAINI::variable( 'SideMenu', 'NascondiAlberturaNodi', array() ),
             'limits' => array(),
             'user_hash' => $this->getSideMenuUserHash(),
             'max_recursion' => 4,

@@ -83,6 +83,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
 
         $classIdentifiers = array();
         $excludeNodes = array();
+        $excludeSubtrees = array();
         $limits = array();
         $maxRecursion = 10;
         $fetchParameters = array();
@@ -92,6 +93,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
         {
             $classIdentifiers = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'classes' );
             $excludeNodes = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'exclude' );
+            $excludeSubtrees = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'exclude_tree' );
             $limits  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'limits' );
             $maxRecursion  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'max_recursion' );
             $fetchParameters  = $handlerObject->attribute( 'control_menu' )->attribute( $settingsScope )->attribute( 'custom_fetch_parameters' );
@@ -102,6 +104,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             'limit' => $limits,
             'class_identifiers' => $classIdentifiers,
             'exclude_node_ids' => $excludeNodes,
+            'exclude_subtree_ids' => $excludeSubtrees,
             'max_recursion' => $maxRecursion,
             'custom_fetch_parameters' => $fetchParameters,
             'custom_max_recursion' => $customMaxRecursion,
@@ -187,7 +190,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
         }
 
         $fetchChildren = $level < $settings['max_recursion'];
-        if ( $fetchChildren )
+        if ( $fetchChildren && !in_array( $rootNode->attribute( 'node_id' ), $settings['exclude_subtree_ids'] ) )
         {
             $childrenLimit = isset( $settings['limit']['level_' . $level] ) ? $settings['limit']['level_' . $level] : null;
 
