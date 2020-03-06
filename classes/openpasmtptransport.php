@@ -10,6 +10,14 @@ class OpenPASMTPTransport extends eZMailTransport
 {
     private $caller;
 
+    private static $emailSenderAddress;
+
+    private static $isDebugSendingEnabled;
+
+    private static $debugReceiverEmail;
+
+    private static $lastError;
+
     function sendMail(eZMail $mail)
     {
         $this->setCaller();
@@ -34,30 +42,20 @@ class OpenPASMTPTransport extends eZMailTransport
          * we substitute it with either MailSettings.EmailSender or AdminEmail.
          */
         if (!$mail->senderText()) {
-            $emailSender = $ini->variable('MailSettings', 'EmailSender');
-            if (!$emailSender) {
-                $emailSender = $ini->variable('MailSettings', 'AdminEmail');
-            }
-
-            eZMail::extractEmail($emailSender, $emailSenderAddress, $emailSenderName);
-
-            if (!eZMail::validate($emailSenderAddress)) {
-                $emailSender = false;
-            }
-
+            $emailSender = self::getEmailSenderAddress();
             if ($emailSender) {
                 $mail->setSenderText($emailSender);
             }
-        }else{
+        } else {
             $sender = $mail->Mail->from->email;
-            $isValid = $sender == $ini->variable('MailSettings', 'EmailSender');
-            if ($ini->hasVariable('MailSettings', 'VerifiedEmailSender')){
+            $isValid = $sender == self::getEmailSenderAddress();
+            if (!$isValid && $ini->hasVariable('MailSettings', 'VerifiedEmailSender')) {
                 $verifiedSenders = (array)$ini->variable('MailSettings', 'VerifiedEmailSender');
                 $isValid = in_array($sender, $verifiedSenders);
             }
-            if(!$isValid){
-                $mail->Mail->from->email = $ini->variable('MailSettings', 'EmailSender');
-                $mail->Mail->from->name	= $sender;
+            if (!$isValid) {
+                $mail->Mail->from->email = self::getEmailSender();
+                $mail->Mail->from->name = $sender;
             }
         }
 
@@ -70,18 +68,22 @@ class OpenPASMTPTransport extends eZMailTransport
         if ($parameters['connectionType']) {
             $options->connectionType = $parameters['connectionType'];
         }
-        $smtp = new ezcMailSmtpTransport($parameters['host'], $user, $password,
-            $parameters['port'], $options);
-
+        $smtp = new ezcMailSmtpTransport(
+            $parameters['host'],
+            $user,
+            $password,
+            $parameters['port'],
+            $options
+        );
 
         /* @see eZMailNotificationTransport::send#49 workaround */
-        if (empty($mail->Mail->to) && !empty($mail->Mail->bcc)){
+        if (empty($mail->Mail->to) && !empty($mail->Mail->bcc)) {
             $mail->Mail->to = array(array_shift($mail->Mail->bcc));
         }
 
         // If in debug mode, send to debug email address and nothing else
-        if ($ini->variable('MailSettings', 'DebugSending') == 'enabled') {
-            $mail->Mail->to = array(new ezcMailAddress($ini->variable('MailSettings', 'DebugReceiverEmail')));
+        if (self::isDebugSendingEnabled()) {
+            $mail->Mail->to = array(new ezcMailAddress(self::getDebugReceiverEmail()));
             $mail->Mail->cc = array();
             $mail->Mail->bcc = array();
         }
@@ -97,6 +99,7 @@ class OpenPASMTPTransport extends eZMailTransport
 
             eZDebug::writeError($e->getMessage(), __METHOD__);
             $this->logError($mail, $e->getMessage());
+            self::$lastError = $e->getMessage();
 
             return false;
         }
@@ -106,29 +109,94 @@ class OpenPASMTPTransport extends eZMailTransport
         return true;
     }
 
+    public static function isDebugSendingEnabled()
+    {
+        if (self::$isDebugSendingEnabled === null) {
+            self::$isDebugSendingEnabled = false;
+            $ini = eZINI::instance();
+            if ($ini->variable('MailSettings', 'DebugSending') == 'enabled') {
+                self::$isDebugSendingEnabled = true;
+            } else {
+                $siteData = eZSiteData::fetchByName('email_debug_sending');
+                if ($siteData instanceof eZSiteData) {
+                    self::$isDebugSendingEnabled = (int)$siteData->attribute('value') === 1;
+                }
+            }
+        }
+
+        return self::$isDebugSendingEnabled;
+    }
+
+    public static function getDebugReceiverEmail()
+    {
+        if (self::$debugReceiverEmail === null){
+            $siteData = eZSiteData::fetchByName('email_debug_receiver');
+            if ($siteData instanceof eZSiteData) {
+                self::$debugReceiverEmail = $siteData->attribute('value');
+            }else{
+                self::$debugReceiverEmail = eZINI::instance()->variable('MailSettings', 'DebugReceiverEmail');
+            }
+        }
+
+        return self::$debugReceiverEmail;
+    }
+
+    public static function getEmailSenderAddress()
+    {
+        if (self::$emailSenderAddress === null) {
+
+            $emailSenderAddress = false;
+            $siteData = eZSiteData::fetchByName('email_sender');
+            if ($siteData instanceof eZSiteData) {
+                $emailSenderAddress = trim($siteData->attribute('value'));
+            }
+
+            if (!eZMail::validate($emailSenderAddress)) {
+                $ini = eZINI::instance();
+                $emailSender = $ini->variable('MailSettings', 'EmailSender');
+                if (!$emailSender) {
+                    $emailSender = $ini->variable('MailSettings', 'AdminEmail');
+                }
+
+                eZMail::extractEmail($emailSender, $emailSenderAddress, $emailSenderName);
+            }
+
+            if (eZMail::validate($emailSenderAddress)) {
+                self::$emailSenderAddress = $emailSenderAddress;
+            }
+        }
+
+        return self::$emailSenderAddress;
+    }
+
+    public static function getLastError()
+    {
+        return self::$lastError;
+    }
+
     private function validateReceivers(ezcMail $mail)
     {
         $ini = eZINI::instance();
 
         $blackListDomains = array();
-        if ($ini->hasVariable('MailSettings', 'BlackListEmailDomains')){
+        if ($ini->hasVariable('MailSettings', 'BlackListEmailDomains')) {
             $blackListDomains = (array)$ini->variable('MailSettings', 'BlackListEmailDomains');
         }
         $blackListDomainSuffixes = array();
-        if ($ini->hasVariable('MailSettings', 'BlackListEmailDomainSuffixes')){
+        if ($ini->hasVariable('MailSettings', 'BlackListEmailDomainSuffixes')) {
             $blackListDomainSuffixes = (array)$ini->variable('MailSettings', 'BlackListEmailDomainSuffixes');
         }
 
         /** @var ezcMailAddress[] $toList */
         $toList = array_merge($mail->to, $mail->cc, $mail->bcc);
-        foreach($toList as $address){
+        foreach ($toList as $address) {
             $domain = substr(strrchr($address->email, "@"), 1);
             $suffix = substr(strrchr($address->email, "."), 1);
-            if (in_array($domain, $blackListDomains)){
+            if (in_array($domain, $blackListDomains)) {
                 throw new ezcMailException("Receiver domain <{$domain}> is in black list");
             }
 
-            if (in_array($suffix, $blackListDomainSuffixes)){
+            if (in_array($suffix, $blackListDomainSuffixes)) {
                 throw new ezcMailException("Receiver domain suffix <{$suffix}> is in black list");
             }
         }
@@ -146,7 +214,8 @@ class OpenPASMTPTransport extends eZMailTransport
         eZLog::write($message . ' ' . $errorMessage, 'mail_error.log');
     }
 
-    private function getLog(eZMail $mail){
+    private function getLog(eZMail $mail)
+    {
         $current = OpenPABase::getCurrentSiteaccessIdentifier();
         $caller = $this->getCaller();
         $from = $mail->Mail->from;
@@ -162,12 +231,18 @@ class OpenPASMTPTransport extends eZMailTransport
         $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
         $register = array();
         $startRegister = false;
-        foreach($trace as $item){
-            if ($item['class'] == 'eZMailTransport'){
+        foreach ($trace as $item) {
+            if (isset($item['class']) && $item['class'] == 'eZMailTransport') {
                 $startRegister = true;
                 continue;
             }
-            if ($startRegister){
+            if ($startRegister) {
+                if (!isset($item['class'])){
+                    $item['class'] = '';
+                }
+                if (!isset($item['type'])){
+                    $item['type'] = '';
+                }
                 $register[] = $item['file'] . '#' . $item['line'] . '(' . $item['class'] . $item['type'] . $item['function'] . ')';
             }
         }

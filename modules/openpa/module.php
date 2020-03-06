@@ -203,11 +203,17 @@ $ViewList['theme'] = array(
     'functions' => array( 'theme' )
 );
 
-$ViewList['fix_class_relation'] = array(
-    'script' => 'fix_class_relation.php',
+//$ViewList['fix_class_relation'] = array(
+//    'script' => 'fix_class_relation.php',
+//    'params' => array(),
+//    'unordered_params' => array(),
+//    "default_navigation_part" => 'ezsetupnavigationpart',
+//);
+
+$ViewList['mail'] = array(
+    'script' =>	'mail.php',
     'params' => array(),
-    'unordered_params' => array(),
-    "default_navigation_part" => 'ezsetupnavigationpart',
+    'functions' => array( 'mail' )
 );
 
 $FunctionList['classdefinition'] = array();
@@ -224,3 +230,4 @@ $FunctionList['recaptcha'] = array();
 $FunctionList['changestatesettings'] = array();
 $FunctionList['changesectionsettings'] = array();
 $FunctionList['theme'] = array();
+$FunctionList['mail'] = array();
