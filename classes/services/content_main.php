@@ -14,8 +14,6 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
     {
         $this->identifiers = OpenPAINI::variable('ContentMain', 'Identifiers', array(
             'image',
-            'ruolo',
-            'ruolo2',
             'oggetto',
             'abstract',
             'short_description',
@@ -27,7 +25,6 @@ class ObjectHandlerServiceContentMain extends ObjectHandlerServiceBase
             'abstract',
             'short_description',
             'oggetto',
-            'ruolo',
         ));
 
         $this->fullTextIdentifiers = OpenPAINI::variable('ContentMain', 'FullTextIdentifiers', array(
