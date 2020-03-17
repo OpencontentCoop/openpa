@@ -97,6 +97,11 @@ class OpenPABase
 
     public static function getSiteaccessIdentifier( $siteaccessName )
     {
+        $instanceIdentifier = getenv('EZ_INSTANCE');
+        if (!empty($instanceIdentifier)) {
+            return $instanceIdentifier;
+        }
+
         //prototipo_ger_sensor
         $parts = explode( '_', $siteaccessName );
         array_pop( $parts );
