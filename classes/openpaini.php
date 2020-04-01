@@ -92,7 +92,8 @@ class OpenPAINI
         'Seo::RobotsText',
         'Seo::DefaultRobotsText',
         'GeneralSettings::valutation',
-        'GeneralSettings::theme'
+        'GeneralSettings::theme',
+        'CreditsSettings::CodeVersion',
     );
 
     public static function variable( $block, $value, $default = null )
@@ -306,6 +307,17 @@ class OpenPAINI
 
             case 'GeneralSettings::theme':
                 return self::getThemeIdentifier($default);
+                break;
+
+            case 'CreditsSettings::CodeVersion':
+                $versionFile = eZSys::rootDir() . '/VERSION';
+                if (file_exists($versionFile)){
+                    return file_get_contents($versionFile);
+                }
+
+                if (eZINI::instance('openpa.ini')->hasVariable('CreditsSettings', 'CodeVersion')) {
+                    return eZINI::instance('openpa.ini')->variable('CreditsSettings', 'CodeVersion');
+                }
                 break;
 
         }
