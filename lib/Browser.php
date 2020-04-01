@@ -132,7 +132,7 @@
 	 *
 	 */
 
-	class Browser {
+	class OpenPABrowser {
 		private $_agent = '';
 		private $_browser_name = '';
 		private $_version = '';
