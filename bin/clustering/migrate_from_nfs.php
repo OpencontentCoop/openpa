@@ -151,22 +151,22 @@ try {
 } catch (eZDBException $e) {
 }
 
-
-$cli->output("Migrating ezflip files");
-$var = FlipMegazine::getFlipVarDirectory();
-$fileList = array();
-eZDir::recursiveList($var, $var, $fileList);
-$total = count($fileList);
-foreach($fileList as $index => $file){
-    if ($file['type'] == 'file'){
-        $suffix = eZFile::suffix($file['name']);
-        if ($suffix != 'txt' && $suffix != 'pdf'){
-            $filePath = $file['path'] . '/' . $file['name'];
-            $message = "$index/$total - " . $filePath;
-            copyToDFS($dispatcher, $mountPointPath, $filePath, $message);
+if (class_exists('FlipMegazine')) {
+    $cli->output("Migrating ezflip files");
+    $var = FlipMegazine::getFlipVarDirectory();
+    $fileList = array();
+    eZDir::recursiveList($var, $var, $fileList);
+    $total = count($fileList);
+    foreach ($fileList as $index => $file) {
+        if ($file['type'] == 'file') {
+            $suffix = eZFile::suffix($file['name']);
+            if ($suffix != 'txt' && $suffix != 'pdf') {
+                $filePath = $file['path'] . '/' . $file['name'];
+                $message = "$index/$total - " . $filePath;
+                copyToDFS($dispatcher, $mountPointPath, $filePath, $message);
+            }
         }
     }
 }
-
 
 $script->shutdown();
