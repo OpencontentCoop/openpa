@@ -82,6 +82,7 @@ class OpenPADFSFileHandlerDFSRegistry
         $pathHandlers["$varDir/storage/images"] = $publicHandler;
         $pathHandlers["$cacheDir/public"] = $publicHandler;
         $pathHandlers["$cacheDir/content"] = $localHandler;
+        $pathHandlers["$cacheDir/ocopendata"] = $localHandler;
         $pathHandlers[$cacheDir] = $redisHandler;
 
         return new static($privateHandler, $pathHandlers);

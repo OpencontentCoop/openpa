@@ -457,11 +457,15 @@ class OpenPABase
         $currentPrefix = self::getCurrentSiteaccessIdentifier();
         $findSiteAccessName = $currentPrefix . '_' . $suffix;
         $items = eZINI::instance()->variable('SiteAccessSettings', 'HostUriMatchMapItems');
-        foreach ($items as $item) {
-            if (strpos($item, ';' . $findSiteAccessName) !== false) {
-                $parts = explode(';', $item);
-                return $parts[0] . '/' . $parts[1];
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                if (strpos($item, ';' . $findSiteAccessName) !== false) {
+                    $parts = explode(';', $item);
+                    return $parts[0] . '/' . $parts[1];
+                }
             }
+        }elseif (in_array($suffix, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
+            return eZINI::instance()->variable('SiteSettings', 'SiteURL');
         }
 
         return false;
