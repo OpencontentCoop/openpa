@@ -134,16 +134,24 @@ class OpenPABase
 
     public static function getCustomSiteaccessName( $customName, $checkIfExists = true, $identifier = null )
     {
-        if ( !$identifier )
+        if ( !$identifier ) {
             $identifier = self::getCurrentSiteaccessIdentifier();
-        $siteaccess = $identifier . '_' . strtolower( $customName );
+        }
+        $identifier .= '_';
+
+        // se EZ_INSTANCE è configurato si tratta di un'installazione stand-alone e il nome del siteaccess potrebbe confliggere con il nome del modulo
+        if (!empty(getenv('EZ_INSTANCE'))) {
+            $identifier = '';
+        }
+
+        $siteaccess = $identifier . strtolower( $customName );
 
         if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
         {
             $language = eZLocale::currentLocaleCode();
             $parts = explode('-', $language);
             $locale = $parts[0];
-            $siteaccess = "{$identifier}_{$locale}_{$customName}";
+            $siteaccess = "{$identifier}{$locale}_{$customName}";
         }
 
         if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
@@ -154,7 +162,7 @@ class OpenPABase
             {
                 $parts = explode('-', $language);
                 $locale = $parts[0];
-                $siteaccess = "{$identifier}_{$locale}_{$customName}";
+                $siteaccess = "{$identifier}{$locale}_{$customName}";
                 if ( file_exists( "settings/siteaccess/$siteaccess" ) )
                 {
                     break;
