@@ -36,6 +36,7 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
             "Telegram",
             "Codice SDI",
             "TikTok",
+            "Link area personale",
         );
     }
 
