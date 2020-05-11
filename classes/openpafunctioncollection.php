@@ -434,6 +434,16 @@ class OpenPaFunctionCollection
         return array( 'result' => $search['SearchResult'] );
     }
 
+    public static function fetchStrutture()
+    {
+        $params = self::$params;
+        $params['SearchSubTreeArray'] = array( eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
+        $params['SearchContentClassID'] = array( 'struttura' );
+        $params['SortBy'] = array( 'name' => 'asc' );
+        $search = self::search( $params );
+        return array( 'result' => $search['SearchResult'] );
+    }
+
     public static function fetchDipendenti( $struttura, $subtree )
     {
         $params = self::$params;
