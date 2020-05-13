@@ -54,7 +54,7 @@ class OpenPASMTPTransport extends eZMailTransport
                 $isValid = in_array($sender, $verifiedSenders);
             }
             if (!$isValid) {
-                $mail->Mail->from->email = self::getEmailSender();
+                $mail->Mail->from->email = self::getEmailSenderAddress();
                 $mail->Mail->from->name = $sender;
             }
         }
