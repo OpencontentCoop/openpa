@@ -474,6 +474,11 @@ class OpenPABase
             }
         }elseif (in_array($suffix, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
             return eZINI::instance()->variable('SiteSettings', 'SiteURL');
+        }else{
+            $current = self::getCustomSiteaccessName($suffix);
+            if (in_array($current, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
+                return eZINI::instance()->variable('SiteSettings', 'SiteURL');
+            }
         }
 
         return false;
