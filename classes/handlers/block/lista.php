@@ -12,16 +12,23 @@ class BlockHandlerLista extends OpenPABlockHandler
      */
     protected $currentSubTreeNode;
 
+    private static $cache = [];
+
     protected function run()
     {
-        $this->data['root_node'] = false;
-        $this->data['fetch_parameters'] = $this->getFetchParameters();
+        if (!isset(self::$cache[$this->currentBlock->id()])) {
+            $this->data['root_node'] = false;
+            $this->data['fetch_parameters'] = $this->getFetchParameters();
 //        eZDebug::writeDebug( $this->currentCustomAttributes );
 //        eZDebug::writeDebug( $this->fetchParameters );
-        $content = $this->getContent();
-        $this->data['has_content'] = $content['SearchCount'] > 0;
-        $this->data['content'] = $content['SearchResult'];
-        $this->data['search_parameters'] = $content['SearchParams'];
+            $content = $this->getContent();
+            $this->data['has_content'] = $content['SearchCount'] > 0;
+            $this->data['content'] = $content['SearchResult'];
+            $this->data['search_parameters'] = $content['SearchParams'];
+            self::$cache[$this->currentBlock->id()] = $this->data;
+        } else {
+            $this->data = self::$cache[$this->currentBlock->id()];
+        }
     }
 
     protected function getContent()

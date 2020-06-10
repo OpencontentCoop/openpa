@@ -12,6 +12,7 @@ class OpenPABlockHandler extends OpenPATempletizable
         $this->currentBlock = $block;
         $this->currentCustomAttributes = $block->attribute( 'custom_attributes' );
         $this->data['page_block'] = $this->currentBlock;
+        $this->data['has_content'] = true;
         $this->run();
     }
 
