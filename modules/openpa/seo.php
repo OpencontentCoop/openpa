@@ -23,6 +23,26 @@ if ($http->hasPostVariable('StoreSeo')) {
         OpenPAINI::set("Seo", "GoogleSiteVerificationID", $googleSiteVerificationID);
     }
 
+    if ($http->hasPostVariable('MetaAuthor')) {
+        $metaAuthor = trim($http->postVariable('MetaAuthor'));
+        OpenPAINI::set("Seo", "metaAuthor", $metaAuthor);
+    }
+
+    if ($http->hasPostVariable('MetaCopyright')) {
+        $metaCopyright = trim($http->postVariable('MetaCopyright'));
+        OpenPAINI::set("Seo", "metaCopyright", $metaCopyright);
+    }
+
+    if ($http->hasPostVariable('MetaDescription')) {
+        $metaDescription = trim($http->postVariable('MetaDescription'));
+        OpenPAINI::set("Seo", "metaDescription", $metaDescription);
+    }
+
+    if ($http->hasPostVariable('MetaKeywords')) {
+        $metaKeywords = trim($http->postVariable('MetaKeywords'));
+        OpenPAINI::set("Seo", "metaKeywords", $metaKeywords);
+    }
+
     if ($http->hasPostVariable('Robots')) {
         OpenPAINI::set("Seo", "EnableRobots", 'enabled');
     } else {
@@ -54,6 +74,10 @@ if (empty($robotsText)) {
 $tpl->setVariable('googleId', OpenPAINI::variable('Seo', 'GoogleAnalyticsAccountID', false));
 $tpl->setVariable('robots', OpenPAINI::variable('Seo', 'EnableRobots', 'disabled'));
 $tpl->setVariable('robotsText', $robotsText);
+$tpl->setVariable('metaAuthor', OpenPAINI::variable('Seo', 'metaAuthor'));
+$tpl->setVariable('metaCopyright', OpenPAINI::variable('Seo', 'metaCopyright'));
+$tpl->setVariable('metaDescription', OpenPAINI::variable('Seo', 'metaDescription'));
+$tpl->setVariable('metaKeywords', OpenPAINI::variable('Seo', 'metaKeywords'));
 $tpl->setVariable('isRobotsTextDefault', $robotsTextDefault);
 $tpl->setVariable('googleTagManagerID', OpenPAINI::variable('Seo', 'GoogleTagManagerID', false));
 $tpl->setVariable('googleSiteVerificationID', OpenPAINI::variable('Seo', 'GoogleSiteVerificationID', false));

@@ -91,6 +91,10 @@ class OpenPAINI
         'Seo::GoogleSiteVerificationID',
         'Seo::RobotsText',
         'Seo::DefaultRobotsText',
+        'Seo::metaAuthor',
+        'Seo::metaCopyright',
+        'Seo::metaDescription',
+        'Seo::metaKeywords',
         'GeneralSettings::valutation',
         'GeneralSettings::theme',
         'CreditsSettings::CodeVersion',
@@ -294,6 +298,22 @@ class OpenPAINI
                 return file_get_contents('robots.txt');
                 break;
 
+            case 'Seo::metaAuthor':
+                return self::getSeoData()['metaAuthor'];
+                break;
+
+            case 'Seo::metaCopyright':
+                return self::getSeoData()['metaCopyright'];
+                break;
+
+            case 'Seo::metaDescription':
+                return self::getSeoData()['metaDescription'];
+                break;
+
+            case 'Seo::metaKeywords':
+                return self::getSeoData()['metaKeywords'];
+                break;
+
             case 'GeneralSettings::valutation':
                 if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
                     && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
@@ -359,6 +379,22 @@ class OpenPAINI
 
                 case 'Seo::DefaultRobotsText':
                     return false;
+                    break;
+
+                case 'Seo::metaAuthor':
+                    return trim(self::setSeoData('metaAuthor', $value));
+                    break;
+
+                case 'Seo::metaCopyright':
+                    return trim(self::setSeoData('metaCopyright', $value));
+                    break;
+
+                case 'Seo::metaDescription':
+                    return trim(self::setSeoData('metaDescription', $value));
+                    break;
+
+                case 'Seo::metaKeywords':
+                    return trim(self::setSeoData('metaKeywords', $value));
                     break;
 
                 case 'GeneralSettings::theme':
@@ -488,7 +524,10 @@ class OpenPAINI
             );
         }
 
-        return self::$seoData;
+        return array_merge(
+            self::getEmptySeoData(),
+            self::$seoData
+        );
     }
 
     private static function setSeoData($key, $value)
@@ -513,18 +552,27 @@ class OpenPAINI
         return true;
     }
 
+    private static function getEmptySeoData()
+    {
+        return array(
+            'googleAnalyticsAccountID' => '',
+            'enableRobots' => 'disabled',
+            'googleTagManagerID' => '',
+            'googleSiteVerificationID' => '',
+            'robotsText' => '',
+            'metaAuthor' => false,
+            'metaCopyright' => false,
+            'metaDescription' => false,
+            'metaKeywords' => false,
+        );
+    }
+
     private static function generateSeoData()
     {
         $siteData = eZSiteData::fetchByName('SeoSettings');
         if (!$siteData instanceof eZSiteData) {
 
-            $data = array(
-                'googleAnalyticsAccountID' => '',
-                'enableRobots' => 'disabled',
-                'googleTagManagerID' => '',
-                'googleSiteVerificationID' => '',
-                'robotsText' => ''
-            );
+            $data = self::getEmptySeoData();
 
             // recupero le informazioni dagli ini o dalla logica precedente di storage
 
