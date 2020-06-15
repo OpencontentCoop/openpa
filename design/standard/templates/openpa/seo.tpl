@@ -41,7 +41,30 @@
                 <textarea id="RobotsText" class="form-control" rows="20" type="text" name="RobotsText">{$robotsText|wash()}</textarea>
             </div>
 
-            <input type="submit" class="defaultbutton btn btn-success" name="StoreSeo" value="Salva"/>
+            <div class="Form-field block pb-5">
+                <label class="Form-label" for="metaAuthor">Meta Author</label>
+                <input id="metaAuthor" class="Form-input u-color-black form-control box" type="text" name="MetaAuthor"
+                       value="{$metaAuthor|wash()}">
+            </div>
+            <div class="Form-field block pb-5">
+                <label class="Form-label" for="metaCopyright">Meta Copyright</label>
+                <input id="metaCopyright" class="Form-input u-color-black form-control box" type="text" name="MetaCopyright"
+                       value="{$metaCopyright|wash()}">
+            </div>
+            <div class="Form-field block pb-5">
+                <label class="Form-label" for="metaDescription">Meta Description</label>
+                <input id="metaDescription" class="Form-input u-color-black form-control box" type="text" name="MetaDescription"
+                       value="{$metaDescription|wash()}">
+            </div>
+            <div class="Form-field block pb-5">
+                <label class="Form-label" for="metaKeywords">Meta Keywords</label>
+                <input id="metaKeywords" class="Form-input u-color-black form-control box" type="text" name="MetaKeywords"
+                       value="{$metaKeywords|wash()}">
+            </div>
+
+            <p class="text-right">
+                <input type="submit" class="defaultbutton btn btn-success btn-xl" name="StoreSeo" value="Salva"/>
+            </p>
         </fieldset>
     </form>
 
