@@ -96,7 +96,8 @@ class OpenPAINI
         'Seo::metaDescription',
         'Seo::metaKeywords',
         'GeneralSettings::valutation',
-        'GeneralSettings::theme'
+        'GeneralSettings::theme',
+        'CreditsSettings::CodeVersion',
     );
 
     public static function variable( $block, $value, $default = null )
@@ -328,6 +329,22 @@ class OpenPAINI
                 return self::getThemeIdentifier($default);
                 break;
 
+            case 'CreditsSettings::CodeVersion':
+                $installerVersion = eZSiteData::fetchByName('ocinstaller_version');
+                if ($installerVersion instanceof eZSiteData){
+                    $installerVersion = '-' . $installerVersion->attribute('value');
+                }
+                $codeVersion = null;
+                $versionFile = eZSys::rootDir() . '/VERSION';
+                if (file_exists($versionFile)){
+                    $codeVersion = file_get_contents($versionFile);
+                }elseif (eZINI::instance('openpa.ini')->hasVariable('CreditsSettings', 'CodeVersion')) {
+                    $codeVersion = eZINI::instance('openpa.ini')->variable('CreditsSettings', 'CodeVersion');
+                }
+
+                return trim($codeVersion) . $installerVersion;
+
+                break;
         }
 
         if ( isset( self::$dynamicIniMap[$block][$value] ) )
