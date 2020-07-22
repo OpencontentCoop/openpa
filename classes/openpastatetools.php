@@ -65,6 +65,7 @@ class OpenPAStateTools
             $nodeArray = eZContentObjectTreeNode::subTreeByNodeID(array(
                 'ClassFilterType' => 'include',
                 'ClassFilterArray' => array($classIdentifier),
+                'MainNodeOnly' => true,
                 'LoadDataMap' => false,
                 'Limitation' => array()
             ), 1
