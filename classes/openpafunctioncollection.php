@@ -969,7 +969,9 @@ class OpenPaFunctionCollection
                 {
                     /** @var eZImageAliasHandler $content */
                     $content = $dataMap['image']->attribute( 'content' );
-                    $result = $content->attribute( 'header_banner' );
+                    if ($content instanceof eZImageAliasHandler) {
+                        $result = $content->attribute('header_banner');
+                    }
                 }
             }
         }
@@ -986,7 +988,9 @@ class OpenPaFunctionCollection
                 {
                     /** @var eZImageAliasHandler $content */
                     $content = $dataMap['image']->attribute( 'content' );
-                    $result = $content->attribute( 'header_banner' );
+                    if ($content instanceof eZImageAliasHandler) {
+                        $result = $content->attribute('header_banner');
+                    }
                 }
             }
         }
@@ -1015,7 +1019,9 @@ class OpenPaFunctionCollection
                                 && $dataMap['logo']->attribute('has_content')) {
                                 /** @var eZImageAliasHandler $content */
                                 $content = $dataMap['logo']->attribute('content');
-                                $result = $content->attribute('header_logo');
+                                if ($content instanceof eZImageAliasHandler) {
+                                    $result = $content->attribute('header_logo');
+                                }
                             }
                         }
                     } else {
@@ -1028,7 +1034,9 @@ class OpenPaFunctionCollection
                                 && $dataMap['image']->attribute('has_content')) {
                                 /** @var eZImageAliasHandler $content */
                                 $content = $dataMap['image']->attribute('content');
-                                $result = $content->attribute('header_logo');
+                                if ($content instanceof eZImageAliasHandler) {
+                                    $result = $content->attribute('header_logo');
+                                }
                             }
                         }
                     }
@@ -1073,6 +1081,9 @@ class OpenPaFunctionCollection
     {
         /** @var eZImageAliasHandler $content */
         $content = $attribute->attribute( 'content' );
+        if (!$content instanceof eZImageAliasHandler) {
+            return '';
+        }
         $image = $content->attribute( $alias );
         $width = $image['width']  . 'px';
         $height = $image['height'] . 'px';

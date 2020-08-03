@@ -333,14 +333,18 @@ class OpenPAPageData
                             if (isset($dataMap['cover']) && $dataMap['cover']->hasContent()) {
                                 /** @var eZImageAliasHandler $coverAttribute */
                                 $coverAttribute = $dataMap['cover']->content();
-                                $coverImage = $coverAttribute->attribute('header_area_tematica');
-                                $cover = '/' . $coverImage['full_path'];
+                                if ($coverAttribute instanceof eZImageAliasHandler) {
+                                    $coverImage = $coverAttribute->attribute('header_area_tematica');
+                                    $cover = '/' . $coverImage['full_path'];
+                                }
                             }
                             if (isset($dataMap['image']) && $dataMap['image']->hasContent()) {
                                 /** @var eZImageAliasHandler $imageAttribute */
                                 $imageAttribute = $dataMap['image']->content();
-                                $imageImage = $imageAttribute->attribute('header_area_tematica');
-                                $image = '/' . $imageImage['full_path'];
+                                if ($imageAttribute instanceof eZImageAliasHandler) {
+                                    $imageImage = $imageAttribute->attribute('header_area_tematica');
+                                    $image = '/' . $imageImage['full_path'];
+                                }
                             }
                             $list[$node->attribute('node_id')] = array(
                                 'id' => $node->attribute('contentobject_id'),
