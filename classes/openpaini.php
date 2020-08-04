@@ -330,10 +330,6 @@ class OpenPAINI
                 break;
 
             case 'CreditsSettings::CodeVersion':
-                $installerVersion = eZSiteData::fetchByName('ocinstaller_version');
-                if ($installerVersion instanceof eZSiteData){
-                    $installerVersion = '-' . $installerVersion->attribute('value');
-                }
                 $codeVersion = null;
                 $versionFile = eZSys::rootDir() . '/VERSION';
                 if (file_exists($versionFile)){
@@ -341,9 +337,17 @@ class OpenPAINI
                 }elseif (eZINI::instance('openpa.ini')->hasVariable('CreditsSettings', 'CodeVersion')) {
                     $codeVersion = eZINI::instance('openpa.ini')->variable('CreditsSettings', 'CodeVersion');
                 }
+                $installerVersion = eZSiteData::fetchByName('ocinstaller_version');
+                if ($installerVersion instanceof eZSiteData){
+                    $installerVersion = $installerVersion->attribute('value');
+                    if (strpos($codeVersion, $installerVersion) !== false){
+                        $installerVersion = '';
+                    }else{
+                        $installerVersion = '-' . $installerVersion;
+                    }
+                }
 
                 return trim($codeVersion) . $installerVersion;
-
                 break;
 
         }
