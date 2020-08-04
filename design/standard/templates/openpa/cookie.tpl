@@ -28,7 +28,7 @@
             
             <p>Si tratta di cookie relativi a:</p>
             
-            <h4>Nonitoraggio delle visite al sito</h4>
+            <h4>Monitoraggio delle visite al sito</h4>
             <p> viene utilizzato lo strumento Google Analytics per raccogliere dati sulla navigazione del sito da parte degli utenti. Si tratta di informazioni utili per verificare cosa funziona e cosa invece va migliorato. Consentono ad esempio di sapere quali sono le pagine più visitate, quanto tempo dura in media una visita al sito, etc.
             </p>
             <p>
