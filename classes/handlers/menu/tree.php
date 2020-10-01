@@ -172,7 +172,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
                     foreach ($tagRoot->getChildren() as $child){
                         $menuItem['children'][] = array(
                             'item' => array(
-                                'node_id' => $rootNode->attribute( 'node_id' ),
+                                'node_id' => $rootNode->attribute( 'node_id' ) . '-' . $child->attribute( 'id' ),
                                 'name' => $child->attribute( 'keyword' ),
                                 'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ) . '/(view)/' . $child->attribute( 'keyword' ),
                                 'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
