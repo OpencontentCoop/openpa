@@ -30,7 +30,8 @@ $eZTemplateOperatorArray[] = array(
         'strReplace',
         'organigramma',
         'trasparenza_root_node_id',
-        'openpa_instance_identifier'
+        'openpa_instance_identifier',
+        'openpa_recaptcha_public_key',
     )
 );
 

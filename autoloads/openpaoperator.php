@@ -43,7 +43,8 @@ class OpenPAOperator
             'strReplace',
             'organigramma',
             'trasparenza_root_node_id',
-            'openpa_instance_identifier'
+            'openpa_instance_identifier',
+            'openpa_recaptcha_public_key'
         );
     }
 
@@ -114,6 +115,9 @@ class OpenPAOperator
             ),
             'organigramma' => array(
                 'root_object_id' => array ( 'type' => 'integer', 'required' => false, 'default' => null)
+            ),
+            'openpa_recaptcha_public_key' => array(
+                'version' => array ( 'type' => 'integer', 'required' => false, 'default' => 2)
             )
         );
     }
@@ -154,6 +158,13 @@ class OpenPAOperator
 
         switch ( $operatorName )
         {
+            case 'openpa_recaptcha_public_key':
+            {
+                $recaptcha = new OpenPARecaptcha($namedParameters['version']);
+                $operatorValue = $recaptcha->getPublicKey();
+                break;
+            }
+
             case 'openpa_instance_identifier':
             {
                 $operatorValue = OpenPABase::getCurrentSiteaccessIdentifier();
