@@ -2,6 +2,13 @@
 
 class OpenPARecaptcha
 {
+    private $version = 2;
+
+    public function __construct($version = 2)
+    {
+        $this->version = $version;
+    }
+
     public function validate()
     {
         if (!class_exists('OcReCaptchaType')){
@@ -36,10 +43,15 @@ class OpenPARecaptcha
 
     private function getSiteData()
     {
-        $data = eZSiteData::fetchByName('GoogleRecaptcha');
+        if ($this->version === 2){
+            $siteDataName = 'GoogleRecaptcha';
+        }else{
+            $siteDataName = 'GoogleRecaptcha' . $this->version;
+        }
+        $data = eZSiteData::fetchByName($siteDataName);
         if (!$data instanceof eZSiteData) {
             $data = new eZSiteData(array(
-                'name' => 'GoogleRecaptcha',
+                'name' => $siteDataName,
                 'value' => 'no-public$$$no-secret'
             ));
         }
