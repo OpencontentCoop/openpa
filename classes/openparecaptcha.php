@@ -39,6 +39,14 @@ class OpenPARecaptcha
         $data = $this->getSiteData();
         $data->setAttribute('value', $public . '$$$' . $private);
         $data->store();
+        if ($this->version === 2 && class_exists('OcReCaptchaType')){
+            $classAttributes = eZContentClassAttribute::fetchFilteredList(array('data_type_string' => OcReCaptchaType::DATA_TYPE_STRING));
+            foreach ($classAttributes as $classAttribute) {
+                $classAttribute->setAttribute(OcReCaptchaType::PUBLIC_KEY_FIELD, $public);
+                $classAttribute->setAttribute(OcReCaptchaType::PRIVATE_KEY_FIELD, $private);
+                $classAttribute->store();
+            }
+        }
     }
 
     private function getSiteData()
