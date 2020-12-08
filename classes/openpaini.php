@@ -95,6 +95,7 @@ class OpenPAINI
         'Seo::metaCopyright',
         'Seo::metaDescription',
         'Seo::metaKeywords',
+        'Seo::webAnalyticsItaliaID',
         'GeneralSettings::valutation',
         'GeneralSettings::theme',
         'CreditsSettings::CodeVersion',
@@ -314,6 +315,10 @@ class OpenPAINI
                 return self::getSeoData()['metaKeywords'];
                 break;
 
+            case 'Seo::webAnalyticsItaliaID':
+                return self::getSeoData()['webAnalyticsItaliaID'];
+                break;
+
             case 'GeneralSettings::valutation':
                 if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
                     && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
@@ -404,6 +409,10 @@ class OpenPAINI
 
                 case 'Seo::metaKeywords':
                     return trim(self::setSeoData('metaKeywords', $value));
+                    break;
+
+                case 'Seo::webAnalyticsItaliaID':
+                    return self::setSeoData('webAnalyticsItaliaID', $value);
                     break;
 
                 case 'GeneralSettings::theme':
@@ -573,6 +582,7 @@ class OpenPAINI
             'metaCopyright' => false,
             'metaDescription' => false,
             'metaKeywords' => false,
+            'webAnalyticsItaliaID' => '',
         );
     }
 
