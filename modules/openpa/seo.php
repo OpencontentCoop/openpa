@@ -54,6 +54,11 @@ if ($http->hasPostVariable('StoreSeo')) {
         OpenPAINI::set("Seo", "RobotsText", $robotsText);
     }
 
+    if ($http->hasPostVariable('WebAnalyticsItaliaID')) {
+        $googleID = trim($http->postVariable('WebAnalyticsItaliaID'));
+        OpenPAINI::set("Seo", "webAnalyticsItaliaID", $googleID);
+    }
+
     eZCache::clearByTag('template');
 
     eZExtension::getHandlerClass(new ezpExtensionOptions(array('iniFile' => 'site.ini',
@@ -81,6 +86,7 @@ $tpl->setVariable('metaKeywords', OpenPAINI::variable('Seo', 'metaKeywords'));
 $tpl->setVariable('isRobotsTextDefault', $robotsTextDefault);
 $tpl->setVariable('googleTagManagerID', OpenPAINI::variable('Seo', 'GoogleTagManagerID', false));
 $tpl->setVariable('googleSiteVerificationID', OpenPAINI::variable('Seo', 'GoogleSiteVerificationID', false));
+$tpl->setVariable('webAnalyticsItaliaId', OpenPAINI::variable('Seo', 'webAnalyticsItaliaID', false));
 
 $Result = array();
 $Result['content'] = $tpl->fetch('design:openpa/seo.tpl');

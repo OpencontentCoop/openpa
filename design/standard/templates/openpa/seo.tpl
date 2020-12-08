@@ -19,6 +19,12 @@
             </div>
 
             <div class="Form-field block pb-5">
+                <label class="Form-label" for="webAnalyticsItaliaId">Codice Web Analytics Italia</label>
+                <input id="webAnalyticsItaliaId" class="Form-input u-color-black form-control box" type="text" name="WebAnalyticsItaliaID"
+                       value="{$webAnalyticsItaliaId|wash()}">
+            </div>
+
+            <div class="Form-field block pb-5">
                 <label class="Form-label" for="googleid">Codice Google Analytics</label>
                 <input id="googleid" class="Form-input u-color-black form-control box" type="text" name="GoogleID"
                        value="{$googleId|wash()}">
