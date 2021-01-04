@@ -15,11 +15,15 @@ abstract class OpenPADFSFileHandlerDFSAWSS3Abstract
     /** @var string */
     protected $httpHost;
 
-    protected function __construct(S3Client $s3client, $bucket, $httpHost)
+    /** @var string */
+    protected $protocol;
+
+    protected function __construct(S3Client $s3client, $bucket, $httpHost, $protocol = 'https')
     {
         $this->s3client = $s3client;
         $this->bucket = $bucket;
         $this->httpHost = $httpHost;
+        $this->protocol = $protocol;
     }
 
     /**
@@ -60,6 +64,8 @@ abstract class OpenPADFSFileHandlerDFSAWSS3Abstract
             $httpHost = $parameters['ServerUri'];
         }
 
+        $protocol = isset($parameters['ServerProtocol']) ? $parameters['ServerProtocol'] : 'https';
+
         if (isset($parameters['Endpoint'])){
             $args['endpoint'] = $parameters['Endpoint'];
         }
@@ -86,6 +92,6 @@ abstract class OpenPADFSFileHandlerDFSAWSS3Abstract
         $sdk = new Aws\Sdk($args);
         $client = $sdk->createS3();
 
-        return new static($client, $bucket, $httpHost);
+        return new static($client, $bucket, $httpHost, $protocol);
     }
 }
