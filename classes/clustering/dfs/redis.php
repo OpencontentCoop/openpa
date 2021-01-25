@@ -2,6 +2,7 @@
 
 use Predis\Client;
 use Predis\Collection\Iterator;
+use Predis\PredisException;
 
 class OpenPADFSFileHandlerDFSRedis implements eZDFSFileHandlerDFSBackendInterface, eZDFSFileHandlerDFSBackendFactoryInterface
 {
@@ -35,59 +36,112 @@ class OpenPADFSFileHandlerDFSRedis implements eZDFSFileHandlerDFSBackendInterfac
 
     public function copyFromDFSToDFS($srcFilePath, $dstFilePath)
     {
-        return $this->redisClient->set($dstFilePath, $this->redisClient->get($srcFilePath));
+        try {
+            return $this->redisClient->set($dstFilePath, $this->redisClient->get($srcFilePath));
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $srcFilePath, $dstFilePath);
+            return false;
+        }
+    }
+
+    private function log($method, $message, $filePath, $otherFilePath = null)
+    {
+        eZLog::write("Error \"$message\" executing \"$method\" in file \"$filePath $otherFilePath\"", 'cluster_error.log');
     }
 
     public function copyFromDFS($srcFilePath, $dstFilePath = false)
     {
-        return eZFile::create($dstFilePath ?: $srcFilePath, false, $this->redisClient->get($srcFilePath));
+        try {
+            return eZFile::create($dstFilePath ?: $srcFilePath, false, $this->redisClient->get($srcFilePath));
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $srcFilePath, $dstFilePath);
+            return false;
+        }
     }
 
     public function copyToDFS($srcFilePath, $dstFilePath = false)
     {
-        $path = $dstFilePath ?: $srcFilePath;
-        $this->redisClient->set($path, file_get_contents($srcFilePath));
+        try {
+            $path = $dstFilePath ?: $srcFilePath;
+            $this->redisClient->set($path, file_get_contents($srcFilePath));
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $srcFilePath, $dstFilePath);
+        }
     }
 
     public function delete($filePath)
     {
-        $this->redisClient->del($filePath);
+        try {
+            $this->redisClient->del($filePath);
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $filePath);
+        }
     }
 
     public function passthrough($filePath, $startOffset = 0, $length = false)
     {
-        echo $this->redisClient->get($filePath);
+        try {
+            echo $this->redisClient->get($filePath);
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $filePath);
+            echo 'Error getting file. Please contact the site administrator';
+        }
     }
 
     public function getContents($filePath)
     {
-        return $this->redisClient->get($filePath);
+        try {
+            return $this->redisClient->get($filePath);
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $filePath);
+            return false;
+        }
     }
 
     public function createFileOnDFS($filePath, $contents)
     {
-        return $this->redisClient->set($filePath, $contents);
+        try {
+            return $this->redisClient->set($filePath, $contents);
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $filePath);
+            return false;
+        }
     }
 
     public function renameOnDFS($oldPath, $newPath)
     {
-        return $this->redisClient->rename($oldPath, $newPath);
+        try {
+            return $this->redisClient->rename($oldPath, $newPath);
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $oldPath, $newPath);
+            return false;
+        }
     }
 
     public function existsOnDFS($filePath)
     {
-        return $this->redisClient->exists($filePath);
+        try {
+            return $this->redisClient->exists($filePath);
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $filePath);
+            return false;
+        }
     }
 
     public function getDfsFileSize($filePath)
     {
-        return $this->redisClient->strlen($filePath);
+        try {
+            return $this->redisClient->strlen($filePath);
+        } catch (PredisException $e) {
+            $this->log( __METHOD__, $e->getMessage(), $filePath);
+            return false;
+        }
     }
 
     public function getFilesList($basePath)
     {
         $list = array();
-        foreach (new Iterator\Keyspace($this->redisClient, $basePath.'*') as $key) {
+        foreach (new Iterator\Keyspace($this->redisClient, $basePath . '*') as $key) {
             $list[] = $key;
         }
 
