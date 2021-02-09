@@ -545,7 +545,7 @@ class OpenPAINI
 
         return array_merge(
             self::getEmptySeoData(),
-            self::$seoData
+            (array)self::$seoData
         );
     }
 
