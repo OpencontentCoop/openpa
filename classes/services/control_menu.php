@@ -4,19 +4,21 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
 {
     protected $hasExtraMenu;
 
+    protected $sideMenuRootNode;
+
     function run()
     {
         $this->data['available_menu'] = array( 'top_menu', 'side_menu' );
 
         $this->data['show_top_menu'] = true;
         $this->fnData['top_menu'] = 'topMenu';
-        
+
         $this->data['show_side_menu'] = $this->hasSideMenu();
         $this->fnData['side_menu'] = 'sideMenu';
 
         $this->fnData['show_extra_menu'] = 'hasExtraMenu';
     }
-    
+
     protected function topMenu()
     {
         return new OpenPATempletizable( array(
@@ -36,7 +38,7 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         ));
 
     }
-    
+
     protected function sideMenu()
     {
         return new OpenPATempletizable( array(
@@ -180,55 +182,51 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
         return $data;
     }
 
-
     protected function hasSideMenu()
     {
         $nascondi = OpenPAINI::variable( 'SideMenu', 'Nascondi', false );
         $nascondiNeiNodi = OpenPAINI::variable( 'SideMenu', 'NascondiNeiNodi', array() );
         $nascondiNelleClassi = OpenPAINI::variable( 'SideMenu', 'NascondiNelleClassi', array() );
         return !( in_array( $this->container->currentNodeId, $nascondiNeiNodi )
-                  || in_array( $this->container->currentClassIdentifier, $nascondiNelleClassi )
-                  || $nascondi );
+            || in_array( $this->container->currentClassIdentifier, $nascondiNelleClassi )
+            || $nascondi );
     }
 
     protected function getSideMenuRootNode()
     {
-        $rootNode = false;
-        if ( $this->container->hasAttribute( 'control_area_tematica' )
-             && $this->container->attribute( 'control_area_tematica' )->attribute( 'is_area_tematica' ) )
-        {
-            $rootNode = $this->container->attribute( 'control_area_tematica' )->attribute( 'area_tematica' );
-        }
+        if ($this->sideMenuRootNode === null) {
+            $rootNode = false;
+            if ($this->container->hasAttribute('control_area_tematica')
+                && $this->container->attribute('control_area_tematica')->attribute('is_area_tematica')) {
+                $rootNode = $this->container->attribute('control_area_tematica')->attribute('area_tematica');
+            }
 
-        if ( !$rootNode instanceof eZContentObjectTreeNode )
-        {
-            $customContextMenuClasses = OpenPAINI::variable( 'SideMenu', 'SideMenuContextRootClasses', array() );
-            if ( !empty( $customContextMenuClasses ) )
-            {
-                $currentPathNodeIds = explode( '/', $this->container->getContentNode()->attribute( 'path_string' ) );
-                foreach( $currentPathNodeIds as $nodeId )
-                {
-                    $node = OpenPABase::fetchNode( $nodeId );
-                    if ( $node instanceof eZContentObjectTreeNode )
-                    {
-                        if ( in_array( $node->attribute( 'class_identifier' ), $customContextMenuClasses ) )
-                        {
-                            $rootNode = $node;
+            if (!$rootNode instanceof eZContentObjectTreeNode) {
+                $customContextMenuClasses = OpenPAINI::variable('SideMenu', 'SideMenuContextRootClasses', array());
+                if (!empty($customContextMenuClasses)) {
+                    $currentPathNodeIds = explode('/', $this->container->getContentNode()->attribute('path_string'));
+                    foreach ($currentPathNodeIds as $nodeId) {
+                        $node = OpenPABase::fetchNode($nodeId);
+                        if ($node instanceof eZContentObjectTreeNode) {
+                            if (in_array($node->attribute('class_identifier'), $customContextMenuClasses)) {
+                                $rootNode = $node;
+                            }
                         }
                     }
                 }
             }
+
+            if (!$rootNode instanceof eZContentObjectTreeNode && isset($this->container->currentPathNodeIds[0])) {
+                $rootNode = OpenPABase::fetchNode($this->container->currentPathNodeIds[0]);
+            }
+            //if ( !$rootNode instanceof eZContentObjectTreeNode )
+            //{
+            //    $rootNode = OpenPaFunctionCollection::fetchHome();
+            //}
+            $this->sideMenuRootNode = $rootNode;
         }
 
-        if ( !$rootNode instanceof eZContentObjectTreeNode && isset( $this->container->currentPathNodeIds[0] ) )
-        {
-            $rootNode = OpenPABase::fetchNode( $this->container->currentPathNodeIds[0] );
-        }
-        //if ( !$rootNode instanceof eZContentObjectTreeNode )
-        //{
-        //    $rootNode = OpenPaFunctionCollection::fetchHome();
-        //}
-        return $rootNode;
+        return $this->sideMenuRootNode;
     }
 
     protected function getSideMenuClassIdentifiers()
@@ -250,8 +248,17 @@ class ObjectHandlerServiceControlMenu extends ObjectHandlerServiceBase
     {
         if ( $this->container->attribute( 'control_area_tematica' )->attribute( 'is_area_tematica' ) )
         {
-            $this->container->currentUserHashString;
+            return $this->container->currentUserHashString;
         }
+
+        $rootNode = $this->getSideMenuRootNode();
+        if ( $rootNode instanceof eZContentObjectTreeNode )
+        {
+            if (OpenPAINI::variable( 'SideMenu', 'VisibilitaMenu_' . $rootNode->attribute( 'class_identifier' ), false ) == 'per_ruoli'){
+                return $this->container->currentUserHashString;
+            }
+        }
+
         return false;
     }
 }

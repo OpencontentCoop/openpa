@@ -205,6 +205,8 @@ class OpenPAINI
                         $classAttributesByClassId[$classAttribute['contentclass_id']][] = $classAttribute;
                     }
 
+                    $keyDefinitionName =  class_exists('OCClassExtraParameters') ? OCClassExtraParameters::getKeyDefinitionName() : 'key';
+
                     foreach( OpenPAINI::$dynamicIniMap as $block => $values ){
 
                         $result[$block] = array();
@@ -220,7 +222,7 @@ class OpenPAINI
                                 null,
                                 array(
                                     'handler' => $handler,
-                                    'key' => $key,
+                                    $keyDefinitionName => $key,
                                     'value' => 1
                                 )
                             );
@@ -354,7 +356,6 @@ class OpenPAINI
 
                 return trim($codeVersion) . $installerVersion;
                 break;
-
         }
 
         if ( isset( self::$dynamicIniMap[$block][$value] ) )
