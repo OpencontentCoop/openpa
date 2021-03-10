@@ -465,6 +465,7 @@ class OpenPABase
         $currentPrefix = self::getCurrentSiteaccessIdentifier();
         $findSiteAccessName = $currentPrefix . '_' . $suffix;
         $items = eZINI::instance()->variable('SiteAccessSettings', 'HostUriMatchMapItems');
+
         if (!empty($items)) {
             foreach ($items as $item) {
                 if (strpos($item, ';' . $findSiteAccessName) !== false) {
@@ -472,13 +473,14 @@ class OpenPABase
                     return $parts[0] . '/' . $parts[1];
                 }
             }
-        }elseif (in_array($suffix, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
+        }
+        if (in_array($suffix, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
             return eZINI::instance()->variable('SiteSettings', 'SiteURL');
-        }else{
-            $current = self::getCustomSiteaccessName($suffix);
-            if (in_array($current, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
-                return eZINI::instance()->variable('SiteSettings', 'SiteURL');
-            }
+        }
+
+        $current = self::getCustomSiteaccessName($suffix);
+        if (in_array($current, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
+            return eZINI::instance()->variable('SiteSettings', 'SiteURL');
         }
 
         return false;

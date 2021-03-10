@@ -87,7 +87,7 @@ class OpenPAUsageMetrics
             ];
         }
 
-        if ($appName == 'SpaziComuni') {
+        if ($appName == 'SpaziComuni' && class_exists('ObjectHandlerServiceControlBookingSalaPubblica')) {
             $booking = new ObjectHandlerServiceControlBookingSalaPubblica();
             $usage = [
                 [
