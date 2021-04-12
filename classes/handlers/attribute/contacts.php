@@ -79,7 +79,9 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
                     $matrix->addRow();
                 }
             }
-
+            if ($matrix->NumRows != count($fields)){
+                $matrix->NumRows = count($fields);
+            }
             $attribute->setAttribute('data_text', $matrix->xmlString());
             $matrix->decodeXML($attribute->attribute('data_text'));
             $attribute->setContent($matrix);
