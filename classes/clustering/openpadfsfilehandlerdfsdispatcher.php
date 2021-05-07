@@ -286,4 +286,17 @@ class OpenPADFSFileHandlerDFSDispatcher implements eZDFSFileHandlerDFSBackendInt
 
         return null;
     }
+
+    public static function storeMetadata($metadata)
+    {
+        if (is_array($metadata)
+            && isset($metadata['name'])
+            && eZINI::instance('file.ini')->variable('eZDFSClusteringSettings', 'DFSBackend') == 'OpenPADFSFileHandlerDFSDispatcher') {
+            $dispatcher = self::build();
+            $handler = $dispatcher->getHandler($metadata['name']);
+            if ($handler instanceof OpenPADFSFileHandlerDFSLoadMetadataCapable) {
+                $handler->onStoreMetadata($metadata);
+            }
+        }
+    }
 }

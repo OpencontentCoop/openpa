@@ -140,4 +140,13 @@ class OpenPADFSFileHandlerDFSLogged implements eZDFSFileHandlerDFSBackendInterfa
 
         return null;
     }
+
+    public function onStoreMetadata($metadata)
+    {
+        if ($this->backendImplementation instanceof OpenPADFSFileHandlerDFSLoadMetadataCapable) {
+            return $this->backendImplementation->onStoreMetadata($metadata);
+        }
+
+        return null;
+    }
 }

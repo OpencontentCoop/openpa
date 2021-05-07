@@ -102,8 +102,26 @@ class OpenPADFSFileHandlerDFSLocal implements eZDFSFileHandlerDFSBackendInterfac
     public function loadMetadata($filePath)
     {
         if (!file_exists($filePath)){
+            eZLog::write('-1', 'aaa.log');
             return array('mtime' => -1);
         }
+
         return null;
+    }
+
+    public function onStoreMetadata($metadata)
+    {
+        if (is_array($metadata) && isset($metadata['name'])) {
+            $filePath = $metadata['name'];
+            if (file_exists($filePath)) {
+                $dbMtime = $metadata['mtime'];
+                $localMtime = @filemtime($filePath);
+                eZLog::write($filePath . ' ' . $dbMtime . ' ' . $localMtime, 'aaa.log');
+                if ($dbMtime > $localMtime) {
+                    eZLog::write('Local file cache is expired ' . $filePath, 'aaa.log');
+                    //@touch($filePath, -1);
+                }
+            }
+        }
     }
 }
