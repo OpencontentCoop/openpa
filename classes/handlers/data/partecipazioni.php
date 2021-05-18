@@ -65,6 +65,7 @@ class DataHandlerPartecipazioni implements OpenPADataHandlerInterface
                         }
                     }
                 }
+                ksort($series);
                 $data = array(
                     'enti' => $enti,
                     'series' => $series,                
