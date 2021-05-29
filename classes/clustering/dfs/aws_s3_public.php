@@ -8,6 +8,27 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
     protected $acl = 'public-read';
 
     /**
+     * @return array
+     */
+    protected static function getClientSettings()
+    {
+        $ini = OpenPADFSFileHandlerDFSRegistry::getCurrentInstanceIni('openpa_cluster.ini');
+        $parameters = array();
+
+        if ($ini->hasGroup("AWSS3DFSBackendSettings_public")
+            && $ini->variable("AWSS3DFSBackendSettings_public", 'Override') == 'enabled') {
+            eZDebugSetting::writeDebug('kernel-clustering',"Load override AWSS3DFSBackendSettings_public settings", __METHOD__);
+            $parameters = $ini->group("AWSS3DFSBackendSettings_public");
+
+        } elseif ($ini->hasGroup("AWSS3DFSBackendSettings")) {
+            eZDebugSetting::writeDebug('kernel-clustering',"Load default AWSS3DFSBackendSettings settings", __METHOD__);
+            $parameters = $ini->group("AWSS3DFSBackendSettings");
+        }
+
+        return $parameters;
+    }
+
+    /**
      * Creates a copy of $srcFilePath from DFS to $dstFilePath on DFS
      *
      * @param string $srcFilePath Local source file path
@@ -79,41 +100,6 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                     'Key' => $dstFilePath ?: $srcFilePath,
                     'SourceFile' => $srcFilePath,
                     'ACL' => $this->acl
-                )
-            );
-            return true;
-        } catch (S3Exception $e) {
-            eZDebug::writeError($e->getMessage(), __METHOD__);
-            return false;
-        }
-    }
-
-    /**
-     * Deletes one or more files from DFS
-     *
-     * @param string|array $filePath
-     *        Single local filename, or array of local filenames
-     *
-     * @return bool true if deletion was successful, false otherwise
-     */
-    public function delete($filePath)
-    {
-        $suffix = eZFile::suffix($filePath);
-        try {
-            if($suffix != 'generating'){
-                $this->s3client->copyObject(
-                    array(
-                        'Bucket' => $this->bucket,
-                        'Key' => 'trash/' . $filePath,
-                        'CopySource' => $this->bucket . "/" . $filePath,
-                        'ACL' => 'private'
-                    )
-                );
-            }
-            $this->s3client->deleteObject(
-                array(
-                    'Bucket' => $this->bucket,
-                    'Key' => $filePath,
                 )
             );
             return true;
@@ -202,6 +188,41 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 )
             );
             $this->delete($oldPath);
+            return true;
+        } catch (S3Exception $e) {
+            eZDebug::writeError($e->getMessage(), __METHOD__);
+            return false;
+        }
+    }
+
+    /**
+     * Deletes one or more files from DFS
+     *
+     * @param string|array $filePath
+     *        Single local filename, or array of local filenames
+     *
+     * @return bool true if deletion was successful, false otherwise
+     */
+    public function delete($filePath)
+    {
+        $suffix = eZFile::suffix($filePath);
+        try {
+            if ($suffix != 'generating') {
+                $this->s3client->copyObject(
+                    array(
+                        'Bucket' => $this->bucket,
+                        'Key' => 'trash/' . $filePath,
+                        'CopySource' => $this->bucket . "/" . $filePath,
+                        'ACL' => 'private'
+                    )
+                );
+            }
+            $this->s3client->deleteObject(
+                array(
+                    'Bucket' => $this->bucket,
+                    'Key' => $filePath,
+                )
+            );
             return true;
         } catch (S3Exception $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);

@@ -62,10 +62,11 @@ class OpenPADFSFileHandlerDFSRegistry
     {
         $privateHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Private');
         $publicHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Public');
+        $privateCacheHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3PrivateCache');
 
         $redisHandler = self::buildHandler('OpenPADFSFileHandlerDFSRedis');
         //$dynamoDbHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSDynamoDb');
-        $localHandler = self::buildHandler('OpenPADFSFileHandlerDFSLocal');
+        //$localHandler = self::buildHandler('OpenPADFSFileHandlerDFSLocal');
 
         $pathHandlers = array();
 
@@ -80,9 +81,13 @@ class OpenPADFSFileHandlerDFSRegistry
         }
 
         $pathHandlers["$varDir/storage/images"] = $publicHandler;
+        $pathHandlers["$varDir/storage"] = $privateHandler;
+
         $pathHandlers["$cacheDir/public"] = $publicHandler;
-        $pathHandlers["$cacheDir/content"] = $localHandler;
-        $pathHandlers["$cacheDir/ocopendata"] = $localHandler;
+
+        $pathHandlers["$cacheDir/content"] = $privateCacheHandler;
+        $pathHandlers["$cacheDir/ocopendata"] = $privateCacheHandler;
+
         $pathHandlers[$cacheDir] = $redisHandler;
 
         return new static($privateHandler, $pathHandlers);

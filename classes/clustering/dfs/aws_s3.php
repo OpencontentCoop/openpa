@@ -40,15 +40,25 @@ abstract class OpenPADFSFileHandlerDFSAWSS3Abstract
     }
 
     /**
-     * @return static
+     * @return array
      */
-    public static function build()
+    protected static function getClientSettings()
     {
         $ini = OpenPADFSFileHandlerDFSRegistry::getCurrentInstanceIni('openpa_cluster.ini');
         $parameters = array();
         if ($ini->hasGroup("AWSS3DFSBackendSettings")) {
             $parameters = $ini->group("AWSS3DFSBackendSettings");
         }
+
+        return $parameters;
+    }
+
+    /**
+     * @return static
+     */
+    public static function build()
+    {
+        $parameters = static::getClientSettings();
 
         $region = isset($parameters['Region']) ? $parameters['Region'] : static::getRegionConfig();
         $bucket = isset($parameters['Bucket']) ? $parameters['Bucket'] : static::getBucketConfig();
@@ -59,7 +69,6 @@ abstract class OpenPADFSFileHandlerDFSAWSS3Abstract
         ];
 
         $httpHost = 's3-' . $region . '.amazonaws.com';
-
         if (isset($parameters['ServerUri'])){
             $httpHost = $parameters['ServerUri'];
         }
