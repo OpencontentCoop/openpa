@@ -243,6 +243,12 @@ class OpenPASMTPTransport extends eZMailTransport
                 if (!isset($item['type'])){
                     $item['type'] = '';
                 }
+                if (!isset($item['file'])){
+                    $item['file'] = '';
+                }
+                if (!isset($item['line'])){
+                    $item['line'] = '';
+                }
                 $register[] = $item['file'] . '#' . $item['line'] . '(' . $item['class'] . $item['type'] . $item['function'] . ')';
             }
         }
