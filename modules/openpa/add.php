@@ -9,6 +9,7 @@ if ( !$class instanceof eZContentClass )
     return $module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
 
 $queryString = '';
+$locale = eZINI::instance()->variable('RegionalSettings', 'ContentObjectLocale');
 if ( $_SERVER['QUERY_STRING'] )
 {
     $queryStringParts =  explode( '/', $_SERVER['QUERY_STRING'] );    
@@ -28,7 +29,7 @@ if ( $http->hasGetVariable( 'parent' ) )
                                                              false );
         if ( $object )
         {                
-            $module->redirectTo( 'content/edit/' . $object->attribute( 'id' ) . '/' . $object->attribute( 'current_version' ) . $queryString );
+            $module->redirectTo( 'content/edit/' . $object->attribute( 'id' ) . '/' . $object->attribute( 'current_version' ) . '/' . $locale . $queryString );
             return;
         }
         else
@@ -45,18 +46,18 @@ elseif ( $http->hasGetVariable( 'from' ) )
     {
         $copy = OpenPAObjectTools::copyObject( $object );
         $http->setSessionVariable('RedirectURIAfterPublish', 'openpa/object/' . $copy->attribute( 'id' ));
-        $module->redirectTo( 'content/edit/' . $copy->attribute( 'id' ) . '/' . $copy->attribute( 'current_version' ) . $queryString );
+        $module->redirectTo( 'content/edit/' . $copy->attribute( 'id' ) . '/' . $copy->attribute( 'current_version' ) . '/' . $locale . $queryString );
         return;
     }    
     catch( InvalidArgumentException $e )
     {
         eZLog::write( $e->getMessage(), 'editor_tools.log' );
-        return $Module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
+        return $module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
     }
     catch( Exception $e )
     {
         eZLog::write( $e->getMessage(), 'editor_tools.log' );
-        return $Module->handleError( eZError::KERNEL_ACCESS_DENIED, 'kernel' );
+        return $module->handleError( eZError::KERNEL_ACCESS_DENIED, 'kernel' );
     }
 }
 else
