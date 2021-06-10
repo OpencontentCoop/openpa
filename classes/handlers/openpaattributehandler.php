@@ -119,6 +119,17 @@ class OpenPAAttributeHandler extends OpenPATempletizable
         {
             $hasContent = true;
         }
+        if ($hasContent && $this->attribute->attribute( 'data_type_string' ) == eZObjectRelationListType::DATA_TYPE_STRING){
+            $idList = explode('-', $this->attribute->toString());
+            /** @var eZContentObject[] $objects */
+            $objects = eZContentObject::fetchIDArray($idList);
+            foreach ($objects as $index => $object){
+                if (!$object->canRead()){
+                    unset($objects[$index]);
+                }
+            }
+            $hasContent = count($objects) > 0;
+        }
         return $hasContent;
     }
 
