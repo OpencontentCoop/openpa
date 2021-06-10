@@ -46,7 +46,7 @@ class OpenPAAjax extends ezjscServerFunctions
                 $accessToDashboard = $user->hasAccessTo('content', 'dashboard');
                 $accessToRegister = $user->hasAccessTo('user', 'register');
                 eZHTTPTool::instance()->setSessionVariable( $sessionKey, array(
-                    'name' => $user->contentObject()->attribute('name'),
+                    'name' => strip_tags($user->contentObject()->attribute('name')),
                     'has_access_to_dashboard' => $accessToDashboard['accessWord'] == 'yes',
                     'has_access_to_register' => $accessToRegister['accessWord'] != 'no',
                 ));
