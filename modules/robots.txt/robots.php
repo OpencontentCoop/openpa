@@ -15,7 +15,6 @@ if (OpenPAINI::variable('Seo', 'EnableRobots') == 'enabled') {
             $result .= "
 Disallow: {$accessSuffix}/Media
 Disallow: {$accessSuffix}/user
-Disallow: {$accessSuffix}/opendata
 Disallow: {$accessSuffix}/api/opendata
 Disallow: {$accessSuffix}/content/advancedsearch
 Disallow: {$accessSuffix}/content/search
