@@ -788,7 +788,7 @@ class OpenPaFunctionCollection
                             else
                             {
                                 eZDebug::writeDebug( $limitationType, __METHOD__ . ' unknown limitation type: ' . $limitationType );
-                                continue;
+                                continue 2;
                             }
                         }
                     }
