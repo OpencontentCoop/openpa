@@ -61,25 +61,16 @@ class OpenPAAjax extends ezjscServerFunctions
     public static function loadWebsiteToolbar($args)
     {
         $currentNodeId = $args[0];
-        $refresh = true;//isset($args[1]);
         $user = eZUser::currentUser();
         if ($user->isRegistered() && $user->attribute('login') != 'utente'){
             $access = $user->hasAccessTo('websitetoolbar', 'use');
             if ($access['accessWord'] != 'no'){
                 $preference = (int)eZPreferences::value('show_editor');
-                $sessionKey = 'websitetoolbar_' . $user->id() . '_' . $currentNodeId . '_' . $preference;
-                if ($refresh){
-                    eZHTTPTool::instance()->removeSessionVariable($sessionKey);
-                }
-                if (!eZHTTPTool::instance()->hasSessionVariable($sessionKey)) {
-                    $tpl = eZTemplate::factory();
-                    $tpl->setVariable('current_node_id', $currentNodeId);
-                    $tpl->setVariable('show_editor', $preference);
-                    $tpl->setVariable('current_user', eZUser::currentUser());
-                    $data = $tpl->fetch('design:parts/website_toolbar.tpl');
-                    eZHTTPTool::instance()->setSessionVariable($sessionKey, $data);
-                }
-                $result = eZHTTPTool::instance()->sessionVariable($sessionKey);
+                $tpl = eZTemplate::factory();
+                $tpl->setVariable('current_node_id', $currentNodeId);
+                $tpl->setVariable('show_editor', $preference);
+                $tpl->setVariable('current_user', eZUser::currentUser());
+                $result = $tpl->fetch('design:parts/website_toolbar.tpl');
 
                 if (in_array('ezformtoken', eZExtension::activeExtensions()) && class_exists('ezxFormToken')){
                     $token = ezxFormToken::getToken();
@@ -90,7 +81,6 @@ class OpenPAAjax extends ezjscServerFunctions
                         $result
                     );
                 }
-
                 echo $result;
                 if (isset($args[1])) eZDisplayDebug();
                 eZExecution::cleanExit();
