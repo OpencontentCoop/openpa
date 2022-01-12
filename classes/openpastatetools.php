@@ -558,7 +558,7 @@ class OpenPAStateTools
             if (isset($dataMap[$attribute]) && $dataMap[$attribute]->toString() !== '') {
                 $string = $dataMap[$attribute]->toString();
                 if ($dataMap[$attribute]->attribute('data_type_string') == 'ezdate') {
-                    $string = mktime(23, 59, 59, date("n", $string), date("j", $string), date("Y", $string));
+                    $string = mktime(0, 0, 0, date("n", $string), date("j", $string), date("Y", $string));
                 }
                 return $this->compare($string, $operator, $value);
             }
