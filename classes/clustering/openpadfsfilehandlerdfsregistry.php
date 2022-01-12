@@ -87,6 +87,9 @@ class OpenPADFSFileHandlerDFSRegistry
 
         $pathHandlers["$cacheDir/content"] = $privateCacheHandler;
         $pathHandlers["$cacheDir/ocopendata"] = $privateCacheHandler;
+        $pathHandlers["$cacheDir/openpa"] = $privateCacheHandler;
+        $pathHandlers["$cacheDir/sensor"] = $privateCacheHandler;
+        $pathHandlers["$cacheDir/template"] = $privateCacheHandler;
 
         $pathHandlers[$cacheDir] = $redisHandler;
 
