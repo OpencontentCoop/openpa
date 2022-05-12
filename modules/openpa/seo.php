@@ -13,6 +13,12 @@ if ($http->hasPostVariable('StoreSeo')) {
         OpenPAINI::set("Seo", "GoogleAnalyticsAccountID", $googleID);
     }
 
+    if ($http->hasPostVariable('GoogleCookieless')) {
+        OpenPAINI::set("Seo", "GoogleCookieless", 'enabled');
+    }else{
+        OpenPAINI::set("Seo", "GoogleCookieless", 'disabled');
+    }
+
     if ($http->hasPostVariable('GoogleTagManagerID')) {
         $googleTagManagerID = trim($http->postVariable('GoogleTagManagerID'));
         OpenPAINI::set("Seo", "GoogleTagManagerID", $googleTagManagerID);
@@ -59,6 +65,25 @@ if ($http->hasPostVariable('StoreSeo')) {
         OpenPAINI::set("Seo", "webAnalyticsItaliaID", $googleID);
     }
 
+    if ($http->hasPostVariable('WebAnalyticsItaliaCookieless')) {
+        OpenPAINI::set("Seo", "WebAnalyticsItaliaCookieless", 'enabled');
+    }else{
+        OpenPAINI::set("Seo", "WebAnalyticsItaliaCookieless", 'disabled');
+    }
+
+    if (OpenPAINI::variable('CookiesSettings', 'Consent', 'simple') == 'advanced') {
+        if ($http->hasPostVariable('CookieConsentMultimediaText')) {
+            $cookieConsentMultimediaText = trim($http->postVariable('CookieConsentMultimediaText'));
+            OpenPAINI::set("Seo", "CookieConsentMultimediaText", $cookieConsentMultimediaText);
+        }
+
+        if ($http->hasPostVariable('CookieConsentMultimedia')) {
+            OpenPAINI::set("Seo", "CookieConsentMultimedia", 'enabled');
+        } else {
+            OpenPAINI::set("Seo", "CookieConsentMultimedia", 'disabled');
+        }
+    }
+
     eZCache::clearByTag('template');
 
     eZExtension::getHandlerClass(new ezpExtensionOptions(array('iniFile' => 'site.ini',
@@ -87,7 +112,23 @@ $tpl->setVariable('isRobotsTextDefault', $robotsTextDefault);
 $tpl->setVariable('googleTagManagerID', OpenPAINI::variable('Seo', 'GoogleTagManagerID', false));
 $tpl->setVariable('googleSiteVerificationID', OpenPAINI::variable('Seo', 'GoogleSiteVerificationID', false));
 $tpl->setVariable('webAnalyticsItaliaId', OpenPAINI::variable('Seo', 'webAnalyticsItaliaID', false));
+$tpl->setVariable('googleCookieless', OpenPAINI::variable('Seo', 'GoogleCookieless', 'disabled'));
+$tpl->setVariable('webAnalyticsItaliaCookieless', OpenPAINI::variable('Seo', 'WebAnalyticsItaliaCookieless', 'disabled'));
+if (OpenPAINI::variable('CookiesSettings', 'Consent', 'simple') == 'advanced') {
+    $tpl->setVariable('cookieConsentMultimediaText',
+        OpenPAINI::variable('Seo', 'CookieConsentMultimediaText', 'YouTube, Vimeo, Slideshare, Isuu, Facebook, Twitter, Linkedin, Instagram, Whatsapp'));
+    $tpl->setVariable('cookieConsentMultimedia',
+        OpenPAINI::variable('Seo', 'CookieConsentMultimedia', 'enabled'));
+}
 
 $Result = array();
 $Result['content'] = $tpl->fetch('design:openpa/seo.tpl');
 $Result['path'] = array(array('text' => 'Impostazioni SEO', 'url' => false));
+$contentInfoArray = array();
+$contentInfoArray['persistent_variable'] = array(
+    'show_path' => false
+);
+if (is_array($tpl->variable('persistent_variable'))) {
+    $contentInfoArray['persistent_variable'] = array_merge($contentInfoArray['persistent_variable'], $tpl->variable('persistent_variable'));
+}
+$Result['content_info'] = $contentInfoArray;
