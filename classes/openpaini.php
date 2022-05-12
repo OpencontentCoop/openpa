@@ -99,6 +99,10 @@ class OpenPAINI
         'GeneralSettings::valutation',
         'GeneralSettings::theme',
         'CreditsSettings::CodeVersion',
+        'Seo::GoogleCookieless',
+        'Seo::WebAnalyticsItaliaCookieless',
+        'Seo::CookieConsentMultimedia',
+        'Seo::CookieConsentMultimediaText',
     );
 
     public static function variable( $block, $value, $default = null )
@@ -321,6 +325,23 @@ class OpenPAINI
                 return self::getSeoData()['webAnalyticsItaliaID'];
                 break;
 
+            case 'Seo::WebAnalyticsItaliaCookieless':
+                return self::getSeoData()['WebAnalyticsItaliaCookieless'];
+                break;
+
+            case 'Seo::GoogleCookieless':
+                return self::getSeoData()['GoogleCookieless'];
+                break;
+
+            case 'Seo::CookieConsentMultimedia':
+                return self::getSeoData()['CookieConsentMultimedia'];
+                break;
+
+
+            case 'Seo::CookieConsentMultimediaText':
+                return self::getSeoData()['CookieConsentMultimediaText'];
+                break;
+
             case 'GeneralSettings::valutation':
                 if (eZINI::instance('openpa.ini')->hasVariable('GeneralSettings', 'valutation')
                     && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
@@ -421,6 +442,22 @@ class OpenPAINI
                     self::setThemeIdentifier($value);
 
                     return true;
+                    break;
+
+                case 'Seo::WebAnalyticsItaliaCookieless':
+                    self::setSeoData('WebAnalyticsItaliaCookieless', $value);
+                    break;
+
+                case 'Seo::GoogleCookieless':
+                    self::setSeoData('GoogleCookieless', $value);
+                    break;
+
+                case 'Seo::CookieConsentMultimedia':
+                    self::setSeoData('CookieConsentMultimedia', $value);
+                    break;
+
+                case 'Seo::CookieConsentMultimediaText':
+                    self::setSeoData('CookieConsentMultimediaText', $value);
                     break;
 
                 default:
@@ -585,6 +622,10 @@ class OpenPAINI
             'metaDescription' => false,
             'metaKeywords' => false,
             'webAnalyticsItaliaID' => '',
+            'GoogleCookieless' => 'disabled',
+            'WebAnalyticsItaliaCookieless' => 'disabled',
+            'CookieConsentMultimedia' => 'enabled',
+            'CookieConsentMultimediaText' => 'YouTube, Vimeo, Slideshare, Isuu, Facebook, Twitter, Linkedin, Instagram, Whatsapp',
         );
     }
 
