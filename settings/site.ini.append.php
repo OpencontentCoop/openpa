@@ -53,6 +53,7 @@ PolicyOmitList[]=robots.txt
 PolicyOmitList[]=openpa/loadwt
 PolicyOmitList[]=openpa/changestatedefinition
 PolicyOmitList[]=openpa/changesectiondefinition
+PolicyOmitList[]=sitemap.xml
 
 [RegionalSettings]
 TranslationExtensions[]=openpa
