@@ -60,19 +60,8 @@ class OpenPADFSFileHandlerDFSRegistry
      */
     public static function build()
     {
-        $privateHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Private');
-        $publicHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Public');
-        $privateCacheHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3PrivateCache');
-
-        $redisHandler = self::buildHandler('OpenPADFSFileHandlerDFSRedis');
-        //$dynamoDbHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSDynamoDb');
-        //$localHandler = self::buildHandler('OpenPADFSFileHandlerDFSLocal');
-
-        $pathHandlers = array();
-
         $ini = self::getCurrentInstanceIni();
         $varDir = eZDir::path(array($ini->variable('FileSettings', 'VarDir')));
-
         $cacheDir = $ini->variable('FileSettings', 'CacheDir');
         if ($cacheDir[0] == "/") {
             $cacheDir = eZDir::path(array($cacheDir));
@@ -80,15 +69,36 @@ class OpenPADFSFileHandlerDFSRegistry
             $cacheDir = eZDir::path(array($varDir, $cacheDir));
         }
 
-        $pathHandlers["$varDir/storage/images"] = $publicHandler;
-        $pathHandlers["$varDir/storage"] = $privateHandler;
+        $openpaClusterIni = self::getCurrentInstanceIni('openpa_cluster.ini');
+        $cacheStrategy = 'AWS-REDIS';
+        $storageStrategy = 'AWS';
+        if ($openpaClusterIni->hasGroup('RegistrySettings')){
+            $cacheStrategy = $openpaClusterIni->variable('RegistrySettings', 'CacheStrategy');
+            $storageStrategy = $openpaClusterIni->variable('RegistrySettings', 'StorageStrategy');
+        }
 
-        $pathHandlers["$cacheDir/public"] = $publicHandler;
+        $pathHandlers = array();
 
-        $pathHandlers["$cacheDir/content"] = $privateCacheHandler;
-        $pathHandlers["$cacheDir/ocopendata"] = $privateCacheHandler;
+        $publicHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Public');
+        $privateHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Private');
+        $nfsHandler = self::buildHandler('eZDFSFileHandlerDFSBackend');
 
-        $pathHandlers[$cacheDir] = $redisHandler;
+        if ($storageStrategy === 'NFS'){
+            $pathHandlers["$varDir/storage"] = $nfsHandler;
+        }else{
+            $pathHandlers["$varDir/storage/images"] = $publicHandler;
+            $pathHandlers["$varDir/storage"] = $privateHandler;
+        }
+
+        if ($cacheStrategy === 'NFS'){
+            $pathHandlers["$cacheDir/public"] = $publicHandler;
+            $pathHandlers[$cacheDir] = $nfsHandler;
+        }else{
+            $pathHandlers["$cacheDir/public"] = $publicHandler;
+            $pathHandlers["$cacheDir/content"] = $privateCacheHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3PrivateCache');
+            $pathHandlers["$cacheDir/ocopendata"] = $privateCacheHandler;
+            $pathHandlers[$cacheDir] = self::buildHandler('OpenPADFSFileHandlerDFSRedis');
+        }
 
         return new static($privateHandler, $pathHandlers);
     }
