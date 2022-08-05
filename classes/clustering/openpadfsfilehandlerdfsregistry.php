@@ -81,7 +81,7 @@ class OpenPADFSFileHandlerDFSRegistry
 
         $publicHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Public');
         $privateHandler = self::buildHandler('OpenPADFSFileHandlerDFSAWSS3Private');
-        $nfsHandler = self::buildHandler('eZDFSFileHandlerDFSBackend');
+        $nfsHandler = self::buildHandler('OpenPADFSFileHandlerDFSNFS');
 
         if ($storageStrategy === 'NFS'){
             $pathHandlers["$varDir/storage"] = $nfsHandler;
