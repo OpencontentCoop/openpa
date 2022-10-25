@@ -151,6 +151,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
         $menuItem = array(
             'item' => array(
                 'node_id' => $rootNode->attribute( 'node_id' ),
+                'remote_id' => $rootNode->object()->attribute( 'remote_id' ),
                 'name' => $rootNode->attribute( 'name' ),
                 'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ),
                 'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
@@ -173,6 +174,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
                         $menuItem['children'][] = array(
                             'item' => array(
                                 'node_id' => $rootNode->attribute( 'node_id' ) . '-' . $child->attribute( 'id' ),
+                                'remote_id' => $child->attribute( 'remote_id' ),
                                 'name' => $child->attribute( 'keyword' ),
                                 'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ) . '/(view)/' . $child->attribute( 'keyword' ),
                                 'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
