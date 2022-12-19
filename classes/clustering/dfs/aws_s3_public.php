@@ -294,6 +294,12 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
      */
     public function applyServerUri($filePath)
     {
+        if (strpos($this->httpHost, '{') !== false){
+            $serverUri = str_replace('{protocol}', $this->protocol, $this->httpHost);
+            $serverUri = str_replace('{bucket}', $this->bucket, $serverUri);
+            return rtrim($serverUri, '/') . '/' . $filePath;
+
+        }
         return sprintf('%s://%s/%s/%s', $this->protocol, $this->httpHost, $this->bucket, $filePath);
     }
 }
