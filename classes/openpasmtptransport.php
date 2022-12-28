@@ -187,6 +187,11 @@ class OpenPASMTPTransport extends eZMailTransport
             $blackListDomainSuffixes = (array)$ini->variable('MailSettings', 'BlackListEmailDomainSuffixes');
         }
 
+        $bounceCollector = false;
+        if ($ini->hasVariable('MailSettings', 'BounceCollector')) {
+            $bounceCollector = $ini->variable('MailSettings', 'BounceCollector') === 'enabled';
+        }
+
         /** @var ezcMailAddress[] $toList */
         $toList = array_merge($mail->to, $mail->cc, $mail->bcc);
         foreach ($toList as $address) {
@@ -199,7 +204,43 @@ class OpenPASMTPTransport extends eZMailTransport
             if (in_array($suffix, $blackListDomainSuffixes)) {
                 throw new ezcMailException("Receiver domain suffix <{$suffix}> is in black list");
             }
+
+            if ($bounceCollector && $this->isBounced($address->email)){
+                throw new ezcMailException("Receiver address <{$address->email}> is in bounce collection");
+            }
         }
+    }
+
+    private function isBounced($emailAddress)
+    {
+        $ini = eZINI::instance();
+        $bounceCollectorEndpoint = rtrim($ini->variable('MailSettings', 'BounceCollectorEndpoint'), '/');
+        $bounceCollectorSecret = $ini->variable('MailSettings', 'BounceCollectorSecret');
+
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => "{$bounceCollectorEndpoint}/status/{$emailAddress}",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_POSTFIELDS => "",
+            CURLOPT_HTTPHEADER => [
+                "x-api-key: $bounceCollectorSecret",
+            ],
+        ]);
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        curl_close($curl);
+        if ($response) {
+            $status = json_decode($response, true);
+            return $status['status'] !== 'Ok';
+        }
+
+        eZDebug::writeError($err, __METHOD__);
+        return false;
     }
 
     private function logSuccess(eZMail $mail)
