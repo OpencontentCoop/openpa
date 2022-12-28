@@ -30,4 +30,10 @@ Scripts[]=generate_menu.php
 [CronjobPart-rename]
 Scripts[]=rename_object.php
 
+[CronjobPart-cjw_newsletter]
+Scripts[]=check_bounce.php
+
+[CronjobPart-check_bounce]
+Scripts[]=check_bounce.php
+
 */ ?>
