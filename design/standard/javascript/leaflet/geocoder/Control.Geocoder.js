@@ -977,7 +977,7 @@ module.exports = {
 	"class": L.Class.extend({
 		options: {
 			serviceUrl: 'https://photon.komoot.de/api/',
-			reverseUrl: 'https://photon.komoot.de/reverse/',
+			reverseUrl: 'https://photon.komoot.de/reverse',
 			nameProperties: [
 				'name',
 				'street',
