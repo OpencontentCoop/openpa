@@ -30,6 +30,13 @@ Visit-time: 0000-0600
 ";
 
     $resultArray = explode("\n", $result);
+    if (OpenPAINI::variable('Seo', 'DisableArchive', 'enabled') === 'enabled') {
+        $resultArray[] = "Disallow: /archivio";
+        $resultArray[] = "Disallow: /archivio_backend";
+        $resultArray[] = "Disallow: /archive";
+        $resultArray[] = "Disallow: /old";
+    }
+
     $resultArray = array_map(function($value) {
         $trimmed = trim($value);
         return empty($trimmed) ? '#' : $trimmed;
@@ -42,7 +49,7 @@ Visit-time: 0000-0600
     $resultArray[] = "# Copyright: https://github.com/mitchellkrogza/apache-ultimate-bad-bot-blocker";
     foreach ($disallowUserAgents as $disallowUserAgent){
         $resultArray[] = "User-agent: $disallowUserAgent";
-        $resultArray[] = "Disallow:/";
+        $resultArray[] = "Disallow: /";
     }
 
     $result = implode("\n", $resultArray);
