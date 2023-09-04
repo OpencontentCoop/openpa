@@ -529,7 +529,7 @@ class OpenPAINI
                 }
             );
 
-            if (empty(self::$themeIdentifier)){
+            if (empty(self::$themeIdentifier) || self::$themeIdentifier instanceof eZClusterFileFailure){
                 self::$themeIdentifier = $default;
             }
         }
