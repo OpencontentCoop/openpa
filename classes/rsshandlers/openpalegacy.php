@@ -1,6 +1,6 @@
 <?php
 
-class OpenPALegacyRSSHandler extends OCRSSHandlerBase
+class OpenPALegacyRSSHandler extends LegacyRSSHandler
 {
 
     /**
@@ -55,11 +55,11 @@ class OpenPALegacyRSSHandler extends OCRSSHandlerBase
     function getNodes()
     {
         $objectListFilter = $this->rssExport->getObjectListFilter();
+        $classes = array();
+        $subtree = array();
         foreach( $this->rssExportItems as $rssSource )
         {
             $parentNode = OpenPABase::fetchNode( $rssSource->SourceNodeID );
-            $classes = array();
-            $subtree = array();
             $handler = OpenPAObjectHandler::instanceFromObject( $parentNode );
             if ( $handler instanceof OpenPAObjectHandler )
             {
@@ -72,7 +72,7 @@ class OpenPALegacyRSSHandler extends OCRSSHandlerBase
                 else
                 {
                     $classes[] = eZContentClass::classIdentifierByID( $rssSource->ClassID );
-                    $subtree[] = $rssSource->SourceNodeID;
+                    $subtree[] = $parentNode->attribute('node_id');
                 }
             }
         }
