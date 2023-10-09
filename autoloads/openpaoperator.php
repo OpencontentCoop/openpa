@@ -44,7 +44,8 @@ class OpenPAOperator
             'organigramma',
             'trasparenza_root_node_id',
             'openpa_instance_identifier',
-            'openpa_recaptcha_public_key'
+            'openpa_recaptcha_public_key',
+            'openpa_no_index_if_needed',
         );
     }
 
@@ -158,6 +159,24 @@ class OpenPAOperator
 
         switch ( $operatorName )
         {
+            case 'openpa_no_index_if_needed':
+            {
+                $siteUrl = eZINI::instance()->variable( 'SiteSettings', 'SiteURL' );
+                if (eZINI::instance()->hasVariable('SiteSettings', 'MetaNoIndex')) {
+                    $addNoIndex = eZINI::instance()->variable('SiteSettings', 'MetaNoIndex') == 'enabled';
+                }elseif (eZINI::instance('openpa.ini')->hasVariable('SEO', 'EnableRobots')) {
+                    $addNoIndex = eZINI::instance()->variable('SEO', 'EnableRobots') == 'disabled';
+                }else{
+                    $addNoIndex = strpos($siteUrl, 'opencontent') !== false;
+                }
+                if (!$addNoIndex){
+                    $addNoIndex = OpenPAINI::variable('Seo', 'EnableRobots') === 'disabled';
+                }
+                if ($addNoIndex){
+                    $operatorValue = '<!-- ' . $siteUrl . ' --><meta name="robots" content="NOINDEX,NOFOLLOW" />';
+                }
+                break;
+            }
             case 'openpa_recaptcha_public_key':
             {
                 $recaptcha = new OpenPARecaptcha($namedParameters['version']);

@@ -107,17 +107,20 @@ class OpenPAINI
 
     public static function variable( $block, $value, $default = null )
     {
+        eZDebug::createAccumulatorGroup('Openpa Ini');
         if ( self::hasFilter( $block, $value, $default ) )
         {
             return self::filter( $block, $value, $default );
         }
 
+        eZDebug::accumulatorStart('openpa_ini_get', 'Openpa Ini', 'Fetch standard openpa.ini');
         $ini = eZINI::instance( 'openpa.ini' );
         $result = $default;
         if ( $ini->hasVariable( $block, $value ) )
         {
             $result = $ini->variable( $block, $value );
         }
+        eZDebug::accumulatorStart('openpa_ini_get');
         return $result;
     }
 
@@ -217,8 +220,6 @@ class OpenPAINI
 
                         foreach( $values as $variable => $settings ){
 
-                            $result[$block][$variable] = array();
-
                             list( $handler, $key ) = explode( '.', $settings['to'] );
                             $matchValue = $settings['value'];
 
@@ -266,80 +267,82 @@ class OpenPAINI
 
     protected static function filter( $block, $value, $default )
     {
+        eZDebug::accumulatorStart('openpa_ini_filter', 'Openpa Ini', 'Fetch dynamic openpa.ini');
+        $result = null;
         $filter = $block . '::' . $value;
         switch( $filter )
         {
             case 'TopMenu::NodiCustomMenu':
-                return OpenPaFunctionCollection::fetchTopMenuNodes();
+                $result = OpenPaFunctionCollection::fetchTopMenuNodes();
                 break;
 
             case 'GestioneSezioni::sezioni_per_tutti':
-                return self::filterSezioniPerTutti();
+                $result = self::filterSezioniPerTutti();
                 break;
 
             case 'Attributi::EscludiDaRicerca':
-                return self::variable( 'GestioneAttributi', 'attributi_da_escludere_dalla_ricerca', $default );
+                $result = self::variable( 'GestioneAttributi', 'attributi_da_escludere_dalla_ricerca', $default );
                 break;
 
             case 'Seo::GoogleAnalyticsAccountID':
-                return self::getSeoData()['googleAnalyticsAccountID'];
+                $result = self::getSeoData()['googleAnalyticsAccountID'];
                 break;
 
             case 'Seo::EnableRobots':
-                return self::getSeoData()['enableRobots'];
+                $result = self::getSeoData()['enableRobots'];
                 break;
 
             case 'Seo::GoogleTagManagerID':
-                return self::getSeoData()['googleTagManagerID'];
+                $result = self::getSeoData()['googleTagManagerID'];
                 break;
 
             case 'Seo::GoogleSiteVerificationID':
-                return self::getSeoData()['googleSiteVerificationID'];
+                $result = self::getSeoData()['googleSiteVerificationID'];
                 break;
 
             case 'Seo::RobotsText':
-                return self::getSeoData()['robotsText'];
+                $result = self::getSeoData()['robotsText'];
                 break;
 
             case 'Seo::DefaultRobotsText':
-                return file_get_contents('robots.txt');
+                $result = file_get_contents('robots.txt');
                 break;
 
             case 'Seo::metaAuthor':
-                return self::getSeoData()['metaAuthor'];
+                $result = self::getSeoData()['metaAuthor'];
                 break;
 
             case 'Seo::metaCopyright':
-                return self::getSeoData()['metaCopyright'];
+                $result = self::getSeoData()['metaCopyright'];
                 break;
 
             case 'Seo::metaDescription':
-                return self::getSeoData()['metaDescription'];
+                $result = self::getSeoData()['metaDescription'];
                 break;
 
             case 'Seo::metaKeywords':
-                return self::getSeoData()['metaKeywords'];
+                $result = self::getSeoData()['metaKeywords'];
                 break;
 
             case 'Seo::webAnalyticsItaliaID':
-                return self::getSeoData()['webAnalyticsItaliaID'];
+                $result = self::getSeoData()['webAnalyticsItaliaID'];
                 break;
 
             case 'Seo::WebAnalyticsItaliaCookieless':
-                return self::getSeoData()['WebAnalyticsItaliaCookieless'];
+                $result = self::getSeoData()['WebAnalyticsItaliaCookieless'];
                 break;
 
             case 'Seo::GoogleCookieless':
-                return self::getSeoData()['GoogleCookieless'];
+                $result = self::getSeoData()['GoogleCookieless'];
                 break;
 
             case 'Seo::CookieConsentMultimedia':
-                return self::getSeoData()['CookieConsentMultimedia'];
+                $result = self::getSeoData()['CookieConsentMultimedia'];
                 break;
 
 
             case 'Seo::CookieConsentMultimediaText':
-                return self::getSeoData()['CookieConsentMultimediaText'];
+                $result = self::getSeoData()['CookieConsentMultimediaText'];
                 break;
 
             case 'GeneralSettings::valutation':
@@ -347,14 +350,13 @@ class OpenPAINI
                     && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
                     $valuationClass = eZContentClass::fetchByIdentifier('valuation');
                     if ($valuationClass instanceof eZContentClass){
-                        return $valuationClass->objectCount() > 0;
+                        $result = $valuationClass->objectCount() > 0;
                     }
                 }
-                return false;
                 break;
 
             case 'GeneralSettings::theme':
-                return self::getThemeIdentifier($default);
+                $result = self::getThemeIdentifier($default);
                 break;
 
             case 'CreditsSettings::CodeVersion':
@@ -375,17 +377,18 @@ class OpenPAINI
                     }
                 }
 
-                return trim($codeVersion) . $installerVersion;
+                $result = trim($codeVersion) . $installerVersion;
                 break;
         }
 
-        if ( isset( self::$dynamicIniMap[$block][$value] ) )
+        if ( !$result && isset( self::$dynamicIniMap[$block][$value] ) )
         {
             self::getDynamicIniData();
-            return isset( self::$dynamicIniData[$block][$value] ) ? self::$dynamicIniData[$block][$value] : $default;
+            $result = isset( self::$dynamicIniData[$block][$value] ) ? self::$dynamicIniData[$block][$value] : $default;
         }
 
-        return null;
+        eZDebug::accumulatorStart('openpa_ini_filter');
+        return $result;
     }
 
     public static function set( $block, $settingName, $value )
@@ -581,6 +584,10 @@ class OpenPAINI
             );
         }
 
+        if (self::isSeoDisabledByHostname()) {
+            self::$seoData['enableRobots'] = 'disabled';
+        }
+
         return array_merge(
             self::getEmptySeoData(),
             (array)self::$seoData
@@ -662,10 +669,7 @@ class OpenPAINI
                 if ($ini->hasVariable( 'Seo', 'EnableRobots' )){
                     $enableRobotsValue = $ini->variable( 'Seo', 'EnableRobots' );
                 }
-                if (strpos(eZSys::hostname(), 'opencontent.it') !== false){
-                    $enableRobotsValue = 'disabled';
-                }
-                $data['enableRobots'] = $enableRobotsValue;
+                $data['enableRobots'] = self::isSeoDisabledByHostname() ? 'disabled' : $enableRobotsValue;
             }
 
             $siteData = new eZSiteData(array(
@@ -676,5 +680,22 @@ class OpenPAINI
         }
 
         return json_decode($siteData->attribute('value'), true);
+    }
+
+    private static function isSeoDisabledByHostname(): bool
+    {
+        $ini = eZINI::instance( 'openpa.ini' );
+        if ($ini->hasVariable('Seo', 'DisabledDomainList')){
+            $disableSeoByHostList = (array)$ini->variable('Seo', 'DisabledDomainList');
+        }else{
+            $disableSeoByHostList = ['opencontent.it'];
+        }
+        foreach ($disableSeoByHostList as $host) {
+            if (strpos(eZSys::hostname(), $host) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
