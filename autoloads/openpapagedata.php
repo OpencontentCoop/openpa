@@ -190,6 +190,7 @@ class OpenPAPageData
                 {
                     $ezPageData = new eZPageData();
                     $data = array();
+                    $namedParameters['params']['template_look'] = false;
                     $ezPageData->modify($tpl, 'ezpagedata', $operatorParameters, $rootNamespace, $currentNamespace, $data, $namedParameters);
 
                     $data['homepage'] = OpenPaFunctionCollection::fetchHome();
