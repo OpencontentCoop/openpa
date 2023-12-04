@@ -70,7 +70,7 @@ class OpenPASMTPTransport extends eZMailTransport
         if ($parameters['connectionType']) {
             $options->connectionType = $parameters['connectionType'];
         }
-        $smtp = new ezcMailSmtpTransport($parameters['host'], $user, $password,
+        $smtp = new ocMailSmtpTransport($parameters['host'], $user, $password,
             $parameters['port'], $options);
 
 
