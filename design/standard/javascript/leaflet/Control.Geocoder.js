@@ -380,7 +380,7 @@
 			L.Control.Geocoder.jsonp(this.options.serviceUrl + 'reverse', L.extend({
 				lat: location.lat,
 				lon: location.lng,
-				zoom: Math.round(Math.log(scale / 256) / Math.log(2)),
+				zoom: 18,
 				addressdetails: 1,
 				format: 'json'
 			}, this.options.reverseQueryParams), function(data) {
