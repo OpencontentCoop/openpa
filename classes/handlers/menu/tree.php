@@ -34,10 +34,13 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
 
     public function cacheFileName()
     {
-        $extraCacheKey = false;
+        $extraCacheKey = '';
         if ( $this->userHash !== null )
         {
             $extraCacheKey = md5( $this->userHash );
+        }
+        if (isset($this->parameters['hide_empty_tag_callback']) && $this->parameters['hide_empty_tag_callback']){
+            $extraCacheKey .= '_he_';
         }
         return $this->identifier . '_' . $this->rootNodeId . $extraCacheKey . '.cache';
     }
@@ -108,7 +111,9 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
             'max_recursion' => $maxRecursion,
             'custom_fetch_parameters' => $fetchParameters,
             'custom_max_recursion' => $customMaxRecursion,
-            'scope' => $parameters['scope']
+            'scope' => $parameters['scope'],
+            'hide_empty_tag' => $parameters['hide_empty_tag'] ?? false,
+            'hide_empty_tag_callback' => $parameters['hide_empty_tag_callback'] ?? false,
         );
         $result = self::treeMenu( $parameters['root_node_id'], $settings );
         if ( !isset( $parameters['user_hash'] ) || $parameters['user_hash'] == false  )
@@ -171,19 +176,26 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
                     $level++;
                     $menuItem['has_children'] = $tagRoot->getChildrenCount();
                     foreach ($tagRoot->getChildren() as $child){
-                        $menuItem['children'][] = array(
-                            'item' => array(
-                                'node_id' => $rootNode->attribute( 'node_id' ) . '-' . $child->attribute( 'id' ),
-                                'remote_id' => $child->attribute( 'remote_id' ),
-                                'name' => $child->attribute( 'keyword' ),
-                                'url' => $handlerObject->attribute( 'content_link' )->attribute( 'link' ) . '/(view)/' . $child->attribute( 'keyword' ),
-                                'internal' => $handlerObject->attribute( 'content_link' )->attribute( 'is_internal' ),
-                                'target' => $handlerObject->attribute( 'content_link' )->attribute( 'target' ),
-                            ),
-                            'max_recursion' => $settings['max_recursion'],
-                            'level' => $level,
-                            'children' => array()
-                        );
+                        $append = true;
+                        if ($settings['hide_empty_tag'] && is_callable($settings['hide_empty_tag_callback'])){
+                            $append = call_user_func($settings['hide_empty_tag_callback'], $child);
+                        }
+                        if ($append) {
+                            $menuItem['children'][] = [
+                                'item' => [
+                                    'node_id' => $rootNode->attribute('node_id') . '-' . $child->attribute('id'),
+                                    'remote_id' => $child->attribute('remote_id'),
+                                    'name' => $child->attribute('keyword'),
+                                    'url' => $handlerObject->attribute('content_link')->attribute('link')
+                                        . '/(view)/' . $child->attribute('keyword'),
+                                    'internal' => $handlerObject->attribute('content_link')->attribute('is_internal'),
+                                    'target' => $handlerObject->attribute('content_link')->attribute('target'),
+                                ],
+                                'max_recursion' => $settings['max_recursion'],
+                                'level' => $level,
+                                'children' => []
+                            ];
+                        }
                     }
                 }
 

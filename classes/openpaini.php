@@ -9,6 +9,8 @@ class OpenPAINI
 
     private static $themeIdentifier;
 
+    private static $installerVersion;
+
     public static $dynamicIniMap = array(
         'GestioneAttributi' => array(
             'attributi_contatti' => array(
@@ -220,7 +222,7 @@ class OpenPAINI
 
                         foreach( $values as $variable => $settings ){
 
-                            list( $handler, $key ) = explode( '.', $settings['to'] );
+                            [ $handler, $key ] = explode( '.', $settings['to'] );
                             $matchValue = $settings['value'];
 
                             $data = OCClassExtraParameters::fetchObjectList(OCClassExtraParameters::definition(),
@@ -367,9 +369,12 @@ class OpenPAINI
                 }elseif (eZINI::instance('openpa.ini')->hasVariable('CreditsSettings', 'CodeVersion')) {
                     $codeVersion = eZINI::instance('openpa.ini')->variable('CreditsSettings', 'CodeVersion');
                 }
-                $installerVersion = eZSiteData::fetchByName('ocinstaller_version');
-                if ($installerVersion instanceof eZSiteData){
-                    $installerVersion = $installerVersion->attribute('value');
+                $installerVersion = false;
+                if (self::$installerVersion === null){
+                    self::$installerVersion = eZSiteData::fetchByName('ocinstaller_version');
+                }
+                if (self::$installerVersion instanceof eZSiteData){
+                    $installerVersion = self::$installerVersion->attribute('value');
                     if (strpos($codeVersion, $installerVersion) !== false){
                         $installerVersion = '';
                     }else{
