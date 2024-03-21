@@ -902,6 +902,11 @@ module.exports = {
 			},
 			parseGeocoderData: function(properties){
 				var name = [];
+				if (properties.hasOwnProperty('tourism')){
+					name.push(properties['tourism'] +', ');
+				}else if (properties.hasOwnProperty('amenity')){
+					name.push(properties['amenity'] +', ');
+				}
 				if (properties.hasOwnProperty('road')){
 					name.push(properties['road']);
 				}else if (properties.hasOwnProperty('pedestrian')){
@@ -947,7 +952,7 @@ module.exports = {
 					for (var j = 0; j < 4; j++) bbox[j] = parseFloat(bbox[j]);
 					results[i] = {
 						icon: data[i].icon,
-						name: data[i].display_name,
+						name: this.options.parseGeocoderData(data[i].address),
 						html: this.options.htmlTemplate ?
 							this.options.htmlTemplate(data[i])
 							: undefined,
