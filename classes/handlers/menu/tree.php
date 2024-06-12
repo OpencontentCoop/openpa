@@ -178,7 +178,7 @@ class OpenPATreeMenuHandler implements OpenPAMenuHandlerInterface
                     foreach ($tagRoot->getChildren() as $child){
                         $append = true;
                         if ($settings['hide_empty_tag'] && is_callable($settings['hide_empty_tag_callback'])){
-                            $append = call_user_func($settings['hide_empty_tag_callback'], $child);
+                            $append = call_user_func($settings['hide_empty_tag_callback'], $child, $rootNode);
                         }
                         if ($append) {
                             $menuItem['children'][] = [
