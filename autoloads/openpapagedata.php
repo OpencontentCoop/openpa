@@ -77,6 +77,7 @@ class OpenPAPageData
                         $data['is_search_page'] = $request['module'] == 'content' && ($request['function'] == 'search' || $request['function'] == 'advancedsearch');
                         $data['is_edit'] = $request['module'] == 'content' && $request['function'] == 'edit';
                         $data['is_browse'] = $request['module'] == 'content' && $request['function'] == 'browse';
+                        $data['is_versionview'] = $request['module'] == 'content' && $request['function'] == 'versionview';
 
                         if ($tpl->hasVariable('module_result')) {
 
