@@ -55,6 +55,7 @@ PolicyOmitList[]=openpa/loadwt
 PolicyOmitList[]=openpa/changestatedefinition
 PolicyOmitList[]=openpa/changesectiondefinition
 PolicyOmitList[]=sitemap.xml
+PolicyOmitList[]=logo
 
 [RegionalSettings]
 TranslationExtensions[]=openpa

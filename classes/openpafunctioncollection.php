@@ -1055,6 +1055,10 @@ class OpenPaFunctionCollection
             );
         }
 
+        if (OpenPAINI::variable('GeneralSettings', 'StaticLogoUrl', 'disabled') !== 'disabled') {
+            self::$headerLogo['url'] = OpenPAINI::variable('GeneralSettings', 'StaticLogoUrl', '/logo');
+        }
+
         return self::$headerLogo;
     }
 
