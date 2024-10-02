@@ -18,17 +18,31 @@ function handleLogoDownload(
         $fileSize = $file->size();
         $fileOffset = 0;
         $contentLength = $fileSize;
-        $mimeinfo = $file->dataType();
+        $mimeInfo = $file->dataType();
+        $mtime = $file->mtime();
         header("HTTP/1.1 200 OK");
         header('Cache-Control: public, must-revalidate, max-age=259200, s-maxage=259200');
-        header("Content-Type: {$mimeinfo}");
+        header("Content-Type: {$mimeInfo}");
         header("Content-Disposition: inline");
         header("Content-Length: $fileSize");
         header('Content-Transfer-Encoding: binary');
         header('Accept-Ranges: bytes');
-        header( "Pragma: " );
-        header( "Last-Modified: " );
-        header( "Expires: ". gmdate( 'D, d M Y H:i:s', time() + 600 ) . ' GMT' );
+        header("Pragma: ");
+        header("Last-Modified: " . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
+        header("Expires: " . gmdate('D, d M Y H:i:s', time() + 86400) . ' GMT');
+        header( "ETag: \"$mtime-$fileSize\"" );
+
+        if (isset($serverVariables['HTTP_IF_MODIFIED_SINCE'])) {
+            $value = $serverVariables['HTTP_IF_MODIFIED_SINCE'];
+            // strip the garbage prepended by a semicolon used by some browsers
+            if (($pos = strpos($value, ';')) !== false) {
+                $value = substr($value, 0, $pos);
+            }
+            if (strtotime($value) <= $mtime) {
+                header( "HTTP/1.1 304 Not Modified" );
+                eZExecution::cleanExit();
+            }
+        }
 
         try {
             header("HTTP/1.1 200 OK");
