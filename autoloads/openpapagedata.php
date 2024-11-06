@@ -92,6 +92,8 @@ class OpenPAPageData
 
                                 if (isset($moduleResult['content_info']['main_node_url_alias']) && $moduleResult['content_info']['main_node_url_alias']) {
                                     $data['canonical_url'] = $moduleResult['content_info']['main_node_url_alias'];
+                                } elseif (strpos(eZURI::instance()->originalURIString(), 'content/view/full') !== false) {
+                                    $data['canonical_url'] = $moduleResult['content_info']['url_alias'];
                                 }
                                 if (isset($moduleResult['content_info']['persistent_variable'])
                                     && is_array($moduleResult['content_info']['persistent_variable'])) {
