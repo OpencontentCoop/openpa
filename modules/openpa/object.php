@@ -1,4 +1,5 @@
 <?php
+
 /** @var eZModule $module */
 $module = $Params['Module'];
 $objectID = $Params['ObjectID'];
@@ -23,4 +24,14 @@ if ($objectID) {
     }
 }
 
-return $module->redirectTo($redirect);
+if ($redirect === '/') {
+    header('X-Robots-Tag: noindex, nofollow, nosnippet, noarchive');
+} else {
+//    $module->setRedirectStatus(301);
+    $canonicalUrl = $redirect;
+    eZURI::transformURI($canonicalUrl, false, 'full');
+    header('Link: <' . $canonicalUrl . '>; rel="canonical"');
+}
+
+$module->redirectTo($redirect);
+return;
