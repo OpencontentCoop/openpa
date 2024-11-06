@@ -9,13 +9,18 @@ if (OpenPAINI::variable('Seo', 'EnableRobots') == 'enabled') {
     $result .= "\n#\n";
     $currentIdentifier = OpenPABase::getCurrentSiteaccessIdentifier();
     $hostUriIniList = eZINI::instance()->variableArray('SiteAccessSettings', 'HostUriMatchMapItems');
-    foreach ($hostUriIniList as $hostUriIni){
-        if (strpos($hostUriIni[2], $currentIdentifier . '_') === 0){
+    foreach ($hostUriIniList as $hostUriIni) {
+        if (strpos($hostUriIni[2], $currentIdentifier . '_') === 0) {
             $accessSuffix = empty($hostUriIni[1]) ? '' : '/' . $hostUriIni[1];
             $result .= "
 Disallow: {$accessSuffix}/Media
 Disallow: {$accessSuffix}/user
-Disallow: {$accessSuffix}/api/opendata
+Disallow: {$accessSuffix}/api/opendata";
+            if (!in_array($accessSuffix, ['debug', 'backend'])) {
+                $result .= "
+Allow: {$accessSuffix}/opendata/api/calendar";
+            }
+            $result .= "
 Disallow: {$accessSuffix}/opendata
 Disallow: {$accessSuffix}/content/advancedsearch
 Disallow: {$accessSuffix}/content/search
@@ -23,12 +28,19 @@ Disallow: {$accessSuffix}/content/view
 Disallow: {$accessSuffix}/layout";
         }
     }
-
-    $result .="
+    $useRateLimitingRules = OpenPAINI::variable('Seo', 'RateLimitingRules', 'disabled') === 'enabled';
+    $rateLimitingRulesKeys = [
+        'Request-rate',
+        'Crawl-delay',
+        'Visit-time',
+    ];
+    if ($useRateLimitingRules) {
+        $result .= "
 Request-rate: 1/10
 Crawl-delay: 10
 Visit-time: 0000-0600
 ";
+    }
 
     $resultArray = explode("\n", $result);
     if (OpenPAINI::variable('Seo', 'DisableArchive', 'enabled') === 'enabled') {
@@ -38,8 +50,15 @@ Visit-time: 0000-0600
         $resultArray[] = "Disallow: /old";
     }
 
-    $resultArray = array_map(function($value) {
+    $resultArray = array_map(function ($value) use ($useRateLimitingRules, $rateLimitingRulesKeys) {
         $trimmed = trim($value);
+        if (!$useRateLimitingRules) {
+            foreach ($rateLimitingRulesKeys as $key) {
+                if (strpos($trimmed, $key) !== false) {
+                    $trimmed = '# ' . $trimmed;
+                }
+            }
+        }
         return empty($trimmed) ? '#' : $trimmed;
     }, $resultArray);
     $resultArray = array_unique($resultArray);
