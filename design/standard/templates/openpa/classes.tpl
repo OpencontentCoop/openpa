@@ -39,9 +39,6 @@
                 <th style="vertical-align: middle">Classe</th>
                 {if is_set( $datatype )}
                   <th style="vertical-align: middle">Attributo</th>
-                  <th style="vertical-align: middle">Obbligatorio</th>
-                  <th style="vertical-align: middle">Ricercabile</th>
-                  <th style="vertical-align: middle">Gruppo</th>
                 {/if}
                 <th style="vertical-align: middle">Descrizione</th>                
                 <th style="vertical-align: middle">Oggetti</th>
@@ -58,15 +55,30 @@
                     </a>
                 </td>
                 {if is_set( $datatype )}
-                {foreach $class.data_map as $identifier => $attribute}
-                    {if $attribute.data_type_string|eq($datatype)}
-                      <td>{$attribute.name} ({$attribute.identifier})<br /></td>
-                      <td style="text-align: center">{if $attribute.is_required}X{/if}</td>
-                      <td style="text-align: center">{if $attribute.is_searchable}X{/if}</td>
-                      <td>{if $attribute.category|eq('')}Valore predefinito{else}{$attribute.category}{/if}</td>
-                      {break}
-                    {/if}
-                {/foreach}
+                <td>
+                    <table class="list">
+                        <thead>
+                            <tr class="class {$style}">
+                                <td style="font-weight:bold;vertical-align: middle">Attributo</td>
+                                <td style="font-weight:bold;vertical-align: middle">Obbligatorio</td>
+                                <td style="font-weight:bold;vertical-align: middle">Ricercabile</td>
+                                <td style="font-weight:bold;vertical-align: middle">Gruppo</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {foreach $class.data_map as $identifier => $attribute}
+                            {if $attribute.data_type_string|eq($datatype)}
+                              <tr class="class {$style}">
+                                <td>{$attribute.name} ({$attribute.identifier})<br /></td>
+                                  <td style="text-align: center">{if $attribute.is_required}X{/if}</td>
+                                  <td style="text-align: center">{if $attribute.is_searchable}X{/if}</td>
+                                  <td>{if $attribute.category|eq('')}Valore predefinito{else}{$attribute.category}{/if}</td>
+                              </tr>
+                            {/if}
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </td>
                 {/if}                
                 <td>{$class.description}</td>
                 <td>
