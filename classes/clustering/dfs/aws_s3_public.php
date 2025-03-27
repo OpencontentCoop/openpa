@@ -1,8 +1,5 @@
 <?php
 
-use Aws\S3\S3Client as S3Client;
-use Aws\S3\Exception\S3Exception;
-
 class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abstract implements eZDFSFileHandlerDFSBackendInterface, eZDFSFileHandlerDFSBackendFactoryInterface
 {
     protected $acl = 'public-read';
@@ -47,7 +44,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 )
             );
             return true;
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -75,7 +72,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 )
             );
             return true;
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -103,7 +100,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 )
             );
             return true;
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -126,7 +123,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 'Range' => "{$startOffset}-{$length}"
             ));
             echo (string)$object['Body'];
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
         }
     }
@@ -143,7 +140,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
         try {
             $object = $this->s3client->getObject(array('Bucket' => $this->bucket, 'Key' => $filePath));
             return (string)$object['Body'];
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -162,7 +159,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
         try {
             $this->s3client->upload($this->bucket, $filePath, $contents, $this->acl);
             return true;
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -189,7 +186,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
             );
             $this->delete($oldPath);
             return true;
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -224,7 +221,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 )
             );
             return true;
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -241,7 +238,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
     {
         try {
             return $this->s3client->doesObjectExist($this->bucket, $filePath);
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
@@ -274,7 +271,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 )
             );
             return $object['ContentLength'];
-        } catch (S3Exception $e) {
+        } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             return false;
         }
