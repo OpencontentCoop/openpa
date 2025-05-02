@@ -76,7 +76,7 @@ $ViewList['classes'] = array(
 $ViewList['addlocationto'] = array(
     'functions' => array('editor_tools'),
     'script' => 'addlocationto.php',
-    'params' => array('ContentObjectID'),
+    'params' => array('ContentObjectID', 'SelectedNodeID'),
     'unordered_params' => array());
 
 //$ViewList['manage_header'] = array( 'functions' => array( 'manage_header' ),
