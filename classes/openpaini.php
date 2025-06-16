@@ -16,69 +16,69 @@ class OpenPAINI
             'attributi_contatti' => array(
                 'from' => '_full_identifier',
                 'to' => 'attribute_group.contacts',
-                'value' => 1
+                'value' => 1,
             ),
             'zero_is_content' => array(
                 'from' => '_full_identifier',
                 'to' => 'table_view.show_empty',
-                'value' => 1
+                'value' => 1,
             ),
             'AttributiNonEditabili' => array(
                 'from' => '_full_identifier',
                 'to' => 'edit_view.show',
-                'value' => 0
+                'value' => 0,
             ),
             'oggetti_senza_label' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.show_label',
-                'value' => 0
+                'value' => 0,
             ),
             'attributes_with_title' => array(
                 'from' => '_identifier',
                 'to' => 'line_view.show_label',
-                'value' => 1
+                'value' => 1,
             ),
             'attributes_to_show' => array(
                 'from' => '_identifier',
                 'to' => 'line_view.show',
-                'value' => 1
+                'value' => 1,
             ),
             'attributi_da_includere_user' => array(
                 'from' => 'user/_identifier',
                 'to' => 'table_view.show',
-                'value' => 1
+                'value' => 1,
             ),
             'attributes_to_show_politici' => array(
                 'from' => 'politico/_identifier',
                 'to' => 'table_view.show',
-                'value' => 1
+                'value' => 1,
             ),
             'attributi_da_escludere_dalla_ricerca' => array(
                 'from' => '_identifier',
                 'to' => 'search_form.show',
-                'value' => 0
+                'value' => 0,
             ),
             'attributi_da_escludere' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.show',
-                'value' => 0
+                'value' => 0,
             ),
             'attributi_event_da_escludere' => array(
                 'from' => 'event/_identifier',
                 'to' => 'table_view.show',
-                'value' => 0
+                'value' => 0,
             ),
             'attributi_da_evidenziare' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.highlight',
-                'value' => 1
+                'value' => 1,
             ),
             'attributi_senza_link' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.show_link',
-                'value' => 0
+                'value' => 0,
             ),
-        )
+        ),
     );
 
     protected static $dynamicIniData;
@@ -193,74 +193,18 @@ class OpenPAINI
                     if (file_exists($file)){
                         $result = include( $file );
                     }else{
-                        eZDebug::writeNotice("File $file not exists, regenerate", __METHOD__);
-                        $result = new eZClusterFileFailure(eZClusterFileFailure::FILE_RETRIEVAL_FAILED);
+                        eZDebug::writeNotice("File $file does not exists, regenerate", __METHOD__);
+                        $result = self::generateDynamicIniData();
                     }
 
                     return $result;
                 },
                 function (){
-                    $result = array();
-
-                    $classes = eZDB::instance()->arrayQuery(
-                        'SELECT id, identifier, serialized_name_list ' .
-                        'FROM ezcontentclass ' .
-                        'WHERE version=0'
+                    $result = self::generateDynamicIniData();
+                    return array(
+                        'content' => $result,
+                        'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER,
                     );
-                    $classAttributes = eZContentClassAttribute::fetchList(false);
-
-                    $classAttributesByClassId = array();
-                    foreach ($classAttributes as $classAttribute){
-                        $classAttributesByClassId[$classAttribute['contentclass_id']][] = $classAttribute;
-                    }
-
-                    $keyDefinitionName =  class_exists('OCClassExtraParameters') ? OCClassExtraParameters::getKeyDefinitionName() : 'key';
-
-                    foreach( OpenPAINI::$dynamicIniMap as $block => $values ){
-
-                        $result[$block] = array();
-
-                        foreach( $values as $variable => $settings ){
-
-                            [ $handler, $key ] = explode( '.', $settings['to'] );
-                            $matchValue = $settings['value'];
-
-                            $data = OCClassExtraParameters::fetchObjectList(OCClassExtraParameters::definition(),
-                                null,
-                                array(
-                                    'handler' => $handler,
-                                    $keyDefinitionName => $key,
-                                    'value' => 1
-                                )
-                            );
-
-                            $results = array();
-                            $resultPart = array();
-                            foreach( $data as $item ){
-                                $resultPart[] = $item->attribute( 'class_identifier' ) . '/' .  $item->attribute( 'attribute_identifier' );
-                            }
-
-                            if ( $matchValue == 0 ){
-                                foreach( $classes as $class ){
-                                    foreach ($classAttributesByClassId[$class['id']] as $classAttribute) {
-                                        if (!in_array($class['identifier'] . '/' . $classAttribute['identifier'], $resultPart)) {
-                                            $results[] = $class['identifier'] . '/' . $classAttribute['identifier'];
-                                        }
-                                    }
-                                }
-                            }else{
-                                $results = $resultPart;
-                            }
-
-                            $results= array_unique( $results );
-                            array_multisort( $results );
-                            $result[$block][$variable] = array_values( $results );
-
-                        }
-                    }
-
-                    return array( 'content' => $result,
-                        'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
                 }
             );
             eZDebug::accumulatorStop('dynamic_ini_map');
@@ -519,7 +463,7 @@ class OpenPAINI
                     if (!$themeIdentifierSiteData instanceof eZSiteData) {
                         $themeIdentifierSiteData = new eZSiteData(array(
                             'name' => 'Theme',
-                            'value' => ''
+                            'value' => '',
                         ));
                         $ini = eZINI::instance('openpa.ini');
                         if ($ini->hasVariable('GeneralSettings', 'theme')) {
@@ -532,7 +476,7 @@ class OpenPAINI
 
                     return array(
                         'content' => $result,
-                        'scope' => 'theme_identifier'
+                        'scope' => 'theme_identifier',
                     );
                 }
             );
@@ -551,7 +495,7 @@ class OpenPAINI
         if (!$data instanceof eZSiteData) {
             $data = new eZSiteData(array(
                 'name' => 'Theme',
-                'value' => ''
+                'value' => '',
             ));
         }
         $data->setAttribute('value', $value);
@@ -583,7 +527,7 @@ class OpenPAINI
 
                     return array(
                         'content' => $result,
-                        'scope' => 'cache'
+                        'scope' => 'cache',
                     );
                 }
             );
@@ -679,7 +623,7 @@ class OpenPAINI
 
             $siteData = new eZSiteData(array(
                 'name' => 'SeoSettings',
-                'value' => json_encode($data)
+                'value' => json_encode($data),
             ));
             $siteData->store();
         }
@@ -702,5 +646,69 @@ class OpenPAINI
         }
 
         return false;
+    }
+
+    private static function generateDynamicIniData(): array
+    {
+        $result = array();
+
+        $classes = eZDB::instance()->arrayQuery(
+            'SELECT id, identifier, serialized_name_list ' .
+            'FROM ezcontentclass ' .
+            'WHERE version=0'
+        );
+        $classAttributes = eZContentClassAttribute::fetchList(false);
+
+        $classAttributesByClassId = array();
+        foreach ($classAttributes as $classAttribute){
+            $classAttributesByClassId[$classAttribute['contentclass_id']][] = $classAttribute;
+        }
+
+        $keyDefinitionName =  class_exists('OCClassExtraParameters') ? OCClassExtraParameters::getKeyDefinitionName() : 'key';
+
+        foreach( OpenPAINI::$dynamicIniMap as $block => $values ){
+
+            $result[$block] = array();
+
+            foreach( $values as $variable => $settings ){
+
+                [ $handler, $key ] = explode( '.', $settings['to'] );
+                $matchValue = $settings['value'];
+
+                $data = OCClassExtraParameters::fetchObjectList(OCClassExtraParameters::definition(),
+                    null,
+                    array(
+                        'handler' => $handler,
+                        $keyDefinitionName => $key,
+                        'value' => 1,
+                    )
+                );
+
+                $results = array();
+                $resultPart = array();
+                foreach( $data as $item ){
+                    $resultPart[] = $item->attribute( 'class_identifier' ) . '/' .  $item->attribute( 'attribute_identifier' );
+                }
+
+                if ( $matchValue == 0 ){
+                    foreach( $classes as $class ){
+                        foreach ($classAttributesByClassId[$class['id']] as $classAttribute) {
+                            if (!in_array($class['identifier'] . '/' . $classAttribute['identifier'], $resultPart)) {
+                                $results[] = $class['identifier'] . '/' . $classAttribute['identifier'];
+                            }
+                        }
+                    }
+                }else{
+                    $results = $resultPart;
+                }
+
+                $results= array_unique( $results );
+                array_multisort( $results );
+                $result[$block][$variable] = array_values( $results );
+
+            }
+        }
+
+        return $result;
     }
 }
