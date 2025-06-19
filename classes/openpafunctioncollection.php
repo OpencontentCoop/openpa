@@ -997,6 +997,49 @@ class OpenPaFunctionCollection
         return $result;
     }
 
+    private static function generateHeaderLogo(): array
+    {
+        $result = array();
+        $homePage = OpenPaFunctionCollection::fetchHome();
+        if ($homePage->attribute('class_identifier') == 'homepage') {
+            $headerObject = $homePage->attribute('object');
+            if ($headerObject instanceof eZContentObject) {
+                /** @var eZContentObjectAttribute[] $dataMap */
+                $dataMap = $headerObject->attribute('data_map');
+                if (isset($dataMap['logo'])
+                    && $dataMap['logo'] instanceof eZContentObjectAttribute
+                    && $dataMap['logo']->attribute('has_content')) {
+                    /** @var eZImageAliasHandler $content */
+                    $content = $dataMap['logo']->attribute('content');
+                    if ($content instanceof eZImageAliasHandler) {
+                        $result = $content->attribute('header_logo');
+                    }
+                }
+            }
+        } else {
+            $headerObject = eZContentObject::fetchByRemoteID(OpenPaFunctionCollection::$remoteLogo);
+            if ($headerObject instanceof eZContentObject) {
+                /** @var eZContentObjectAttribute[] $dataMap */
+                $dataMap = $headerObject->attribute('data_map');
+                if (isset($dataMap['image'])
+                    && $dataMap['image'] instanceof eZContentObjectAttribute
+                    && $dataMap['image']->attribute('has_content')) {
+                    /** @var eZImageAliasHandler $content */
+                    $content = $dataMap['image']->attribute('content');
+                    if ($content instanceof eZImageAliasHandler) {
+                        $result = $content->attribute('header_logo');
+                    }
+                }
+            }
+        }
+
+        if (empty($result)) {
+            $result = array('url' => false);
+        }
+
+        return $result;
+    }
+
     public static function fetchHeaderLogo()
     {
         if (self::$headerLogo === null) {
@@ -1007,44 +1050,23 @@ class OpenPaFunctionCollection
                 },
                 function () {
                     eZDebug::writeNotice("Regenerate header_logo cache", 'OpenPaFunctionCollection::fetchHeaderLogo');
-                    $result = array();
-                    $homePage = OpenPaFunctionCollection::fetchHome();
-                    if ($homePage->attribute('class_identifier') == 'homepage') {
-                        $headerObject = $homePage->attribute('object');
-                        if ($headerObject instanceof eZContentObject) {
-                            /** @var eZContentObjectAttribute[] $dataMap */
-                            $dataMap = $headerObject->attribute('data_map');
-                            if (isset($dataMap['logo'])
-                                && $dataMap['logo'] instanceof eZContentObjectAttribute
-                                && $dataMap['logo']->attribute('has_content')) {
-                                /** @var eZImageAliasHandler $content */
-                                $content = $dataMap['logo']->attribute('content');
-                                if ($content instanceof eZImageAliasHandler) {
-                                    $result = $content->attribute('header_logo');
-                                }
-                            }
-                        }
-                    } else {
-                        $headerObject = eZContentObject::fetchByRemoteID(OpenPaFunctionCollection::$remoteLogo);
-                        if ($headerObject instanceof eZContentObject) {
-                            /** @var eZContentObjectAttribute[] $dataMap */
-                            $dataMap = $headerObject->attribute('data_map');
-                            if (isset($dataMap['image'])
-                                && $dataMap['image'] instanceof eZContentObjectAttribute
-                                && $dataMap['image']->attribute('has_content')) {
-                                /** @var eZImageAliasHandler $content */
-                                $content = $dataMap['image']->attribute('content');
-                                if ($content instanceof eZImageAliasHandler) {
-                                    $result = $content->attribute('header_logo');
-                                }
-                            }
-                        }
-                    }
+                    $result = self::generateHeaderLogo();
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache',
+                        'datatype' => 'php',
+                        'store' => true
+                    );
+                }
+            );
+        }
 
-                    if (empty($result)) {
-                        $result = array('url' => false);
-                    }
-
+        if (self::$headerLogo instanceof eZClusterFileFailure) {
+            self::$headerLogo = OpenPAPageData::getHeaderLogoCache()->processCache(
+                null,
+                function () {
+                    eZDebug::writeWarning("Force regenerate header_logo cache", 'OpenPaFunctionCollection::fetchHeaderLogo');
+                    $result = self::generateHeaderLogo();
                     return array(
                         'content' => $result,
                         'scope' => 'cache',
