@@ -207,6 +207,18 @@ class OpenPAINI
                     );
                 }
             );
+            if (self::$dynamicIniData instanceof eZClusterFileFailure){
+                self::$dynamicIniData = eZClusterFileHandler::instance( self::dynamicIniCachePath() )->processCache(
+                    null,
+                    function (){
+                        $result = self::generateDynamicIniData();
+                        return array(
+                            'content' => $result,
+                            'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER,
+                        );
+                    }
+                );
+            }
             eZDebug::accumulatorStop('dynamic_ini_map');
         }
     }
@@ -447,6 +459,24 @@ class OpenPAINI
         self::clearDynamicIniCache();
     }
 
+    private static function generateThemeIdentifier()
+    {
+        $themeIdentifierSiteData = eZSiteData::fetchByName('Theme');
+        if (!$themeIdentifierSiteData instanceof eZSiteData) {
+            $themeIdentifierSiteData = new eZSiteData(array(
+                'name' => 'Theme',
+                'value' => '',
+            ));
+            $ini = eZINI::instance('openpa.ini');
+            if ($ini->hasVariable('GeneralSettings', 'theme')) {
+                $themeIdentifier = $ini->variable('GeneralSettings', 'theme');
+                $themeIdentifierSiteData->setAttribute('value', $themeIdentifier);
+                $themeIdentifierSiteData->store();
+            }
+        }
+        return $themeIdentifierSiteData->attribute('value');
+    }
+
     private static function getThemeIdentifier($default)
     {
         if (self::$themeIdentifier === null) {
@@ -459,27 +489,24 @@ class OpenPAINI
                     return $result;
                 },
                 function () {
-                    $themeIdentifierSiteData = eZSiteData::fetchByName('Theme');
-                    if (!$themeIdentifierSiteData instanceof eZSiteData) {
-                        $themeIdentifierSiteData = new eZSiteData(array(
-                            'name' => 'Theme',
-                            'value' => '',
-                        ));
-                        $ini = eZINI::instance('openpa.ini');
-                        if ($ini->hasVariable('GeneralSettings', 'theme')) {
-                            $themeIdentifier = $ini->variable('GeneralSettings', 'theme');
-                            $themeIdentifierSiteData->setAttribute('value', $themeIdentifier);
-                            $themeIdentifierSiteData->store();
-                        }
-                    }
-                    $result = $themeIdentifierSiteData->attribute('value');
-
                     return array(
-                        'content' => $result,
+                        'content' => self::generateThemeIdentifier(),
                         'scope' => 'theme_identifier',
                     );
                 }
             );
+
+            if (self::$themeIdentifier instanceof eZClusterFileFailure) {
+                self::$themeIdentifier = OpenPAPageData::getThemeIdentifierCache()->processCache(
+                    null,
+                    function () {
+                        return array(
+                            'content' => self::generateThemeIdentifier(),
+                            'scope' => 'theme_identifier',
+                        );
+                    }
+                );
+            }
 
             if (empty(self::$themeIdentifier) || self::$themeIdentifier instanceof eZClusterFileFailure){
                 self::$themeIdentifier = $default;
@@ -524,13 +551,34 @@ class OpenPAINI
                     } else {
                         $result = json_decode($siteData->attribute('value'), true);
                     }
-
                     return array(
                         'content' => $result,
                         'scope' => 'cache',
                     );
                 }
             );
+        }
+
+        if (self::$seoData instanceof eZClusterFileFailure){
+            self::$seoData = OpenPAPageData::getSeoCache()->processCache(
+                null,
+                function () {
+                    $siteData = eZSiteData::fetchByName('SeoSettings');
+                    if (!$siteData instanceof eZSiteData) {
+                        $result = self::generateSeoData();
+                    } else {
+                        $result = json_decode($siteData->attribute('value'), true);
+                    }
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache',
+                    );
+                }
+            );
+        }
+
+        if (empty(self::$seoData) || self::$seoData instanceof eZClusterFileFailure){
+            self::$seoData = [];
         }
 
         if (self::isSeoDisabledByHostname()) {
