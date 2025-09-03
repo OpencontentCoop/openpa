@@ -98,6 +98,7 @@ class OpenPAINI
         'Seo::metaDescription',
         'Seo::metaKeywords',
         'Seo::webAnalyticsItaliaID',
+        'Seo::webAnalyticsItaliaSiteID',
         'GeneralSettings::valutation',
         'GeneralSettings::theme',
         'CreditsSettings::CodeVersion',
@@ -286,6 +287,10 @@ class OpenPAINI
                 $result = self::getSeoData()['webAnalyticsItaliaID'];
                 break;
 
+            case 'Seo::webAnalyticsItaliaSiteID':
+                $result = self::getSeoData()['webAnalyticsItaliaSiteID'];
+                break;
+
             case 'Seo::WebAnalyticsItaliaCookieless':
                 $result = self::getSeoData()['WebAnalyticsItaliaCookieless'];
                 break;
@@ -402,7 +407,7 @@ class OpenPAINI
                     return self::setSeoData('webAnalyticsItaliaID', $value);
                     break;
 
-                    case 'Seo::webAnalyticsItaliaSiteID':
+                case 'Seo::webAnalyticsItaliaSiteID':
                     return self::setSeoData('webAnalyticsItaliaSiteID', $value);
                     break;
 
