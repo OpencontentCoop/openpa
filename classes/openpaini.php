@@ -402,6 +402,10 @@ class OpenPAINI
                     return self::setSeoData('webAnalyticsItaliaID', $value);
                     break;
 
+                    case 'Seo::webAnalyticsItaliaSiteID':
+                    return self::setSeoData('webAnalyticsItaliaSiteID', $value);
+                    break;
+
                 case 'GeneralSettings::theme':
                     self::setThemeIdentifier($value);
 
@@ -626,6 +630,7 @@ class OpenPAINI
             'metaDescription' => false,
             'metaKeywords' => false,
             'webAnalyticsItaliaID' => '',
+            'webAnalyticsItaliaSiteID' => '',
             'GoogleCookieless' => 'disabled',
             'WebAnalyticsItaliaCookieless' => 'disabled',
             'CookieConsentMultimedia' => 'enabled',

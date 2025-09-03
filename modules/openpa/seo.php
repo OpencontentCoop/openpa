@@ -65,6 +65,11 @@ if ($http->hasPostVariable('StoreSeo')) {
         OpenPAINI::set("Seo", "webAnalyticsItaliaID", $googleID);
     }
 
+    if ($http->hasPostVariable('WebAnalyticsItaliaSiteID')) {
+        $googleID = trim($http->postVariable('WebAnalyticsItaliaSiteID'));
+        OpenPAINI::set("Seo", "webAnalyticsItaliaSiteID", $googleID);
+    }
+
     if ($http->hasPostVariable('WebAnalyticsItaliaCookieless')) {
         OpenPAINI::set("Seo", "WebAnalyticsItaliaCookieless", 'enabled');
     }else{
@@ -112,6 +117,7 @@ $tpl->setVariable('isRobotsTextDefault', $robotsTextDefault);
 $tpl->setVariable('googleTagManagerID', OpenPAINI::variable('Seo', 'GoogleTagManagerID', false));
 $tpl->setVariable('googleSiteVerificationID', OpenPAINI::variable('Seo', 'GoogleSiteVerificationID', false));
 $tpl->setVariable('webAnalyticsItaliaId', OpenPAINI::variable('Seo', 'webAnalyticsItaliaID', false));
+$tpl->setVariable('webAnalyticsItaliaSiteId', OpenPAINI::variable('Seo', 'webAnalyticsItaliaSiteID', false));
 $tpl->setVariable('googleCookieless', OpenPAINI::variable('Seo', 'GoogleCookieless', 'disabled'));
 $tpl->setVariable('webAnalyticsItaliaCookieless', OpenPAINI::variable('Seo', 'WebAnalyticsItaliaCookieless', 'disabled'));
 if (OpenPAINI::variable('CookiesSettings', 'Consent', 'simple') == 'advanced') {
