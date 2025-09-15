@@ -121,6 +121,12 @@ class OpenPAObjectTools
         $newDataMap = $newObject->attribute('data_map');
         foreach ($newDataMap as $identifier => $attribute) {
             if ($attribute instanceof eZContentObjectAttribute) {
+                if ($attribute->attribute('data_type_string') == eZIdentifierType::DATA_TYPE_STRING) {
+                    $attribute->setAttribute('data_int', 0);
+                    $attribute->setAttribute('data_text', '');
+                    $attribute->store();
+                    $attribute->dataType()->assignValue($attribute->contentClassAttribute(), $attribute);
+                }
                 if ($attribute->attribute('data_type_string') == 'ezimage') {
                     $attribute->setAttribute("data_text", '');
                     if (isset($dataMap[$identifier])) {
