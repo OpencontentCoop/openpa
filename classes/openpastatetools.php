@@ -67,7 +67,7 @@ class OpenPAStateTools
                 'ClassFilterArray' => array($classIdentifier),
                 'MainNodeOnly' => true,
                 'LoadDataMap' => false,
-                'Limitation' => array()
+                'Limitation' => array(),
             ), 1
             );
 
@@ -182,7 +182,7 @@ class OpenPAStateTools
         if (!$siteData instanceof eZSiteData) {
             $siteData = new eZSiteData([
                 'name' => 'changestatesettings',
-                'value' => ''
+                'value' => '',
             ]);
         }
         $siteData->setAttribute('value', json_encode($data));
@@ -250,7 +250,7 @@ class OpenPAStateTools
             if (!$siteData instanceof eZSiteData) {
                 $siteData = new eZSiteData([
                     'name' => 'changestatesettings',
-                    'value' => ''
+                    'value' => '',
                 ]);
             }
             $siteData->setAttribute('value', $data);
@@ -277,7 +277,7 @@ class OpenPAStateTools
         if (!$siteData instanceof eZSiteData) {
             $siteData = new eZSiteData([
                 'name' => 'changestatesettings_backup',
-                'value' => ''
+                'value' => '',
             ]);
         }
         $siteData->setAttribute('value', $data);
@@ -290,7 +290,7 @@ class OpenPAStateTools
         if (!$siteData instanceof eZSiteData) {
             $siteData = new eZSiteData([
                 'name' => 'changestatesettings',
-                'value' => ''
+                'value' => '',
             ]);
         }
         $siteData->setAttribute('value', json_encode(self::getRulesFromBackendIni()));
@@ -352,7 +352,7 @@ class OpenPAStateTools
             if (!$siteData instanceof eZSiteData) {
                 $siteData = new eZSiteData([
                     'name' => 'changestatesettings',
-                    'value' => json_encode(self::getRulesFromBackendIni())
+                    'value' => json_encode(self::getRulesFromBackendIni()),
                 ]);
                 $siteData->store();
             }
@@ -408,31 +408,56 @@ class OpenPAStateTools
     {
         if ($this->log) $this->notice("{$this->currentObject->attribute( 'class_identifier' )} Oggetto #{$this->currentObject->attribute( 'id' )} - {$this->currentObject->attribute( 'name' )}");
         if (isset($this->rules[$this->currentObject->attribute('class_identifier')])) {
+            $realCurrentStateIdentifiers = implode(', ', $this->currentObject->attribute('state_identifier_array'));
+            if ($this->log) $this->notice(" - L'oggetto è in stato $realCurrentStateIdentifiers");
+            $assignStates = [];
             foreach ($this->rules[$this->currentObject->attribute('class_identifier')] as $ruleIdentifier => $ruleSettings) {
-                $this->runCurrentChangeObjectStateRule($ruleIdentifier, $ruleSettings);
+                $state = $this->runCurrentChangeObjectStateRule($ruleIdentifier, $ruleSettings);
+                if ($state instanceof eZContentObjectState) {
+                    $assignStates[$state->attribute('group_id')] = $state;
+                }
+            }
+            if (!empty($assignStates)) {
+                $stateIdentifiers = $this->assignStatesToObject($this->currentObject, $assignStates);
+                $relatedChanges = $this->changeCurrentObjectRelatedFilesStates($assignStates);
+                //$this->registerChangeState($toState, $ruleIdentifier, $relatedChanges); @todo: gestire più stati
+                $this->flushCurrentObject();
+                if ($this->log && !empty($stateIdentifiers)) $this->warning(" - Aggiornamento stato a {$stateIdentifiers}");
             }
         }
+    }
+
+    private function assignStatesToObject(eZContentObject $object, array $states): string
+    {
+        $identifiers = [];
+        foreach ($states as $state) {
+            if ($object->assignState($state)){
+                $identifiers[] = $state->attribute('group')->attribute('identifier') . '/' . $state->attribute('identifier');
+            }
+        }
+
+        return implode(', ', $identifiers);
     }
 
     private function runCurrentChangeObjectStateRule($ruleIdentifier, $ruleSettings)
     {
         // stato corrente
-        $isInRuleCurrentState = true;
-        $currentStateIdentifier = $ruleSettings['CurrentState'];
-        if ($this->log) $this->notice("[$ruleIdentifier]");
-        try {
-            $currentState = self::getState($currentStateIdentifier);
-        } catch (Exception $e) {
-            eZDebug::writeError($e->getMessage(), __METHOD__);
-            if ($this->log) $this->error(" - " . $e->getMessage());
-            return false;
-        }
-        if (!in_array($currentState->attribute('id'), $this->currentObject->attribute('state_id_array'))) {
-            $realCurrentStateIdentifiers = implode(', ', $this->currentObject->attribute('state_identifier_array'));
-            if ($this->log) $this->notice(" - L'oggetto non è in stato corrente $currentStateIdentifier ma in $realCurrentStateIdentifiers");
-            //$isInRuleCurrentState = false;
-            return false;
-        }
+//        $isInRuleCurrentState = true;
+//        $currentStateIdentifier = $ruleSettings['CurrentState'];
+//        if ($this->log) $this->notice("[$ruleIdentifier]");
+//        try {
+//            $currentState = self::getState($currentStateIdentifier);
+//        } catch (Exception $e) {
+//            eZDebug::writeError($e->getMessage(), __METHOD__);
+//            if ($this->log) $this->error(" - " . $e->getMessage());
+//            return false;
+//        }
+//        if (!in_array($currentState->attribute('id'), $this->currentObject->attribute('state_id_array'))) {
+//            $realCurrentStateIdentifiers = implode(', ', $this->currentObject->attribute('state_identifier_array'));
+//            if ($this->log) $this->notice(" - L'oggetto non è in stato corrente $currentStateIdentifier ma in $realCurrentStateIdentifiers");
+//            //$isInRuleCurrentState = false;
+//            return false;
+//        }
 
         // stato futuro
         $isInRuleDestinationState = false;
@@ -444,20 +469,22 @@ class OpenPAStateTools
             if ($this->log) $this->error(" - " . $e->getMessage());
             return false;
         }
-        if (in_array($destinationState->attribute('id'), $this->currentObject->attribute('state_id_array'))) {
-            if ($this->log) $this->notice(" - L'oggetto è già in stato destinazione $destinationStateIdentifier");
-            //$isInRuleDestinationState = true;
-            return false;
-        }
+//        if (in_array($destinationState->attribute('id'), $this->currentObject->attribute('state_id_array'))) {
+//            if ($this->log) $this->notice(" - L'oggetto è già in stato destinazione $destinationStateIdentifier");
+//            //$isInRuleDestinationState = true;
+//            return false;
+//        }
 
         // condizioni
         $passValidations = true;
         foreach ($ruleSettings['Conditions'] as $condition) {
-            if ($this->log) $this->notice(" - $condition ", false);
+            if ($this->log) $this->notice("$ruleIdentifier - $condition ", false);
             $pass = $this->verifyConditionForCurrentObject($condition);
-            if ($this->log) $this->notice('Condizione: ' . var_export($pass, 1));
             if (!$pass) {
+                if ($this->log) $this->notice('Condizione: ' . var_export($pass, 1));
                 $passValidations = false;
+            } else {
+                if ($this->log) $this->notice('Condizione: ' . var_export($pass, 1) . ' -> ' . $destinationStateIdentifier);
             }
         }
 
@@ -465,25 +492,13 @@ class OpenPAStateTools
             return false;
         }
 
-        $toState = null;
-        if ($passValidations && $isInRuleCurrentState && !$isInRuleDestinationState) {
-            $toState = $destinationState;
-        } /*elseif (!$passValidations && !$isInRuleCurrentState && $isInRuleDestinationState) {
-            $toState = $currentState;
-        }*/
-
-        if ($toState instanceof eZContentObjectState) {
-            $this->currentObject->assignState($toState);
-            $relatedChanges = $this->changeCurrentObjectRelatedFilesState($toState);
-            $this->registerChangeState($toState, $ruleIdentifier, $relatedChanges);
-            $this->flushCurrentObject();
-            if ($this->log) $this->warning(" - Aggiornamento stato a {$toState->attribute('identifier')}");
-            return true;
+        if ($destinationState instanceof eZContentObjectState) {
+            return $destinationState;
         }
         return false;
     }
 
-    private function changeCurrentObjectRelatedFilesState(eZContentObjectState $state)
+    private function changeCurrentObjectRelatedFilesStates(array $states)
     {
         $relatedChanges = [];
         $dataMap = $this->currentObject->dataMap();
@@ -493,9 +508,9 @@ class OpenPAStateTools
                 $objectList = OpenPABase::fetchObjects($idList);
                 foreach ($objectList as $object){
                     if (in_array($object->attribute('class_identifier'), ['file', 'file_pdf'])){
-                        $object->assignState($state);
+                        $stateIdentifiers = $this->assignStatesToObject($object, $states);
                         $this->flushObject($object);
-                        if ($this->log) $this->warning(" - Aggiornamento stato a {$state->attribute('identifier')} per oggetto correlato #" . $object->attribute('id'));
+                        if ($this->log && !empty($stateIdentifiers)) $this->warning(" - Aggiornamento stato a {$stateIdentifiers} per oggetto correlato #" . $object->attribute('id'));
                         $relatedChanges[] = $object->attribute('id');
                     }
                 }
@@ -534,10 +549,13 @@ class OpenPAStateTools
 
     private function flushObject(eZContentObject $object)
     {
+        $object->resetDataMap();
         eZContentObject::clearCache(array($object->attribute('id')));
         $object = eZContentObject::fetch($object->attribute('id'));
         eZContentOperationCollection::registerSearchObject($object->attribute('id'));
         eZContentCacheManager::clearContentCacheIfNeeded($object->attribute('id'));
+        $object->resetDataMap();
+        eZContentObject::clearCache(array($object->attribute('id')));
     }
 
 
@@ -609,7 +627,7 @@ class OpenPAStateTools
 
     private static function parseCondition($conditionSetting)
     {
-        list($attributeIdentifier, $operator, $string) = explode(';', $conditionSetting);
+        [$attributeIdentifier, $operator, $string] = explode(';', $conditionSetting);
         if (!isset($attributeIdentifier, $operator, $string)) {
             throw new Exception("Parametri non sufficienti in $conditionSetting");
         }
@@ -621,7 +639,7 @@ class OpenPAStateTools
         return array(
             'attribute' => $attributeIdentifier,
             'operator' => $operator,
-            'value' => $string
+            'value' => $string,
         );
     }
 
