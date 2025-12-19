@@ -78,7 +78,12 @@ class OpenPAStateTools
                     $index++;
                     if ($this->log) $this->output("$index/$count ", false);
                     $this->changeState($currentNode->object());
-                    if ($this->log) $this->output();
+                    if ($this->log) {
+                        $memoryMax = memory_get_peak_usage(); // Result is in bytes
+                        $memoryMax = round($memoryMax / 1024 / 1024, 2); // Convert in Megabytes
+                        $this->output('Memory: ' . $memoryMax . 'M');
+                        $this->output();
+                    }
                     if ($this->wait > 0) {
                         sleep($this->wait);
                     }
@@ -110,6 +115,15 @@ class OpenPAStateTools
         if ($currentObject instanceof eZContentObject) {
             $this->currentObject = $currentObject;
             $this->changeCurrentObjectState();
+
+            $this->currentObject->resetDataMap();
+            eZContentObject::clearCache();
+            global $eZContentObjectContentObjectCache;
+            unset($eZContentObjectContentObjectCache);
+            global $eZContentObjectDataMapCache;
+            unset($eZContentObjectDataMapCache);
+            unset($this->currentObject);
+            unset($currentObject);
         }
     }
 
@@ -534,10 +548,13 @@ class OpenPAStateTools
 
     private function flushObject(eZContentObject $object)
     {
+        $object->resetDataMap();
         eZContentObject::clearCache(array($object->attribute('id')));
         $object = eZContentObject::fetch($object->attribute('id'));
         eZContentOperationCollection::registerSearchObject($object->attribute('id'));
         eZContentCacheManager::clearContentCacheIfNeeded($object->attribute('id'));
+        $object->resetDataMap();
+        eZContentObject::clearCache(array($object->attribute('id')));
     }
 
 
