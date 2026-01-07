@@ -53,7 +53,7 @@ class OpenPABase
                 $siteaccess[$file['name']] = $file['name'];
             }
         }
-        array_unique( $siteaccess );
+        $siteaccess = array_unique( $siteaccess );
         sort( $siteaccess );
         return $siteaccess;
     }

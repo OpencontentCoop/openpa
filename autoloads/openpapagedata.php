@@ -89,10 +89,10 @@ class OpenPAPageData
 
                             $data['ui_context'] = $moduleResult['ui_context'];
                             if (isset($moduleResult['content_info'])) {
-
+                                
                                 if (isset($moduleResult['content_info']['main_node_url_alias']) && $moduleResult['content_info']['main_node_url_alias']) {
                                     $data['canonical_url'] = $moduleResult['content_info']['main_node_url_alias'];
-                                } elseif (strpos(eZURI::instance()->originalURIString(), 'content/view/full') !== false) {
+                                } elseif (isset($moduleResult['content_info']['url_alias'])) {
                                     $data['canonical_url'] = $moduleResult['content_info']['url_alias'];
                                 }
                                 if (isset($moduleResult['content_info']['persistent_variable'])
@@ -167,7 +167,6 @@ class OpenPAPageData
                         $data['uri_prefix'] = rtrim($uriPrefix, '/') . '/';
 
                         self::$openpaContextData = $data;
-
                         eZDebug::appendBottomReport('OpenPA Pagedata', array('OpenPAPageData', 'printDebugReport'));
                     }
 
