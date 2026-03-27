@@ -217,7 +217,7 @@ class OpenPAStateTools
      */
     public static function validateRuleDefinition($ruleSettings)
     {
-        self::getState($ruleSettings['CurrentState']);
+        self::getState($ruleSettings['CurrentState'], true);
         self::getState($ruleSettings['DestinationState']);
         if (!empty((array)$ruleSettings['Conditions'])) {
             foreach ($ruleSettings['Conditions'] as $conditionSetting) {
@@ -401,8 +401,11 @@ class OpenPAStateTools
      * @return bool|eZContentObjectState|null
      * @throws Exception
      */
-    private static function getState($identifier)
+    private static function getState($identifier, $allowWildcards = false)
     {
+        if ($identifier === '*' && $allowWildcards) {
+            return true;
+        }
         @list($groupIdentifier, $stateIdentifier) = explode('.', $identifier);
 
         $stateObject = null;
@@ -435,13 +438,13 @@ class OpenPAStateTools
         $currentStateIdentifier = $ruleSettings['CurrentState'];
         if ($this->log) $this->notice("[$ruleIdentifier]");
         try {
-            $currentState = self::getState($currentStateIdentifier);
+            $currentState = self::getState($currentStateIdentifier, true);
         } catch (Exception $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
             if ($this->log) $this->error(" - " . $e->getMessage());
             return false;
         }
-        if (!in_array($currentState->attribute('id'), $this->currentObject->attribute('state_id_array'))) {
+        if ($currentStateIdentifier !== '*' && !in_array($currentState->attribute('id'), $this->currentObject->attribute('state_id_array'))) {
             $realCurrentStateIdentifiers = implode(', ', $this->currentObject->attribute('state_identifier_array'));
             if ($this->log) $this->notice(" - L'oggetto non è in stato corrente $currentStateIdentifier ma in $realCurrentStateIdentifiers");
             //$isInRuleCurrentState = false;
