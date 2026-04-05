@@ -7,6 +7,7 @@ class OpenPABlockHandler extends OpenPATempletizable
 
     protected $currentCustomAttributes;
 
+    /** @phpstan-ignore constructor.unusedParameter */
     public function __construct( eZPageBlock $block, $params = array() )
     {
         $this->currentBlock = $block;

@@ -14,6 +14,7 @@ class OpenPADFSFileHandlerDFSLocal implements eZDFSFileHandlerDFSBackendInterfac
 
     public static function build()
     {
+        // @phpstan-ignore new.static
         return new static();
     }
 
@@ -44,12 +45,14 @@ class OpenPADFSFileHandlerDFSLocal implements eZDFSFileHandlerDFSBackendInterfac
 
     public function delete($filePath)
     {
+        // @phpstan-ignore return.missing
         $this->handler->fileDelete($filePath);
     }
 
     public function passthrough($filePath, $startOffset = 0, $length = false)
     {
         $handler = new eZFSFileHandler($filePath);
+        // @phpstan-ignore return.missing
         $handler->passthrough($startOffset, $length);
     }
 

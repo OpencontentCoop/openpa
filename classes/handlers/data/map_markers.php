@@ -68,6 +68,7 @@ class DataHandlerMapMarkers implements OpenPADataHandlerInterface
                 $data = array( 'content' => '<em>Private</em>' );
             }
         }
+        // @phpstan-ignore variable.undefined
         return $data;
     }
 }

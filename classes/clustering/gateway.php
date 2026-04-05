@@ -1,5 +1,6 @@
 <?php
 
+// @phpstan-ignore require.fileNotFound
 require 'autoload.php';
 
 class OpenPADFSGateway extends ezpDfsPostgresqlClusterGateway

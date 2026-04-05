@@ -69,6 +69,7 @@ class OpenPADFSFileHandlerDFSLogged implements eZDFSFileHandlerDFSBackendInterfa
 
     public function passthrough($filePath, $startOffset = 0, $length = false)
     {
+        // @phpstan-ignore return.missing
         $this->backendImplementation->passthrough($filePath, $startOffset, $length);
     }
 

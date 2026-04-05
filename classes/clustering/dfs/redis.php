@@ -47,6 +47,7 @@ class OpenPADFSFileHandlerDFSRedis implements eZDFSFileHandlerDFSBackendInterfac
             count($options) ? $options : null
         );
 
+        // @phpstan-ignore new.static
         return new static($redisClient, $isCluster);
     }
 
@@ -82,6 +83,7 @@ class OpenPADFSFileHandlerDFSRedis implements eZDFSFileHandlerDFSBackendInterfac
 
     public function copyToDFS($srcFilePath, $dstFilePath = false)
     {
+        // @phpstan-ignore return.missing
         try {
             $path = $dstFilePath ?: $srcFilePath;
             $this->redisClient->set($path, file_get_contents($srcFilePath));
@@ -92,6 +94,7 @@ class OpenPADFSFileHandlerDFSRedis implements eZDFSFileHandlerDFSBackendInterfac
 
     public function passthrough($filePath, $startOffset = 0, $length = false)
     {
+        // @phpstan-ignore return.missing
         try {
             echo $this->redisClient->get($filePath);
         } catch (PredisException $e) {
@@ -137,6 +140,7 @@ class OpenPADFSFileHandlerDFSRedis implements eZDFSFileHandlerDFSBackendInterfac
 
     public function delete($filePath)
     {
+        // @phpstan-ignore return.missing
         try {
             $this->redisClient->del($filePath);
         } catch (PredisException $e) {
