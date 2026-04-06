@@ -78,6 +78,7 @@ class OpenPALegacyRSSHandler extends LegacyRSSHandler
         }
         $result = array();
         // @phpstan-ignore isset.variable
+        // @phpstan-ignore isset.variable
         if ( isset( $subtree ) && isset( $classes ) )
         {
             $params = array(
