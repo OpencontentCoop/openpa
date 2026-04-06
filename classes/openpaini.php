@@ -504,7 +504,6 @@ class OpenPAINI
                         'scope' => 'theme_identifier',
                     );
                 }
-            // @phpstan-ignore variable.undefined
             );
 
             if (self::$themeIdentifier instanceof eZClusterFileFailure) {
@@ -563,9 +562,7 @@ class OpenPAINI
                     } else {
                         $result = json_decode($siteData->attribute('value'), true);
                     }
-                    // @phpstan-ignore variable.undefined
                     return array(
-                        // @phpstan-ignore variable.undefined
                         'content' => $result,
                         'scope' => 'cache',
                     );

@@ -280,7 +280,6 @@ class OpenPADFSFileHandlerDFSAWSDynamoDb implements eZDFSFileHandlerDFSBackendIn
     public function getFilesList($basePath)
     {
         // @phpstan-ignore return.missing
-    // @phpstan-ignore return.missing
         // TODO: Implement getFilesList() method.
     }
 

@@ -130,7 +130,6 @@ class CustomBlockFinder
                                         $includeClasses = false;
                                         $excludeClasses = false;                                        
                                         // @phpstan-ignore property.notFound
-        // @phpstan-ignore property.notFound
                                         if ( isset( $customAttributes[$this->customAttributeInclude] ) && !empty( $customAttributes[$this->customAttributeInclude] ) )
                                         {
                                             // @phpstan-ignore property.notFound
@@ -138,7 +137,6 @@ class CustomBlockFinder
                                         }
                                         // @phpstan-ignore property.notFound
                                         elseif ( isset( $customAttributes[$this->customAttributeExclude] ) && !empty( $customAttributes[$this->customAttributeExclude] ) )
-        // @phpstan-ignore property.notFound
                                         {
                                             // @phpstan-ignore property.notFound
                                             $excludeClasses = $customAttributes[$this->customAttributeExclude];

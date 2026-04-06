@@ -44,13 +44,11 @@ class ObjectRelationFilterAndInv
 		$db =& eZDB::instance();
 		$result=$db->arrayQuery("select distinct from_contentobject_id as id from ezcontentobject_link, ezcontentobject
      // @phpstan-ignore variable.undefined
-        // @phpstan-ignore variable.undefined
 					where current_version=from_contentobject_version AND ezcontentobject.id=ezcontentobject_link.from_contentobject_id AND $sqlCondTo");
 
 		$sql = "select distinct from_contentobject_id from ezcontentobject_link, ezcontentobject
                                                 // @phpstan-ignore variable.undefined
                                                 where current_version=from_contentobject_version  AND ezcontentobject.id=ezcontentobject_link.from_contentobject_id AND $sqlJoins";
-        // @phpstan-ignore variable.undefined
                 eZDebug::writeError('SQL filtro:', $sql);
                 $result=$db->arrayQuery($sql);
 

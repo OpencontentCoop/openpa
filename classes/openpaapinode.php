@@ -107,7 +107,6 @@ class OpenPAApiNode implements ArrayAccess
         if ( $search['SearchCount'] > 0 )
         {
             // @phpstan-ignore property.notFound
-        // @phpstan-ignore property.notFound
             throw new Exception( "Sembra che esista già un oggetto con nome \"{$this->metadata['objectName']}\" e remote {$this->metadata['objectRemoteId']} in {$parentNodeID} ({$search['SearchResult'][0]->attribute('contentobject_id')})" );
         }        
         
