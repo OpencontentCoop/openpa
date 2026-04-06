@@ -1,5 +1,6 @@
 <?php
 
+// @phpstan-ignore class.notFound
 class OpenpaMugoVarnishBuilderByInstance extends OpenpaMugoVarnishBuilder
 {
     public function buildConditionForNodeIdCache($nodeId)
