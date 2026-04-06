@@ -145,10 +145,8 @@ class OpenPADFSFileHandlerDFSDispatcher implements eZDFSFileHandlerDFSBackendInt
         if (get_class($handler) == 'eZDFSFileHandlerDFSBackend') {
             $gateway = ezpClusterGateway::getGateway();
             ezpClusterGateway::setGatewayClass('ezpDfsPostgresqlClusterGateway');
-            // @phpstan-ignore return.missing
             $gateway->passthrough($filePath, $startOffset, $length);
         } else {
-            // @phpstan-ignore return.missing
             $handler->passthrough($filePath, $startOffset, $length);
         }
     }

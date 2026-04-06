@@ -100,7 +100,6 @@ class OpenPADFSFileHandlerDFSRegistry
             $pathHandlers[$cacheDir] = self::buildHandler('OpenPADFSFileHandlerDFSRedis');
         }
 
-        // @phpstan-ignore new.static
         return new static($privateHandler, $pathHandlers);
     }
 

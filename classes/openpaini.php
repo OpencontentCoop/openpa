@@ -495,7 +495,6 @@ class OpenPAINI
                         $result = include( $file );
                     }
 
-                    // @phpstan-ignore variable.undefined
                     return $result;
                 },
                 function () {
@@ -552,7 +551,6 @@ class OpenPAINI
                         $result = include($file);
                     }
 
-                    // @phpstan-ignore variable.undefined
                     return $result;
                 },
                 function () {

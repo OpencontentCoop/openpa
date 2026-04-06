@@ -60,7 +60,6 @@ class OpenPADFSFileHandlerDFSAWSDynamoDb implements eZDFSFileHandlerDFSBackendIn
 
         $tableName = isset($parameters['TableName']) ? $parameters['TableName'] : static::getDynamoDBTableConfig();
 
-        // @phpstan-ignore new.static
         return new static($client, $tableName, $readCapacityUnits, $writeCapacityUnits);
     }
 
@@ -236,19 +235,16 @@ class OpenPADFSFileHandlerDFSAWSDynamoDb implements eZDFSFileHandlerDFSBackendIn
     public function copyToDFS($srcFilePath, $dstFilePath = false)
     {
         $path = $dstFilePath ?: $srcFilePath;
-        // @phpstan-ignore return.missing
         $this->set($path, file_get_contents($srcFilePath));
     }
 
     public function delete($filePath)
     {
-        // @phpstan-ignore return.missing
         $this->del($filePath);
     }
 
     public function passthrough($filePath, $startOffset = 0, $length = false)
     {
-        // @phpstan-ignore return.missing
         echo $this->get($filePath);
     }
 
@@ -279,7 +275,6 @@ class OpenPADFSFileHandlerDFSAWSDynamoDb implements eZDFSFileHandlerDFSBackendIn
 
     public function getFilesList($basePath)
     {
-        // @phpstan-ignore return.missing
         // TODO: Implement getFilesList() method.
     }
 

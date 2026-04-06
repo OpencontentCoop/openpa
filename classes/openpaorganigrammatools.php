@@ -227,7 +227,6 @@ class OpenPAOrganigrammaTools
                                 $subItems->append(OpenPAOrganigrammaItem::instanceFromNode($servizioNode));
                             }
                         }
-                        // @phpstan-ignore empty.variable
                         if (!empty( $subItems )) {
                             $item->appendSubItemCollection($subItems);
                         }

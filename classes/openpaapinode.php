@@ -33,7 +33,6 @@ class OpenPAApiNode implements ArrayAccess
 
         if ( $useRemote )
         {
-            // @phpstan-ignore property.notFound
             $object = eZContentObject::fetchByRemoteID( $localRemoteIdPrefix . $this->metadata['objectRemoteId'] );
         }
         else
@@ -46,13 +45,11 @@ class OpenPAApiNode implements ArrayAccess
             $params = array(
                 'SearchLimit' => 1,
                 'Filter' => null,
-                // @phpstan-ignore property.notFound
                 'SearchContentClassID' => array( $this->metadata['classIdentifier']  ),
                 'SearchSubTreeArray' => array( $parentNode ),
                 'Limitation' => array()
             );        
             $solrSearch = new eZSolr();
-            // @phpstan-ignore property.notFound
             $search = $solrSearch->search( '"' . $this->metadata['objectName'] . '"', $params );
             if ( $search['SearchCount'] > 0 )
             {
@@ -74,7 +71,6 @@ class OpenPAApiNode implements ArrayAccess
         {
             throw new Exception( 'Oggetto non trovato' );
         }
-        // @phpstan-ignore property.notFound
         if ( $this->metadata['classIdentifier'] !== $object->attribute( 'class_identifier' ) )
         {
             throw new Exception( "L'oggetto con remote id {$object->attribute( 'class_identifier' )} è di classe diversa rispetto all'oggetto remoto" );
@@ -88,32 +84,25 @@ class OpenPAApiNode implements ArrayAccess
     
     public function createContentObject( $parentNodeID, $localRemoteIdPrefix = '' )
     {
-        // @phpstan-ignore property.notFound
         if ( eZContentObject::fetchByRemoteID( $this->metadata['objectRemoteId'] ) )
         {
-            // @phpstan-ignore property.notFound
             throw new Exception( "L'oggetto con remote \"{$this->metadata['objectRemoteId']}\" esiste già in questa installazione" );            
         }
         
         $searchEngine = new eZSolr();
-        // @phpstan-ignore property.notFound
         $searchParams = array( 'SearchContentClassID' => $this->metadata['classIdentifier'],
                                'SearchLimit' => 1,
-                               // @phpstan-ignore property.notFound
                                'Filter' => array( 'or', 'meta_name_t:"' . $this->metadata['objectName'] . '"'),
                                'SearchSubTreeArray' => array( $parentNodeID ) );
 
         $search = $searchEngine->search( '', $searchParams);
         if ( $search['SearchCount'] > 0 )
         {
-            // @phpstan-ignore property.notFound
             throw new Exception( "Sembra che esista già un oggetto con nome \"{$this->metadata['objectName']}\" e remote {$this->metadata['objectRemoteId']} in {$parentNodeID} ({$search['SearchResult'][0]->attribute('contentobject_id')})" );
         }        
         
         $params                     = array();        
-        // @phpstan-ignore property.notFound
         $params['class_identifier'] = $this->metadata['classIdentifier'];
-        // @phpstan-ignore property.notFound
         $params['remote_id']        = $localRemoteIdPrefix . $this->metadata['objectRemoteId'];
         $params['parent_node_id']   = $parentNodeID;
         $params['attributes']       = $this->getAttributesStringArray();
@@ -124,7 +113,6 @@ class OpenPAApiNode implements ArrayAccess
     {
         if ( $localRemoteIdPrefix !== null )
         {
-            // @phpstan-ignore property.notFound
             $remoteId = $localRemoteIdPrefix . $this->metadata['objectRemoteId'];            
             if ( $object->attribute( 'remote_id' ) != $remoteId )
             {
@@ -153,7 +141,6 @@ class OpenPAApiNode implements ArrayAccess
     protected function getAttributesStringArray()
     {
         $attributeList = array();
-        // @phpstan-ignore property.notFound
         foreach( $this->fields as $identifier => $fieldArray )
         {
             switch( $fieldArray['type'] )

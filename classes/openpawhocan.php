@@ -445,7 +445,6 @@ class OpenPAWhoCan
                                     break;
                                 }
                             }
-                            // @phpstan-ignore variable.undefined
                             if ( $access != 'allowed' && $checkedSubtree && !$accessSubtree )
                             {
                                 $access = 'denied';
@@ -512,7 +511,6 @@ class OpenPAWhoCan
                                     }
                                 }
                             }
-                            // @phpstan-ignore variable.undefined
                             if ( $access != 'allowed' && $checkedNode && !$accessNode )
                             {
                                 $access = 'denied';

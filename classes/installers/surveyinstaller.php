@@ -39,7 +39,6 @@ class OpenPASurveyInstaller implements OpenPAInstaller
             throw new Exception( "Fallita creazione nodo parent survey attributes" );
         }
 
-        // @phpstan-ignore class.notFound
         $surveyWizard = eZSurveyWizard::instance();
         if ( $surveyWizard->databaseStatus() === false )
         {
@@ -55,16 +54,13 @@ class OpenPASurveyInstaller implements OpenPAInstaller
         $surveyAttributeClass = new OpenPAClassTools( $surveyAttributeClassIdentifier, true );
         $surveyAttributeClass->sync();
 
-        // @phpstan-ignore class.notFound
         $configList = eZSurveyRelatedConfig::fetchList();
-        // @phpstan-ignore class.notFound
         if ( isset( $configList[0] ) && $configList[0] instanceof eZSurveyRelatedConfig )
         {
             $config = $configList[0];
         }
         else
         {
-            // @phpstan-ignore class.notFound
             $config = eZSurveyRelatedConfig::create();
         }
 

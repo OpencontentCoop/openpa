@@ -252,7 +252,6 @@ class BlockHandlerLista extends OpenPABlockHandler
                 if (!empty( $value )) {
                     $classes = explode(',', $value);
                     $classes = array_map('trim', $classes);
-                    // @phpstan-ignore empty.variable
                     if (!empty( $classes )) {
                         $this->fetchParameters['class_filter_type'] = 'include';
                         $this->fetchParameters['class_filter_array'] = $classes;
@@ -265,7 +264,6 @@ class BlockHandlerLista extends OpenPABlockHandler
                 if (!empty( $value )) {
                     $classes = explode(',', $value);
                     $classes = array_map('trim', $classes);
-                    // @phpstan-ignore empty.variable
                     if (!empty( $classes ) && !isset( $this->fetchParameters['class_filter_type'] )) {
                         $this->fetchParameters['class_filter_type'] = 'exclude';
                         $this->fetchParameters['class_filter_array'] = array_merge(

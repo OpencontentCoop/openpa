@@ -49,7 +49,6 @@ class OpenPALegacyMenuHandler implements OpenPAMenuHandlerInterface
     public static function menuGenerate( $file, $args )
     {
         extract( $args );
-        // @phpstan-ignore variable.undefined
         $result = self::getMenu( $parameters );
         return array( 'content' => $result,
                       'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );

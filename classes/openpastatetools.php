@@ -627,11 +627,9 @@ class OpenPAStateTools
     private static function parseCondition($conditionSetting)
     {
         list($attributeIdentifier, $operator, $string) = explode(';', $conditionSetting);
-        // @phpstan-ignore isset.variable
         if (!isset($attributeIdentifier, $operator, $string)) {
             throw new Exception("Parametri non sufficienti in $conditionSetting");
         }
- // @phpstan-ignore isset.variable
 
         if (!in_array($operator, array('eq', 'gt', 'ge', 'lt', 'le'))) {
             throw new Exception("Operatore $operator non riconosciuto");

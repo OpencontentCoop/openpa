@@ -9,7 +9,6 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     
     protected $attributeCaches = array();
     
-    /** @phpstan-ignore constructor.unusedParameter */
     public function __construct( eZContentObjectAttribute $attribute, $params = array() )
     {
         $this->attribute = $attribute;        

@@ -66,11 +66,9 @@ class OpenPADBTools
         }
         if ( strlen( $sql ) > 0 )
         {
-            // @phpstan-ignore variable.undefined
             $queries[] = $row;
             if ( !$onlyOutputQueries )
             {
-                // @phpstan-ignore variable.undefined
                 $db->query( $row );
             }
         }

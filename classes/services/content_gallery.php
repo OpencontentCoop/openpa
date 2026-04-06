@@ -44,7 +44,6 @@ class ObjectHandlerServiceContentGallery extends ObjectHandlerServiceBase
             {
                 try
                 {
-                    // @phpstan-ignore class.notFound
                     if ( eZFlip::instance( $this->container->attribute( 'file' )->attribute( 'contentobject_attribute' ) )->isConverted() )
                     {
                         self::$flipControlCache[$this->container->currentMainNodeId] = true;

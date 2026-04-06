@@ -30,7 +30,6 @@ class OpenPAApiChildNode implements ArrayAccess
         if ( $this->children == null )
         {
             $this->children = array();
-            // @phpstan-ignore property.notFound
             $treeUrl = rtrim( $this->link, '/' ) . '/list'; 
             $children = json_decode( OpenPABase::getDataByURL( $treeUrl ), true );            
             foreach( $children['childrenNodes'] as $item )

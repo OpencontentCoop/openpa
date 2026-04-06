@@ -101,7 +101,6 @@ abstract class OpenPADFSFileHandlerDFSAWSS3Abstract
         $sdk = new Aws\Sdk($args);
         $client = $sdk->createS3();
 
-        // @phpstan-ignore new.static
         return new static($client, $bucket, $httpHost, $protocol);
     }
 }

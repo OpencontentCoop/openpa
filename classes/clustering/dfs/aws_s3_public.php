@@ -116,7 +116,6 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
      */
     public function passthrough($filePath, $startOffset = 0, $length = false)
     {
-        // @phpstan-ignore return.missing
         try {
             $object = $this->s3client->getObject(array(
                 'Bucket' => $this->bucket,
