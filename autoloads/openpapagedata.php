@@ -77,6 +77,7 @@ class OpenPAPageData
                         $data['is_search_page'] = $request['module'] == 'content' && ($request['function'] == 'search' || $request['function'] == 'advancedsearch');
                         $data['is_edit'] = $request['module'] == 'content' && $request['function'] == 'edit';
                         $data['is_browse'] = $request['module'] == 'content' && $request['function'] == 'browse';
+                        $data['is_versionview'] = $request['module'] == 'content' && $request['function'] == 'versionview';
 
                         if ($tpl->hasVariable('module_result')) {
 
@@ -88,9 +89,11 @@ class OpenPAPageData
 
                             $data['ui_context'] = $moduleResult['ui_context'];
                             if (isset($moduleResult['content_info'])) {
-
+                                
                                 if (isset($moduleResult['content_info']['main_node_url_alias']) && $moduleResult['content_info']['main_node_url_alias']) {
                                     $data['canonical_url'] = $moduleResult['content_info']['main_node_url_alias'];
+                                } elseif (isset($moduleResult['content_info']['url_alias'])) {
+                                    $data['canonical_url'] = $moduleResult['content_info']['url_alias'];
                                 }
                                 if (isset($moduleResult['content_info']['persistent_variable'])
                                     && is_array($moduleResult['content_info']['persistent_variable'])) {
@@ -164,7 +167,6 @@ class OpenPAPageData
                         $data['uri_prefix'] = rtrim($uriPrefix, '/') . '/';
 
                         self::$openpaContextData = $data;
-
                         eZDebug::appendBottomReport('OpenPA Pagedata', array('OpenPAPageData', 'printDebugReport'));
                     }
 
@@ -190,6 +192,7 @@ class OpenPAPageData
                 {
                     $ezPageData = new eZPageData();
                     $data = array();
+                    $namedParameters['params']['template_look'] = false;
                     $ezPageData->modify($tpl, 'ezpagedata', $operatorParameters, $rootNamespace, $currentNamespace, $data, $namedParameters);
 
                     $data['homepage'] = OpenPaFunctionCollection::fetchHome();

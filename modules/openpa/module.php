@@ -76,7 +76,7 @@ $ViewList['classes'] = array(
 $ViewList['addlocationto'] = array(
     'functions' => array('editor_tools'),
     'script' => 'addlocationto.php',
-    'params' => array('ContentObjectID'),
+    'params' => array('ContentObjectID', 'SelectedNodeID'),
     'unordered_params' => array());
 
 //$ViewList['manage_header'] = array( 'functions' => array( 'manage_header' ),
@@ -203,6 +203,19 @@ $ViewList['theme'] = array(
     'functions' => array( 'theme' )
 );
 
+//$ViewList['fix_class_relation'] = array(
+//    'script' => 'fix_class_relation.php',
+//    'params' => array(),
+//    'unordered_params' => array(),
+//    "default_navigation_part" => 'ezsetupnavigationpart',
+//);
+
+$ViewList['mail'] = array(
+    'script' =>	'mail.php',
+    'params' => array(),
+    'functions' => array( 'mail' )
+);
+
 $FunctionList['classdefinition'] = array();
 $FunctionList['class'] = array();
 $FunctionList['manage_roles'] = array();
@@ -217,5 +230,4 @@ $FunctionList['recaptcha'] = array();
 $FunctionList['changestatesettings'] = array();
 $FunctionList['changesectionsettings'] = array();
 $FunctionList['theme'] = array();
-
-?>
+$FunctionList['mail'] = array();

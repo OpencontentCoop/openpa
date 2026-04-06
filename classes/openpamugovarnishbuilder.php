@@ -1,5 +1,6 @@
 <?php
 
+// @phpstan-ignore interface.notFound
 class OpenpaMugoVarnishBuilder implements MugoVarnishBuilderInterface
 {
     public function buildConditionForNodeIdCache($nodeId)

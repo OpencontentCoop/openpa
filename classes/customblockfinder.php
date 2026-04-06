@@ -6,9 +6,13 @@ class CustomBlockFinder
 
     function __construct()
     {
+        // @phpstan-ignore property.notFound
         $this->cacheControlBlockTypes = array( 'Lista' );
+        // @phpstan-ignore property.notFound
         $this->customAttributeNodeID = array( 'node_id', 'parent_node_id' );
+        // @phpstan-ignore property.notFound
         $this->customAttributeInclude = 'includi_classi';
+        // @phpstan-ignore property.notFound
         $this->customAttributeExclude = 'escludi_classi';
     }    
     
@@ -94,6 +98,7 @@ class CustomBlockFinder
                     {
                         foreach( $blocks as $block )
                         {                    
+                            // @phpstan-ignore property.notFound
                             if ( $block instanceof eZPageBlock && $block->hasAttribute( 'type' ) && in_array( $block->attribute( 'type' ), $this->cacheControlBlockTypes ) )
                             {
                                 if ( $block->hasAttribute( 'custom_attributes' ) )
@@ -101,6 +106,7 @@ class CustomBlockFinder
                                     $customAttributes = $block->attribute( 'custom_attributes' );
                                     
                                     $nodeToAdd = false;
+                                    // @phpstan-ignore property.notFound
                                     foreach( $this->customAttributeNodeID as $customAttributeNodeID  )
                                     {
                                         if ( isset( $customAttributes[$customAttributeNodeID] ) )
@@ -123,12 +129,16 @@ class CustomBlockFinder
                                         
                                         $includeClasses = false;
                                         $excludeClasses = false;                                        
+                                        // @phpstan-ignore property.notFound
                                         if ( isset( $customAttributes[$this->customAttributeInclude] ) && !empty( $customAttributes[$this->customAttributeInclude] ) )
                                         {
+                                            // @phpstan-ignore property.notFound
                                             $includeClasses = $customAttributes[$this->customAttributeInclude];
                                         }
+                                        // @phpstan-ignore property.notFound
                                         elseif ( isset( $customAttributes[$this->customAttributeExclude] ) && !empty( $customAttributes[$this->customAttributeExclude] ) )
                                         {
+                                            // @phpstan-ignore property.notFound
                                             $excludeClasses = $customAttributes[$this->customAttributeExclude];
                                         }
                                         

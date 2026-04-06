@@ -9,6 +9,7 @@ class OpenPAAttributeHandler extends OpenPATempletizable
     
     protected $attributeCaches = array();
     
+    /** @phpstan-ignore constructor.unusedParameter */
     public function __construct( eZContentObjectAttribute $attribute, $params = array() )
     {
         $this->attribute = $attribute;        
@@ -123,12 +124,11 @@ class OpenPAAttributeHandler extends OpenPATempletizable
             $idList = explode('-', $this->attribute->toString());
             /** @var eZContentObject[] $objects */
             $objects = eZContentObject::fetchIDArray($idList);
-            foreach ($objects as $index => $object){
-                if (!$object->canRead()){
-                    unset($objects[$index]);
+            foreach ($objects as $object){
+                if ($object->canRead()){
+                    return true;
                 }
             }
-            $hasContent = count($objects) > 0;
         }
         return $hasContent;
     }

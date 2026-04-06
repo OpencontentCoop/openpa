@@ -6,7 +6,7 @@ class FindGlobalLayoutOperator
         'find_global_layout'
     );
     
-    function FindGlobalLayoutOperator()
+    function __construct()
     {
     }
     

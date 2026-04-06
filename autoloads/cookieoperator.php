@@ -3,7 +3,7 @@
 class CookieOperator
 {
 
-    function CookieOperator()
+    function __construct()
     {
         $this->Operators= array( 'cookieset', 'cookieget', 'check_and_set_cookies' );
     }

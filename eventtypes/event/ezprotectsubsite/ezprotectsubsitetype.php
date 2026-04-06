@@ -4,9 +4,9 @@ class eZProtectSubsiteType extends eZWorkflowEventType
 {
     const WORKFLOW_TYPE_STRING = "ezprotectsubsite";
     
-	function eZProtectSubsiteType()
+	function __construct()
     {
-        $this->eZWorkflowEventType( eZProtectSubsiteType::WORKFLOW_TYPE_STRING, ezpI18n::tr( 'opencontent', 'Protect subsite' ) );
+        parent::__construct( eZProtectSubsiteType::WORKFLOW_TYPE_STRING, ezpI18n::tr( 'opencontent', 'Protect subsite' ) );
         $this->setTriggerTypes( array( 'content' => array( 'read' => array( 'before' ) ) ) );
     }
 

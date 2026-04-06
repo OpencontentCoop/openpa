@@ -132,7 +132,7 @@
 	 *
 	 */
 
-	class Browser {
+	class OpenPABrowser {
 		private $_agent = '';
 		private $_browser_name = '';
 		private $_version = '';
@@ -204,7 +204,7 @@
 		
 		const OPERATING_SYSTEM_UNKNOWN = 'unknown';
 
-		public function Browser($useragent="") {
+		public function __construct($useragent="") {
 			$this->reset();
 			if( $useragent != "" ) {
 				$this->setUserAgent($useragent);

@@ -37,6 +37,10 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
             "Codice SDI",
             "TikTok",
             "Link area personale",
+            "Link assistenza",
+            "Numero verde",
+            "Link prenotazione appuntamento",
+            "Link segnalazione disservizio",
         );
     }
 

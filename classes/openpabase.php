@@ -39,7 +39,7 @@ class OpenPABase
      */
     public static function getInstances( $siteaccessType = 'frontend' )
     {
-        if ( !in_array( $siteaccessType, array( 'debug', 'frontend', 'backend', 'sensor', 'dimmi' ) ) )
+        if ( !in_array( $siteaccessType, array( 'debug', 'frontend', 'backend', 'sensor', 'dimmi', 'agenda' ) ) )
         {
             throw new Exception( "Tipo di siteaccess $siteaccessType non ammesso" );
         }
@@ -53,7 +53,7 @@ class OpenPABase
                 $siteaccess[$file['name']] = $file['name'];
             }
         }
-        array_unique( $siteaccess );
+        $siteaccess = array_unique( $siteaccess );
         sort( $siteaccess );
         return $siteaccess;
     }
@@ -97,6 +97,11 @@ class OpenPABase
 
     public static function getSiteaccessIdentifier( $siteaccessName )
     {
+        $instanceIdentifier = getenv('EZ_INSTANCE');
+        if (!empty($instanceIdentifier)) {
+            return $instanceIdentifier;
+        }
+
         //prototipo_ger_sensor
         $parts = explode( '_', $siteaccessName );
         array_pop( $parts );
@@ -129,16 +134,24 @@ class OpenPABase
 
     public static function getCustomSiteaccessName( $customName, $checkIfExists = true, $identifier = null )
     {
-        if ( !$identifier )
+        if ( !$identifier ) {
             $identifier = self::getCurrentSiteaccessIdentifier();
-        $siteaccess = $identifier . '_' . strtolower( $customName );
+        }
+        $identifier .= '_';
+
+        // se EZ_INSTANCE è configurato si tratta di un'installazione stand-alone e il nome del siteaccess potrebbe confliggere con il nome del modulo
+        if (!empty(getenv('EZ_INSTANCE'))) {
+            $identifier = '';
+        }
+
+        $siteaccess = $identifier . strtolower( $customName );
 
         if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
         {
             $language = eZLocale::currentLocaleCode();
             $parts = explode('-', $language);
             $locale = $parts[0];
-            $siteaccess = "{$identifier}_{$locale}_{$customName}";
+            $siteaccess = "{$identifier}{$locale}_{$customName}";
         }
 
         if ( !file_exists( "settings/siteaccess/$siteaccess" ) && $checkIfExists )
@@ -149,7 +162,7 @@ class OpenPABase
             {
                 $parts = explode('-', $language);
                 $locale = $parts[0];
-                $siteaccess = "{$identifier}_{$locale}_{$customName}";
+                $siteaccess = "{$identifier}{$locale}_{$customName}";
                 if ( file_exists( "settings/siteaccess/$siteaccess" ) )
                 {
                     break;
@@ -442,6 +455,35 @@ class OpenPABase
         }
 
         return array();
+    }
+
+    public static function hasActiveSiteaccessSuffix($suffix)
+    {
+        if (empty($suffix)) {
+            return false;
+        }
+        $currentPrefix = self::getCurrentSiteaccessIdentifier();
+        $findSiteAccessName = $currentPrefix . '_' . $suffix;
+        $items = eZINI::instance()->variable('SiteAccessSettings', 'HostUriMatchMapItems');
+
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                if (strpos($item, ';' . $findSiteAccessName) !== false) {
+                    $parts = explode(';', $item);
+                    return $parts[0] . '/' . $parts[1];
+                }
+            }
+        }
+        if (in_array($suffix, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
+            return eZINI::instance()->variable('SiteSettings', 'SiteURL');
+        }
+
+        $current = self::getCustomSiteaccessName($suffix);
+        if (in_array($current, eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList'))){
+            return eZINI::instance()->variable('SiteSettings', 'SiteURL');
+        }
+
+        return false;
     }
 
     public static function getPrototypeRemoteHost()

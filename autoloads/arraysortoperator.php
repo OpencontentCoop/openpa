@@ -29,7 +29,7 @@ class ArraySortOperator
 	/*!
 		Constructor, initializes sort flags
 	*/
-	function ArraySortOperator()
+	function __construct()
 	{
 		$this->sort_flags = array(
 			'regular' => SORT_REGULAR,

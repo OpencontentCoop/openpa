@@ -1,8 +1,9 @@
 <?php /*
 
+[Event]
 # Per impedire l'indicizzazione dei file scaricati con content/download attivare la seguente regola
-#[Event]
 #Listeners[]=content/download@OpenPADownloadFilter::addXRobotsTagHeader
+Listeners[]=cluster/loadMetadata@OpenPADFSFileHandlerDFSDispatcher::loadMetadata
 
 
 [Cache]
@@ -54,6 +55,7 @@ PolicyOmitList[]=openpa/loadwt
 PolicyOmitList[]=openpa/changestatedefinition
 PolicyOmitList[]=openpa/changesectiondefinition
 PolicyOmitList[]=sitemap.xml
+PolicyOmitList[]=logo
 
 [RegionalSettings]
 TranslationExtensions[]=openpa

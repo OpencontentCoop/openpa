@@ -7,5 +7,6 @@ ModuleList[]=openpa
 ModuleList[]=robots.txt
 ModuleList[]=apps
 ModuleList[]=sitemap.xml
+ModuleList[]=logo
 
 */ ?>

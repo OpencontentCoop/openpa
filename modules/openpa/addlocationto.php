@@ -2,7 +2,8 @@
 
 $module = $Params['Module'];
 $http = eZHTTPTool::instance();
-$objectID = $Params['ContentObjectID'];
+$objectID = (int)$Params['ContentObjectID'];
+$selectedNodeID = (int)$Params['SelectedNodeID'];
 
 $object = eZContentObject::fetch( $objectID );
 if ( !$object instanceof eZContentObject )
@@ -20,10 +21,16 @@ if ( !$object->checkAccess( 'edit' ) &&
     return $module->handleError( eZError::KERNEL_ACCESS_DENIED, 'kernel' );
 }
 
-$selectedNodeIDArray = $http->postVariable( 'SelectedNodeIDArray' );
-if ( !is_array( $selectedNodeIDArray ) )
+if ( $selectedNodeID > 0 )
 {
-    $selectedNodeIDArray = array();
+    $selectedNodeIDArray = [$selectedNodeID];
+}
+else
+{
+    $selectedNodeIDArray = $http->postVariable( 'SelectedNodeIDArray' );
+    if ( !is_array( $selectedNodeIDArray ) ) {
+        $selectedNodeIDArray = [];
+    }
 }
 
 if ( eZOperationHandler::operationIsAvailable( 'content_addlocation' ) )

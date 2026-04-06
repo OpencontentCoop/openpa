@@ -3,7 +3,7 @@
 class SlugizeOperator
 {
 
-    function SlugizeOperator()
+    function __construct()
     {
     }
 
