@@ -9,74 +9,76 @@ class OpenPAINI
 
     private static $themeIdentifier;
 
+    private static $installerVersion;
+
     public static $dynamicIniMap = array(
         'GestioneAttributi' => array(
             'attributi_contatti' => array(
                 'from' => '_full_identifier',
                 'to' => 'attribute_group.contacts',
-                'value' => 1
+                'value' => 1,
             ),
             'zero_is_content' => array(
                 'from' => '_full_identifier',
                 'to' => 'table_view.show_empty',
-                'value' => 1
+                'value' => 1,
             ),
             'AttributiNonEditabili' => array(
                 'from' => '_full_identifier',
                 'to' => 'edit_view.show',
-                'value' => 0
+                'value' => 0,
             ),
             'oggetti_senza_label' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.show_label',
-                'value' => 0
+                'value' => 0,
             ),
             'attributes_with_title' => array(
                 'from' => '_identifier',
                 'to' => 'line_view.show_label',
-                'value' => 1
+                'value' => 1,
             ),
             'attributes_to_show' => array(
                 'from' => '_identifier',
                 'to' => 'line_view.show',
-                'value' => 1
+                'value' => 1,
             ),
             'attributi_da_includere_user' => array(
                 'from' => 'user/_identifier',
                 'to' => 'table_view.show',
-                'value' => 1
+                'value' => 1,
             ),
             'attributes_to_show_politici' => array(
                 'from' => 'politico/_identifier',
                 'to' => 'table_view.show',
-                'value' => 1
+                'value' => 1,
             ),
             'attributi_da_escludere_dalla_ricerca' => array(
                 'from' => '_identifier',
                 'to' => 'search_form.show',
-                'value' => 0
+                'value' => 0,
             ),
             'attributi_da_escludere' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.show',
-                'value' => 0
+                'value' => 0,
             ),
             'attributi_event_da_escludere' => array(
                 'from' => 'event/_identifier',
                 'to' => 'table_view.show',
-                'value' => 0
+                'value' => 0,
             ),
             'attributi_da_evidenziare' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.highlight',
-                'value' => 1
+                'value' => 1,
             ),
             'attributi_senza_link' => array(
                 'from' => '_identifier',
                 'to' => 'table_view.show_link',
-                'value' => 0
+                'value' => 0,
             ),
-        )
+        ),
     );
 
     protected static $dynamicIniData;
@@ -96,6 +98,7 @@ class OpenPAINI
         'Seo::metaDescription',
         'Seo::metaKeywords',
         'Seo::webAnalyticsItaliaID',
+        'Seo::webAnalyticsItaliaSiteID',
         'GeneralSettings::valutation',
         'GeneralSettings::theme',
         'CreditsSettings::CodeVersion',
@@ -107,17 +110,20 @@ class OpenPAINI
 
     public static function variable( $block, $value, $default = null )
     {
+        eZDebug::createAccumulatorGroup('Openpa Ini');
         if ( self::hasFilter( $block, $value, $default ) )
         {
             return self::filter( $block, $value, $default );
         }
 
+        eZDebug::accumulatorStart('openpa_ini_get', 'Openpa Ini', 'Fetch standard openpa.ini');
         $ini = eZINI::instance( 'openpa.ini' );
         $result = $default;
         if ( $ini->hasVariable( $block, $value ) )
         {
             $result = $ini->variable( $block, $value );
         }
+        eZDebug::accumulatorStart('openpa_ini_get');
         return $result;
     }
 
@@ -188,158 +194,118 @@ class OpenPAINI
                     if (file_exists($file)){
                         $result = include( $file );
                     }else{
-                        eZDebug::writeNotice("File $file not exists, regenerate", __METHOD__);
-                        $result = new eZClusterFileFailure(eZClusterFileFailure::FILE_RETRIEVAL_FAILED);
+                        eZDebug::writeNotice("File $file does not exists, regenerate", __METHOD__);
+                        $result = self::generateDynamicIniData();
                     }
 
                     return $result;
                 },
                 function (){
-                    $result = array();
-
-                    $classes = eZDB::instance()->arrayQuery(
-                        'SELECT id, identifier, serialized_name_list ' .
-                        'FROM ezcontentclass ' .
-                        'WHERE version=0'
+                    $result = self::generateDynamicIniData();
+                    return array(
+                        'content' => $result,
+                        'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER,
                     );
-                    $classAttributes = eZContentClassAttribute::fetchList(false);
-
-                    $classAttributesByClassId = array();
-                    foreach ($classAttributes as $classAttribute){
-                        $classAttributesByClassId[$classAttribute['contentclass_id']][] = $classAttribute;
-                    }
-
-                    $keyDefinitionName =  class_exists('OCClassExtraParameters') ? OCClassExtraParameters::getKeyDefinitionName() : 'key';
-
-                    foreach( OpenPAINI::$dynamicIniMap as $block => $values ){
-
-                        $result[$block] = array();
-
-                        foreach( $values as $variable => $settings ){
-
-                            $result[$block][$variable] = array();
-
-                            list( $handler, $key ) = explode( '.', $settings['to'] );
-                            $matchValue = $settings['value'];
-
-                            $data = OCClassExtraParameters::fetchObjectList(OCClassExtraParameters::definition(),
-                                null,
-                                array(
-                                    'handler' => $handler,
-                                    $keyDefinitionName => $key,
-                                    'value' => 1
-                                )
-                            );
-
-                            $results = array();
-                            $resultPart = array();
-                            foreach( $data as $item ){
-                                $resultPart[] = $item->attribute( 'class_identifier' ) . '/' .  $item->attribute( 'attribute_identifier' );
-                            }
-
-                            if ( $matchValue == 0 ){
-                                foreach( $classes as $class ){
-                                    foreach ($classAttributesByClassId[$class['id']] as $classAttribute) {
-                                        if (!in_array($class['identifier'] . '/' . $classAttribute['identifier'], $resultPart)) {
-                                            $results[] = $class['identifier'] . '/' . $classAttribute['identifier'];
-                                        }
-                                    }
-                                }
-                            }else{
-                                $results = $resultPart;
-                            }
-
-                            $results= array_unique( $results );
-                            array_multisort( $results );
-                            $result[$block][$variable] = array_values( $results );
-
-                        }
-                    }
-
-                    return array( 'content' => $result,
-                        'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER );
                 }
             );
+            if (self::$dynamicIniData instanceof eZClusterFileFailure){
+                self::$dynamicIniData = eZClusterFileHandler::instance( self::dynamicIniCachePath() )->processCache(
+                    null,
+                    function (){
+                        $result = self::generateDynamicIniData();
+                        return array(
+                            'content' => $result,
+                            'scope'   => OpenPAMenuTool::CACHE_IDENTIFIER,
+                        );
+                    }
+                );
+            }
             eZDebug::accumulatorStop('dynamic_ini_map');
         }
     }
 
     protected static function filter( $block, $value, $default )
     {
+        eZDebug::accumulatorStart('openpa_ini_filter', 'Openpa Ini', 'Fetch dynamic openpa.ini');
+        $result = null;
         $filter = $block . '::' . $value;
         switch( $filter )
         {
             case 'TopMenu::NodiCustomMenu':
-                return OpenPaFunctionCollection::fetchTopMenuNodes();
+                $result = OpenPaFunctionCollection::fetchTopMenuNodes();
                 break;
 
             case 'GestioneSezioni::sezioni_per_tutti':
-                return self::filterSezioniPerTutti();
+                $result = self::filterSezioniPerTutti();
                 break;
 
             case 'Attributi::EscludiDaRicerca':
-                return self::variable( 'GestioneAttributi', 'attributi_da_escludere_dalla_ricerca', $default );
+                $result = self::variable( 'GestioneAttributi', 'attributi_da_escludere_dalla_ricerca', $default );
                 break;
 
             case 'Seo::GoogleAnalyticsAccountID':
-                return self::getSeoData()['googleAnalyticsAccountID'];
+                $result = self::getSeoData()['googleAnalyticsAccountID'];
                 break;
 
             case 'Seo::EnableRobots':
-                return self::getSeoData()['enableRobots'];
+                $result = self::getSeoData()['enableRobots'];
                 break;
 
             case 'Seo::GoogleTagManagerID':
-                return self::getSeoData()['googleTagManagerID'];
+                $result = self::getSeoData()['googleTagManagerID'];
                 break;
 
             case 'Seo::GoogleSiteVerificationID':
-                return self::getSeoData()['googleSiteVerificationID'];
+                $result = self::getSeoData()['googleSiteVerificationID'];
                 break;
 
             case 'Seo::RobotsText':
-                return self::getSeoData()['robotsText'];
+                $result = self::getSeoData()['robotsText'];
                 break;
 
             case 'Seo::DefaultRobotsText':
-                return file_get_contents('robots.txt');
+                $result = file_get_contents('robots.txt');
                 break;
 
             case 'Seo::metaAuthor':
-                return self::getSeoData()['metaAuthor'];
+                $result = self::getSeoData()['metaAuthor'];
                 break;
 
             case 'Seo::metaCopyright':
-                return self::getSeoData()['metaCopyright'];
+                $result = self::getSeoData()['metaCopyright'];
                 break;
 
             case 'Seo::metaDescription':
-                return self::getSeoData()['metaDescription'];
+                $result = self::getSeoData()['metaDescription'];
                 break;
 
             case 'Seo::metaKeywords':
-                return self::getSeoData()['metaKeywords'];
+                $result = self::getSeoData()['metaKeywords'];
                 break;
 
             case 'Seo::webAnalyticsItaliaID':
-                return self::getSeoData()['webAnalyticsItaliaID'];
+                $result = self::getSeoData()['webAnalyticsItaliaID'];
+                break;
+
+            case 'Seo::webAnalyticsItaliaSiteID':
+                $result = self::getSeoData()['webAnalyticsItaliaSiteID'];
                 break;
 
             case 'Seo::WebAnalyticsItaliaCookieless':
-                return self::getSeoData()['WebAnalyticsItaliaCookieless'];
+                $result = self::getSeoData()['WebAnalyticsItaliaCookieless'];
                 break;
 
             case 'Seo::GoogleCookieless':
-                return self::getSeoData()['GoogleCookieless'];
+                $result = self::getSeoData()['GoogleCookieless'];
                 break;
 
             case 'Seo::CookieConsentMultimedia':
-                return self::getSeoData()['CookieConsentMultimedia'];
+                $result = self::getSeoData()['CookieConsentMultimedia'];
                 break;
 
 
             case 'Seo::CookieConsentMultimediaText':
-                return self::getSeoData()['CookieConsentMultimediaText'];
+                $result = self::getSeoData()['CookieConsentMultimediaText'];
                 break;
 
             case 'GeneralSettings::valutation':
@@ -347,14 +313,13 @@ class OpenPAINI
                     && eZINI::instance('openpa.ini')->variable('GeneralSettings', 'valutation') == 1){
                     $valuationClass = eZContentClass::fetchByIdentifier('valuation');
                     if ($valuationClass instanceof eZContentClass){
-                        return $valuationClass->objectCount() > 0;
+                        $result = $valuationClass->objectCount() > 0;
                     }
                 }
-                return false;
                 break;
 
             case 'GeneralSettings::theme':
-                return self::getThemeIdentifier($default);
+                $result = self::getThemeIdentifier($default);
                 break;
 
             case 'CreditsSettings::CodeVersion':
@@ -365,9 +330,12 @@ class OpenPAINI
                 }elseif (eZINI::instance('openpa.ini')->hasVariable('CreditsSettings', 'CodeVersion')) {
                     $codeVersion = eZINI::instance('openpa.ini')->variable('CreditsSettings', 'CodeVersion');
                 }
-                $installerVersion = eZSiteData::fetchByName('ocinstaller_version');
-                if ($installerVersion instanceof eZSiteData){
-                    $installerVersion = $installerVersion->attribute('value');
+                $installerVersion = false;
+                if (self::$installerVersion === null){
+                    self::$installerVersion = eZSiteData::fetchByName('ocinstaller_version');
+                }
+                if (self::$installerVersion instanceof eZSiteData){
+                    $installerVersion = self::$installerVersion->attribute('value');
                     if (strpos($codeVersion, $installerVersion) !== false){
                         $installerVersion = '';
                     }else{
@@ -375,17 +343,18 @@ class OpenPAINI
                     }
                 }
 
-                return trim($codeVersion) . $installerVersion;
+                $result = trim($codeVersion) . $installerVersion;
                 break;
         }
 
-        if ( isset( self::$dynamicIniMap[$block][$value] ) )
+        if ( !$result && isset( self::$dynamicIniMap[$block][$value] ) )
         {
             self::getDynamicIniData();
-            return isset( self::$dynamicIniData[$block][$value] ) ? self::$dynamicIniData[$block][$value] : $default;
+            $result = isset( self::$dynamicIniData[$block][$value] ) ? self::$dynamicIniData[$block][$value] : $default;
         }
 
-        return null;
+        eZDebug::accumulatorStart('openpa_ini_filter');
+        return $result;
     }
 
     public static function set( $block, $settingName, $value )
@@ -436,6 +405,10 @@ class OpenPAINI
 
                 case 'Seo::webAnalyticsItaliaID':
                     return self::setSeoData('webAnalyticsItaliaID', $value);
+                    break;
+
+                case 'Seo::webAnalyticsItaliaSiteID':
+                    return self::setSeoData('webAnalyticsItaliaSiteID', $value);
                     break;
 
                 case 'GeneralSettings::theme':
@@ -495,6 +468,24 @@ class OpenPAINI
         self::clearDynamicIniCache();
     }
 
+    private static function generateThemeIdentifier()
+    {
+        $themeIdentifierSiteData = eZSiteData::fetchByName('Theme');
+        if (!$themeIdentifierSiteData instanceof eZSiteData) {
+            $themeIdentifierSiteData = new eZSiteData(array(
+                'name' => 'Theme',
+                'value' => '',
+            ));
+            $ini = eZINI::instance('openpa.ini');
+            if ($ini->hasVariable('GeneralSettings', 'theme')) {
+                $themeIdentifier = $ini->variable('GeneralSettings', 'theme');
+                $themeIdentifierSiteData->setAttribute('value', $themeIdentifier);
+                $themeIdentifierSiteData->store();
+            }
+        }
+        return $themeIdentifierSiteData->attribute('value');
+    }
+
     private static function getThemeIdentifier($default)
     {
         if (self::$themeIdentifier === null) {
@@ -504,32 +495,31 @@ class OpenPAINI
                         $result = include( $file );
                     }
 
+                    // @phpstan-ignore variable.undefined
                     return $result;
                 },
                 function () {
-                    $themeIdentifierSiteData = eZSiteData::fetchByName('Theme');
-                    if (!$themeIdentifierSiteData instanceof eZSiteData) {
-                        $themeIdentifierSiteData = new eZSiteData(array(
-                            'name' => 'Theme',
-                            'value' => ''
-                        ));
-                        $ini = eZINI::instance('openpa.ini');
-                        if ($ini->hasVariable('GeneralSettings', 'theme')) {
-                            $themeIdentifier = $ini->variable('GeneralSettings', 'theme');
-                            $themeIdentifierSiteData->setAttribute('value', $themeIdentifier);
-                            $themeIdentifierSiteData->store();
-                        }
-                    }
-                    $result = $themeIdentifierSiteData->attribute('value');
-
                     return array(
-                        'content' => $result,
-                        'scope' => 'theme_identifier'
+                        'content' => self::generateThemeIdentifier(),
+                        'scope' => 'theme_identifier',
                     );
                 }
+            // @phpstan-ignore variable.undefined
             );
 
-            if (empty(self::$themeIdentifier)){
+            if (self::$themeIdentifier instanceof eZClusterFileFailure) {
+                self::$themeIdentifier = OpenPAPageData::getThemeIdentifierCache()->processCache(
+                    null,
+                    function () {
+                        return array(
+                            'content' => self::generateThemeIdentifier(),
+                            'scope' => 'theme_identifier',
+                        );
+                    }
+                );
+            }
+
+            if (empty(self::$themeIdentifier) || self::$themeIdentifier instanceof eZClusterFileFailure){
                 self::$themeIdentifier = $default;
             }
         }
@@ -543,7 +533,7 @@ class OpenPAINI
         if (!$data instanceof eZSiteData) {
             $data = new eZSiteData(array(
                 'name' => 'Theme',
-                'value' => ''
+                'value' => '',
             ));
         }
         $data->setAttribute('value', $value);
@@ -563,6 +553,7 @@ class OpenPAINI
                         $result = include($file);
                     }
 
+                    // @phpstan-ignore variable.undefined
                     return $result;
                 },
                 function () {
@@ -572,18 +563,45 @@ class OpenPAINI
                     } else {
                         $result = json_decode($siteData->attribute('value'), true);
                     }
-
+                    // @phpstan-ignore variable.undefined
                     return array(
+                        // @phpstan-ignore variable.undefined
                         'content' => $result,
-                        'scope' => 'cache'
+                        'scope' => 'cache',
                     );
                 }
             );
         }
 
+        if (self::$seoData instanceof eZClusterFileFailure){
+            self::$seoData = OpenPAPageData::getSeoCache()->processCache(
+                null,
+                function () {
+                    $siteData = eZSiteData::fetchByName('SeoSettings');
+                    if (!$siteData instanceof eZSiteData) {
+                        $result = self::generateSeoData();
+                    } else {
+                        $result = json_decode($siteData->attribute('value'), true);
+                    }
+                    return array(
+                        'content' => $result,
+                        'scope' => 'cache',
+                    );
+                }
+            );
+        }
+
+        if (empty(self::$seoData) || self::$seoData instanceof eZClusterFileFailure){
+            self::$seoData = [];
+        }
+
+        if (self::isSeoDisabledByHostname()) {
+            self::$seoData['enableRobots'] = 'disabled';
+        }
+
         return array_merge(
             self::getEmptySeoData(),
-            self::$seoData
+            (array)self::$seoData
         );
     }
 
@@ -622,6 +640,7 @@ class OpenPAINI
             'metaDescription' => false,
             'metaKeywords' => false,
             'webAnalyticsItaliaID' => '',
+            'webAnalyticsItaliaSiteID' => '',
             'GoogleCookieless' => 'disabled',
             'WebAnalyticsItaliaCookieless' => 'disabled',
             'CookieConsentMultimedia' => 'enabled',
@@ -662,19 +681,97 @@ class OpenPAINI
                 if ($ini->hasVariable( 'Seo', 'EnableRobots' )){
                     $enableRobotsValue = $ini->variable( 'Seo', 'EnableRobots' );
                 }
-                if (strpos(eZSys::hostname(), 'opencontent.it') !== false){
-                    $enableRobotsValue = 'disabled';
-                }
-                $data['enableRobots'] = $enableRobotsValue;
+                $data['enableRobots'] = self::isSeoDisabledByHostname() ? 'disabled' : $enableRobotsValue;
             }
 
             $siteData = new eZSiteData(array(
                 'name' => 'SeoSettings',
-                'value' => json_encode($data)
+                'value' => json_encode($data),
             ));
             $siteData->store();
         }
 
         return json_decode($siteData->attribute('value'), true);
+    }
+
+    private static function isSeoDisabledByHostname(): bool
+    {
+        $ini = eZINI::instance( 'openpa.ini' );
+        if ($ini->hasVariable('Seo', 'DisabledDomainList')){
+            $disableSeoByHostList = (array)$ini->variable('Seo', 'DisabledDomainList');
+        }else{
+            $disableSeoByHostList = ['opencontent.it'];
+        }
+        foreach ($disableSeoByHostList as $host) {
+            if (strpos(eZSys::hostname(), $host) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function generateDynamicIniData(): array
+    {
+        $result = array();
+
+        $classes = eZDB::instance()->arrayQuery(
+            'SELECT id, identifier, serialized_name_list ' .
+            'FROM ezcontentclass ' .
+            'WHERE version=0'
+        );
+        $classAttributes = eZContentClassAttribute::fetchList(false);
+
+        $classAttributesByClassId = array();
+        foreach ($classAttributes as $classAttribute){
+            $classAttributesByClassId[$classAttribute['contentclass_id']][] = $classAttribute;
+        }
+
+        $keyDefinitionName =  class_exists('OCClassExtraParameters') ? OCClassExtraParameters::getKeyDefinitionName() : 'key';
+
+        foreach( OpenPAINI::$dynamicIniMap as $block => $values ){
+
+            $result[$block] = array();
+
+            foreach( $values as $variable => $settings ){
+
+                [ $handler, $key ] = explode( '.', $settings['to'] );
+                $matchValue = $settings['value'];
+
+                $data = OCClassExtraParameters::fetchObjectList(OCClassExtraParameters::definition(),
+                    null,
+                    array(
+                        'handler' => $handler,
+                        $keyDefinitionName => $key,
+                        'value' => 1,
+                    )
+                );
+
+                $results = array();
+                $resultPart = array();
+                foreach( $data as $item ){
+                    $resultPart[] = $item->attribute( 'class_identifier' ) . '/' .  $item->attribute( 'attribute_identifier' );
+                }
+
+                if ( $matchValue == 0 ){
+                    foreach( $classes as $class ){
+                        foreach ($classAttributesByClassId[$class['id']] as $classAttribute) {
+                            if (!in_array($class['identifier'] . '/' . $classAttribute['identifier'], $resultPart)) {
+                                $results[] = $class['identifier'] . '/' . $classAttribute['identifier'];
+                            }
+                        }
+                    }
+                }else{
+                    $results = $resultPart;
+                }
+
+                $results= array_unique( $results );
+                array_multisort( $results );
+                $result[$block][$variable] = array_values( $results );
+
+            }
+        }
+
+        return $result;
     }
 }
