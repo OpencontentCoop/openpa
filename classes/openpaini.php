@@ -554,7 +554,7 @@ class OpenPAINI
                     return $result;
                 },
                 function () {
-                    $siteData = eZSiteData::fetchByName('SeoSettings');
+                    $siteData = eZSiteData::fetchByName(self::getLocalePrefix() . 'SeoSettings');
                     if (!$siteData instanceof eZSiteData) {
                         $result = self::generateSeoData();
                     } else {
@@ -572,7 +572,7 @@ class OpenPAINI
             self::$seoData = OpenPAPageData::getSeoCache()->processCache(
                 null,
                 function () {
-                    $siteData = eZSiteData::fetchByName('SeoSettings');
+                    $siteData = eZSiteData::fetchByName(self::getLocalePrefix() .'SeoSettings');
                     if (!$siteData instanceof eZSiteData) {
                         $result = self::generateSeoData();
                     } else {
@@ -602,10 +602,10 @@ class OpenPAINI
 
     private static function setSeoData($key, $value)
     {
-        $siteData = eZSiteData::fetchByName('SeoSettings');
+        $siteData = eZSiteData::fetchByName(self::getLocalePrefix() . 'SeoSettings');
         if (!$siteData instanceof eZSiteData) {
             self::generateSeoData();
-            $siteData = eZSiteData::fetchByName('SeoSettings');
+            $siteData = eZSiteData::fetchByName(self::getLocalePrefix() . 'SeoSettings');
         }
 
         $data = json_decode($siteData->attribute('value'), true);
@@ -645,7 +645,7 @@ class OpenPAINI
 
     private static function generateSeoData()
     {
-        $siteData = eZSiteData::fetchByName('SeoSettings');
+        $siteData = eZSiteData::fetchByName(self::getLocalePrefix() . 'SeoSettings');
         if (!$siteData instanceof eZSiteData) {
 
             $data = self::getEmptySeoData();
@@ -680,7 +680,7 @@ class OpenPAINI
             }
 
             $siteData = new eZSiteData(array(
-                'name' => 'SeoSettings',
+                'name' => self::getLocalePrefix() . 'SeoSettings',
                 'value' => json_encode($data),
             ));
             $siteData->store();
@@ -768,5 +768,11 @@ class OpenPAINI
         }
 
         return $result;
+    }
+
+    public static function getLocalePrefix(string $default = 'ita-IT'): string
+    {
+        $locale = eZLocale::currentLocaleCode();
+        return $locale === $default ? '' : $locale . '-';
     }
 }
