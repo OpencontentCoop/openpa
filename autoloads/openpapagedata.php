@@ -89,7 +89,7 @@ class OpenPAPageData
 
                             $data['ui_context'] = $moduleResult['ui_context'];
                             if (isset($moduleResult['content_info'])) {
-                                
+
                                 if (isset($moduleResult['content_info']['main_node_url_alias']) && $moduleResult['content_info']['main_node_url_alias']) {
                                     $data['canonical_url'] = $moduleResult['content_info']['main_node_url_alias'];
                                 } elseif (isset($moduleResult['content_info']['url_alias'])) {
@@ -411,7 +411,7 @@ class OpenPAPageData
 
     public static function getSeoCache()
     {
-        $cacheFilePath = eZSys::cacheDirectory() . '/openpa/' . 'seo.cache';
+        $cacheFilePath = eZSys::cacheDirectory() . '/openpa/' . OpenPAINI::getLocalePrefix() . 'seo.cache';
         return eZClusterFileHandler::instance($cacheFilePath);
     }
 
