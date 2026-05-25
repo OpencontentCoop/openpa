@@ -117,12 +117,18 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
     public function passthrough($filePath, $startOffset = 0, $length = false)
     {
         try {
-            $object = $this->s3client->getObject(array(
+            $params = array(
                 'Bucket' => $this->bucket,
                 'Key' => $filePath,
-                'Range' => "{$startOffset}-{$length}"
-            ));
-            echo (string)$object['Body'];
+            );
+            if ($startOffset !== false && $startOffset !== 0 || $length !== false) {
+                $end = $length !== false ? $length : '';
+                $params['Range'] = "bytes={$startOffset}-{$end}";
+            }
+            $object = $this->s3client->getObject($params);
+            $content = (string)$object['Body'];
+            header('Content-Length: ' . strlen($content));
+            echo $content;
         } catch (Throwable $e) {
             eZDebug::writeError($e->getMessage(), __METHOD__);
         }
