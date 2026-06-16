@@ -239,6 +239,40 @@ class OpenPASMTPTransport extends eZMailTransport
                 eZDebug::writeError($err, __METHOD__);
             }
         }
+
+        if ($ini->variable('MailSettings', 'BounceCollector') === 'ses') {
+            $region = 'eu-west-1';
+            if ($ini->hasVariable('MailSettings', 'SESRegion')) {
+                $configuredRegion = trim($ini->variable('MailSettings', 'SESRegion'));
+                if ($configuredRegion !== '') {
+                    $region = $configuredRegion;
+                }
+            }
+
+            return self::isSesSuppressedDestination($emailAddress, $region);
+        }
+
+        return false;
+    }
+
+    public static function isSesSuppressedDestination($emailAddress, $region)
+    {
+        try {
+            $sesClient = new \Aws\SesV2\SesV2Client([
+                'version' => 'latest',
+                'region'  => $region,
+            ]);
+            $sesClient->getSuppressedDestination([
+                'EmailAddress' => $emailAddress,
+            ]);
+
+            return 'SES_SUPPRESSED';
+        } catch (\Aws\Exception\AwsException $e) {
+            if ($e->getAwsErrorCode() === 'NotFoundException') {
+                return false;
+            }
+            eZDebug::writeError($e->getMessage(), __METHOD__);
+        }
         return false;
     }
 
