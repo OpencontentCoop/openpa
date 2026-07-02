@@ -36,8 +36,8 @@ Disallow: {$accessSuffix}/layout";
     ];
     if ($useRateLimitingRules) {
         $result .= "
-Request-rate: 1/10
-Crawl-delay: 10
+Request-rate: 1/3
+Crawl-delay: 3
 Visit-time: 0000-0600
 ";
     }
