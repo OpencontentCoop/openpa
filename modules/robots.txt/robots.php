@@ -1,7 +1,11 @@
 <?php
 
 if (OpenPAINI::variable('Seo', 'EnableRobots') == 'enabled') {
-    $result = "";
+    $customData = OpenPAINI::variable('Seo', 'RobotsText', '');
+    if (empty($customData)) {
+        $customData = OpenPAINI::variable('Seo', 'DefaultRobotsText', false);
+    }
+    $result = "\n$customData\n";
     $result .= "\n#\n";
     $currentIdentifier = OpenPABase::getCurrentSiteaccessIdentifier();
     $hostUriIniList = eZINI::instance()->variableArray('SiteAccessSettings', 'HostUriMatchMapItems');
@@ -37,11 +41,6 @@ Crawl-delay: 3
 Visit-time: 0000-0600
 ";
     }
-    $customData = OpenPAINI::variable('Seo', 'RobotsText', '');
-    if (empty($customData)) {
-        $customData = OpenPAINI::variable('Seo', 'DefaultRobotsText', false);
-    }
-    $result .= "\n$customData\n";
     $result .= "\nAllow: /Media/FAQ\n";
 
     $resultArray = explode("\n", $result);
