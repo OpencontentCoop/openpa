@@ -124,7 +124,7 @@ if (OpenPAINI::variable('SiteMapSettings', 'ShowSitemap', 'enabled') === 'enable
 
     // Query actual content pages within the collected subtrees.
     // Uses path_string LIKE to leverage the existing DB index (2 queries total).
-    if (!empty($subtrees)) {
+    if (!empty($subtrees) && OpenPAINI::variable('SitemapSettings', 'FullSiteMap', 'disabled') === 'enabled') {
         $inString = $db->generateSQLINStatement($subtrees, 'node_id', false, false, 'int');
         $rootRows = $db->arrayQuery(
             "SELECT path_string FROM ezcontentobject_tree WHERE $inString"
