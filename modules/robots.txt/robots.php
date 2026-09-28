@@ -26,10 +26,12 @@ Disallow: {$accessSuffix}/content/advancedsearch
 Disallow: {$accessSuffix}/content/search
 Disallow: {$accessSuffix}/content/view
 Disallow: {$accessSuffix}/layout";
-            $sitemapUrl = "{$accessSuffix}/sitemap.xml";
-            eZURI::transformURI($sitemapUrl, false, 'full');
-            $result .= "
+            if (!in_array($accessSuffix, ['debug', 'backend'])) {
+                $sitemapUrl = "{$accessSuffix}/sitemap.xml";
+                eZURI::transformURI($sitemapUrl, false, 'full');
+                $result .= "
 Sitemap: {$sitemapUrl}";
+            }
         }
     }
     $useRateLimitingRules = OpenPAINI::variable('Seo', 'RateLimitingRules', 'disabled') === 'enabled';
