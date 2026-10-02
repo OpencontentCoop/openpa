@@ -120,6 +120,11 @@ if (OpenPAINI::variable('SiteMapSettings', 'ShowSitemap', 'enabled') === 'enable
         createSiteMapNode($menuItem, $root, $modifiedSubtreeByNodeIdList, $subtrees);
     }
 
+    $faqRoot = eZContentObject::fetchByRemoteID('faq_system');
+    if ($faqRoot instanceof eZContentObject && $faqRoot->mainNodeID()) {
+        $subtrees[] = ['node_id' => (int)$faqRoot->mainNodeID()];
+    }
+
     $subtrees = array_unique($subtrees);
 
     // Query actual content pages within the collected subtrees.
