@@ -26,6 +26,18 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
     }
 
     /**
+     * S3 requires x-amz-copy-source to be URL-encoded: file names with characters like ? & = # or %
+     * (e.g. imported from a remote URL) are rejected with "Invalid copy source URI" otherwise.
+     *
+     * @param string $filePath
+     * @return string
+     */
+    protected function getCopySource($filePath)
+    {
+        return $this->bucket . '/' . implode('/', array_map('rawurlencode', explode('/', $filePath)));
+    }
+
+    /**
      * Creates a copy of $srcFilePath from DFS to $dstFilePath on DFS
      *
      * @param string $srcFilePath Local source file path
@@ -39,7 +51,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 array(
                     'Bucket' => $this->bucket,
                     'Key' => $dstFilePath,
-                    'CopySource' => $this->bucket . "/" . $srcFilePath,
+                    'CopySource' => $this->getCopySource($srcFilePath),
                     'ACL' => $this->acl
                 )
             );
@@ -186,7 +198,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                 array(
                     'Bucket' => $this->bucket,
                     'Key' => $newPath,
-                    'CopySource' => $this->bucket . "/" . $oldPath,
+                    'CopySource' => $this->getCopySource($oldPath),
                     'ACL' => $this->acl
                 )
             );
@@ -215,7 +227,7 @@ class OpenPADFSFileHandlerDFSAWSS3Public extends OpenPADFSFileHandlerDFSAWSS3Abs
                     array(
                         'Bucket' => $this->bucket,
                         'Key' => 'trash/' . $filePath,
-                        'CopySource' => $this->bucket . "/" . $filePath,
+                        'CopySource' => $this->getCopySource($filePath),
                         'ACL' => 'private'
                     )
                 );
