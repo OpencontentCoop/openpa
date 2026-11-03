@@ -1078,7 +1078,18 @@ class OpenPaFunctionCollection
         }
 
         if (OpenPAINI::variable('GeneralSettings', 'StaticLogoUrl', 'disabled') !== 'disabled') {
-            self::$headerLogo['url'] = OpenPAINI::variable('GeneralSettings', 'StaticLogoUrl', '/logo');
+            $staticLogoUrl = OpenPAINI::variable('GeneralSettings', 'StaticLogoUrl', '/logo');
+            // la versione della home nell'url fa cambiare l'url quando cambia il logo,
+            // cosi' cache e flyimg non servono il logo vecchio
+            try {
+                $homeVersion = (int)self::fetchHome()->attribute('contentobject_version');
+                if ($homeVersion > 0) {
+                    $staticLogoUrl .= (strpos($staticLogoUrl, '?') === false ? '?' : '&') . 'v=' . $homeVersion;
+                }
+            } catch (Exception $e) {
+                eZDebug::writeError($e->getMessage(), __METHOD__);
+            }
+            self::$headerLogo['url'] = $staticLogoUrl;
         }
 
         return self::$headerLogo;
