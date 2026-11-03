@@ -433,16 +433,23 @@ class OpenPAWhoCan
                         case 'Node':
                         {
                             $accessNode = false;
-                            $mainNodeID = $this->mainNode()->attribute( 'node_id' );
-                            foreach ( $limitationArray[$key] as $nodeID )
+                            // Un oggetto senza nodo principale (archiviato/nel cestino) non puo' combaciare
+                            // con nessuna limitazione Node: si salta il confronto invece di dereferenziare
+                            // null, cosi' la valutazione prosegue con le altre limitazioni/policy.
+                            $mainNode = $this->mainNode();
+                            if ( $mainNode instanceof eZContentObjectTreeNode )
                             {
-                                $node = eZContentObjectTreeNode::fetch( $nodeID, false, false );
-                                $limitationNodeID = $node['main_node_id'];
-                                if ( $mainNodeID == $limitationNodeID )
+                                $mainNodeID = $mainNode->attribute( 'node_id' );
+                                foreach ( $limitationArray[$key] as $nodeID )
                                 {
-                                    $access = 'allowed';
-                                    $accessNode = true;
-                                    break;
+                                    $node = eZContentObjectTreeNode::fetch( $nodeID, false, false );
+                                    $limitationNodeID = $node['main_node_id'];
+                                    if ( $mainNodeID == $limitationNodeID )
+                                    {
+                                        $access = 'allowed';
+                                        $accessNode = true;
+                                        break;
+                                    }
                                 }
                             }
                             if ( $access != 'allowed' && $checkedSubtree && !$accessSubtree )
