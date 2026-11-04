@@ -142,6 +142,11 @@ class OpenPABase
         // se EZ_INSTANCE è configurato si tratta di un'installazione stand-alone e il nome del siteaccess potrebbe confliggere con il nome del modulo
         if (!empty(getenv('EZ_INSTANCE'))) {
             $identifier = '';
+            // con siteaccess generati da istances.yml (id valorizzato) i nomi hanno il prefisso dell'id: <id>_backend, <id>_frontend
+            $prefixed = getenv('EZ_INSTANCE') . '_' . strtolower($customName);
+            if (file_exists("settings/siteaccess/$prefixed")) {
+                return $prefixed;
+            }
         }
 
         $siteaccess = $identifier . strtolower( $customName );
