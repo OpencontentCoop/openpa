@@ -16,6 +16,7 @@ class OpenPAAttributeContactsHandler extends OpenPAAttributeHandler
             "Email",
             "PEC",
             "Indirizzo",
+            "Indirizzo altra sede",
             "Facebook",
             "Twitter",
             "Web",
