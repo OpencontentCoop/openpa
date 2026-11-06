@@ -4,7 +4,12 @@
 
 {let matrix=$attribute.content}
 
-{def $rows = $matrix.rows.sequential}
+{def $rows = $matrix.rows.sequential
+     $values = hash()}
+{* i valori si cercano per nome della riga (colonna 0), non per posizione: l'ordine salvato può differire da quello di contacts_matrix_fields() *}
+{foreach $rows as $row}
+  {set $values = $values|merge(hash($row.columns[0], $row.columns[1]))}
+{/foreach}
 
 <table cellspacing="0" class="list">
 <tbody>
@@ -15,13 +20,13 @@
 	  <label>{$name}</label>
 	</td>
 	<td>
-	  <input class="form-control" type="text" value="{$rows[$index].columns[1]}" name="{$attribute_base}_ezmatrix_cell_{$attribute.id}[]">
+	  <input class="form-control" type="text" value="{if is_set($values[$name])}{$values[$name]}{/if}" name="{$attribute_base}_ezmatrix_cell_{$attribute.id}[]">
 	</td>
   </tr>
   {/foreach}  
 </tbody>
 </table>
-{undef $rows}
+{undef $rows $values}
 {/let}
 {/default}
 
