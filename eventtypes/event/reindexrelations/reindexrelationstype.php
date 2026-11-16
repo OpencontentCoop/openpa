@@ -1,55 +1,69 @@
 <?php
- 
+
+/**
+ * Workflow post_publish: se cambia il nome di un oggetto (o un attributo elencato in Attributes[]), accoda la reindicizzazione Solr degli
+ * oggetti che lo citano (che ne conservano una copia nel proprio documento).
+ * Vedi OpenPAReindexRelations per le scelte di contenimento del carico.
+ */
 class ReindexRelationsType extends eZWorkflowEventType
 {
     const WORKFLOW_TYPE_STRING = "reindexrelations";
-    
-    const LOGFILE = 'openpa_worflow_reindexrelations.log';
-    
+
+    const LOGFILE = 'openpa_workflow_reindexrelations.log';
+
     public function __construct()
     {
         parent::__construct( ReindexRelationsType::WORKFLOW_TYPE_STRING, 'Reindicizzazione degli oggetti correlati' );
     }
- 
+
     public function execute( $process, $event )
     {
-        $parameters = $process->attribute( 'parameter_list' );
-        if ( isset( $parameters['object_id'] ) )
-        {
-            $object = eZContentObject::fetch( $parameters['object_id'] );
-            if ( $object instanceof eZContentObject )
+        // Un errore qui non deve mai bloccare la pubblicazione.
+        try {
+            $parameters = $process->attribute( 'parameter_list' );
+            if ( isset( $parameters['object_id'] ) )
             {
-                //$relations = $object->relatedContentObjectList( false, false, 0, false, array( 'AllRelations' => true ) );
-                $reverseRelations = $object->reverseRelatedObjectList( false, false, 0, false, array( 'AllRelations' => true ) );
-                $index = array();
-                //foreach( $relations as $relation )
-                //{
-                //    /** @var $relation eZContentObject */
-                //    $index[] = $relation->attribute( 'id' );
-                //}
-                foreach( $reverseRelations as $relation )
+                $object = eZContentObject::fetch( (int)$parameters['object_id'] );
+                if ( $object instanceof eZContentObject )
                 {
-                    /** @var $relation eZContentObject */
-                    $index[] = $relation->attribute( 'id' );
-                }
-                $index = array_unique( $index );
-                if ( count( $index ) > 0 )
-                {
-                    $pendingAction = new eZPendingActions(
-                        array(
-                             'action' => OpenPABase::PENDING_ACTION_INDEX_OBJECTS,
-                             'created' => time(),
-                             'param' => implode( '-', $index )
-                        )
-                    );
-                    $pendingAction->store();
+                    $this->queueRelatedObjects( $object );
                 }
             }
         }
+        catch ( Throwable $e )
+        {
+            OpenPAReindexRelations::log( 'Errore: ' . $e->getMessage() );
+        }
 
-        
         return eZWorkflowType::STATUS_ACCEPTED;
+    }
+
+    private function queueRelatedObjects( eZContentObject $object )
+    {
+        $classes = OpenPAReindexRelations::enabledClasses();
+        if ( !empty( $classes ) && !in_array( $object->attribute( 'class_identifier' ), $classes ) )
+        {
+            return;
+        }
+
+        $objectID = (int)$object->attribute( 'id' );
+        if ( !OpenPAReindexRelations::relevantChange( $objectID, $object->attribute( 'current_version' ) ) )
+        {
+            return;
+        }
+
+        $limit = OpenPAReindexRelations::intSetting(
+            'MaxRelatedObjects',
+            OpenPAReindexRelations::DEFAULT_MAX_RELATED_OBJECTS
+        );
+        $truncated = false;
+        $ids = OpenPAReindexRelations::reverseRelatedIDs( $objectID, $limit, $truncated );
+        $queued = OpenPAReindexRelations::queue( $ids );
+
+        OpenPAReindexRelations::log(
+            "Oggetto #$objectID modificato (nome o attributi tracciati): " . count( $ids ) . " correlati, $queued accodati" .
+            ( $truncated ? " (TRONCATO a $limit: gli altri non verranno reindicizzati)" : '' )
+        );
     }
 }
 eZWorkflowEventType::registerEventType( ReindexRelationsType::WORKFLOW_TYPE_STRING, 'reindexrelationstype' );
-?>
