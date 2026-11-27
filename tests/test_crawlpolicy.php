@@ -104,6 +104,33 @@ $assert(
     ['Sitemap: https://h/s.xml', 'Crawl-delay: 10', 'Visit-time: 0000-0600']
 );
 
+// classificazione dei siteaccess mappati sullo stesso host
+$private = ['backend', 'debug'];
+$related = ['comune_frontend' => true, 'comune_eng_frontend' => true, 'comune_backend' => true];
+$sameDb = function () {
+    return true;
+};
+$otherDb = function () {
+    return false;
+};
+$classify = function ($uri, $siteaccess, $related, $sharesDatabase) use ($private) {
+    return OpenPACrawlPolicy::classifyMappedSiteaccess($uri, $siteaccess, $private, $related, $sharesDatabase);
+};
+$assert('prefisso: backend per uri', $classify('backend', 'comune_backend', $related, $sameDb), OpenPACrawlPolicy::PREFIX_PRIVATE);
+$assert('prefisso: backend per suffisso del nome', $classify('admin', 'comune_backend', $related, $sameDb), OpenPACrawlPolicy::PREFIX_PRIVATE);
+$assert('prefisso: uri privato in maiuscolo', $classify('Debug', 'comune_frontend', $related, $sameDb), OpenPACrawlPolicy::PREFIX_PRIVATE);
+$assert('prefisso: lingua nella RelatedSiteAccessList', $classify('en', 'Comune_Eng_Frontend', $related, $sameDb), OpenPACrawlPolicy::PREFIX_LANGUAGE);
+$assert('prefisso: duplicato stesso database (/new)', $classify('new', 'comune_new', $related, $sameDb), OpenPACrawlPolicy::PREFIX_PRIVATE);
+$assert('prefisso: altro sito, altro database (/agenda)', $classify('agenda', 'comune_ita_agenda', $related, $otherDb), OpenPACrawlPolicy::PREFIX_OTHER);
+$assert('prefisso: RelatedSiteAccessList vuota = tutto pubblico', $classify('new', 'comune_new', [], $sameDb), OpenPACrawlPolicy::PREFIX_LANGUAGE);
+$assert('prefisso: privato anche con RelatedSiteAccessList vuota', $classify('backend', 'comune_backend', [], $sameDb), OpenPACrawlPolicy::PREFIX_PRIVATE);
+$called = false;
+$classify('en', 'comune_eng_frontend', $related, function () use (&$called) {
+    $called = true;
+    return true;
+});
+$assert('prefisso: database letto solo per i siteaccess fuori lista', $called, false);
+
 // codifica dei path
 $assert('encodePath spazi', OpenPACrawlPolicy::encodePath('/Media/Domande frequenti'), '/Media/Domande%20frequenti');
 $assert('encodePath idempotente', OpenPACrawlPolicy::encodePath('/Media/Domande%20frequenti'), '/Media/Domande%20frequenti');

@@ -13,6 +13,12 @@ class OpenPACrawlPolicy
 
     const DISALLOW = 'Disallow';
 
+    const PREFIX_PRIVATE = 'private';
+
+    const PREFIX_LANGUAGE = 'language';
+
+    const PREFIX_OTHER = 'other';
+
     private static $instance;
 
     private $host;
@@ -243,6 +249,38 @@ class OpenPACrawlPolicy
         return isset($this->siteaccessPrefixes[$name]) ? $this->siteaccessPrefixes[$name] : '';
     }
 
+    /**
+     * Tipo di un siteaccess mappato su un uri dello stesso host:
+     * - PREFIX_PRIVATE: backend/debug (uri o suffisso del nome in PrivateUriList) oppure duplicato
+     *   dello stesso database fuori dalla RelatedSiteAccessList (es. /new, /old);
+     * - PREFIX_LANGUAGE: lingua del sito (nella RelatedSiteAccessList, o lista vuota): stesse regole
+     *   della radice e una sitemap propria;
+     * - PREFIX_OTHER: altro sito sullo stesso host (altro database): non lo tocchiamo.
+     *
+     * @param string $uri es. en
+     * @param string $siteaccess
+     * @param string[] $privateUris minuscoli, es. ['backend', 'debug']
+     * @param array<string, true> $related RelatedSiteAccessList in minuscolo
+     * @param callable $sharesDatabase function(string $siteaccess): bool
+     * @return string
+     */
+    public static function classifyMappedSiteaccess($uri, $siteaccess, array $privateUris, array $related, callable $sharesDatabase)
+    {
+        $name = strtolower($siteaccess);
+        if (in_array(strtolower($uri), $privateUris, true)) {
+            return self::PREFIX_PRIVATE;
+        }
+        foreach ($privateUris as $privateUri) {
+            if (substr($name, -strlen('_' . $privateUri)) === '_' . $privateUri) {
+                return self::PREFIX_PRIVATE;
+            }
+        }
+        if (empty($related) || isset($related[$name])) {
+            return self::PREFIX_LANGUAGE;
+        }
+        return $sharesDatabase($siteaccess) ? self::PREFIX_PRIVATE : self::PREFIX_OTHER;
+    }
+
     private function loadPrefixes()
     {
         $this->siteaccessPrefixes = [];
@@ -271,23 +309,15 @@ class OpenPACrawlPolicy
                 continue;
             }
             $siteaccess = strtolower($item[2]);
-            $isPrivate = in_array(strtolower($uri), $privateUris);
-            foreach ($privateUris as $privateUri) {
-                if (substr($siteaccess, -strlen('_' . $privateUri)) === '_' . $privateUri) {
-                    $isPrivate = true;
-                }
-            }
-            if ($isPrivate) {
+            $type = self::classifyMappedSiteaccess($uri, $item[2], $privateUris, self::relatedSiteaccesses(), function ($name) {
+                return self::sharesDatabase($name);
+            });
+            if ($type === self::PREFIX_PRIVATE) {
                 $private['/' . $uri] = true;
-            } elseif (self::isRelatedSiteaccess($siteaccess)) {
-                // lingua del sito: stesse regole della radice e una sitemap propria
+            } elseif ($type === self::PREFIX_LANGUAGE) {
                 $public['/' . $uri] = true;
                 $this->siteaccessPrefixes[$siteaccess] = '/' . $uri;
-            } elseif (self::sharesDatabase($item[2])) {
-                // stessi contenuti con un'altra grafica (es. /new, /old): duplicati, vietati
-                $private['/' . $uri] = true;
             }
-            // altrimenti e' un altro sito sullo stesso host (es. /agenda): non lo tocchiamo
         }
 
         $this->privatePrefixes = array_keys($private);
