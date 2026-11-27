@@ -31,6 +31,9 @@ class OpenPACrawlPolicy
 
     private $compiledRules;
 
+    /** @var array<string, string> siteaccess di lingua => prefisso (es. eng_frontend => /en) */
+    private $siteaccessPrefixes = [];
+
     /**
      * @param string|null $host per i test; di default l'host della richiesta
      */
@@ -142,8 +145,67 @@ class OpenPACrawlPolicy
     }
 
     /**
-     * Uri dei siteaccess non pubblici (backend, debug): sempre vietati, anche se non mappati.
-     * @return string[] es. ['/backend', '/debug']
+     * Una sitemap per ogni prefisso pubblico: radice e siteaccess di lingua.
+     * @return string[]
+     */
+    public function getSitemapUrls()
+    {
+        $urls = [];
+        foreach ($this->getPublicPrefixes() as $prefix) {
+            $urls[] = $this->absoluteUrl($prefix . '/sitemap.xml');
+        }
+        return $urls;
+    }
+
+    /**
+     * Il siteaccess e' una versione pubblica del sito: e' nella RelatedSiteAccessList del sito
+     * (siteaccess di lingua) oppure la lista e' vuota. Esclude per esempio _new e _old, che
+     * mostrano gli stessi contenuti con un'altra grafica.
+     *
+     * @param string $siteaccess
+     * @return bool
+     */
+    public static function isRelatedSiteaccess($siteaccess)
+    {
+        $related = self::relatedSiteaccesses();
+        return empty($related) || isset($related[strtolower($siteaccess)]);
+    }
+
+    /**
+     * @return array<string, true>
+     */
+    private static function relatedSiteaccesses()
+    {
+        $related = [];
+        foreach ((array)eZINI::instance()->variable('SiteAccessSettings', 'RelatedSiteAccessList') as $siteaccess) {
+            $siteaccess = strtolower(trim((string)$siteaccess));
+            if ($siteaccess !== '') {
+                $related[$siteaccess] = true;
+            }
+        }
+        return $related;
+    }
+
+    /**
+     * Il siteaccess usa lo stesso database del sito corrente (stessi contenuti).
+     * @param string $siteaccess
+     * @return bool
+     */
+    private static function sharesDatabase($siteaccess)
+    {
+        $current = eZINI::instance()->variable('DatabaseSettings', 'Database');
+        try {
+            $ini = eZSiteAccess::getIni($siteaccess, 'site.ini');
+        } catch (Exception $e) {
+            return false;
+        }
+        return $ini instanceof eZINI && $ini->variable('DatabaseSettings', 'Database') === $current;
+    }
+
+    /**
+     * Uri dei siteaccess non pubblici: backend e debug (sempre vietati, anche se non mappati)
+     * e i siteaccess dello stesso database che non sono lingue del sito (es. /new, /old).
+     * @return string[] es. ['/backend', '/debug', '/new']
      */
     public function getPrivatePrefixes()
     {
@@ -154,7 +216,8 @@ class OpenPACrawlPolicy
     }
 
     /**
-     * Prefissi pubblici dello stesso host: '' (radice) piu' gli uri dei siteaccess in lingua.
+     * Prefissi pubblici dello stesso host: '' (radice) piu' gli uri dei siteaccess di lingua
+     * (RelatedSiteAccessList). Gli altri siti sullo stesso host (altro database) sono ignorati.
      * @return string[] es. ['', '/en', '/de']
      */
     public function getPublicPrefixes()
@@ -165,8 +228,24 @@ class OpenPACrawlPolicy
         return $this->publicPrefixes;
     }
 
+    /**
+     * Prefisso pubblico del siteaccess corrente su questo host ('' per la radice, '/en' per l'inglese),
+     * ricavato da HostUriMatchMapItems e non dalla richiesta: vale uguale da web e da CLI.
+     * @return string
+     */
+    public function getCurrentPrefix()
+    {
+        if ($this->publicPrefixes === null) {
+            $this->loadPrefixes();
+        }
+        $current = eZSiteAccess::current();
+        $name = strtolower(isset($current['name']) ? $current['name'] : '');
+        return isset($this->siteaccessPrefixes[$name]) ? $this->siteaccessPrefixes[$name] : '';
+    }
+
     private function loadPrefixes()
     {
+        $this->siteaccessPrefixes = [];
         $privateUris = array_map(function ($uri) {
             return strtolower(trim($uri, '/ '));
         }, (array)self::iniVariable('PrivateUriList', ['backend', 'debug']));
@@ -187,12 +266,12 @@ class OpenPACrawlPolicy
             if (self::normalizeHost($item[0]) !== $currentHost) {
                 continue;
             }
-            $uri = strtolower(trim($item[1], '/ '));
+            $uri = trim($item[1], '/ ');
             if ($uri === '') {
                 continue;
             }
             $siteaccess = strtolower($item[2]);
-            $isPrivate = in_array($uri, $privateUris);
+            $isPrivate = in_array(strtolower($uri), $privateUris);
             foreach ($privateUris as $privateUri) {
                 if (substr($siteaccess, -strlen('_' . $privateUri)) === '_' . $privateUri) {
                     $isPrivate = true;
@@ -200,9 +279,15 @@ class OpenPACrawlPolicy
             }
             if ($isPrivate) {
                 $private['/' . $uri] = true;
-            } else {
+            } elseif (self::isRelatedSiteaccess($siteaccess)) {
+                // lingua del sito: stesse regole della radice e una sitemap propria
                 $public['/' . $uri] = true;
+                $this->siteaccessPrefixes[$siteaccess] = '/' . $uri;
+            } elseif (self::sharesDatabase($item[2])) {
+                // stessi contenuti con un'altra grafica (es. /new, /old): duplicati, vietati
+                $private['/' . $uri] = true;
             }
+            // altrimenti e' un altro sito sullo stesso host (es. /agenda): non lo tocchiamo
         }
 
         $this->privatePrefixes = array_keys($private);
@@ -608,7 +693,9 @@ class OpenPACrawlPolicy
 
         if (OpenPASitemapBuilder::isEnabled()) {
             $lines[] = '';
-            $lines[] = 'Sitemap: ' . $this->getSitemapUrl();
+            foreach ($this->getSitemapUrls() as $sitemapUrl) {
+                $lines[] = 'Sitemap: ' . $sitemapUrl;
+            }
         }
 
         return implode("\n", $lines) . "\n";

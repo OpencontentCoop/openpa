@@ -84,10 +84,16 @@ if ($options['verbose']) {
 
 preg_match_all('/^\s*sitemap\s*:\s*(\S+)\s*$/im', $robots, $matches);
 $sitemapUrls = $matches[1];
+$expectedSitemaps = OpenPASitemapBuilder::isEnabled() ? $policy->getSitemapUrls() : [];
 if (!$policy->isRobotsEnabled()) {
     $warnings[] = 'robots.txt disabilitato (Disallow: / per tutti)';
-} elseif (count($sitemapUrls) !== 1) {
-    $errors[] = 'robots.txt: righe Sitemap = ' . count($sitemapUrls) . ' (attesa 1)';
+} elseif (empty($expectedSitemaps)) {
+    $warnings[] = 'sitemap disattivata (ShowSitemap=disabled): nessuna riga Sitemap attesa';
+    if (!empty($sitemapUrls)) {
+        $errors[] = 'robots.txt: righe Sitemap presenti con la sitemap disattivata';
+    }
+} elseif ($sitemapUrls !== $expectedSitemaps) {
+    $errors[] = 'robots.txt: righe Sitemap ' . implode(', ', $sitemapUrls) . ' (attese ' . implode(', ', $expectedSitemaps) . ')';
 }
 foreach ($sitemapUrls as $sitemapUrl) {
     if (strpos($sitemapUrl, 'https://') !== 0) {
@@ -134,7 +140,13 @@ $load = function ($url) use ($options, $fetch, $builder, &$errors) {
 $totalUrls = 0;
 $perSitemap = [];
 $skipped = [];
-$queue = $sitemapUrls ? [$sitemapUrls[0]] : [$policy->getSitemapUrl()];
+// via HTTP si seguono tutte le sitemap dichiarate (una per lingua); in locale si genera quella
+// del siteaccess -s (per una lingua: -s<siteaccess_lingua>, oppure --http)
+if ($options['http']) {
+    $queue = $sitemapUrls ? $sitemapUrls : $expectedSitemaps;
+} else {
+    $queue = empty($expectedSitemaps) ? [] : [$policy->getSitemapUrl()];
+}
 $seen = [];
 while ($url = array_shift($queue)) {
     if (isset($seen[$url])) {

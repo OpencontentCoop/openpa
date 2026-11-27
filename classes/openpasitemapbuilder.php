@@ -40,6 +40,10 @@ class OpenPASitemapBuilder
 
     private $menuModified;
 
+    private $untranslatedMenuNodeIds = [];
+
+    private $contentLanguageId;
+
     private $stats = [];
 
     public function __construct(OpenPACrawlPolicy $policy)
@@ -97,9 +101,12 @@ class OpenPASitemapBuilder
         if (!$staticCacheHandler instanceof ezpStaticCache) {
             return;
         }
-        $staticCacheHandler->removeURL('/sitemap.xml');
-        foreach ($locations as $location) {
-            $staticCacheHandler->removeURL($location['loc']);
+        // stesse URL per ogni lingua (/en/sitemap.xml...): le pagine in piu' di una lingua scadono col TTL
+        foreach (OpenPACrawlPolicy::instance()->getPublicPrefixes() as $prefix) {
+            $staticCacheHandler->removeURL($prefix . '/sitemap.xml');
+            foreach ($locations as $location) {
+                $staticCacheHandler->removeURL($prefix . $location['loc']);
+            }
         }
     }
 
@@ -157,6 +164,10 @@ class OpenPASitemapBuilder
     {
         $current = eZSiteAccess::current();
         $name = strtolower(isset($current['name']) ? $current['name'] : '');
+        // _new, _old e simili: stessi contenuti con un'altra grafica, non sono una versione pubblica
+        if ($name !== '' && !OpenPACrawlPolicy::isRelatedSiteaccess($name)) {
+            return true;
+        }
         $privateUris = (array)eZINI::instance('openpa.ini')->variable('CrawlPolicy', 'PrivateUriList');
         foreach ($privateUris as $uri) {
             $uri = strtolower(trim($uri, '/ '));
@@ -249,9 +260,11 @@ class OpenPASitemapBuilder
         $root = $dom->appendChild($dom->createElementNS(self::SITEMAP_NS, 'sitemapindex'));
 
         foreach ($this->getSectionLocations() as $location) {
+            // prefisso del siteaccess (es. /en): le sitemap figlie restano nella stessa lingua
+            $loc = $this->policy->getCurrentPrefix() . $location['loc'];
             $sitemap = $root->appendChild($dom->createElementNS(self::SITEMAP_NS, 'sitemap'));
             $sitemap->appendChild($dom->createElementNS(self::SITEMAP_NS, 'loc'))
-                ->appendChild($dom->createTextNode($this->policy->absoluteUrl($location['loc'])));
+                ->appendChild($dom->createTextNode($this->policy->absoluteUrl($loc)));
             if ($location['lastmod'] > 0) {
                 $sitemap->appendChild($dom->createElementNS(self::SITEMAP_NS, 'lastmod'))
                     ->appendChild($dom->createTextNode(date('c', $location['lastmod'])));
@@ -388,8 +401,12 @@ class OpenPASitemapBuilder
      */
     private function appendUrl(DOMDocument $dom, DOMNode $root, $path, $lastmod)
     {
-        $path = OpenPACrawlPolicy::encodePath('/' . ltrim($path, '/'));
-        eZURI::transformURI($path, false, 'relative', false);
+        $path = OpenPACrawlPolicy::encodePath('/' . trim($path, '/'));
+        // prefisso del siteaccess dalla mappatura, non dalla richiesta: stesso risultato da web e da CLI
+        $prefix = $this->policy->getCurrentPrefix();
+        if ($prefix !== '') {
+            $path = $path === '/' ? $prefix : $prefix . $path;
+        }
         if (!$this->policy->isAllowed($path)) {
             $this->stats['skipped_by_robots'][] = $path;
             return 0;
@@ -447,6 +464,7 @@ class OpenPASitemapBuilder
         }
         $this->menuNodeIds = array_values(array_unique($this->menuNodeIds));
         $this->menuModified = $this->fetchModifiedSubnode($this->menuNodeIds);
+        $this->untranslatedMenuNodeIds = $this->fetchUntranslatedNodeIds($this->menuNodeIds);
 
         $menuRootPaths = $this->fetchPathStrings($menuRootIds);
         $trasparenzaPath = $trasparenzaNode instanceof eZContentObjectTreeNode ? $trasparenzaNode->attribute('path_string') : null;
@@ -531,7 +549,8 @@ class OpenPASitemapBuilder
         if (isset($menuItem['item']['url']) && !empty($menuItem['item']['internal'])) {
             $path = '/' . ltrim(trim($menuItem['item']['url']), '/');
             $nodeId = isset($menuItem['item']['node_id']) ? (int)$menuItem['item']['node_id'] : 0;
-            if (!isset($items[$path])) {
+            // senza traduzione nella lingua del siteaccess la pagina e' un duplicato dell'originale
+            if (!isset($items[$path]) && !isset($this->untranslatedMenuNodeIds[$nodeId])) {
                 $items[$path] = [
                     'path' => $path,
                     'lastmod' => isset($this->menuModified[$nodeId]) ? $this->menuModified[$nodeId] : 0,
@@ -558,6 +577,44 @@ class OpenPASitemapBuilder
         $result = [];
         foreach ($this->db->arrayQuery("SELECT node_id, modified_subnode FROM ezcontentobject_tree WHERE $in") as $row) {
             $result[(int)$row['node_id']] = (int)$row['modified_subnode'];
+        }
+        return $result;
+    }
+
+    /**
+     * Id della lingua dei contenuti del siteaccess (RegionalSettings/ContentObjectLocale).
+     * La sitemap elenca solo i contenuti tradotti in questa lingua: quelli mostrati in un'altra
+     * lingua di ripiego sono duplicati dell'originale, che sta nella sitemap della sua lingua.
+     * @return int|null null se la lingua non esiste (nessun filtro)
+     */
+    private function getContentLanguageId()
+    {
+        if ($this->contentLanguageId === null) {
+            $locale = eZINI::instance()->variable('RegionalSettings', 'ContentObjectLocale');
+            $language = eZContentLanguage::fetchByLocale($locale);
+            $this->contentLanguageId = $language instanceof eZContentLanguage ? (int)$language->attribute('id') : 0;
+        }
+        return $this->contentLanguageId > 0 ? $this->contentLanguageId : null;
+    }
+
+    /**
+     * @param int[] $nodeIds
+     * @return array<int, true> nodi i cui oggetti non hanno la traduzione nella lingua del siteaccess
+     */
+    private function fetchUntranslatedNodeIds(array $nodeIds)
+    {
+        $languageId = $this->getContentLanguageId();
+        if (empty($nodeIds) || $languageId === null) {
+            return [];
+        }
+        $in = $this->db->generateSQLINStatement($nodeIds, 't.node_id', false, false, 'int');
+        $result = [];
+        foreach ($this->db->arrayQuery(
+            "SELECT t.node_id FROM ezcontentobject_tree t
+             INNER JOIN ezcontentobject o ON o.id = t.contentobject_id
+             WHERE $in AND (o.language_mask & $languageId) = 0"
+        ) as $row) {
+            $result[(int)$row['node_id']] = true;
         }
         return $result;
     }
@@ -649,6 +706,11 @@ class OpenPASitemapBuilder
             );
         }
 
+        $languageId = $this->getContentLanguageId();
+        if ($languageId !== null) {
+            $where[] = "(o.language_mask & $languageId) > 0";
+        }
+
         return "FROM ezcontentobject_tree t
                 INNER JOIN ezcontentobject o ON o.id = t.contentobject_id AND o.status = 1
                 " . implode("\n                ", $joins) . "
@@ -722,12 +784,19 @@ class OpenPASitemapBuilder
             $segmentMap[$nodeId] = ['text' => $aliasRow['text'], 'parent' => (int)$aliasRow['parent']];
         }
 
+        // la radice dei contenuti non ha alias; per ogni altro nodo un alias mancante darebbe un URL sbagliato
+        $rootNodeId = (int)eZINI::instance('content.ini')->variable('NodeSettings', 'RootNode');
         $result = [];
         foreach ($rows as $row) {
             $segments = [];
             foreach ($nodePathMap[(int)$row['node_id']] as $nodeId) {
                 if (!isset($segmentMap[$nodeId])) {
-                    continue;
+                    if ($nodeId === $rootNodeId) {
+                        continue;
+                    }
+                    $this->stats['missing_alias'][] = (int)$row['node_id'];
+                    $segments = [];
+                    break;
                 }
                 if ($segmentMap[$nodeId]['parent'] === 0) {
                     $segments = []; // mount point, come fetchPathByActionList
