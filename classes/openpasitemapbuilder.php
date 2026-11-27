@@ -46,6 +46,9 @@ class OpenPASitemapBuilder
 
     private $stats = [];
 
+    /** @var array<string, bool> */
+    private static $patternIndexByDatabase = [];
+
     public function __construct(OpenPACrawlPolicy $policy)
     {
         $this->policy = $policy;
@@ -135,12 +138,29 @@ class OpenPASitemapBuilder
         return self::hasPathStringPatternIndex();
     }
 
+    /**
+     * Risultato memorizzato per database: l'indice non compare ne' sparisce durante una richiesta,
+     * e senza memoria la query su pg_index partirebbe a ogni sezione.
+     */
     public static function hasPathStringPatternIndex()
     {
         $db = eZDB::instance();
         if ($db->databaseName() !== 'postgresql') {
             return false;
         }
+        $key = (string)eZINI::instance()->variable('DatabaseSettings', 'Database');
+        if (!isset(self::$patternIndexByDatabase[$key])) {
+            self::$patternIndexByDatabase[$key] = self::queryPathStringPatternIndex($db);
+        }
+        return self::$patternIndexByDatabase[$key];
+    }
+
+    /**
+     * @param eZDBInterface $db
+     * @return bool
+     */
+    private static function queryPathStringPatternIndex($db)
+    {
         $rows = $db->arrayQuery(
             "SELECT pg_get_indexdef(i.indexrelid) AS indexdef
              FROM pg_index i
