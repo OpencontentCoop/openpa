@@ -58,6 +58,8 @@ if ($http->hasPostVariable('StoreSeo')) {
     if ($http->hasPostVariable('RobotsText')) {
         $robotsText = trim($http->postVariable('RobotsText'));
         OpenPAINI::set("Seo", "RobotsText", $robotsText);
+        // le regole del robots filtrano anche la sitemap; la cache HTTP e' svuotata sotto da generateCache()
+        OpenPASitemapBuilder::clearServerCache();
     }
 
     if ($http->hasPostVariable('WebAnalyticsItaliaID')) {
@@ -99,12 +101,11 @@ if ($http->hasPostVariable('StoreSeo')) {
     return;
 }
 
+// Il campo contiene solo le regole aggiuntive dell'ente: le regole di base sono generate da
+// OpenPACrawlPolicy (openpa.ini [CrawlPolicy]). Non si precompila con DefaultRobotsText (html/robots.txt),
+// altrimenti al salvataggio quelle regole diventerebbero personalizzazioni dell'ente.
 $robotsTextDefault = false;
 $robotsText = OpenPAINI::variable('Seo', 'RobotsText', '');
-if (empty($robotsText)) {
-    $robotsText = OpenPAINI::variable('Seo', 'DefaultRobotsText', false);
-    $robotsTextDefault = true;
-}
 
 $tpl->setVariable('googleId', OpenPAINI::variable('Seo', 'GoogleAnalyticsAccountID', false));
 $tpl->setVariable('robots', OpenPAINI::variable('Seo', 'EnableRobots', 'disabled'));

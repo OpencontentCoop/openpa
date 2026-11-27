@@ -11,6 +11,7 @@ CacheItems[]=openpamenu
 CacheItems[]=openpadynamicini
 CacheItems[]=openpacontextdata
 CacheItems[]=openpaorganigramma
+CacheItems[]=openpasitemap
 
 [Cache_openpamenu]
 name=OpenPA Menu cache
@@ -41,6 +42,14 @@ id=openpaorganigramma
 tags[]=openpa
 class=OpenPAOrganigrammaTools
 path=openpa/organigramma
+isClustered=true
+
+[Cache_openpasitemap]
+name=OpenPA Sitemap
+id=openpasitemap
+tags[]=openpa
+class=OpenPASitemapBuilder
+path=openpa_sitemap
 isClustered=true
 
 [RoleSettings]
