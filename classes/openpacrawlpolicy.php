@@ -36,7 +36,63 @@ class OpenPACrawlPolicy
      */
     public function __construct($host = null)
     {
-        $this->host = $host !== null ? $host : eZSys::hostname();
+        $this->host = $host !== null ? $host : self::resolveRequestHost(eZSys::hostname());
+    }
+
+    /**
+     * Host da usare negli URL assoluti e nelle chiavi di cache: quello della richiesta solo se
+     * e' un host configurato del sito (SiteURL, HostMatchMapItems, HostUriMatchMapItems),
+     * altrimenti l'host di SiteURL. L'header Host e' scelto dal client e non deve entrare
+     * nelle sitemap ne' moltiplicare le voci di cache.
+     *
+     * @param string $requestHost
+     * @return string
+     */
+    public static function resolveRequestHost($requestHost)
+    {
+        $siteHost = self::siteUrlHost();
+        $allowed = self::configuredHosts();
+        $normalized = self::normalizeHost($requestHost);
+        if ($normalized !== '' && isset($allowed[$normalized])) {
+            return $normalized;
+        }
+        return $siteHost !== '' ? $siteHost : $normalized;
+    }
+
+    /**
+     * @return string host di SiteSettings/SiteURL del siteaccess corrente, senza schema, porta e path
+     */
+    public static function siteUrlHost()
+    {
+        $siteUrl = trim((string)eZINI::instance()->variable('SiteSettings', 'SiteURL'));
+        $siteUrl = preg_replace('#^[a-z]+://#i', '', $siteUrl);
+        $siteUrl = explode('/', $siteUrl)[0];
+        return self::normalizeHost($siteUrl);
+    }
+
+    /**
+     * @return array<string, true>
+     */
+    private static function configuredHosts()
+    {
+        $hosts = [];
+        $siteHost = self::siteUrlHost();
+        if ($siteHost !== '') {
+            $hosts[$siteHost] = true;
+        }
+        $ini = eZINI::instance();
+        foreach ((array)$ini->variableArray('SiteAccessSettings', 'HostUriMatchMapItems') as $item) {
+            if (is_array($item) && isset($item[0])) {
+                $hosts[self::normalizeHost($item[0])] = true;
+            }
+        }
+        foreach ((array)$ini->variableArray('SiteAccessSettings', 'HostMatchMapItems') as $item) {
+            if (is_array($item) && isset($item[0])) {
+                $hosts[self::normalizeHost($item[0])] = true;
+            }
+        }
+        unset($hosts['']);
+        return $hosts;
     }
 
     /**

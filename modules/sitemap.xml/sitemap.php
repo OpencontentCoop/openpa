@@ -33,13 +33,22 @@ if ($isAdmin && isset($_GET['source'])) {
 $section = isset($_GET['section']) ? (string)$_GET['section'] : null;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-if ($section === null) {
-    $xml = $builder->getIndexXml();
-} else {
-    $xml = $builder->getSectionXml($section, $page);
-    if ($xml === null) {
-        $notFound();
+try {
+    if ($section === null) {
+        $xml = $builder->getIndexXml();
+    } else {
+        $xml = $builder->getSectionXml($section, $page);
+        if ($xml === null) {
+            $notFound();
+        }
     }
+} catch (OpenPASitemapUnavailableException $e) {
+    header('HTTP/1.1 503 Service Unavailable');
+    header('Retry-After: 60');
+    header('Cache-Control: no-store');
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Sitemap in generazione, riprovare tra poco\n";
+    eZExecution::cleanExit();
 }
 
 if ($isAdmin && isset($_GET['debug'])) {

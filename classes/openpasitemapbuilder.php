@@ -26,6 +26,8 @@ class OpenPASitemapBuilder
 
     const MAX_PAGE_SIZE = 40000;
 
+    const CACHE_DIR = 'openpa_sitemap';
+
     private $policy;
 
     private $db;
@@ -44,6 +46,61 @@ class OpenPASitemapBuilder
     {
         $this->policy = $policy;
         $this->db = eZDB::instance();
+    }
+
+    /**
+     * Svuota la cache della sitemap di tutti i siteaccess e invalida in Varnish le URL
+     * del siteaccess corrente (cache item "openpasitemap" di site.ini, ezcache.php --clear-id=openpasitemap).
+     */
+    public static function clearCache()
+    {
+        // gli URL da invalidare si leggono prima di svuotare la cache, cosi' non serve rigenerare l'indice
+        $locations = [];
+        if (self::isEnabled()) {
+            try {
+                $locations = (new self(OpenPACrawlPolicy::instance()))->getSectionLocations();
+            } catch (OpenPASitemapUnavailableException $e) {
+                // cache in generazione altrove: si invalida almeno l'indice
+            }
+        }
+        self::clearServerCache();
+        self::invalidateHttpCache($locations);
+    }
+
+    /**
+     * Svuota solo la cache lato server (tutti i siteaccess).
+     */
+    public static function clearServerCache()
+    {
+        $dir = eZSys::cacheDirectory() . '/' . self::CACHE_DIR;
+        // fs: cancella la directory; dfs: delete() lavora per nome esatto, serve fileDelete per prefisso
+        eZClusterFileHandler::instance($dir)->delete();
+        eZClusterFileHandler::instance()->fileDelete($dir, true);
+        eZClusterFileHandler::instance($dir)->purge();
+    }
+
+    /**
+     * Invalida /sitemap.xml e le sitemap figlie nella cache HTTP tramite lo StaticCacheHandler
+     * configurato (es. ocfoshttpcache), anche se chiamato dal backend o da CLI.
+     * @param array<int, array{loc: string}> $locations
+     */
+    private static function invalidateHttpCache(array $locations)
+    {
+        if (eZINI::instance()->variable('ContentSettings', 'StaticCache') !== 'enabled') {
+            return;
+        }
+        $staticCacheHandler = eZExtension::getHandlerClass(new ezpExtensionOptions([
+            'iniFile' => 'site.ini',
+            'iniSection' => 'ContentSettings',
+            'iniVariable' => 'StaticCacheHandler',
+        ]));
+        if (!$staticCacheHandler instanceof ezpStaticCache) {
+            return;
+        }
+        $staticCacheHandler->removeURL('/sitemap.xml');
+        foreach ($locations as $location) {
+            $staticCacheHandler->removeURL($location['loc']);
+        }
     }
 
     public static function isEnabled()
@@ -86,7 +143,7 @@ class OpenPASitemapBuilder
         foreach ($rows as $row) {
             $definition = strtolower($row['indexdef']);
             if (strpos($definition, 'path_string') !== false
-                && (strpos($definition, 'varchar_pattern_ops') !== false || strpos($definition, 'text_pattern_ops') !== false)) {
+                && (strpos($definition, 'varchar_pattern_ops') !== false || strpos($definition, 'text_pattern_ops') !== false)) {                
                 return true;
             }
         }
@@ -144,6 +201,10 @@ class OpenPASitemapBuilder
         return $this->menuTrees;
     }
 
+    /**
+     * @return string
+     * @throws OpenPASitemapUnavailableException
+     */
     public function getIndexXml()
     {
         return $this->cached('index', function () {
@@ -152,13 +213,27 @@ class OpenPASitemapBuilder
     }
 
     /**
+     * Solo le pagine elencate nell'indice: section e page arrivano dalla query string e non devono
+     * creare voci di cache ne' query per pagine inesistenti.
+     *
      * @param string $section
      * @param int $page da 1
      * @return string|null null se sezione o pagina non esistono
+     * @throws OpenPASitemapUnavailableException
      */
     public function getSectionXml($section, $page)
     {
         if (!in_array($section, self::getSectionNames(), true) || $page < 1) {
+            return null;
+        }
+        $exists = false;
+        foreach ($this->getSectionLocations() as $location) {
+            if ($location['section'] === $section && $location['page'] === $page) {
+                $exists = true;
+                break;
+            }
+        }
+        if (!$exists) {
             return null;
         }
         $result = $this->cached('section-' . $section . '-' . $page, function () use ($section, $page) {
@@ -173,23 +248,49 @@ class OpenPASitemapBuilder
         $dom = new DOMDocument('1.0', 'UTF-8');
         $root = $dom->appendChild($dom->createElementNS(self::SITEMAP_NS, 'sitemapindex'));
 
+        foreach ($this->getSectionLocations() as $location) {
+            $sitemap = $root->appendChild($dom->createElementNS(self::SITEMAP_NS, 'sitemap'));
+            $sitemap->appendChild($dom->createElementNS(self::SITEMAP_NS, 'loc'))
+                ->appendChild($dom->createTextNode($this->policy->absoluteUrl($location['loc'])));
+            if ($location['lastmod'] > 0) {
+                $sitemap->appendChild($dom->createElementNS(self::SITEMAP_NS, 'lastmod'))
+                    ->appendChild($dom->createTextNode(date('c', $location['lastmod'])));
+            }
+        }
+
+        return $dom->saveXML();
+    }
+
+    /**
+     * Sitemap figlie elencate nell'indice (in cache con lo stesso TTL dell'indice).
+     * @return array<int, array{section: string, page: int, loc: string, lastmod: int}>
+     * @throws OpenPASitemapUnavailableException
+     */
+    public function getSectionLocations()
+    {
+        $json = $this->cached('locations', function () {
+            return json_encode($this->buildSectionLocations());
+        });
+        $locations = json_decode($json, true);
+        return is_array($locations) ? $locations : [];
+    }
+
+    /**
+     * @return array<int, array{section: string, page: int, loc: string, lastmod: int}>
+     */
+    private function buildSectionLocations()
+    {
+        $locations = [];
         foreach (self::getSectionNames() as $section) {
             foreach ($this->getSectionPages($section) as $page => $info) {
                 $loc = '/sitemap.xml?section=' . rawurlencode($section);
                 if ($section === self::SECTION_CONTENTS || $page > 1) {
                     $loc .= '&page=' . $page;
                 }
-                $sitemap = $root->appendChild($dom->createElementNS(self::SITEMAP_NS, 'sitemap'));
-                $sitemap->appendChild($dom->createElementNS(self::SITEMAP_NS, 'loc'))
-                    ->appendChild($dom->createTextNode($this->policy->absoluteUrl($loc)));
-                if ($info['lastmod'] > 0) {
-                    $sitemap->appendChild($dom->createElementNS(self::SITEMAP_NS, 'lastmod'))
-                        ->appendChild($dom->createTextNode(date('c', $info['lastmod'])));
-                }
+                $locations[] = ['section' => $section, 'page' => (int)$page, 'loc' => $loc, 'lastmod' => (int)$info['lastmod']];
             }
         }
-
-        return $dom->saveXML();
+        return $locations;
     }
 
     /**
@@ -656,6 +757,8 @@ class OpenPASitemapBuilder
      * @param string $key
      * @param callable $generate
      * @return string
+     * @throws OpenPASitemapUnavailableException se il file e' in generazione in un altro processo
+     *         e non c'e' una versione precedente da servire
      */
     private function cached($key, $generate)
     {
@@ -666,20 +769,24 @@ class OpenPASitemapBuilder
         $current = eZSiteAccess::current();
         $siteaccess = isset($current['name']) ? $current['name'] : 'default';
         $hash = md5($this->policy->getScheme() . '://' . $this->policy->getHost() . '|' . $key);
-        $path = eZDir::path([eZSys::cacheDirectory(), 'openpa_sitemap', $siteaccess, $hash . '.xml']);
+        $path = eZDir::path([eZSys::cacheDirectory(), self::CACHE_DIR, $siteaccess, $hash . '.xml']);
 
         // binarydata: il file contiene la stringa cosi' com'e', sia in lettura sia in generazione
         $content = eZClusterFileHandler::instance($path)->processCache(
-            function ($file, $mtime, $args) {
+            function ($file, $mtime, $args = null) {
                 $data = @file_get_contents($file);
                 return is_string($data) ? $data : new eZClusterFileFailure(1, 'sitemap cache non leggibile');
             },
-            function ($file, $args) use ($generate) {
+            function ($file, $args = null) use ($generate) {
                 return ['binarydata' => (string)$generate(), 'scope' => 'openpa_sitemap'];
             },
             $ttl
         );
 
-        return is_string($content) ? $content : $generate();
+        if (!is_string($content)) {
+            // niente rigenerazione qui: con molte richieste insieme ripeterebbero tutte le stesse query
+            throw new OpenPASitemapUnavailableException("Sitemap $key in generazione");
+        }
+        return $content;
     }
 }
